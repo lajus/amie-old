@@ -1,0 +1,62 @@
+% !TEX root = main.tex
+
+In recent years, we have experienced the rise of large knowledge bases (KBs), such as Cyc~\cite{cyc}, YAGO~\cite{SucKasWei07}, DBpedia~\cite{dbpedia}, and Freebase\footnote{\label{freebase}\url{http://freebase.com}}.
+%, to name just a few of the most prominent projects. 
+These KBs provide information about a great variety of entities, such as people, countries, rivers, cities, universities, movies, animals, etc. 
+Moreover, KBs also contain facts relating these entities, e.g., 
+%The KBs know, e.g., 
+who was born where, which actor acted in which movie, or which city is located in which country. Today's KBs contain millions of entities and hundreds of millions of facts. 
+% Recent years have seen the rise of large knowledge bases (KBs). Among the most prominent projects are Cyc \cite{cyc}, YAGO \cite{yago}, DBpedia \cite{dbpedia}, and Freebase \cite{freebase}. The knowledge bases contain entities such as rivers, cities, people, movies, and universities. They also contain facts about these entities, such as who was born where, which actor acted in which movie, and which city is located in which country. Today's knowledge bases contain millions of entities and hundreds of millions of facts.
+
+Yet, even these large KBs are not complete. Some of them are extracted from natural language resources that inevitably exhibit gaps. Others are created and extended manually. Making these KBs complete requires great effort to extract facts, check them for correctness, and add them to the KB. 
+However, KBs themselves often already contain enough information to derive and add new facts. If, for instance, a KB contains the fact that a child has a mother, then the mother's husband is most likely the father: 
+\indented{
+\emph{motherOf}$(m,c)$ $\wedge$ \emph{marriedTo}$(m,f) \Rightarrow$ \emph{fatherOf}$(f,c)$}
+As for any rule, there can be exceptions, but in the vast majority of cases, the rule will hold. Finding such rules can serve four purposes: First, by applying such rules on the data, new facts can be derived that make the KB more complete. 
+Second, such rules can identify potential errors in the knowledge base. If, for instance, the KB contains the statement that a totally unrelated person is the father of a child, then maybe this statement is wrong. 
+Third, the rules can be used for reasoning. Many reasoning approaches rely on other parties to provide rules (e.g., \cite{markovlogic,urdf}). 
+Last, rules describing general regularities can help us understand the data better. We can, e.g., find out that countries often trade with countries speaking the same language, that marriage is a symmetric relationship, that musicians who influence each other often play the same instrument, and~so~on. 
+
+The goal of this paper is to mine such rules from KBs. 
+%We want to mine logical rules, and deduce new knowledge for the KB.
+% Fabian: Let's not give reviewers some cute ideas that we do not implement...
+%Once these rules are available, we can either decide to make use of them during query runtime and apply live reasoning to obtain answers to a query that would not be available if we only considered the set of facts in the KB. On the other hand, we can apply these rules to the knowledge base, materialize the derivable knowledge, and extend the KB accordingly so that we do not need to apply reasoning during query runtime and therefore compute answers faster.
+%Without loss of generality, in this paper we focus on the second option and introduce methods to mine such rules from KBs. 
+We focus on RDF-style KBs in the spirit of the Semantic Web, such as YAGO \cite{SucKasWei07}, Freebase$^{\ref{freebase}}$, and DBpedia \cite{dbpedia}. These KBs provide binary relationships in the form of RDF triples\footnote{\url{http://www.w3.org/TR/rdf-primer/}}. Since RDF has only positive inference rules, these KBs contain only positive statements and no negations.
+%These KBs contain only binary relationships. 
+Furthermore, they 
+operate under the \emph{Open World Assumption} (OWA). Under the OWA, a statement that is not contained in the KB is not necessarily false; it is just \emph{unknown}. 
+This is a crucial difference to many standard database settings that operate under the \emph{Closed World Assumption} (CWA). 
+Consider an example KB that does not contain the information that a particular person is married. Under CWA we can conclude that the person is not married. Under OWA, however, the person could be either married or single.
+
+
+Mining rules from a given dataset is a problem that has a long history. It has been studied in the context of association rule mining and inductive logic programming (ILP). Association rule mining~\cite{AgrImiSwa93} is well-known in the context of sales databases. It can find rules such as ``If a client bought beer and wine, then he also bought aspirin''. 
+The confidence of such a rule is the ratio of cases where beer and wine was actually bought together with aspirin. Association rule mining inherently implements a closed world assumption: A rule that predicts new items that are not in the database has a low confidence. It cannot be used to (and is not intended to be used to) add new items to the database.
+
+ILP approaches deduce logical rules 
+from ground facts. Yet, current ILP systems cannot be applied to semantic KBs for two reasons: First, they usually require negative statements as counter-examples. 
+Semantic KBs, however, usually do not contain negative statements. The semantics of RDF are too weak to deduce negative evidence from the facts in a KB.\footnote{RDF has only positive rules and no disjointness constraints or similar concepts.} Because of the OWA, absent statements cannot serve as counter-evidence either.
+Second, today's ILP systems are slow and cannot handle the huge amount of data that KBs provide. In our experiments, we ran state-of-the-art approaches on YAGO2 for a couple of days without obtaining any results. 
+
+In this paper, we propose a rule mining system that is inherently designed to work under the OWA, and efficient enough to handle the size of today's KBs. 
+More precisely, our contributions are as follows:\\
+\noindent (1) A method to simulate negative examples for positive KBs (the Partial Completeness Assumption)\\
+\noindent (2) An algorithm for the efficient mining of rules.\\
+\noindent (3) A system, AMIE, that mines rules on millions of facts in a few minutes without the need for parameter tuning or expert input.\\
+The rest of this paper is structured as follows. Section~\ref{sec:relatedWork} discusses related work and Section~\ref{sec:preliminaries} introduces preliminaries. Sections~\ref{sec:model} and \ref{sec:alg} are the main part of the paper, presenting our mining model and its implementation. Section~\ref{sec:experiments} presents our experiments before Section~\ref{sec:conclusion} concludes.\\[-0.6cm]
+
+\ignore{
+\begin{itemize}
+ \item Strong motivation that points out the necessity and ``greatness'' of our contributions
+ \item one or two strong use cases with examples that we can use as running examples to explain the problems we tackle and the techniques we introduce
+ \item highlight contributions
+ 	\begin{itemize}
+	 \item efficient computation (minutes vs. hours)
+	 \item rule generation (efficient pruning, tree, language bias)
+	 \item dealing with incompleteness 
+	 \item generality, preciseness, predictiveness, interestingness, etc.
+	 \item ``smart confidence''\dots or not
+	 \item evaluation results show that we are better and faster than the competitors
+	\end{itemize}
+\end{itemize}
+}

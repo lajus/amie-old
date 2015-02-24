@@ -1,0 +1,79 @@
+nohup: ignoring input
+Loading files... 
+  Starting sample.tsv
+  Finished sample.tsv, still running: 0
+Loaded 354656 facts in 4.49 s using -30 MB
+Using HeadCoverage as pruning metric with minimum threshold 0.01
+Counting on both head variables
+No minimum threshold on standard confidence
+No minimum threshold on PCA confidence
+Constants in the arguments of relations are disabled
+Starting the mining phase... Using 16 threads
+?a  <directed>  ?b   => ?a  <wroteMusicFor>  ?b	0.000008459	0.016042781	0.010273973	0.75	3	292	?b
+?a  <composerOf>  ?b   => ?a  <wroteMusicFor>  ?b	0.000005639	0.010695187	0.000813339	1	2	2459	?b
+?a  <created>  ?b   => ?a  <wroteMusicFor>  ?b	0.000005639	0.010695187	0.001007557	1	2	1985	?b
+?a  <isMarriedTo>  ?b   => ?a  <hasChild>  ?b	0.000005639	0.015873016	0.009090909	1	2	220	?b
+?a  <diedIn>  ?b   => ?a  <livesIn>  ?b	0.000008459	0.012987013	0.008902077	0.053571429	3	337	?b
+?a  <isCitizenOf>  ?b   => ?a  <livesIn>  ?b	0.000022557	0.034632035	0.025889968	0.034934498	8	309	?b
+?a  <wasBornIn>  ?b   => ?a  <livesIn>  ?b	0.000053573	0.082251082	0.016060862	0.11875	19	1183	?b
+?a  <wasBornIn>  ?b   => ?a  <diedIn>  ?b	0.000093048	0.097922849	0.027895182	0.222972973	33	1183	?a
+?a  <livesIn>  ?b   => ?a  <wasBornIn>  ?b	0.000053573	0.016060862	0.082251082	0.2	19	231	?a
+?a  <diedIn>  ?b   => ?a  <wasBornIn>  ?b	0.000093048	0.027895182	0.097922849	0.222972973	33	337	?a
+?a  <imdb:actedIn>  ?b   => ?a  <editorOf>  ?b	0.000267865	0.112426036	0.001381456	0.608974359	95	68768	?b
+?a  <writerOf>  ?b   => ?a  <editorOf>  ?b	0.000501895	0.210650888	0.030978072	0.951871658	178	5746	?b
+?a  <composerOf>  ?b   => ?a  <editorOf>  ?b	0.000033836	0.014201183	0.004880033	0.857142857	12	2459	?b
+?a  <producerOf>  ?b   => ?a  <editorOf>  ?b	0.000510354	0.214201183	0.023960815	0.952631579	181	7554	?b
+?a  <directed>  ?b   => ?a  <created>  ?b	0.000219931	0.03929471	0.267123288	1	78	292	?b
+?b  <isConnectedTo>  ?a   => ?a  <isConnectedTo>  ?b	0.000022557	0.01236476	0.01236476	0.01965602	8	647	?b
+?a  <livesIn>  ?b   => ?a  <isCitizenOf>  ?b	0.000022557	0.025889968	0.034632035	0.210526316	8	231	?a
+?a  <imdb:actedIn>  ?b   => ?a  <actedIn>  ?b	0.00015508	0.064629847	0.000799791	0.846153846	55	68768	?b
+?a  <isAffiliatedTo>  ?b   => ?a  <playsFor>  ?b	0.007192886	1	0.833115611	0.986465584	2551	3062	?b
+?a  <wasCreatedOnDate>  ?b   => ?a  <wasDestroyedOnDate>  ?b	0.000022557	0.02020202	0.001200841	0.020356234	8	6662	?a
+?a  <producerOf>  ?b   => ?a  <composerOf>  ?b	0.00007613	0.010980073	0.003574265	0.794117647	27	7554	?b
+?a  <imdb:actedIn>  ?b   => ?a  <composerOf>  ?b	0.000487797	0.070353802	0.002515705	0.225554107	173	68768	?b
+?a  <writerOf>  ?b   => ?a  <composerOf>  ?b	0.000115605	0.016673444	0.007135399	0.891304348	41	5746	?b
+?a  rdfs:label  ?b   => ?a  <hasFamilyName>  ?b	0.000882545	0.047903275	0.004816422	0.022209608	313	64986	?a
+?a  <wasCreatedOnDate>  ?b   => ?a  <happenedOnDate>  ?b	0.000149441	0.235555556	0.007955569	0.445378151	53	6662	?a
+?a  <worksAt>  ?b   => ?a  <graduatedFrom>  ?b	0.000005639	0.010638298	0.076923077	0.095238095	2	26	?a
+?a  <editorOf>  ?b   => ?a  <producerOf>  ?b	0.000510354	0.023960815	0.214201183	0.957671958	181	845	?b
+?a  <writerOf>  ?b   => ?a  <producerOf>  ?b	0.002985992	0.140190627	0.184302123	0.486672794	1059	5746	?b
+?a  <imdb:actedIn>  ?b   => ?a  <producerOf>  ?b	0.001440833	0.06764628	0.007430782	0.433786078	511	68768	?b
+?a  <wasBornOnDate>  ?b   => ?a  <bornOn>  ?b	0.000662614	0.10676965	0.037060401	0.683139535	235	6341	?a
+?a  <bornOn>  ?b   => ?a  <wasBornOnDate>  ?b	0.000662614	0.037060401	0.10676965	0.68914956	235	2201	?a
+?a  <actedIn>  ?b   => ?a  <directed>  ?b	0.000019737	0.023972603	0.008225617	0.7	7	851	?b
+?a  <producerOf>  ?b   => ?a  <directed>  ?b	0.000011279	0.01369863	0.000529521	0.571428571	4	7554	?b
+?a  <created>  ?b   => ?a  <directed>  ?b	0.000219931	0.267123288	0.03929471	1	78	1985	?b
+?a  <imdb:actedIn>  ?b   => ?a  <directed>  ?b	0.000008459	0.010273973	0.000043625	0.6	3	68768	?b
+?a  <wroteMusicFor>  ?b   => ?a  <directed>  ?b	0.000008459	0.010273973	0.016042781	0.75	3	187	?b
+?a  <writerOf>  ?b   => ?a  <directed>  ?b	0.000011279	0.01369863	0.000696136	1	4	5746	?b
+?a  <inCountry>  ?b   => ?a  <producedIn>  ?b	0.020030678	0.929113262	0.238389262	0.60853178	7104	29800	?a
+?a  <editorOf>  ?b   => ?a  <writerOf>  ?b	0.000501895	0.030978072	0.210650888	0.956989247	178	845	?b
+?a  <producerOf>  ?b   => ?a  <writerOf>  ?b	0.002985992	0.184302123	0.140190627	0.495322732	1059	7554	?b
+?a  <imdb:actedIn>  ?b   => ?a  <writerOf>  ?b	0.001669223	0.103028194	0.008608655	0.574199806	592	68768	?b
+?a  <playsFor>  ?b   => ?a  <isAffiliatedTo>  ?b	0.007192886	0.833115611	1	1	2551	2551	?b
+?a  <isPreferredMeaningOf>  ?b   => ?a  skos:prefLabel  ?b	0.070034061	0.993480261	0.988341093	0.988341093	24838	25131	?a
+?a  rdfs:label  ?b   => ?a  skos:prefLabel  ?b	0.070493661	1	0.384713631	0.384713631	25001	64986	?a
+?a  rdfs:label  ?b   => ?a  <isPreferredMeaningOf>  ?b	0.070857394	0.999960209	0.386698674	0.999522711	25130	64986	?b
+?a  skos:prefLabel  ?b   => ?a  <isPreferredMeaningOf>  ?b	0.070034061	0.988341093	0.993480261	0.999959741	24838	25001	?b
+?a  <producedIn>  ?b   => ?a  <inCountry>  ?b	0.020030678	0.238389262	0.929113262	0.961819659	7104	7646	?a
+?a  <imdb:actedIn>  ?b  ?a  <producerOf>  ?b   => ?a  <editorOf>  ?b	0.000217112	0.09112426	0.150684932	0.987179487	77	511	?b
+?a  <imdb:actedIn>  ?b  ?a  <writerOf>  ?b   => ?a  <editorOf>  ?b	0.000203014	0.085207101	0.121621622	1	72	592	?b
+?a  <composerOf>  ?b  ?a  <producerOf>  ?b   => ?a  <editorOf>  ?b	0.000028196	0.01183432	0.37037037	1	10	27	?b
+?a  <composerOf>  ?b  ?a  <writerOf>  ?b   => ?a  <editorOf>  ?b	0.000028196	0.01183432	0.243902439	1	10	41	?b
+?a  <producerOf>  ?b  ?a  <writerOf>  ?b   => ?a  <editorOf>  ?b	0.000372192	0.156213018	0.124645892	0.985074627	132	1059	?b
+?e  <isConnectedTo>  ?b  ?a  <isConnectedTo>  ?e   => ?a  <isConnectedTo>  ?b	0.000439863	0.241112828	0.2496	0.2496	156	625	?b
+?a  <isConnectedTo>  ?f  ?b  <isConnectedTo>  ?f   => ?a  <isConnectedTo>  ?b	0.000025377	0.013910355	0.077586207	0.176470588	9	116	?b
+?e  <isConnectedTo>  ?a  ?e  <isConnectedTo>  ?b   => ?a  <isConnectedTo>  ?b	0.000439863	0.241112828	0.002831422	0.002831422	156	55096	?b
+?a  <isPreferredMeaningOf>  ?b   => ?a  rdfs:label  ?b	0.070860214	0.386714061	1	1.000039793	25131	25131	?b
+?a  skos:prefLabel  ?b   => ?a  rdfs:label  ?b	0.070496481	0.384729019	1.000039998	1.000039998	25002	25001	?b
+?f  <isConnectedTo>  ?b  ?a  <isConnectedTo>  ?f   => ?a  <isConnectedTo>  ?b	0.000439863	0.241112828	0.2496	0.2496	156	625	?b
+?a  <editorOf>  ?b  ?a  <imdb:actedIn>  ?b   => ?a  <producerOf>  ?b	0.000217112	0.010193275	0.810526316	1	77	95	?b
+?a  <editorOf>  ?b  ?a  <writerOf>  ?b   => ?a  <producerOf>  ?b	0.000372192	0.017474186	0.741573034	1	132	178	?b
+?a  <imdb:actedIn>  ?b  ?a  <writerOf>  ?b   => ?a  <producerOf>  ?b	0.000637237	0.029917924	0.381756757	0.982608696	226	592	?b
+?a  <imdb:actedIn>  ?b  ?a  <producerOf>  ?b   => ?a  <writerOf>  ?b	0.000637237	0.039331709	0.442270059	1	226	511	?b
+?a  <editorOf>  ?b  ?a  <producerOf>  ?b   => ?a  <writerOf>  ?b	0.000372192	0.022972503	0.729281768	1	132	181	?b
+?a  <editorOf>  ?b  ?a  <imdb:actedIn>  ?b   => ?a  <writerOf>  ?b	0.000203014	0.012530456	0.757894737	1	72	95	?b
+?a  <isPreferredMeaningOf>  ?b  ?a  skos:prefLabel  ?b   => ?a  rdfs:label  ?b	0.070036881	0.382220786	1.000040261	1.000040261	24839	24838	?b
+?a  rdfs:label  ?b  ?a  skos:prefLabel  ?b   => ?a  <isPreferredMeaningOf>  ?b	0.070034061	0.988341093	0.993480261	0.999959741	24838	25001	?b
+?a  <isPreferredMeaningOf>  ?b  ?a  rdfs:label  ?b   => ?a  skos:prefLabel  ?b	0.070034061	0.993480261	0.988380422	0.988380422	24838	25130	?a
+Mining done in 10 min, 33 s seconds

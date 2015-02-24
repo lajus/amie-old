@@ -1,0 +1,185 @@
+Configuration 1: == Pruned by heuristic ==
+
+Query ?a <hasCapital> ?b  ?e <isCitizenOf> ?a  ?e <wasBornIn> ?b   discarded by functionality heuristic with ratio 0.015305422100205902
+Query ?a <hasCapital> ?b  ?e <isCitizenOf> ?a  ?e <isLocatedIn> ?b   discarded by functionality heuristic with ratio 0.015168446527335485
+Query ?a <hasCapital> ?b  ?e <isCitizenOf> ?a  ?e <diedIn> ?b   discarded by functionality heuristic with ratio 0.015305422100205902
+Query ?a <hasCapital> ?b  ?e <isCitizenOf> ?a  ?e <livesIn> ?b   discarded by functionality heuristic with ratio 0.011463596488402008
+Query ?a <exports> ?b  ?a <dealsWith> ?f  ?f <imports> ?b   discarded by functionality heuristic with ratio 0.08095135996079393
+Query ?a <exports> ?b  ?e <dealsWith> ?a  ?e <imports> ?b   discarded by functionality heuristic with ratio 0.09229968145062487
+Query ?a <dealsWith> ?b  ?e <isCitizenOf> ?a  ?e <livesIn> ?b   discarded by functionality heuristic with ratio 0.06474113098777855
+Query ?a <influences> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.040028241150707224
+Query ?a <influences> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.08856136784847578
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.011865827944135411
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.01584245445459909
+Query ?a <hasAcademicAdvisor> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.03505098890790721
+Query ?a <isMarriedTo> ?b  ?a <actedIn> ?f  ?b <actedIn> ?f   discarded by functionality heuristic with ratio 0.07325914433615606
+Query ?a <isMarriedTo> ?b  ?a <actedIn> ?f  ?b <directed> ?f   discarded by functionality heuristic with ratio 0.08688628214290338
+
+Configuration 2: == Pruned by heuristic + functionality checking ==
+
+Query ?a <influences> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.08856136784847578
+Query ?a <influences> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.040028241150707224
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.011865827944135411
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.01584245445459909
+Query ?a <hasAcademicAdvisor> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.03505098890790721
+
+Configuration 3: == Pruned by heuristic + checking the other functionality on the head ==
+
+Query ?a <hasCapital> ?b  ?e <isLeaderOf> ?a  ?e <wasBornIn> ?b   discarded by functionality heuristic (on the less functional variable) with ratio 0.09233532867747457
+Query ?a <hasCapital> ?b  ?e <isCitizenOf> ?a  ?e <wasBornIn> ?b   discarded by functionality heuristic with ratio 0.015305422100205902
+Query ?a <hasCapital> ?b  ?e <isCitizenOf> ?a  ?e <diedIn> ?b   discarded by functionality heuristic with ratio 0.015305422100205902
+Query ?a <hasCapital> ?b  ?e <isCitizenOf> ?a  ?e <isLocatedIn> ?b   discarded by functionality heuristic with ratio 0.015168446527335485
+Query ?a <hasCapital> ?b  ?e <isCitizenOf> ?a  ?e <livesIn> ?b   discarded by functionality heuristic with ratio 0.011463596488402008
+Query ?a <exports> ?b  ?a <dealsWith> ?f  ?f <imports> ?b   discarded by functionality heuristic with ratio 0.08095135996079393
+Query ?a <exports> ?b  ?e <dealsWith> ?a  ?e <imports> ?b   discarded by functionality heuristic with ratio 0.09229968145062487
+Query ?a <dealsWith> ?b  ?e <livesIn> ?a  ?e <isCitizenOf> ?b   discarded by functionality heuristic (on the less functional variable) with ratio 0.07381699047204657
+Query ?a <dealsWith> ?b  ?e <isCitizenOf> ?a  ?e <livesIn> ?b   discarded by functionality heuristic with ratio 0.06474113098777855
+Query ?a <influences> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.08856136784847578
+Query ?a <influences> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.040028241150707224
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.011865827944135411
+Query ?a <hasAcademicAdvisor> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.03505098890790721
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.01584245445459909
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <livesIn> ?f   discarded by functionality heuristic (on the less functional variable) with ratio 0.019963884045544462
+Query ?a <isMarriedTo> ?b  ?a <actedIn> ?f  ?b <actedIn> ?f   discarded by functionality heuristic with ratio 0.07325914433615606
+Query ?a <isMarriedTo> ?b  ?a <actedIn> ?f  ?b <directed> ?f   discarded by functionality heuristic with ratio 0.08688628214290338
+Query ?a <isMarriedTo> ?b  ?a <directed> ?f  ?b <actedIn> ?f   discarded by functionality heuristic (on the less functional variable) with ratio 0.09065105230876162
+
+Configuration 4: == Pruned by heuristic + functionality checking + checking the other functionality on the head ==
+
+Query ?a <influences> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.08856136784847578
+Query ?a <influences> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.040028241150707224
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.011865827944135411
+Query ?a <hasAcademicAdvisor> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.03505098890790721
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.01584245445459909
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <livesIn> ?f   discarded by functionality heuristic (on the less functional variable) with ratio 0.019963884045544462
+
+Configuration 5: == Optimistic heuristic + checking the other functionality on the head ==
+
+Query ?a <influences> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.040028241150707224
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.01584245445459909
+Query ?a <hasAcademicAdvisor> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.052145553720492156
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.01584245445459909
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <livesIn> ?f   discarded by functionality heuristic (on the less functional variable) with ratio 0.02665443365751421
+
+Configuration 6: == Average between optimistic and pessimistic + checking the other functionality on the head ==
+
+Query ?a <influences> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.040028241150707224
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.013854141199367252
+Query ?a <hasAcademicAdvisor> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.04359827131419968
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.01584245445459909
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <livesIn> ?f   discarded by functionality heuristic (on the less functional variable) with ratio 0.02330915885152934
+
+Configuration 7: == New formula ==
+
+Query ?a <influences> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.040028241150707224
+Query ?a <hasCapital> ?b  ?e <isCitizenOf> ?a  ?e <isLocatedIn> ?b   discarded by functionality heuristic with ratio 0.07004829500839325
+Query ?a <hasCapital> ?b  ?e <isCitizenOf> ?a  ?e <livesIn> ?b   discarded by functionality heuristic with ratio 0.03794245034140406
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.011865827944135411
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.01584245445459909
+Query ?a <hasAcademicAdvisor> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.05214555372049216
+
+Configuration 8: == New formula considering overlaps and minimum number of "z"s in the body ==
+
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.020199081156810662
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.020199081156810662
+Query ?a <hasAcademicAdvisor> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.052145553720492156
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.01584245445459909
+
+Configuration 9: == New formula considering overlaps (Christina's original formula) ==
+
+Query ?a <influences> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.040028241150707224
+Query ?a <hasAcademicAdvisor> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.052145553720492156
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.01584245445459909
+
+Configuration 10: == Body size star estimator ==
+
+Query ?a <hasChild> ?b  ?a <diedIn> ?f  ?b <wasBornIn> ?f   discarded by functionality heuristic with ratio 0.09259135118241399
+Query ?a <hasChild> ?b  ?a <diedIn> ?f  ?b <diedIn> ?f   discarded by functionality heuristic with ratio 0.020753314070242116
+Query ?a <hasChild> ?b  ?a <wasBornIn> ?f  ?b <wasBornIn> ?f   discarded by functionality heuristic with ratio 0.02989425327522705
+Query ?a <livesIn> ?b  ?a <livesIn> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.02267694134980351
+Query ?a <livesIn> ?b  ?a <isCitizenOf> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.045990519516009076
+Query ?a <diedIn> ?b  ?a <isCitizenOf> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.08737995513610772
+Query ?a <wasBornIn> ?b  ?a <isCitizenOf> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.09166437275973796
+Query ?a <isLeaderOf> ?b  ?a <livesIn> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.056128909371447
+Query ?a <dealsWith> ?b  ?a <hasCurrency> ?f  ?b <hasCurrency> ?f   discarded by functionality heuristic with ratio 0.08467023172905527
+Query ?a <influences> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.004252804308759503
+Query ?a <influences> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.018492062222942793
+Query ?a <hasAcademicAdvisor> ?b  ?a <worksAt> ?f  ?b <worksAt> ?f   discarded by functionality heuristic with ratio 0.029919822697346977
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.059948811769022045
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <livesIn> ?f   discarded by functionality heuristic with ratio 0.04574097224478363
+Query ?a <hasAcademicAdvisor> ?b  ?a <graduatedFrom> ?f  ?b <graduatedFrom> ?f   discarded by functionality heuristic with ratio 0.009470926223856584
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.003902124941389129
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <livesIn> ?f   discarded by functionality heuristic with ratio 0.06458857988492604
+Query ?a <hasAcademicAdvisor> ?b  ?a <diedIn> ?f  ?b <diedIn> ?f   discarded by functionality heuristic with ratio 0.013131797115265083
+Query ?a <hasAcademicAdvisor> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.009843959001589108
+Query ?a <isMarriedTo> ?b  ?a <created> ?f  ?b <created> ?f   discarded by functionality heuristic with ratio 0.08903266820817979
+Query ?a <isMarriedTo> ?b  ?a <actedIn> ?f  ?b <actedIn> ?f   discarded by functionality heuristic with ratio 0.06502935328597316
+Query ?a <isMarriedTo> ?b  ?a <directed> ?f  ?b <actedIn> ?f   discarded by functionality heuristic with ratio 0.06397486474327686
+Query ?a <directed> ?b  ?e <isMarriedTo> ?a  ?e <actedIn> ?b   discarded by functionality heuristic with ratio 0.035498518535751145
+
+Configuration 11: == Body size estimator with Maximum trick ==
+
+Query ?a <hasChild> ?b  ?a <diedIn> ?f  ?b <wasBornIn> ?f   discarded by functionality heuristic with ratio 0.029931818493347688
+Query ?a <hasChild> ?b  ?a <diedIn> ?f  ?b <diedIn> ?f   discarded by functionality heuristic with ratio 0.020753314070242116
+Query ?a <hasChild> ?b  ?a <wasBornIn> ?f  ?b <wasBornIn> ?f   discarded by functionality heuristic with ratio 0.02989425327522705
+Query ?a <livesIn> ?b  ?a <isCitizenOf> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.03650368589387268
+Query ?a <livesIn> ?b  ?a <livesIn> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.01889119317155575
+Query ?a <livesIn> ?b  ?a <livesIn> ?f  ?b <hasCapital> ?f   discarded by functionality heuristic with ratio 0.04974122078506364
+Query ?a <livesIn> ?b  ?a <livesIn> ?f  ?f <hasCapital> ?b   discarded by functionality heuristic with ratio 0.07341362772265742
+Query ?a <hasCapital> ?b  ?e <isCitizenOf> ?a  ?e <livesIn> ?b   discarded by functionality heuristic with ratio 0.08535720997313045
+Query ?a <diedIn> ?b  ?a <isCitizenOf> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.0693553903995115
+Query ?a <wasBornIn> ?b  ?a <isCitizenOf> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.07275602680929873
+Query ?a <isLeaderOf> ?b  ?a <livesIn> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.04675860174828817
+Query ?a <dealsWith> ?b  ?a <hasCurrency> ?f  ?b <hasCurrency> ?f   discarded by functionality heuristic with ratio 0.08467023172905527
+Query ?a <dealsWith> ?b  ?e <isCitizenOf> ?a  ?e <livesIn> ?b   discarded by functionality heuristic with ratio 0.07942273340765361
+Query ?a <influences> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.004252804308759503
+Query ?a <influences> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.018492062222942793
+Query ?a <isPoliticianOf> ?b  ?a <diedIn> ?f  ?b <hasCapital> ?f   discarded by functionality heuristic with ratio 0.06589798346473366
+Query ?a <hasAcademicAdvisor> ?b  ?a <worksAt> ?f  ?b <worksAt> ?f   discarded by functionality heuristic with ratio 0.029919822697346977
+Query ?a <hasAcademicAdvisor> ?b  ?a <graduatedFrom> ?f  ?b <worksAt> ?f   discarded by functionality heuristic with ratio 0.045173919590423134
+Query ?a <hasAcademicAdvisor> ?b  ?a <graduatedFrom> ?f  ?b <graduatedFrom> ?f   discarded by functionality heuristic with ratio 0.009470926223856584
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.0023781333143746224
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <livesIn> ?f   discarded by functionality heuristic with ratio 0.04574097224478363
+Query ?a <hasAcademicAdvisor> ?b  ?a <diedIn> ?f  ?b <diedIn> ?f   discarded by functionality heuristic with ratio 0.013131797115265083
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.003902124941389129
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <livesIn> ?f   discarded by functionality heuristic with ratio 0.03794217024630185
+Query ?a <hasAcademicAdvisor> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.009843959001589108
+Query ?a <participatedIn> ?b  ?a <dealsWith> ?f  ?f <participatedIn> ?b   discarded by functionality heuristic with ratio 0.06734148241478087
+Query ?a <participatedIn> ?b  ?e <dealsWith> ?a  ?e <participatedIn> ?b   discarded by functionality heuristic with ratio 0.08731223729880928
+Query ?a <isMarriedTo> ?b  ?a <created> ?f  ?b <created> ?f   discarded by functionality heuristic with ratio 0.08903266820817979
+Query ?a <isMarriedTo> ?b  ?a <actedIn> ?f  ?b <actedIn> ?f   discarded by functionality heuristic with ratio 0.06502935328597316
+Query ?a <isMarriedTo> ?b  ?a <diedIn> ?f  ?b <diedIn> ?f   discarded by functionality heuristic with ratio 0.026270885892510212
+Query ?a <isMarriedTo> ?b  ?a <directed> ?f  ?b <actedIn> ?f   discarded by functionality heuristic with ratio 0.05975952529233998
+Query ?a <directed> ?b  ?e <isMarriedTo> ?a  ?e <actedIn> ?b   discarded by functionality heuristic with ratio 0.01369187099713226
+
+Configuration 13: Improved duplicate elimination
+
+Query ?a <hasChild> ?b  ?a <diedIn> ?f  ?b <wasBornIn> ?f   discarded by functionality heuristic with ratio 0.032413866688860704
+Query ?a <hasChild> ?b  ?a <diedIn> ?f  ?b <diedIn> ?f   discarded by functionality heuristic with ratio 0.020753314070242116
+Query ?a <hasChild> ?b  ?a <wasBornIn> ?f  ?b <wasBornIn> ?f   discarded by functionality heuristic with ratio 0.02989425327522705
+Query ?a <livesIn> ?b  ?a <isCitizenOf> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.03658643742447085
+Query ?a <livesIn> ?b  ?a <livesIn> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.02157663918677267
+Query ?a <diedIn> ?b  ?a <isCitizenOf> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.07005793048617714
+Query ?a <wasBornIn> ?b  ?a <isCitizenOf> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.07267882945103546
+Query ?a <exports> ?b  ?e <dealsWith> ?a  ?e <exports> ?b   discarded by functionality heuristic with ratio 0.09292941769858672
+Query ?a <isLeaderOf> ?b  ?a <livesIn> ?f  ?b <isLocatedIn> ?f   discarded by functionality heuristic with ratio 0.05400948317624761
+Query ?a <dealsWith> ?b  ?a <hasCurrency> ?f  ?b <hasCurrency> ?f   discarded by functionality heuristic with ratio 0.08467023172905527
+Query ?a <influences> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.018492062222942796
+Query ?a <influences> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.004252804308759503
+Query ?a <hasAcademicAdvisor> ?b  ?a <worksAt> ?f  ?b <worksAt> ?f   discarded by functionality heuristic with ratio 0.029919822697346977
+Query ?a <hasAcademicAdvisor> ?b  ?a <graduatedFrom> ?f  ?b <worksAt> ?f   discarded by functionality heuristic with ratio 0.05286964694824649
+Query ?a <hasAcademicAdvisor> ?b  ?a <graduatedFrom> ?f  ?b <graduatedFrom> ?f   discarded by functionality heuristic with ratio 0.009470926223856584
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.0034503552711446835
+Query ?a <hasAcademicAdvisor> ?b  ?a <livesIn> ?f  ?b <livesIn> ?f   discarded by functionality heuristic with ratio 0.04574097224478362
+Query ?a <hasAcademicAdvisor> ?b  ?a <diedIn> ?f  ?b <diedIn> ?f   discarded by functionality heuristic with ratio 0.013131797115265083
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <isCitizenOf> ?f   discarded by functionality heuristic with ratio 0.003902124941389129
+Query ?a <hasAcademicAdvisor> ?b  ?a <isCitizenOf> ?f  ?b <livesIn> ?f   discarded by functionality heuristic with ratio 0.028702460083601722
+Query ?a <hasAcademicAdvisor> ?b  ?a <hasWonPrize> ?f  ?b <hasWonPrize> ?f   discarded by functionality heuristic with ratio 0.009843959001589108
+Query ?a <participatedIn> ?b  ?a <dealsWith> ?f  ?f <participatedIn> ?b   discarded by functionality heuristic with ratio 0.06750445103443853
+Query ?a <participatedIn> ?b  ?e <dealsWith> ?a  ?e <participatedIn> ?b   discarded by functionality heuristic with ratio 0.04975671580547037
+Query ?a <isMarriedTo> ?b  ?a <created> ?f  ?b <created> ?f   discarded by functionality heuristic with ratio 0.08903266820817979
+Query ?a <isMarriedTo> ?b  ?a <diedIn> ?f  ?b <diedIn> ?f   discarded by functionality heuristic with ratio 0.026270885892510212
+Query ?a <isMarriedTo> ?b  ?a <actedIn> ?f  ?b <actedIn> ?f   discarded by functionality heuristic with ratio 0.06502935328597315
+Query ?a <isMarriedTo> ?b  ?a <actedIn> ?f  ?b <directed> ?f   discarded by functionality heuristic with ratio 0.08729971662288456
+Query ?a <isMarriedTo> ?b  ?a <directed> ?f  ?b <actedIn> ?f   discarded by functionality heuristic with ratio 0.05946769959971786
+Query ?a <directed> ?b  ?e <isMarriedTo> ?a  ?e <actedIn> ?b   discarded by functionality heuristic with ratio 0.0232292271471645

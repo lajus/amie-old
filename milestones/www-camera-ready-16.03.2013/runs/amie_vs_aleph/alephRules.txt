@@ -1,0 +1,290 @@
+RULES FOR: dealsWith
+[pos cover = 473 neg cover = -3.951244] [posonly bayes estimate] [10.1039966123588]
+dealsWith(A,B) :-
+dealsWith(A,C), dealsWith(C,B).
+[time taken] [203.71]
+
+RULES FOR: diedIn
+[pos cover = 24 neg cover = -3.951244] [posonly bayes estimate] [7.00429754892937]
+diedIn(A,B) :-
+isCitizenOf(A,C), hasCapital(C,B).
+
+[pos cover = 4 neg cover = -3.951244] [posonly bayes estimate] [4.83753807970132]
+diedIn(A,B) :-
+isLocatedIn(A,B).
+
+[pos cover = 59 neg cover = -3.951244] [posonly bayes estimate] [7.9948828574024]
+diedIn(A,B) :-
+wasBornIn(A,B).
+
+[pos cover = 19 neg cover = -3.951244] [posonly bayes estimate] [6.73778796090576]
+diedIn(A,B) :-
+hasChild(A,C), diedIn(C,B).
+
+[pos cover = 10 neg cover = -3.951244] [posonly bayes estimate] [6.05382881157547]
+diedIn(A,B) :-
+livesIn(A,B).
+
+[pos cover = 71 neg cover = -3.951244] [posonly bayes estimate] [8.17167007449598]
+diedIn(A,B) :-
+isMarriedTo(A,C), diedIn(C,B).
+[time taken] [6.52]
+
+RULES FOR: directed
+[pos cover = 66 neg cover = -3.951244] [posonly bayes estimate] [8.11059543030482]
+directed(A,B) :-
+produced(A,B).
+
+[pos cover = 222 neg cover = -3.951244] [posonly bayes estimate] [9.3449120914447]
+directed(A,B) :-
+created(A,B).
+
+[pos cover = 35 neg cover = -3.951244] [posonly bayes estimate] [7.44944892292798]
+directed(A,B) :-
+actedIn(A,B).
+
+[pos cover = 117 neg cover = -3.951244] [posonly bayes estimate] [8.68777662773816]
+directed(A,B) :-
+isMarriedTo(A,C), directed(C,B).
+[time taken] [83.2350000000006]
+
+RULES FOR: exports
+[pos cover = 38 neg cover = -3.951244] [posonly bayes estimate] [7.53619829936044]
+exports(A,B) :-
+imports(A,B).
+
+[pos cover = 157 neg cover = -3.951244] [posonly bayes estimate] [8.98838124367496]
+exports(A,B) :-
+dealsWith(A,C), exports(C,B).
+[time taken] [828.632]
+
+RULES FOR: graduatedFrom
+[pos cover = 4 neg cover = -3.951244] [posonly bayes estimate] [4.58753807970132]
+graduatedFrom(A,B) :-
+hasAcademicAdvisor(A,C), graduatedFrom(C,B).
+
+[pos cover = 9 neg cover = -3.951244] [posonly bayes estimate] [5.92624607369542]
+graduatedFrom(A,B) :-
+worksAt(A,B).
+
+[pos cover = 14 neg cover = -3.951244] [posonly bayes estimate] [6.37601533391097]
+graduatedFrom(A,B) :-
+isMarriedTo(A,C), graduatedFrom(C,B).
+
+[pos cover = 2 neg cover = -3.951244] [posonly bayes estimate] [3.14439089914137]
+graduatedFrom(A,B) :-
+influences(A,C), graduatedFrom(C,B).
+[time taken] [2.836]
+
+RULES FOR: hasAcademicAdvisor
+[pos cover = 3 neg cover = -3.951244] [posonly bayes estimate] [4.04985600724954]
+hasAcademicAdvisor(A,B) :-
+hasAcademicAdvisor(A,C), hasAcademicAdvisor(C,B).
+[time taken] [1.246]
+
+RULES FOR: hasCapital
+[time taken] [12.81]
+
+RULES FOR: hasCurrency
+[pos cover = 21 neg cover = -3.951244] [posonly bayes estimate] [6.85290901344771]
+hasCurrency(A,B) :-
+dealsWith(A,C), hasCurrency(C,B).
+[time taken] [16.272]
+
+RULES FOR: hasMusicalRole
+[pos cover = 2 neg cover = -3.951244] [posonly bayes estimate] [3.14439089914137]
+hasMusicalRole(A,B) :-
+isMarriedTo(A,C), hasMusicalRole(C,B).
+[time taken] [32.455]
+
+RULES FOR: hasWonPrize
+[pos cover = 7 neg cover = -3.951244] [posonly bayes estimate] [5.46858243906531]
+hasWonPrize(A,B) :-
+influences(A,C), hasWonPrize(C,B).
+
+[pos cover = 33 neg cover = -3.951244] [posonly bayes estimate] [7.35684218913882]
+hasWonPrize(A,B) :-
+isMarriedTo(A,C), hasWonPrize(C,B).
+
+[pos cover = 4 neg cover = -3.951244] [posonly bayes estimate] [4.58753807970132]
+hasWonPrize(A,B) :-
+hasAcademicAdvisor(A,C), hasWonPrize(C,B).
+[time taken] [37.188]
+
+RULES FOR: holdsPoliticalPosition
+[time taken] [0.436000000000007]
+
+RULES FOR: isAffiliatedTo
+[time taken] [0.0229999999999997]
+
+RULES FOR: isCitizenOf
+[pos cover = 29 neg cover = -3.951244] [posonly bayes estimate] [7.21509127270583]
+isCitizenOf(A,B) :-
+wasBornIn(A,C), isLocatedIn(C,B).
+
+[pos cover = 4 neg cover = -3.951244] [posonly bayes estimate] [4.58753807970132]
+isCitizenOf(A,B) :-
+livesIn(A,C), isLocatedIn(C,B).
+
+[pos cover = 18 neg cover = -3.951244] [posonly bayes estimate] [6.67494880981092]
+isCitizenOf(A,B) :-
+diedIn(A,C), isLocatedIn(C,B).
+
+[pos cover = 10 neg cover = -3.951244] [posonly bayes estimate] [5.95382881157547]
+isCitizenOf(A,B) :-
+isMarriedTo(A,C), isCitizenOf(C,B).
+
+[pos cover = 16 neg cover = -3.951244] [posonly bayes estimate] [6.59883244082121]
+isCitizenOf(A,B) :-
+livesIn(A,B).
+
+[pos cover = 3 neg cover = -3.951244] [posonly bayes estimate] [4.04985600724954]
+isCitizenOf(A,B) :-
+isCitizenOf(A,C), isLocatedIn(C,B).
+
+[pos cover = 5 neg cover = -3.951244] [posonly bayes estimate] [4.96068163101553]
+isCitizenOf(A,B) :-
+isLocatedIn(A,C), isLocatedIn(C,B).
+
+[pos cover = 69 neg cover = -3.951244] [posonly bayes estimate] [8.14187196230912]
+isCitizenOf(A,B) :-
+isCitizenOf(A,C), dealsWith(C,B).
+
+[pos cover = 3 neg cover = -3.951244] [posonly bayes estimate] [4.04985600724954]
+isCitizenOf(A,B) :-
+influences(A,C), isCitizenOf(C,B).
+
+[pos cover = 2 neg cover = -3.951244] [posonly bayes estimate] [3.14439089914137]
+isCitizenOf(A,B) :-
+hasChild(A,C), isCitizenOf(C,B).
+[time taken] [5179.702]
+
+RULES FOR: isInterestedIn
+[pos cover = 5 neg cover = -3.951244] [posonly bayes estimate] [4.96068163101553]
+isInterestedIn(A,B) :-
+influences(A,C), isInterestedIn(C,B).
+[time taken] [1.30399999999999]
+
+RULES FOR: isLeaderOf
+[pos cover = 5 neg cover = -3.951244] [posonly bayes estimate] [5.16068163101553]
+isLeaderOf(A,B) :-
+livesIn(A,B).
+
+[pos cover = 3 neg cover = -3.951244] [posonly bayes estimate] [4.38318934058287]
+isLeaderOf(A,B) :-
+wasBornIn(A,B).
+
+[pos cover = 10 neg cover = -3.951244] [posonly bayes estimate] [5.95382881157547]
+isLeaderOf(A,B) :-
+isMarriedTo(A,C), isLeaderOf(C,B).
+[time taken] [29.128]
+
+RULES FOR: isPoliticianOf
+[pos cover = 11 neg cover = -3.951244] [posonly bayes estimate] [6.07641171865253]
+isPoliticianOf(A,B) :-
+diedIn(A,C), isLocatedIn(C,B).
+
+[pos cover = 8 neg cover = -3.951244] [posonly bayes estimate] [5.65568526026126]
+isPoliticianOf(A,B) :-
+livesIn(A,C), isLocatedIn(C,B).
+
+[pos cover = 5 neg cover = -3.951244] [posonly bayes estimate] [4.96068163101553]
+isPoliticianOf(A,B) :-
+wasBornIn(A,C), isLocatedIn(C,B).
+[time taken] [0.0559999999999974]
+
+RULES FOR: livesIn
+[pos cover = 7 neg cover = -3.951244] [posonly bayes estimate] [5.46858243906531]
+livesIn(A,B) :-
+isCitizenOf(A,C), hasCapital(C,B).
+
+[pos cover = 28 neg cover = -3.951244] [posonly bayes estimate] [7.21201965732806]
+livesIn(A,B) :-
+wasBornIn(A,B).
+
+[pos cover = 17 neg cover = -3.951244] [posonly bayes estimate] [6.60798647440235]
+livesIn(A,B) :-
+livesIn(A,C), hasCapital(C,B).
+
+[pos cover = 62 neg cover = -3.951244] [posonly bayes estimate] [8.02999100685233]
+livesIn(A,B) :-
+livesIn(A,C), isLocatedIn(C,B).
+
+[pos cover = 10 neg cover = -3.951244] [posonly bayes estimate] [6.05382881157547]
+livesIn(A,B) :-
+diedIn(A,B).
+
+[pos cover = 2 neg cover = -3.951244] [posonly bayes estimate] [3.64439089914137]
+livesIn(A,B) :-
+isLeaderOf(A,B).
+
+[pos cover = 8 neg cover = -3.951244] [posonly bayes estimate] [5.78068526026126]
+livesIn(A,B) :-
+isCitizenOf(A,B).
+[pos cover = 26 neg cover = -3.951244] [posonly bayes estimate] [7.09395564121829]
+livesIn(A,B) :-
+isMarriedTo(A,C), livesIn(C,B).
+
+[pos cover = 2 neg cover = -3.951244] [posonly bayes estimate] [3.14439089914137]
+livesIn(A,B) :-
+hasAcademicAdvisor(A,C), livesIn(C,B).
+
+[pos cover = 7 neg cover = -3.951244] [posonly bayes estimate] [5.46858243906531]
+livesIn(A,B) :-
+hasChild(A,C), livesIn(C,B).
+[time taken] [2486.747]
+
+RULES FOR: playsFor
+[time taken] [0.497000000000014]
+RULES FOR: wasBornIn
+wasBornIn(A,B) :-
+hasChild(A,C), diedIn(C,B).[pos cover = 3 neg cover = -3.951244] [posonly bayes estimate] [4.04985600724954]
+wasBornIn(A,B) :-
+hasChild(A,C), wasBornIn(C,B).[pos cover = 24 neg cover = -3.951244] [posonly bayes estimate] [7.00429754892937]
+wasBornIn(A,B) :-
+diedIn(A,B).[pos cover = 61 neg cover = -3.951244] [posonly bayes estimate] [8.02933069750884]
+wasBornIn(A,B) :-
+influences(A,C), diedIn(C,B).[pos cover = 3 neg cover = -3.951244] [posonly bayes estimate] [4.04985600724954]
+wasBornIn(A,B) :-
+influences(A,C), wasBornIn(C,B).[pos cover = 4 neg cover = -3.951244] [posonly bayes estimate] [4.58753807970132]
+wasBornIn(A,B) :-
+livesIn(A,B).[pos cover = 26 neg cover = -3.951244] [posonly bayes estimate] [7.13241717967983]
+wasBornIn(A,B) :-
+isCitizenOf(A,C), hasCapital(C,B).[pos cover = 30 neg cover = -3.951244] [posonly bayes estimate] [7.25244110024358]
+wasBornIn(A,B) :-
+isMarriedTo(A,C), wasBornIn(C,B).[pos cover = 117 neg cover = -3.951244] [posonly bayes estimate] [8.68777662773816]
+wasBornIn(A,B) :-
+isLeaderOf(A,B).[pos cover = 3 neg cover = -3.951244] [posonly bayes estimate] [4.38318934058287]
+[time taken] [14.496]
+RULES FOR: worksAt
+worksAt(A,B) :-
+graduatedFrom(A,B).[pos cover = 9 neg cover = -3.951244] [posonly bayes estimate] [5.92624607369542]
+worksAt(A,B) :-
+hasAcademicAdvisor(A,C), worksAt(C,B).[pos cover = 4 neg cover = -3.951244] [posonly bayes estimate] [4.58753807970132]
+[time taken] [0.570000000000007]
+RULES FOR: imports
+[pos cover = 38 neg cover = -3.951244] [posonly bayes estimate] [7.53619829936044]
+imports(A,B) :-
+exports(A,B).
+
+[pos cover = 37 neg cover = -3.951244] [posonly bayes estimate] [7.48108055014457]
+imports(A,B) :-
+dealsWith(A,C), exports(C,B).
+
+[pos cover = 79 neg cover = -3.951244] [posonly bayes estimate] [8.28271688750415]
+imports(A,B) :-
+dealsWith(A,C), imports(C,B).
+[time taken] [42.7209999999977]
+
+RULES FOR: hasOfficialLanguage
+[pos cover = 2 neg cover = -3.951244] [posonly bayes estimate] [3.14439089914137]
+hasOfficialLanguage(A,B) :-
+hasCapital(A,C), hasOfficialLanguage(C,B).
+
+[pos cover = 111 neg cover = -3.951244] [posonly bayes estimate] [8.63374689286673]
+hasOfficialLanguage(A,B) :-
+dealsWith(A,C), hasOfficialLanguage(C,B).
+
+[pos cover = 2 neg cover = -3.951244] [posonly bayes estimate] [3.14439089914137]
+hasOfficialLanguage(A,B) :-
+isLocatedIn(A,C), hasOfficialLanguage(C,B).

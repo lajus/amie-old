@@ -1,0 +1,17 @@
+?a  <exports>  ?b   => ?a  <imports>  ?b	1	28	1
+?a  <isCitizenOf>  ?c  ?c  <hasCapital>  ?b   => ?a  <wasBornIn>  ?b	1	28	0
+?a  <dealsWith>  ?c  ?c  <hasOfficialLanguage>  ?b   => ?a  <hasOfficialLanguage>  ?b	2	28	0
+?c  <hasAcademicAdvisor>  ?a  ?c  <worksAt>  ?b   => ?a  <worksAt>  ?b	0	29	0
+?c  <dealsWith>  ?a  ?c  <hasOfficialLanguage>  ?b   => ?a  <hasOfficialLanguage>  ?b	3	28	0
+?a  <hasAcademicAdvisor>  ?c  ?c  <worksAt>  ?b   => ?a  <worksAt>  ?b	1	29	0
+?a  <dealsWith>  ?c  ?c  <exports>  ?b   => ?a  <imports>  ?b	3	27	0
+?c  <isCitizenOf>  ?a  ?c  <diedIn>  ?b   => ?a  <hasCapital>  ?b	0	30	0
+?a  <directed>  ?b   => ?a  <produced>  ?b	3	27	0
+?c  <isCitizenOf>  ?a  ?c  <isLocatedIn>  ?b   => ?a  <hasCapital>  ?b	0	29	0
+?c  <isCitizenOf>  ?a  ?c  <livesIn>  ?b   => ?a  <hasCapital>  ?b	1	29	0
+?c  <dealsWith>  ?a  ?c  <imports>  ?b   => ?a  <exports>  ?b	6	22	1
+?a  <livesIn>  ?b   => ?a  <wasBornIn>  ?b	4	25	1
+?a  <isCitizenOf>  ?c  ?c  <hasCapital>  ?b   => ?a  <diedIn>  ?b	1	29	0
+?a  <imports>  ?c  ?b  <exports>  ?c   => ?a  <dealsWith>  ?b	6	23	0
+?e  <dealsWith>  ?a  ?e  <exports>  ?b   => ?a  <exports>  ?b	1	29	0
+?a  <dealsWith>  ?c  ?c  <imports>  ?b   => ?a  <exports>  ?b	6	24	0

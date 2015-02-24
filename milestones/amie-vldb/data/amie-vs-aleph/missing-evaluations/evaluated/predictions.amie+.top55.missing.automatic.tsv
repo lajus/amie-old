@@ -1,0 +1,13 @@
+?a  <hasChild>  ?b  ?b  <isMarriedTo>  ?a   => ?a  <isMarriedTo>  ?b	<Todd_Manning>	<isMarriedTo>	<Téa_Delgado>	TargetSource	True
+?a  <hasChild>  ?b  ?b  <isMarriedTo>  ?a   => ?a  <isMarriedTo>  ?b	<Amenhotep_III>	<isMarriedTo>	<Sitamun>	TargetSource	True
+?a  <hasChild>  ?b  ?b  <isMarriedTo>  ?a   => ?a  <isMarriedTo>  ?b	<Amenhotep_III>	<isMarriedTo>	<Iset_(daughter_of_Amenhotep_III)>	TargetSource	True
+?a  <created>  ?f  ?f  <hasChild>  ?b   => ?a  <created>  ?b	<Gerry_Anderson>	<created>	<Scott_Tracy>	TargetSource	True
+?a  <created>  ?f  ?f  <hasChild>  ?b   => ?a  <created>  ?b	<Gerry_Anderson>	<created>	<Virgil_Tracy>	TargetSource	True
+?a  <created>  ?f  ?f  <hasChild>  ?b   => ?a  <created>  ?b	<Tony_McHale>	<created>	<Robbie_Jackson>	TargetSource	True
+?a  <created>  ?f  ?f  <hasChild>  ?b   => ?a  <created>  ?b	<Tony_McHale>	<created>	<Bianca_Jackson>	TargetSource	True
+?a  <created>  ?f  ?f  <hasChild>  ?b   => ?a  <created>  ?b	<Gerry_Anderson>	<created>	<Gordon_Tracy>	TargetSource	True
+?a  <created>  ?f  ?f  <hasChild>  ?b   => ?a  <created>  ?b	<Gerry_Anderson>	<created>	<Alan_Tracy>	TargetSource	True
+?a  <actedIn>  ?b  ?a  <directed>  ?b   => ?a  <created>  ?b	<Emilio_Estevez>	<created>	<Wisdom_(film)>	TargetSource	True
+?a  <actedIn>  ?b  ?a  <directed>  ?b   => ?a  <created>  ?b	<Lucas_Belvaux>	<created>	<Cavale>	TargetSource	True
+?a  <actedIn>  ?b  ?a  <directed>  ?b   => ?a  <created>  ?b	<Tom_Hanks>	<created>	<That_Thing_You_Do!>	TargetSource	True
+?a  <actedIn>  ?b  ?a  <produced>  ?b   => ?a  <created>  ?b	<Kamal_Haasan>	<created>	<Unnaipol_Oruvan>	TargetSource	True

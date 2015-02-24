@@ -1,0 +1,100 @@
+% !TEX root = main.tex
+Technically speaking, we aim to mine Horn rules on binary predicates. 
+Rule mining has been an area of active research during the past years. 
+Some approaches mine association rules, some mine logical rules, others mine a schema for the KB, and again others use rule mining for application purposes.
+In the following, we survey the most pertinent related work along these lines.
+%\www{
+\subsection{Association Rule Mining} 
+Association rules \cite{AgrImiSwa93} are mined on a list of \emph{transactions}. A transaction is a set of items. 
+For example, in the context of sales analysis, a transaction is the set of products bought together by a customer in a specific event. 
+The mined rules are of the form \{\emph{ElvisCD, ElvisBook}\} $\Rightarrow$ \emph{ElvisCostume}, meaning that people who bought an Elvis CD and an Elvis book usually also bought an Elvis costume. 
+However, these are not the kind of rules that we aim to mine in this paper; we aim at mining Horn rules. %}
+%\www{
+One problem for association rule mining is that for some applications the standard measurements for support and confidence do not produce good results. 
+\cite{TanKumSri02} discusses a number of alternatives to measure the interestingness of a rule in general. 
+Our approach is inspired by this work and also makes use of a language bias~\cite{AdeRaeBru95} to reduce the search space. %}
+
+%\www{
+\subsection{Logical Rule Mining}
+Sherlock \cite{SchEtzWel10} is an unsupervised ILP method to learn first-order Horn clauses from a set of extracted facts for a given target relation. 
+It uses probabilistic graphical models (PGMs) to infer new facts. 
+It tackles the noise of the extracted  facts by extensive filtering in a preprocessing step and by penalizing longer rules in the inference part. 
+For mining the rules, Sherlock uses 2 heuristics: statistical significance and statistical relevance.
+% (an alternative way to express Occam's razor).
+%}
+QuickFOIL~\cite{quickfoil} is a standard ILP system based on a generic top-down greedy algorithm and implemented 
+on top of  the QuickStep in-memory storage engine~\cite{Chasseur:2013:DES:2536258.2536260}. It learns a set of hypotheses (Horn rules)
+from positive and negative examples of a target relation and a collection of background facts. When refining a rule, the QuickFOIL algorithm 
+greedily picks the clause that maximizes a scoring 
+function depending on the support and the confidence gain of the new rule. Once a rule is mined, the algorithm removes the positive examples
+covered by the rule and starts the induction process on the remaining facts.
+QuickFOIL can scale to problem  instances with millions of background facts thanks to a 
+set of aggresive pruning heuristics and multiple database optimizations. 
+However, it is not suitable for mining rules under the Open World Assumption, since it requires explicit negative examples. 
+%\www{
+The WARMR system \cite{DehToi99,DehToi00} mines patterns in data\-bases that correspond to conjunctive queries. It uses a declarative language bias to reduce the search space. 
+An extension of the system, WARMER~\cite{GoeVan02}, modified the approach to support a broader range of conjunctive queries and increase efficiency of search space exploration. 
+ALEPH\footnote{\label{foot:aleph}\url{http://www.cs.ox.ac.uk/activities/machlearn/Aleph/aleph_toc.html}} is a general purpose ILP system that implements Muggleton's Inverse Entailment algorithm~\cite{Muggleton95inverseentailment} in Prolog. 
+It employs a variety of evaluation functions for the rules as well as a variety of search strategies. 
+These approaches are not tailored to deal with large KBs under the Open World Assumption. 
+We compare our system to WARMR and ALEPH, which are the only ones available for download. 
+Our experiments do not only show that these systems mine less sensible rules than our approach, but also that it takes them much longer to do so. 
+%}
+
+\www{
+\subsection{Expert Rule Mining}
+% redundant: \cite{NebLla10}
+Another rule mining approach over RDF data~\cite{NebBer12} was proposed to discover causal relations in RDF-based medical data. 
+It requires a domain expert who defines targets and contexts of the mining process, so that the correct transactions are generated.
+Our approach, in contrast, does not rely on the user to define any context or target. It works out-of-the-box.
+
+\subsection{Generating Schemas} In this paper, we aim to generate Horn rules on a KB. Other approaches use rule mining to generate the schema or taxonomy of a KB.
+\cite{CimHotSta04} applies clustering techniques based on context vectors and formal concept analysis to construct taxonomies. 
+Other approaches use clustering~\cite{MaeZac02} and ILP-based approaches~\cite{DamFanEsp10}. For the friend-of-a-friend network on the Semantic Web, 
+\cite{GriEdwPre04} applies clustering to identify classes of people and ILP to learn descriptions of these groups. 
+Another example of an ILP-based approach is the DL-Learner~\cite{Leh09}, which has successfully been applied~\cite{HelLehAue09} to generate OWL class expressions from YAGO~\cite{SucKasWei07}. %large scale
+As an alternative to ILP techniques, \cite{VoeNie11} proposes a statistical method that does not require negative examples. 
+%In general, however, approaches relying on inductive logic programming (ILP)
+%~\cite{DamFanEsp10} or Formal Concept Analysis (FCA)~\cite{} 
+%face the challenge of uncertain and noisy input data in the form of background knowledge and examples (open world assumption). Furthermore, the need for both positive and negative examples as well as scalability issues restrict the general applicability of ILP approaches~\cite{VoeNie11}. 
+%In contrast to our approach, the proposed techniques aim at generating a schema for a given RDF repository, not logical rules in general.
+In contrast to our approach, these techniques aim at generating a schema for a given RDF repository, not logical rules in general.
+}
+
+\subsection{Relational Machine Learning}
+Some approaches learn new associations from semantic data without mining explicit logical rules.
+For example, relational machine learning methods propose a holistic statistical approach that considers both the attribute information and the relationships between entities to learn new links and concepts. 
+\cite{nickel:factorizing} applies tensor factorization
+methods to predict new triples on the YAGO2 ontology by representing the KB as a three-dimensional tensor.
+In a similar fashion, \cite{Huang:2010:MPL:2022735.2022750} uses multivariate prediction techniques to learn new links on
+a social graph. 
+In both approaches, however, the predictions are \emph{opaque}. 
+It is possible to generate predictions, but not to derive general structural knowledge about the data that can explain the reasons why the predictions were made. 
+For example, these approaches will tell us that Michelle Obama most likely lives in Washington, 
+but they will not tell us that this is because her husband lives in Washington and people tend to live in same place as their spouses. 
+Our approach, in contrast, aims at mining explicit logical rules that capture the correlations in the data.  
+These can then be used to derive new facts and also to explain why these facts were derived.
+\www{
+\subsection{Learning Rules From Hybrid Sources} 
+\cite{DBLP:conf/semweb/dAmatoBS12} proposes to learn association rules from hybrid sources (RDBMS and Ontologies) under the OWA. For this purpose, the definition of frequency (and thus of support and confidence) is changed so that unknown statements contribute with half of the weight of the true statements. 
+Another approach~\cite{DBLP:journals/tplp/Lisi08} makes use of an ontology and a constraint Datalog program. The goal is to learn association rules at different levels of granularity w.r.t. the type hierarchy of the ontology.
+While these approaches focus more on the benefits of combining hybrid sources, our approach focuses on pure RDF KBs.
+}
+\vspace{-0.5em}
+\www{
+\subsection{Further Applications of Rule Mining}
+\cite{JozLawLuk10} proposes an algorithm for frequent pattern mining in KBs that uses DL-safe rules. 
+Such KBs can be transformed into a disjunctive Datalog program, which allows seeing patterns as queries. 
+This approach does not mine the Horn rules that we aim at.
+Some approaches use rule mining for ontology merging and alignment~\cite{McgFikRic00,DavGuiBri07,NoyMus00}. 
+The AROMA system~\cite{DavGuiBri07}, for instance, uses association rules on extracted terms to find subsumption relations between classes and properties of different ontologies. 
+Again, these systems do not mine the kind of rules we are interested in.
+In~\cite{Abedjan:2012:ROW:2396761.2398467} association rules and frequency analysis are used to identify and classify common misusage patterns for relations in DBpedia.}
+In the same fashion,~\cite{Ziawasch2013a} applies association rules to find synonym predicates in DBpedia. The matched synonyms are then used
+for predicate expansion in the spirit of data integration, a vital task for manually built KBs or for cases when the data is produced by
+independent providers. In contrast to our work, these approaches do not mine logical rules, but association rules on the co-occurrence of values.
+\www{
+Since RDF data can be seen as a graph, mining frequent subtrees~\cite{ChiMunNij04,KurKar01} is another related field of research. 
+However, as the URIs of resources in knowledge bases are unique, these techniques are limited to mining frequent combinations of classes.
+Several approaches, such as Markov Logic \cite {markovlogic} or URDF \cite{urdf} use Horn rules to perform reasoning. These approaches can be consumers of the rules we mine with AMIE.
+}

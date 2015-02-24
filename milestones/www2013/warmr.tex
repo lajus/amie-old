@@ -1,0 +1,26 @@
+%WARMR in general
+% to be used most probably as a separate section somewhere in the beginning
+WARMR\cite{DehToi99,DehToi00} is a system which unifies ILP and association rule mining. Being very closely related to the APRIORI algorithms~\cite{Agrawal:1996:FDA:257938.257975}, it performs a general to specific, breadth-first search. The difference with the traditional association rule mining systems (and the connection to ILP) is that in WARMR it is not binary attributes that are added in each level, but predicate calculus literals.
+
+%WARMR input 
+The input for WARMR consists of files containing the facts in the database and the background knowledge. The user also needs to provide the language bias, i.e. to provide WARMR with specific information about which predicates are allowed to be added in a query, which of their variables could be new and which should have appeared in previously used literals (mode declarations), which arguments of predicates are allowed to be unified (type declarations). 
+
+
+Apart from that, to discover frequent patterns, we need to have a notion of frequency. Given that WARMR considers queries as patterns and that queries can have variables, it is not
+immediately obvious what the frequency of a given query is. Therefore, the user needs to define what is actually the predicate that is being counted by the system (\textit{key predicate}). In the usual scenario of market basket analysis, for example, the system counts customer transactions. In a scenario, in which the database is actually an ontology, a straightforward solution could be to count entities. Since the key predicate determines what is actually counted, it is necessary that it is contained in all queries.  
+
+
+WARMR first discovers frequent queries of the form $Q =?-A_1,A_2, . . . A_n$ with variables ${X_1, . . .X_m}$ by calculating its absolute frequency, i.e. the number of answer substitutions $\theta$ for the variables in the key atom for which the query $Q\theta$ succeeds in the given database $r$:
+\[
+a(Q, r, key) = |\{\theta \in answerset(key, r)|Q\theta \; succeeds \; w.r.t. \; r\}| 
+\]
+
+
+The relative frequency (support) can be then calculated as:
+\[
+ f(Q, r, key) = a(Q, r, key)/|\{\theta \in answerset(key, r)\}|
+\]
+
+After all frequent Datalog queries are found, WARMR produces relational association rules from them. From two frequent queries $Q_1=?-l_1,...,l_m$ and $Q_2=?-l_1,...,l_m,l_{m+1},...,l_n$, where $Q_2$ $\theta-$subsumes $Q_1$, it derives a relational association rule $Q_1 \rightarrow Q_2$ with confidence equal to $support(Q_2)/support(Q_1)$.
+
+At this point, we should note that WARMR, like all other association rule mining systems, makes implicitly a closed world assumption, i.e. if a fact is not inside the database it is assumed that it is false. Although this assumption is natural for the market basket analysis scenario, in which we have complete knowledge of all the transactions that took place, it might not be optimal for a web-extracted ontology, which is inherently incomplete.

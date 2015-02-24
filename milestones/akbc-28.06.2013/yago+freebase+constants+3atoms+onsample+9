@@ -1,0 +1,64 @@
+nohup: ignoring input
+Loading files... 
+  Starting sample.tsv
+  Finished sample.tsv, still running: 0
+Loaded 129237 facts in 0.80 s using -211 MB
+Using Support as pruning metric with threshold 30
+Counting on both head variables
+No minimum threshold on standard confidence
+No minimum threshold on PCA confidence
+Constants in the arguments of relations are enabled
+Starting the mining phase... Using 16 threads
+?a  <ns:people.person.education..education.education.institution>  ?b   => ?a  <graduatedFrom>  ?b	0.000851149	0.901639344	0.077084793	0.48245614	110	1427	?a
+?a  <rdf:type>  ns:people.person  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000742821	0.786885246	0.000025285	0.001481893	96	3796650	?a
+?a  <rdf:type>  ns:people.person  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000796985	0.844262295	0.000034546	0.00202461	103	2981550	?a
+?a  <ns:people.person.profession>  <Politician>  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.00034046	0.360655738	0.000380103	0.001563444	44	115758	?a
+?a  <ns:people.person.profession>  <Politician>  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000363673	0.385245902	0.000517018	0.002126601	47	90906	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000247607	0.262295082	0.000109004	0.001705302	32	293568	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000239869	0.254098361	0.000082927	0.001297343	31	373824	?a
+?a  <ns:type.object.type>  ns:common.topic  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000742821	0.786885246	0.000025229	0.001481893	96	3805146	?a
+?a  <ns:type.object.type>  ns:government.politician  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000464263	0.491803279	0.000307887	0.00159147	60	194877	?a
+?a  <ns:type.object.type>  ns:government.politician  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000495214	0.524590164	0.000418194	0.002161651	64	153039	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000402362	0.426229508	0.000095046	0.001861198	52	547104	?a
+?b  <isLocatedIn>  <United_States>  ?a  <ns:type.object.type>  ns:government.politician   => ?a  <graduatedFrom>  ?b	0.000263083	0.278688525	0.000124856	0.000645382	34	272314	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000379148	0.401639344	0.000070334	0.001377294	49	696672	?a
+?a  <ns:type.object.type>  ns:people.deceased_person  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000363673	0.385245902	0.000065951	0.002012676	47	712653	?a
+?b  <isLocatedIn>  <United_States>  ?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <graduatedFrom>  ?b	0.000239869	0.254098361	0.000031844	0.000623567	31	973504	?a
+?a  <ns:type.object.type>  ns:common.topic  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000796985	0.844262295	0.000034469	0.00202461	103	2988222	?a
+?a  <ns:type.object.type>  ns:people.deceased_person  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000332722	0.352459016	0.000047384	0.001446059	43	907479	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000286296	0.303278689	0.000093405	0.00148255	37	396126	?a
+?a  <ns:people.person.gender>  <Male>  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000634493	0.672131148	0.000051953	0.002069923	82	1578345	?a
+?a  <ns:people.person.gender>  <Male>  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000588067	0.62295082	0.000037814	0.001506591	76	2009835	?a
+?a  <ns:people.person.education..education.education.institution>  ?b  ?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <graduatedFrom>  ?b	0.000379148	0.401639344	0.09141791	0.5	49	536	?a
+?a  rdf:type  <wordnet_alumnus_109786338>  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000479739	0.508196721	0.000236358	0.001556811	62	262314	?a
+?b  <isLocatedIn>  <United_States>  ?a  rdf:type  <wordnet_alumnus_109786338>   => ?a  <graduatedFrom>  ?b	0.000294033	0.31147541	0.00010367	0.000682839	38	366548	?a
+?a  rdf:type  <wordnet_alumnus_109786338>  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000526165	0.557377049	0.0003301	0.002174261	68	205998	?a
+?b  <isLocatedIn>  <United_States>  ?a  <rdf:type>  ns:people.person   => ?a  <graduatedFrom>  ?b	0.000410099	0.43442623	0.00000999	0.00058548	53	5305300	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000317247	0.336065574	0.000131798	0.002091943	41	311082	?a
+?b  <isLocatedIn>  <United_States>  ?a  <ns:people.person.education..education.education.institution>  ?b   => ?a  <graduatedFrom>  ?b	0.000402362	0.426229508	0.104208417	0.495238095	52	499	?a
+?a  <ns:people.person.education..education.education.institution>  ?b  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.00078151	0.827868852	0.113738739	0.561111111	101	888	?a
+?a  <ns:people.person.education..education.education.institution>  ?b  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000727346	0.770491803	0.094472362	0.519337017	94	995	?a
+?a  <ns:type.object.type>  ns:people.person  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000796985	0.844262295	0.000034546	0.00202461	103	2981550	?a
+?b  <isLocatedIn>  <United_States>  ?a  <ns:type.object.type>  ns:common.topic   => ?a  <graduatedFrom>  ?b	0.000410099	0.43442623	0.000009968	0.00058548	53	5317172	?a
+?a  <ns:people.person.education>  <ns:m.0>  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.00078151	0.827868852	0.000269118	0.002143418	101	375300	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000355935	0.37704918	0.000070145	0.001375064	46	655785	?a
+?a  rdf:type  <wordnet_person_100007846>  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000735084	0.778688525	0.000081422	0.002016086	95	1166766	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000371411	0.393442623	0.000093205	0.00182711	48	514995	?a
+?b  <isLocatedIn>  <United_States>  ?a  <ns:people.person.gender>  <Male>   => ?a  <graduatedFrom>  ?b	0.000301771	0.319672131	0.000013887	0.00055327	39	2808470	?a
+?a  <ns:people.person.education>  <ns:m.0>  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000727346	0.770491803	0.000196694	0.001566588	94	477900	?a
+?a  <isAffiliatedTo>  <Democratic_Party_(United_States)>  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000232132	0.245901639	0.001357405	0.002248201	30	22101	?a
+?b  <isLocatedIn>  <United_States>  ?a  rdf:type  <wordnet_person_100007846>   => ?a  <graduatedFrom>  ?b	0.000371411	0.393442623	0.00002312	0.000572478	48	2076116	?a
+?a  <hasGender>  <male>  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000649969	0.68852459	0.000080576	0.002034736	84	1042500	?a
+?b  <isLocatedIn>  <United_States>  ?a  <ns:people.person.education>  <ns:m.0>   => ?a  <graduatedFrom>  ?b	0.000402362	0.426229508	0.000077868	0.000620185	52	667800	?a
+?a  <hasGender>  <male>  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000603542	0.639344262	0.000058757	0.001483764	78	1327500	?a
+?a  <ns:people.person.nationality>  <>  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.00044105	0.467213115	0.000152386	0.002169693	57	374049	?a
+?b  rdf:type  <wordnet_educational_institution_108276342>  ?a  rdf:type  <wordnet_person_100007846>   => ?a  <graduatedFrom>  ?b	0.000688657	0.729508197	0.000059903	0.001483259	89	1485738	?a
+?a  <ns:people.person.nationality>  <>  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000402362	0.426229508	0.000109173	0.00155442	52	476307	?a
+?a  <ns:type.object.type>  ns:people.person  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000742821	0.786885246	0.000025285	0.001481893	96	3796650	?a
+?b  <isLocatedIn>  <United_States>  ?a  <ns:people.person.nationality>  <>   => ?a  <graduatedFrom>  ?b	0.000286296	0.303278689	0.000055591	0.000791512	37	665574	?a
+?a  <hasGender>  <male>  ?b  <isLocatedIn>  <United_States>   => ?a  <graduatedFrom>  ?b	0.000317247	0.336065574	0.000022102	0.000558142	41	1855000	?a
+?b  <isLocatedIn>  <United_States>  ?a  <ns:type.object.type>  ns:people.person   => ?a  <graduatedFrom>  ?b	0.000410099	0.43442623	0.00000999	0.00058548	53	5305300	?a
+?a  <ns:common.topic.notable_types>  ns:people.person  ?b  rdf:type  <wordnet_university_108286569>   => ?a  <graduatedFrom>  ?b	0.000796985	0.844262295	0.000034667	0.00202461	103	2971125	?a
+?a  <ns:common.topic.notable_types>  ns:people.person  ?b  rdf:type  <wordnet_educational_institution_108276342>   => ?a  <graduatedFrom>  ?b	0.000742821	0.786885246	0.000025374	0.001481893	96	3783375	?a
+?b  <isLocatedIn>  <United_States>  ?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <graduatedFrom>  ?b	0.000410099	0.43442623	0.000010025	0.00058548	53	5286750	?a
+Mining done in 4.55 s seconds

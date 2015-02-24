@@ -1,0 +1,12 @@
+
+\ignore{
+\begin{itemize}
+ \item Assume completeness of the type hierarchy
+ \item Automatically identify incompleteness by chance (i.e, livesIn) or on purpose (i.e, politician[x,y])
+	\begin{itemize}
+	 \item Using the type hierarchy: Force always a type atom in the body of the rule
+	 \item Identify blocks of rules with the same succedent and analyze correlations between antecedents and succedent
+	 \item If incompleteness on purpose is rare, just relax!
+	\end{itemize}
+\end{itemize}
+}

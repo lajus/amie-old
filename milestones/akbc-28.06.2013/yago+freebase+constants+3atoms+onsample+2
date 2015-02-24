@@ -1,0 +1,347 @@
+nohup: ignoring input
+Loading files... 
+  Starting sample.tsv
+  Finished sample.tsv, still running: 0
+Loaded 129237 facts in 3.87 s using -210 MB
+Using Support as pruning metric with threshold 30
+Counting on both head variables
+No minimum threshold on standard confidence
+No minimum threshold on PCA confidence
+Constants in the arguments of relations are enabled
+Starting the mining phase... Using 16 threads
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.editor	0.000464263	0.002014572	0.008391608	0.008391608	60	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:film.editor	0.000464263	0.002014572	0.008372872	0.008372872	60	7166	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.editor	0.000332722	0.001443777	0.061959654	0.061959654	43	694	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.crime.lawyer	0.000232132	0.001007286	0.004210526	0.004210526	30	7125	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.crime.lawyer	0.000232132	0.001007286	0.004195804	0.004195804	30	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.crime.lawyer	0.000232132	0.001007286	0.004186436	0.004186436	30	7166	?a
+?a  <ns:type.object.type>  ns:base.bibkn.topic   => ?a  <ns:type.object.type>  ns:education.academic	0.000247607	0.001074438	0.96969697	0.96969697	32	33	?a
+?a  <ns:type.object.type>  ns:base.bibkn.author   => ?a  <ns:type.object.type>  ns:education.academic	0.000247607	0.001074438	1	1	32	32	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:film.editor	0.000286296	0.001242319	0.009775429	0.009775429	37	3785	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.crime.lawyer	0.000232132	0.001007286	0.004195804	0.004195804	30	7150	?a
+?a  <ns:type.object.type>  ns:book.author   => ?a  <ns:type.object.type>  ns:education.academic	0.000379148	0.001645234	0.036296296	0.036296296	49	1350	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.editor	0.000464263	0.002014572	0.008421053	0.008421053	60	7125	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.editor	0.000464263	0.002014572	0.008391608	0.008391608	60	7150	?a
+?a  <ns:people.person.profession>  <Mathematician>   => ?a  <ns:type.object.type>  ns:education.academic	0.00027082	0.001175167	0.897435897	0.897435897	35	39	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:education.academic	0.000549378	0.00238391	0.009907898	0.009907898	71	7166	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:education.academic	0.000549378	0.00238391	0.00993007	0.00993007	71	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:education.academic	0.000549378	0.00238391	0.00993007	0.00993007	71	7150	?a
+?a  <ns:type.object.type>  ns:people.family_member   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000232132	0.001007286	0.12295082	0.12295082	30	244	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000324984	0.0014102	0.024575775	0.024575775	42	1709	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:education.academic	0.000541641	0.002350334	0.009824561	0.009824561	70	7125	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000332722	0.001443777	0.006000558	0.006000558	43	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000332722	0.001443777	0.006013986	0.006013986	43	7150	?a
+?a  <ns:type.object.type>  ns:royalty.noble_person   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000332722	0.001443777	0.13030303	0.13030303	43	330	?a
+?a  <ns:type.object.type>  ns:royalty.noble_person   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000332722	0.001443777	0.13030303	0.13030303	43	330	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000332722	0.001443777	0.006013986	0.006013986	43	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000263083	0.001141591	0.025914634	0.025914634	34	1312	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000263083	0.001141591	0.027530364	0.027530364	34	1235	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000324984	0.0014102	0.011096433	0.011096433	42	3785	?a
+countProjectionBindings var=?e in ?a <ns:type.object.type> ns:film.editor  ?a <ns:common.topic.notable_types> ?d  ?e <rdf:type> ?d   has taken 25120 ms
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.lyricist	0.000239869	0.001040862	0.004335664	0.004335664	31	7150	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.00027082	0.001175167	0.014	0.014516798	35	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000332722	0.001443777	0.006035088	0.006035088	43	7125	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.lyricist	0.000239869	0.001040862	0.004335664	0.004335664	31	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.lyricist	0.000239869	0.001040862	0.004335664	0.004335664	31	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:music.lyricist	0.000239869	0.001040862	0.004325984	0.004325984	31	7166	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:film.cinematographer	0.000448788	0.00194742	0.008093776	0.008093776	58	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.cinematographer	0.000448788	0.00194742	0.008111888	0.008111888	58	7150	?a
+?a  <ns:people.person.profession>  <Cinematographer>   => ?a  <ns:type.object.type>  ns:film.cinematographer	0.000286296	0.001242319	0.770833333	0.770833333	37	48	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.lyricist	0.000232132	0.001007286	0.004210526	0.004210526	30	7125	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.cinematographer	0.000448788	0.00194742	0.008111888	0.008111888	58	7150	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.cinematographer	0.000448788	0.00194742	0.008111888	0.008111888	58	7150	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.cinematographer	0.000448788	0.00194742	0.008140351	0.008140351	58	7125	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:film.cinematographer	0.000247607	0.001074438	0.008454425	0.008454425	32	3785	?a
+?a  <ns:people.person.profession>  <Actor>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000286296	0.001242319	0.041666667	0.041666667	37	888	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000324984	0.0014102	0.062780269	0.062780269	42	669	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00044105	0.001913843	0.007972028	0.007972028	57	7150	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000239869	0.001040862	0.008190225	0.008190225	31	3785	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00034046	0.001477353	0.03562753	0.03562753	44	1235	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000301771	0.001309472	0.043333333	0.043333333	39	900	?a
+?a  <ns:people.person.parents>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000294033	0.001275896	0.075396825	0.075396825	38	504	?a
+Exception in thread "Thread-8" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Demi_Moore> WHERE <Demi_Moore> <ns:type.object.type> ns:people.person  ?e ?p <Demi_Moore>  <Tina_Fey> <isMarriedTo> ?h  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countProjectionBindings(FactDatabase.java:976)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:328)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00044105	0.001913843	0.008	0.008	57	7125	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000317247	0.001376624	0.045707915	0.045707915	41	897	?a
+?a  <ns:type.object.type>  ns:base.popstra.sww_base   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00044105	0.001913843	1	1	57	57	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00044105	0.001913843	0.007972028	0.007972028	57	7150	?a
+?a  <ns:type.object.type>  ns:base.popstra.celebrity   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00044105	0.001913843	0.814285714	0.814285714	57	70	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000247607	0.001074438	0.158415842	0.158415842	32	202	?a
+Exception in thread "Thread-6" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Portia_de_Rossi> WHERE <Portia_de_Rossi> <ns:type.object.type> ns:film.person_or_entity_appearing_in_film  ?e ?p <Portia_de_Rossi>  <Tina_Fey> <ns:people.person.nationality> ?h  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countProjectionBindings(FactDatabase.java:976)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:328)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000247607	0.001074438	0.158415842	0.158415842	32	202	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000448788	0.00194742	0.008093776	0.008093776	58	7166	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000255345	0.001108015	0.161764706	0.161764706	33	204	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000255345	0.001108015	0.161764706	0.161764706	33	204	?a
+Exception in thread "Thread-9" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Wanda_Hendrix> WHERE ?a <ns:type.object.type> ns:base.popstra.topic  <Wanda_Hendrix> <ns:type.object.type> ns:film.actor  <Wanda_Hendrix> ?p "1980-11-17"  ?a <ns:people.person.nationality> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+Exception in thread "Thread-13" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Ami_Dolenz> WHERE ?a <ns:type.object.type> ns:base.popstra.topic  <Ami_Dolenz> <ns:type.object.type> ns:celebrities.celebrity  <Ami_Dolenz> ?p <Demolition_University>  ?a <ns:people.person.place_of_birth> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000448788	0.00194742	0.008093776	0.008093776	58	7166	?a
+?a  <ns:type.object.type>  ns:film.person_or_entity_appearing_in_film   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000263083	0.001141591	0.142857143	0.142857143	34	238	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00034046	0.001477353	0.118598383	0.118598383	44	371	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00034046	0.001477353	0.118598383	0.118598383	44	371	?a
+?a  <ns:type.object.type>  ns:film.actor   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000294033	0.001275896	0.033958892	0.033958892	38	1119	?a
+?a  <ns:type.object.type>  ns:celebrities.celebrity   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000232132	0.001007286	0.810810811	0.810810811	30	37	?a
+?a  <ns:people.person.children>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000239869	0.001040862	0.056776557	0.056776557	31	546	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00034046	0.001477353	0.033536585	0.033536585	44	1312	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000301771	0.001309472	0.05227882	0.05227882	39	746	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000402362	0.001745962	0.018584703	0.018991965	52	2798	?a
+?a  rdf:type  <wordnet_actor_109765278>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000263083	0.001141591	0.080952381	0.082125604	34	420	?a
+?a  <ns:people.person.profession>  <Actor>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000278558	0.001208743	0.040540541	0.040540541	36	888	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000433312	0.001880267	0.007832168	0.007832168	56	7150	?a
+?a  <ns:people.person.sibling_s..people.sibling_relationship.sibling>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000232132	0.001007286	0.075376884	0.075376884	30	398	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000232132	0.001007286	0.007926024	0.007926024	30	3785	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000324984	0.0014102	0.062780269	0.062780269	42	669	?a
+?a  <ns:people.person.parents>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000286296	0.001242319	0.073412698	0.073412698	37	504	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000294033	0.001275896	0.042222222	0.042222222	38	900	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000332722	0.001443777	0.034817814	0.034817814	43	1235	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000317247	0.001376624	0.045707915	0.045707915	41	897	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000247607	0.001074438	10.666666667	0.158415842	32	3	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000433312	0.001880267	0.007859649	0.007859649	56	7125	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000247607	0.001074438	0.158415842	0.158415842	32	202	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000255345	0.001108015	0.161764706	0.161764706	33	204	?a
+?a  <ns:type.object.type>  ns:base.popstra.celebrity   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000433312	0.001880267	0.8	0.8	56	70	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000433312	0.001880267	0.007832168	0.007832168	56	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000433312	0.001880267	0.007832168	0.007832168	56	7150	?a
+?a  <ns:type.object.type>  ns:film.actor   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000286296	0.001242319	0.033065237	0.033065237	37	1119	?a
+?a  <ns:type.object.type>  ns:film.actor   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000286296	0.001242319	0.033065237	0.033065237	37	1119	?a
+?a  <ns:type.object.type>  ns:film.person_or_entity_appearing_in_film   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000263083	0.001141591	0.142857143	0.142857143	34	238	?a
+?a  <ns:type.object.type>  ns:film.person_or_entity_appearing_in_film   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000263083	0.001141591	0.142857143	0.142857143	34	238	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.00044105	0.001913843	0.007954228	0.007954228	57	7166	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.00044105	0.001913843	0.007954228	0.007954228	57	7166	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000255345	0.001108015	0.161764706	0.161764706	33	204	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000332722	0.001443777	0.115902965	0.115902965	43	371	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000332722	0.001443777	0.115902965	0.115902965	43	371	?a
+?a  <ns:type.object.type>  ns:celebrities.celebrity   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000232132	0.001007286	0.810810811	0.810810811	30	37	?a
+?a  <ns:type.object.type>  ns:celebrities.celebrity   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000232132	0.001007286	0.810810811	0.810810811	30	37	?a
+?a  <ns:people.person.children>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000232132	0.001007286	0.054945055	0.054945055	30	546	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000332722	0.001443777	0.03277439	0.03277439	43	1312	?a
+?a  <ns:people.person.sibling_s..people.sibling_relationship.sibling>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000232132	0.001007286	0.075376884	0.075376884	30	398	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000394624	0.001712386	0.018227305	0.018626735	51	2798	?a
+?a  rdf:type  <wordnet_actor_109765278>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000255345	0.001108015	0.078571429	0.079710145	33	420	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000301771	0.001309472	0.05227882	0.05227882	39	746	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000518427	0.002249605	0.009349707	0.009349707	67	7166	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000301771	0.001309472	0.022820363	0.022820363	39	1709	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000301771	0.001309472	0.022820363	0.022820363	39	1709	?a
+Exception in thread "Thread-11" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Claude_Lelouch> WHERE ?a <ns:type.object.type> ns:film.film_story_contributor  <Claude_Lelouch> <ns:type.object.type> ns:film.writer  <Claude_Lelouch> ?p "1970"  ?a rdf:type ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000518427	0.002249605	0.009370629	0.009370629	67	7150	?a
+?a  <ns:type.object.type>  ns:film.writer   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000324984	0.0014102	0.233333333	0.233333333	42	180	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000518427	0.002249605	0.009370629	0.009370629	67	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000518427	0.002249605	0.009370629	0.009370629	67	7150	?a
+?a  <ns:type.object.type>  ns:book.author   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000294033	0.001275896	0.028148148	0.028148148	38	1350	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000309509	0.001343048	0.030487805	0.030487805	40	1312	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000232132	0.001007286	0.042613636	0.042613636	30	704	?a
+?a  <ns:people.person.profession>  <Screenwriter>   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000278558	0.001208743	0.202247191	0.202247191	36	178	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000355935	0.001544505	0.016440315	0.016800584	46	2798	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000410099	0.001779539	0.014002642	0.014002642	53	3785	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.00034046	0.001477353	0.0176	0.018249689	44	2500	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000286296	0.001242319	0.029959514	0.029959514	37	1235	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000518427	0.002249605	0.009403509	0.009403509	67	7125	?a
+Exception in thread "Thread-14" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Green_Clay> WHERE ?a <ns:type.object.type> ns:military.military_person  <Green_Clay> <ns:type.object.type> ns:people.deceased_person  <Green_Clay> ?p <Powhatan_County,_Virginia>  ?a <rdf:type> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+Exception in thread "Thread-7" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Grand_Duchess_Olga_Nikolaevna_of_Russia> WHERE ?a <ns:type.object.type> ns:military.military_person  <Grand_Duchess_Olga_Nikolaevna_of_Russia> <ns:type.object.type> ns:people.person  <Grand_Duchess_Olga_Nikolaevna_of_Russia> ?p <wordnet_saint_110546850>  ?a <rdf:type> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:military.military_person	0.000750559	0.003256892	0.056758338	0.056758338	97	1709	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:military.military_person	0.000974953	0.004230601	0.017622378	0.017622378	126	7150	?a
+?a  <ns:type.object.type>  ns:government.politician   => ?a  <ns:type.object.type>  ns:military.military_person	0.00027082	0.001175167	0.095367847	0.095367847	35	367	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:military.military_person	0.000974953	0.004230601	0.017583031	0.017583031	126	7166	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000363673	0.001578081	0.035823171	0.035823171	47	1312	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:military.military_person	0.000974953	0.004230601	0.017622378	0.017622378	126	7150	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000247607	0.001074438	0.045454545	0.045454545	32	704	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000905313	0.003928416	0.030911493	0.030911493	117	3785	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000704133	0.003055434	0.032523231	0.033235939	91	2798	?a
+?a  rdf:type  <wordnet_alumnus_109786338>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000286296	0.001242319	0.074898785	0.075819672	37	494	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000355935	0.001544505	0.061662198	0.061662198	46	746	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000348197	0.001510929	0.036437247	0.036437247	45	1235	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000425575	0.001846691	0.061111111	0.061111111	55	900	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:military.military_person	0.000974953	0.004230601	0.017684211	0.017684211	126	7125	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000812461	0.003525501	0.042	0.043550394	105	2500	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000386886	0.00167881	0.05574136	0.05574136	50	897	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:music.composer	0.000309509	0.001343048	0.0234055	0.0234055	40	1709	?a
+Exception in thread "Thread-12" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Anna_McGarrigle> WHERE ?a <ns:type.object.type> ns:music.composer  <Anna_McGarrigle> <ns:type.object.type> ns:people.person  <Anna_McGarrigle> ?p ns:music.lyricist  ?a <ns:people.person.spouse_s..people.marriage.spouse> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:music.composer	0.000309509	0.001343048	0.0234055	0.0234055	40	1709	?a
+?a  <ns:type.object.type>  ns:music.artist   => ?a  <ns:type.object.type>  ns:music.composer	0.000541641	0.002350334	0.107033639	0.107033639	70	654	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.composer	0.000688657	0.002988282	0.012447552	0.012447552	89	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:music.composer	0.000696395	0.003021858	0.012559308	0.012559308	90	7166	?a
+?a  <ns:type.object.type>  ns:music.group_member   => ?a  <ns:type.object.type>  ns:music.composer	0.000386886	0.00167881	1.162790698	0.006953136	50	43	?a
+?a  <ns:type.object.type>  ns:music.group_member   => ?a  <ns:type.object.type>  ns:music.composer	0.000386886	0.00167881	0.118764846	0.118764846	50	421	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.composer	0.000688657	0.002988282	0.012447552	0.012447552	89	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.composer	0.000247607	0.001074438	0.024390244	0.024390244	32	1312	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:music.composer	0.000557116	0.002417486	0.019022457	0.019022457	72	3785	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.composer	0.000309509	0.001343048	0.057636888	0.057636888	40	694	?a
+?a  rdf:type  <wordnet_composer_109947232>   => ?a  <ns:type.object.type>  ns:music.composer	0.000386886	0.00167881	0.769230769	0.793650794	50	65	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.composer	0.000239869	0.001040862	0.04155496	0.04155496	31	746	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:music.composer	0.000239869	0.001040862	0.025101215	0.025101215	31	1235	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:music.composer	0.000479739	0.002081724	0.022158685	0.022644266	62	2798	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:music.composer	0.000487476	0.002115301	0.0252	0.026130236	63	2500	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.composer	0.000247607	0.001074438	0.035555556	0.035555556	32	900	?a
+Exception in thread "Thread-15" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Eleanor_Roosevelt> WHERE <Eleanor_Roosevelt> <ns:type.object.type> ns:people.deceased_person  ?e ?p <Eleanor_Roosevelt>  <Shat> <ns:people.person.place_of_birth> ?h  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countProjectionBindings(FactDatabase.java:976)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:328)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+Exception in thread "Thread-3" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Jobyna_Howland> WHERE ?a <ns:type.object.type> ns:base.allthingsnewyork.topic  <Jobyna_Howland> <ns:type.object.type> ns:common.topic  <Jobyna_Howland> ?p <wordnet_actor_109765278>  ?a <ns:people.person.parents> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.composer	0.00068092	0.002954706	0.012350877	0.012350877	88	7125	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000464263	0.002014572	0.008372872	0.008372872	60	7166	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000309509	0.001343048	0.0234055	0.0234055	40	1709	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000456526	0.001980996	0.842857143	0.0082047	59	70	?a
+?a  <ns:type.object.type>  ns:film.actor   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000247607	0.001074438	0.028596962	0.028596962	32	1119	?a
+?a  <ns:type.object.type>  ns:film.actor   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000247607	0.001074438	0.028596962	0.028596962	32	1119	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000456526	0.001980996	0.008251748	0.008251748	59	7150	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000456526	0.001980996	0.008251748	0.008251748	59	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000286296	0.001242319	0.02820122	0.02820122	37	1312	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000294033	0.001275896	0.01003963	0.01003963	38	3785	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.00034046	0.001477353	0.015725518	0.016070124	44	2798	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000278558	0.001208743	0.029149798	0.029149798	36	1235	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000255345	0.001108015	0.0132	0.013687267	33	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000456526	0.001980996	0.008280702	0.008280702	59	7125	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.001516594	0.006580935	0.027351382	0.027351382	196	7166	?a
+?a  <ns:type.object.type>  ns:sports.pro_athlete   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.001516594	0.006580935	0.261333333	0.261333333	196	750	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.001516594	0.006580935	0.027412587	0.027412587	196	7150	?a
+?a  <ns:type.object.type>  ns:sports.pro_athlete   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.001516594	0.006580935	0.261333333	0.261333333	196	750	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.001516594	0.006580935	0.027412587	0.027412587	196	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.001516594	0.006580935	0.027412587	0.027412587	196	7150	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000348197	0.001510929	0.064841499	0.064841499	45	694	?a
+?a  <ns:people.person.gender>  <Female>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000433312	0.001880267	0.043276662	0.043310131	56	1294	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000874363	0.003794111	0.02985469	0.02985469	113	3785	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000294033	0.001275896	0.050938338	0.050938338	38	746	?a
+?a  rdf:type  <wordnet_medalist_110305062>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000549378	0.00238391	0.806818182	0.816091954	71	88	?a
+?a  rdf:type  <wordnet_player_110439851>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000239869	0.001040862	0.072941176	0.073459716	31	425	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000913051	0.003961992	0.042172981	0.043097151	118	2798	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000665444	0.002887553	0.0344	0.035669847	86	2500	?a
+?a  <hasGender>  <female>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000309509	0.001343048	0.063492063	0.06504065	40	630	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.001516594	0.006580935	0.027508772	0.027508772	196	7125	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.crime.topic	0.000332722	0.001443777	0.006000558	0.006000558	43	7166	?a
+Exception in thread "Thread-2" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Danny_Driscoll> WHERE ?a <ns:type.object.type> ns:base.crime.topic  <Danny_Driscoll> <ns:type.object.type> ns:people.person  <Danny_Driscoll> ?p ns:base.crime.executed_person  ?a <ns:people.person.profession> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.crime.topic	0.000332722	0.001443777	0.006000558	0.006000558	43	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.crime.topic	0.000317247	0.001376624	0.005734266	0.005734266	41	7150	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.crime.topic	0.000317247	0.001376624	0.005734266	0.005734266	41	7150	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:base.crime.topic	0.000263083	0.001141591	0.008982827	0.008982827	34	3785	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:base.crime.topic	0.000286296	0.001242319	0.013223731	0.013513514	37	2798	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.crime.topic	0.000317247	0.001376624	0.005754386	0.005754386	41	7125	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.todolists.topic	0.000232132	0.001007286	0.004195804	0.004195804	30	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.todolists.topic	0.000232132	0.001007286	0.004195804	0.004195804	30	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.todolists.topic	0.000232132	0.001007286	0.004186436	0.004186436	30	7166	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.todolists.topic	0.000232132	0.001007286	0.004186436	0.004186436	30	7166	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.todolists.topic	0.000232132	0.001007286	0.004195804	0.004195804	30	7150	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.todolists.topic	0.000232132	0.001007286	0.004210526	0.004210526	30	7125	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000417837	0.001813115	0.007552448	0.007552448	54	7150	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.00027082	0.001175167	0.052316891	0.052316891	35	669	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000294033	0.001275896	0.01003963	0.01003963	38	3785	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000324984	0.0014102	0.034008097	0.034008097	42	1235	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000232132	0.001007286	0.033333333	0.033333333	30	900	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000263083	0.001141591	0.0136	0.014102032	34	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000417837	0.001813115	0.007578947	0.007578947	54	7125	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000417837	0.001813115	0.007552448	0.007552448	54	7150	?a
+Exception in thread "Thread-17" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Eleanor_Roosevelt> WHERE ?a <ns:type.object.type> ns:book.book_subject  <Eleanor_Roosevelt> <ns:type.object.type> ns:people.deceased_person  <Eleanor_Roosevelt> ?p <Anna_Hall_Roosevelt>  ?a <ns:people.person.gender> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000417837	0.001813115	0.007552448	0.007552448	54	7150	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000309509	0.001343048	0.0234055	0.0234055	40	1709	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000595805	0.002585367	0.010745186	0.010745186	77	7166	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000595805	0.002585367	0.010745186	0.010745186	77	7166	?a
+?a  <ns:type.object.type>  ns:book.author   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000232132	0.001007286	0.022222222	0.022222222	30	1350	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000348197	0.001510929	0.03429878	0.03429878	45	1312	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000247607	0.001074438	0.042895442	0.042895442	32	746	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000348197	0.001510929	0.016082916	0.016435354	45	2798	?a
+Exception in thread "Thread-4" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Lana_Turner> WHERE ?a <ns:type.object.type> ns:celebrities.celebrity  <Lana_Turner> <ns:type.object.type> ns:common.topic  <Lana_Turner> ?p ns:base.filmnoir.topic  ?a <rdf:type> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+Exception in thread "Thread-16" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Alicia_Keys> WHERE ?a <ns:type.object.type> ns:celebrities.celebrity  <Alicia_Keys> <ns:type.object.type> ns:people.person  <Alicia_Keys> ?p <wordnet_singer_110599806>  ?a <ns:people.person.place_of_birth> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:celebrities.celebrity	0.000286296	0.001242319	0.005163271	0.005163271	37	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:celebrities.celebrity	0.000286296	0.001242319	0.005174825	0.005174825	37	7150	?a
+?a  <ns:type.object.type>  ns:base.popstra.celebrity   => ?a  <ns:type.object.type>  ns:celebrities.celebrity	0.000247607	0.001074438	0.457142857	0.457142857	32	70	?a
+Exception in thread "Thread-10" java.util.ConcurrentModificationException
+	at java.util.ArrayList$SubList.checkForComodification(ArrayList.java:1129)
+	at java.util.ArrayList$SubList.get(ArrayList.java:953)
+	at amie.data.FactDatabase$Instantiator.instantiate(FactDatabase.java:1307)
+	at amie.data.FactDatabase.countProjectionBindings(FactDatabase.java:976)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:236)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+	Suppressed: java.util.ConcurrentModificationException
+		at java.util.ArrayList$SubList.checkForComodification(ArrayList.java:1129)
+		at java.util.ArrayList$SubList.get(ArrayList.java:953)
+		at amie.data.FactDatabase$Instantiator.close(FactDatabase.java:1316)
+		at amie.data.FactDatabase.countProjectionBindings(FactDatabase.java:978)
+		... 3 more
+Exception in thread "Thread-5" java.lang.RuntimeException: Very weird: SELECT ?a WHERE ?e ?p ?f 
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:638)
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:680)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.calculateMetrics(MiningAssistantHeadVariables.java:491)
+	at amie.mining.assistant.MiningAssistant.testRule(MiningAssistant.java:499)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:256)
+	at java.lang.Thread.run(Thread.java:722)
+Mining done in 1 min, 51 s seconds

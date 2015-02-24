@@ -1,0 +1,331 @@
+=======================================================================================
+[Rule 1] [Pos cover = 34 Rand cover = 0][posonly bayes estimate] [7.38936894907994]
+isPoliticianOf(A,B) :-
+   wasBornIn(A,C), isLocatedIn(C,B).
+
+[Rule 2] [Pos cover = 40 Rand cover = 0]
+isPoliticianOf(A,B) :-
+   diedIn(A,C), isLocatedIn(C,B).
+
+[Rule 15] [Pos cover = 3 Rand cover = 0][posonly bayes estimate] [4.38318934058287]
+isPoliticianOf(A,B) :-
+   isLeaderOf(A,B).
+
+[Rule 50] [Pos cover = 6 Rand cover = 0][posonly bayes estimate] [4.38318934058287]
+isPoliticianOf(A,B) :-
+   livesIn(A,B).
+
+[time taken] [2.53300000000002]
+[total clauses constructed] [4374]
+=======================================================================================
+
+[Rule 1] [Pos cover = 9 Rand cover = 0][posonly bayes estimate] [5.46858243906531]
+diedIn(A,B) :-
+   influences(A,C), diedIn(C,B).
+
+[Rule 3] [Pos cover = 39 Rand cover = 0][posonly bayes estimate] [7.53619829936044]
+diedIn(A,B) :-
+   wasBornIn(A,B).
+
+[Rule 10] [Pos cover = 19 Rand cover = 0][posonly bayes estimate] [6.67494880981092]
+diedIn(A,B) :-
+   hasChild(A,C), diedIn(C,B).
+
+[Rule 15] [Pos cover = 3 Rand cover = 0][posonly bayes estimate] [4.04985600724954]
+diedIn(A,B) :-
+   livesIn(A,C), hasCapital(C,B).
+
+[Rule 64] [Pos cover = 69 Rand cover = 0][posonly bayes estimate] [7.82424582189399]
+diedIn(A,B) :-
+   isMarriedTo(A,C), diedIn(C,B).
+
+[Rule 65] [Pos cover = 19 Rand cover = 0][posonly bayes estimate] [6.07641171865253]
+diedIn(A,B) :-
+   isCitizenOf(A,C), hasCapital(C,B).
+
+[Rule 97] [Pos cover = 3 Rand cover = 0][posonly bayes estimate] [4.04985600724954]
+diedIn(A,B) :-
+   isPoliticianOf(A,C), hasCapital(C,B).
+
+[Rule 152] [Pos cover = 4 Rand cover = 0][posonly bayes estimate] [4.83753807970132]
+diedIn(A,B) :-
+   isLocatedIn(A,B).
+
+[Rule 289] [Pos cover = 3 Rand cover = 0][posonly bayes estimate] [3.64439089914137]
+diedIn(A,B) :-
+   livesIn(A,B).
+
+[time taken] [91.168]
+[total clauses constructed] [50695]
+======================================================================================
+
+[Rule 1] [Pos cover = 64 Rand cover = 0][posonly bayes estimate] [8.0788768019411]
+directed(A,B) :-
+   actedIn(A,B).
+
+[Rule 2] [Pos cover = 168 Rand cover = 0][posonly bayes estimate] [8.87872701321491]
+directed(A,B) :-
+   isMarriedTo(A,C), directed(C,B).
+
+[Rule 9] [Pos cover = 164 Rand cover = 0][posonly bayes estimate] [8.80339355365239]
+directed(A,B) :-
+   created(A,B).
+
+[Rule 35] [Pos cover = 60 Rand cover = 0][posonly bayes estimate] [6.66681000381411]
+directed(A,B) :-
+   produced(A,B).
+
+[time taken] [22.065]
+[total clauses constructed] [153430]
+======================================================================================
+
+[Rule 12] [Pos cover = 5 Rand cover = 0][posonly bayes estimate] [5.16068163101553]
+isLeaderOf(A,B) :-
+   livesIn(A,B).
+
+[Rule 106] [Pos cover = 20 Rand cover = 0][posonly bayes estimate] [6.73778796090576]
+isLeaderOf(A,B) :-
+   isMarriedTo(A,C), isLeaderOf(C,B).
+
+[time taken] [2.67]
+[total clauses constructed] [15766]
+======================================================================================
+
+[Rule 1] [Pos cover = 36 Rand cover = 0][posonly bayes estimate] [8.22873183211774]
+livesIn(A,B) :-
+   isMarriedTo(A,C), livesIn(C,B).
+
+[Rule 2] [Pos cover = 46 Rand cover = 0][posonly bayes estimate] [8.49502686203326]
+livesIn(A,B) :-
+   livesIn(A,C), isLocatedIn(C,B).
+
+[Rule 3] [Pos cover = 16 Rand cover = 0][posonly bayes estimate] [6.59883244082121]
+livesIn(A,B) :-
+   wasBornIn(A,B).
+
+[Rule 8] [Pos cover = 24 Rand cover = 0][posonly bayes estimate] [8.25608810147407]
+livesIn(A,B) :-
+   livesIn(A,C), hasCapital(C,B).
+
+[Rule 20] [Pos cover = 11 Rand cover = 0][posonly bayes estimate] [8.24206516545107]
+livesIn(A,B) :-
+   isCitizenOf(A,B).
+
+[Rule 22] [Pos cover = 5 Rand cover = 0][posonly bayes estimate] [4.38318934058287]
+livesIn(A,B) :-
+   isLeaderOf(A,B).
+
+[Rule 42] [Pos cover = 46 Rand cover = 0]
+livesIn(A,B) :-
+   livesIn(A,C), isLocatedIn(C,B).
+
+[Rule 89] [Pos cover = 12 Rand cover = 0][posonly bayes estimate] [7.64267639241452]
+livesIn(A,B) :-
+   hasChild(A,C), livesIn(C,B).
+
+[Rule 158] [Pos cover = 3 Rand cover = 0] [posonly bayes estimate] [3.64439089914137]
+livesIn(A,B) :-
+   diedIn(A,B).
+
+[time taken] [3015.32]
+[total clauses constructed] [15992]
+======================================================================================
+
+[Rule 8] [Pos cover = 39 Rand cover = 0][posonly bayes estimate] [7.56352331342902]
+wasBornIn(A,B) :-
+   diedIn(A,B).
+
+[Rule 18] [Pos cover = 11 Rand cover = 0][posonly bayes estimate] [5.95382881157547]
+wasBornIn(A,B) :-
+   hasChild(A,C), wasBornIn(C,B).
+
+[Rule 30] [Pos cover = 24 Rand cover = 0][posonly bayes estimate] [6.67494880981092]
+wasBornIn(A,B) :-
+   isCitizenOf(A,C), hasCapital(C,B).
+
+[Rule 154] [Pos cover = 16 Rand cover = 0][posonly bayes estimate] [6.44744390533954]
+wasBornIn(A,B) :-
+   livesIn(A,B).
+
+[Rule 248] [Pos cover = 115 Rand cover = 0][posonly bayes estimate] [8.42913619213124]
+wasBornIn(A,B) :-
+   isMarriedTo(A,C), wasBornIn(C,B).
+
+[Rule 356] [Pos cover = 7 Rand cover = 0][posonly bayes estimate] [4.04985600724954]
+wasBornIn(A,B) :-
+   influences(A,C), wasBornIn(C,B).
+
+[time taken] [23.885]
+[total clauses constructed] [99542]
+======================================================================================
+
+[Rule 2] [Pos cover = 11 Rand cover = 0] [posonly bayes estimate] [6.16732080956162]
+worksAt(A,B) :-
+   graduatedFrom(A,B).
+
+[time taken] [1.333]
+[total clauses constructed] [8796]
+======================================================================================
+hasAcademicAdvisor: no rule learned
+
+[time taken] [8.00299999999999]
+[total clauses constructed] [25687]
+======================================================================================
+playsFor: no rule learned
+
+[time taken] [1.94999999999999]
+[total clauses constructed] [17359]
+======================================================================================
+hasCapital: no rule learned
+
+[time taken] [11.652]
+[total clauses constructed] [91640]
+======================================================================================
+
+[Rule 2] [Pos cover = 53 Rand cover = 0][posonly bayes estimate] [7.86493185854864]
+hasWonPrize(A,B) :-
+   isMarriedTo(A,C), hasWonPrize(C,B).
+
+[Rule 10] [Pos cover = 9 Rand cover = 0][posonly bayes estimate] [5.81513496258431]
+hasWonPrize(A,B) :-
+   influences(A,C), hasWonPrize(C,B).
+
+[Rule 69] [Pos cover = 5 Rand cover = 0][posonly bayes estimate] [4.58753807970132]
+hasWonPrize(A,B) :-
+   hasAcademicAdvisor(A,C), hasWonPrize(C,B).
+
+[time taken] [8.88600000000001]
+[total clauses constructed] [41366]
+======================================================================================
+
+[Rule 5] [Pos cover = 11 Rand cover = 0][posonly bayes estimate] [6.16732080956162]
+graduatedFrom(A,B) :-
+   worksAt(A,B).
+
+[Rule 52] [Pos cover = 2 Rand cover = 0][posonly bayes estimate] [3.14439089914137]
+graduatedFrom(A,B) :-
+   hasChild(A,C), graduatedFrom(C,B).
+
+[Rule 107] [Pos cover = 26 Rand cover = 0][posonly bayes estimate] [6.73778796090576]
+graduatedFrom(A,B) :-
+   isMarriedTo(A,C), graduatedFrom(C,B).
+
+[Rule 114] [Pos cover = 2 Rand cover = 0][posonly bayes estimate] [3.14439089914137]
+graduatedFrom(A,B) :-
+   influences(A,C), graduatedFrom(C,B).
+
+[time taken] [3.91899999999987]
+[total clauses constructed] [5464]
+======================================================================================
+
+[Rule 5] [Pos cover = 91 Rand cover = 0]
+hasOfficialLanguage(A,B) :-
+   dealsWith(A,C), hasOfficialLanguage(C,B).
+
+[Rule 12] [Pos cover = 3 Rand cover = 0]
+hasOfficialLanguage(A,B) :-
+   isLocatedIn(A,C), hasOfficialLanguage(C,B).
+
+[Rule 16] [Pos cover = 52 Rand cover = 0]
+hasOfficialLanguage(A,B) :-
+   hasCapital(A,C), hasOfficialLanguage(C,B).
+
+[time taken] [76.178]
+[total clauses constructed] [27437]
+======================================================================================
+
+[Rule 10] [Pos cover = 156 Rand cover = 0][posonly bayes estimate] [8.90728780582959]
+imports(A,B) :-
+   dealsWith(A,C), imports(C,B).
+
+[Rule 12] [Pos cover = 38 Rand cover = 0][posonly bayes estimate] [4.83753807970132]
+imports(A,B) :-
+   exports(A,B).
+
+[time taken] [36.555]
+[total clauses constructed] [39874]
+======================================================================================
+
+[Rule 17] [Pos cover = 22 Rand cover = 0][posonly bayes estimate] [6.79697599213542]
+hasCurrency(A,B) :-
+   dealsWith(A,C), hasCurrency(C,B).
+
+[time taken] [30.548]
+[total clauses constructed] [26246]
+======================================================================================
+
+[Rule 7] [Pos cover = 8 Rand cover = 0][posonly bayes estimate] [5.46858243906531]
+isInterestedIn(A,B) :-
+   influences(A,C), isInterestedIn(C,B).
+
+[time taken] [3.503]
+[total clauses constructed] [35553]
+======================================================================================
+
+[Rule 13] [Pos cover = 32 Rand cover = 0][posonly bayes estimate] [7.32322962138115]
+isCitizenOf(A,B) :-
+   wasBornIn(A,C), isLocatedIn(C,B).
+
+[Rule 14] [Pos cover = 11 Rand cover = 0][posonly bayes estimate] [6.16732080956162]
+isCitizenOf(A,B) :-
+   livesIn(A,B).
+
+[Rule 20] [Pos cover = 9 Rand cover = 0][posonly bayes estimate] [4.96068163101553]
+isCitizenOf(A,B) :-
+   influences(A,C), isCitizenOf(C,B).
+
+[Rule 42] [Pos cover = 20 Rand cover = 0][posonly bayes estimate] [6.18615036836943]
+isCitizenOf(A,B) :-
+   diedIn(A,C), isLocatedIn(C,B).
+
+[Rule 107] [Pos cover = 2 Rand cover = 0][posonly bayes estimate] [3.14439089914137]
+isCitizenOf(A,B) :-
+   isLocatedIn(A,C), isLocatedIn(C,B).
+
+[Rule 113] [Pos cover = 5 Rand cover = 0][posonly bayes estimate] [4.58753807970132]
+isCitizenOf(A,B) :-
+   hasChild(A,C), isCitizenOf(C,B).
+
+[Rule 115] [Pos cover = 127 Rand cover = 0][posonly bayes estimate] [8.12663377669871]
+isCitizenOf(A,B) :-
+   isCitizenOf(A,C), dealsWith(C,B).
+
+[time taken] [141.657]
+[total clauses constructed] [32439]
+======================================================================================
+hasLanguageCode: no rule learned
+
+[time taken] [0.213999999999999]
+[total clauses constructed] [78]
+======================================================================================
+holdsPoliticalPosition: no rule learned
+
+[time taken] [0.376000000000005]
+[total clauses constructed] [470]
+======================================================================================
+hasMusicalRole: no rule learned
+
+[time taken] [5.053]
+[total clauses constructed] [37564]
+======================================================================================
+
+[Rule 2] [Pos cover = 161 Rand cover = 0][posonly bayes estimate] [8.9818689566002]
+exports(A,B) :-
+   dealsWith(A,C), exports(C,B).
+
+[Rule 17] [Pos cover = 38 Rand cover = 0][posonly bayes estimate] [4.83753807970132]
+exports(A,B) :-
+   imports(A,B).
+
+[time taken] [262.189]
+[total clauses constructed] [84318]
+======================================================================================
+
+[Rule 1] [Pos cover = 424 Rand cover = 0][posonly bayes estimate] [9.99390170211527]
+dealsWith(A,B) :-
+   dealsWith(A,C), dealsWith(C,B).
+
+[time taken] [154.18]
+[total clauses constructed] [25179]
+======================================================================================
+did not finish in 24h: isLocatedIn, produced, participatedIn, hasChild, created, influences, isKnownFor, actedIn

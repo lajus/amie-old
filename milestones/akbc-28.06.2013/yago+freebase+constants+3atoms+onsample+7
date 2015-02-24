@@ -1,0 +1,12 @@
+nohup: ignoring input
+Loading files... 
+  Starting sample.tsv
+  Finished sample.tsv, still running: 0
+Loaded 129237 facts in 1.73 s using -211 MB
+Using Support as pruning metric with threshold 30
+Counting on both head variables
+No minimum threshold on standard confidence
+No minimum threshold on PCA confidence
+Constants in the arguments of relations are enabled
+Starting the mining phase... Using 16 threads
+Mining done in 14.46 s seconds

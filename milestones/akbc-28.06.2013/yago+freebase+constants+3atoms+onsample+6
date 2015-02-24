@@ -1,0 +1,905 @@
+nohup: ignoring input
+Loading files... 
+  Starting sample.tsv
+  Finished sample.tsv, still running: 0
+Loaded 129237 facts in 0.88 s using -211 MB
+Using Support as pruning metric with threshold 30
+Counting on both head variables
+No minimum threshold on standard confidence
+No minimum threshold on PCA confidence
+Constants in the arguments of relations are enabled
+Starting the mining phase... Using 16 threads
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.crime.lawyer	0.000232132	0.001007286	0.004210526	0.004210526	30	7125	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.crime.lawyer	0.000232132	0.001007286	0.004186436	0.004186436	30	7166	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.crime.lawyer	0.000232132	0.001007286	0.004195804	0.004195804	30	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.crime.lawyer	0.000232132	0.001007286	0.004195804	0.004195804	30	7150	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.editor	0.000464263	0.002014572	0.008391608	0.008391608	60	7150	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.editor	0.000332722	0.001443777	0.061959654	0.061959654	43	694	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:film.editor	0.000286296	0.001242319	0.009775429	0.009775429	37	3785	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:film.editor	0.000464263	0.002014572	0.008372872	0.008372872	60	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.editor	0.000464263	0.002014572	0.008391608	0.008391608	60	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.lyricist	0.000239869	0.001040862	0.004335664	0.004335664	31	7150	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.editor	0.000464263	0.002014572	0.008421053	0.008421053	60	7125	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.lyricist	0.000239869	0.001040862	0.004335664	0.004335664	31	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:music.lyricist	0.000239869	0.001040862	0.004325984	0.004325984	31	7166	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000324984	0.0014102	0.024575775	0.024575775	42	1709	?a
+?a  <ns:type.object.type>  ns:people.family_member   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000232132	0.001007286	0.12295082	0.12295082	30	244	?a
+Exception in thread "Thread-12" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Sigismund_III_Vasa> WHERE ?a <ns:type.object.type> ns:royalty.monarch  <Sigismund_III_Vasa> <ns:type.object.type> ns:royalty.noble_person  <Sigismund_III_Vasa> ?p <wordnet_sovereign_110628644>  ?a <ns:people.person.gender> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.lyricist	0.000232132	0.001007286	0.004210526	0.004210526	30	7125	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000332722	0.001443777	0.006013986	0.006013986	43	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000332722	0.001443777	0.006000558	0.006000558	43	7166	?a
+?a  <ns:type.object.type>  ns:royalty.noble_person   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000332722	0.001443777	0.13030303	0.13030303	43	330	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000332722	0.001443777	0.006013986	0.006013986	43	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000263083	0.001141591	0.025914634	0.025914634	34	1312	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000324984	0.0014102	0.011096433	0.011096433	42	3785	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.00027082	0.001175167	0.014	0.014516798	35	2500	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000263083	0.001141591	0.027530364	0.027530364	34	1235	?a
+?a  <ns:type.object.type>  ns:base.bibkn.topic   => ?a  <ns:type.object.type>  ns:education.academic	0.000247607	0.001074438	0.96969697	0.96969697	32	33	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:royalty.monarch	0.000332722	0.001443777	0.006035088	0.006035088	43	7125	?a
+?a  <ns:type.object.type>  ns:book.author   => ?a  <ns:type.object.type>  ns:education.academic	0.000379148	0.001645234	0.036296296	0.036296296	49	1350	?a
+?a  <ns:type.object.type>  ns:base.bibkn.author   => ?a  <ns:type.object.type>  ns:education.academic	0.000247607	0.001074438	1	1	32	32	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:education.academic	0.000549378	0.00238391	0.009907898	0.009907898	71	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:education.academic	0.000549378	0.00238391	0.00993007	0.00993007	71	7150	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:education.academic	0.000549378	0.00238391	0.00993007	0.00993007	71	7150	?a
+?a  <ns:people.person.profession>  <Mathematician>   => ?a  <ns:type.object.type>  ns:education.academic	0.00027082	0.001175167	0.897435897	0.897435897	35	39	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.cinematographer	0.000448788	0.00194742	0.008111888	0.008111888	58	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:film.cinematographer	0.000448788	0.00194742	0.008093776	0.008093776	58	7166	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:education.academic	0.000541641	0.002350334	0.009824561	0.009824561	70	7125	?a
+?a  <ns:people.person.profession>  <Cinematographer>   => ?a  <ns:type.object.type>  ns:film.cinematographer	0.000286296	0.001242319	0.770833333	0.770833333	37	48	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:film.cinematographer	0.000247607	0.001074438	0.008454425	0.008454425	32	3785	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.cinematographer	0.000448788	0.00194742	0.008111888	0.008111888	58	7150	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.cinematographer	0.000448788	0.00194742	0.008140351	0.008140351	58	7125	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.crime.topic	0.000317247	0.001376624	0.005734266	0.005734266	41	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.crime.topic	0.000332722	0.001443777	0.006000558	0.006000558	43	7166	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.crime.topic	0.000317247	0.001376624	0.005734266	0.005734266	41	7150	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:base.crime.topic	0.000286296	0.001242319	0.013223731	0.013513514	37	2798	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:base.crime.topic	0.000263083	0.001141591	0.008982827	0.008982827	34	3785	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.crime.topic	0.000317247	0.001376624	0.005754386	0.005754386	41	7125	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000417837	0.001813115	0.007552448	0.007552448	54	7150	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.00027082	0.001175167	0.052316891	0.052316891	35	669	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000294033	0.001275896	0.01003963	0.01003963	38	3785	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000324984	0.0014102	0.034008097	0.034008097	42	1235	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000232132	0.001007286	0.033333333	0.033333333	30	900	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000263083	0.001141591	0.0136	0.014102032	34	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000417837	0.001813115	0.007578947	0.007578947	54	7125	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000417837	0.001813115	0.007552448	0.007552448	54	7150	?a
+Exception in thread "Thread-4" java.util.ConcurrentModificationException
+	at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:819)
+	at java.util.ArrayList$Itr.next(ArrayList.java:791)
+	at amie.query.Query.<init>(Query.java:193)
+	at amie.query.Query.addEdge(Query.java:557)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:254)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+Exception in thread "Thread-17" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Duke_Cunningham> WHERE ?a <ns:type.object.type> ns:book.book_subject  <Duke_Cunningham> <ns:type.object.type> ns:common.topic  <Duke_Cunningham> ?p <Purple_Heart>  ?a <hasGender> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000309509	0.001343048	0.0234055	0.0234055	40	1709	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000417837	0.001813115	0.007552448	0.007552448	54	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000348197	0.001510929	0.03429878	0.03429878	45	1312	?a
+?a  <ns:type.object.type>  ns:book.author   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000232132	0.001007286	0.022222222	0.022222222	30	1350	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000595805	0.002585367	0.010745186	0.010745186	77	7166	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000247607	0.001074438	0.042895442	0.042895442	32	746	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:book.book_subject	0.000348197	0.001510929	0.016082916	0.016435354	45	2798	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000309509	0.001343048	0.0234055	0.0234055	40	1709	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000309509	0.001343048	0.0234055	0.0234055	40	1709	?a
+?a  <ns:type.object.type>  ns:film.actor   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000247607	0.001074438	0.028596962	0.028596962	32	1119	?a
+?a  <ns:type.object.type>  ns:film.actor   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000247607	0.001074438	0.028596962	0.028596962	32	1119	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000464263	0.002014572	0.008372872	0.008372872	60	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000456526	0.001980996	0.008251748	0.008251748	59	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000464263	0.002014572	0.008372872	0.008372872	60	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000456526	0.001980996	0.008251748	0.008251748	59	7150	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000294033	0.001275896	0.01003963	0.01003963	38	3785	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000286296	0.001242319	0.02820122	0.02820122	37	1312	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000456526	0.001980996	0.008251748	0.008251748	59	7150	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.00034046	0.001477353	0.015725518	0.016070124	44	2798	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000255345	0.001108015	0.0132	0.013687267	33	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000456526	0.001980996	0.008280702	0.008280702	59	7125	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.todolists.topic	0.000232132	0.001007286	0.004195804	0.004195804	30	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.todolists.topic	0.000232132	0.001007286	0.004195804	0.004195804	30	7150	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:base.allthingsnewyork.topic	0.000278558	0.001208743	0.029149798	0.029149798	36	1235	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.todolists.topic	0.000232132	0.001007286	0.004186436	0.004186436	30	7166	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.todolists.topic	0.000232132	0.001007286	0.004186436	0.004186436	30	7166	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.todolists.topic	0.000232132	0.001007286	0.004195804	0.004195804	30	7150	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.todolists.topic	0.000232132	0.001007286	0.004210526	0.004210526	30	7125	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000433312	0.001880267	0.007832168	0.007832168	56	7150	?a
+?a  <ns:people.person.profession>  <Actor>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000278558	0.001208743	0.040540541	0.040540541	36	888	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000232132	0.001007286	0.007926024	0.007926024	30	3785	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000324984	0.0014102	0.062780269	0.062780269	42	669	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000332722	0.001443777	0.034817814	0.034817814	43	1235	?a
+?a  <ns:people.person.parents>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000286296	0.001242319	0.073412698	0.073412698	37	504	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000317247	0.001376624	0.045707915	0.045707915	41	897	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000294033	0.001275896	0.042222222	0.042222222	38	900	?a
+Exception in thread "Thread-10" java.util.ConcurrentModificationException
+	at java.util.ArrayList$SubList.checkForComodification(ArrayList.java:1129)
+	at java.util.ArrayList$SubList.get(ArrayList.java:953)
+	at amie.data.FactDatabase$Instantiator.instantiate(FactDatabase.java:1307)
+	at amie.data.FactDatabase.countProjectionBindings(FactDatabase.java:976)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:236)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+	Suppressed: java.util.ConcurrentModificationException
+		at java.util.ArrayList$SubList.checkForComodification(ArrayList.java:1129)
+		at java.util.ArrayList$SubList.get(ArrayList.java:953)
+		at amie.data.FactDatabase$Instantiator.close(FactDatabase.java:1316)
+		at amie.data.FactDatabase.countProjectionBindings(FactDatabase.java:978)
+		... 3 more
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000433312	0.001880267	0.007859649	0.007859649	56	7125	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000433312	0.001880267	0.007832168	0.007832168	56	7150	?a
+Exception in thread "Thread-8" java.lang.RuntimeException: Very weird: SELECT ?a WHERE ?e ?p ?f 
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:638)
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:680)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.calculateMetrics(MiningAssistantHeadVariables.java:491)
+	at amie.mining.assistant.MiningAssistant.testRule(MiningAssistant.java:499)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:256)
+	at java.lang.Thread.run(Thread.java:722)
+Exception in thread "Thread-7" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Tina_Fey> WHERE ?a <ns:type.object.type> ns:base.popstra.sww_base  <Tina_Fey> <ns:type.object.type> ns:user.narphorium.people.topic  <Tina_Fey> ?p ns:base.summermovies2009.topic  ?a <ns:type.object.type> ?f  ?f differentFrom ns:base.popstra.sww_base  ?f differentFrom ns:user.narphorium.people.topic  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:base.popstra.celebrity   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000433312	0.001880267	0.8	0.8	56	70	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000247607	0.001074438	0.158415842	0.158415842	32	202	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000247607	0.001074438	0.158415842	0.158415842	32	202	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000433312	0.001880267	0.007832168	0.007832168	56	7150	?a
+Exception in thread "Thread-5" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Bruce_Willis> WHERE ?a <ns:type.object.type> ns:base.popstra.sww_base  <Bruce_Willis> <ns:type.object.type> ns:film.person_or_entity_appearing_in_film  <Bruce_Willis> ?p <Tears_of_the_Sun>  ?a <ns:people.person.date_of_birth> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.00044105	0.001913843	0.007954228	0.007954228	57	7166	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.00044105	0.001913843	0.007954228	0.007954228	57	7166	?a
+?a  <ns:type.object.type>  ns:film.actor   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000286296	0.001242319	0.033065237	0.033065237	37	1119	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000255345	0.001108015	0.161764706	0.161764706	33	204	?a
+?a  <ns:type.object.type>  ns:celebrities.celebrity   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000232132	0.001007286	0.810810811	0.810810811	30	37	?a
+?a  <ns:type.object.type>  ns:film.actor   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000286296	0.001242319	0.033065237	0.033065237	37	1119	?a
+?a  <ns:type.object.type>  ns:film.person_or_entity_appearing_in_film   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000263083	0.001141591	0.142857143	0.142857143	34	238	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000332722	0.001443777	0.115902965	0.115902965	43	371	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000332722	0.001443777	0.03277439	0.03277439	43	1312	?a
+?a  <ns:type.object.type>  ns:celebrities.celebrity   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000232132	0.001007286	0.810810811	0.810810811	30	37	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000332722	0.001443777	0.115902965	0.115902965	43	371	?a
+?a  <ns:people.person.children>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000232132	0.001007286	0.054945055	0.054945055	30	546	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000301771	0.001309472	0.05227882	0.05227882	39	746	?a
+?a  <ns:people.person.sibling_s..people.sibling_relationship.sibling>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000232132	0.001007286	0.075376884	0.075376884	30	398	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000394624	0.001712386	0.018227305	0.018626735	51	2798	?a
+?a  rdf:type  <wordnet_actor_109765278>   => ?a  <ns:type.object.type>  ns:base.popstra.sww_base	0.000255345	0.001108015	0.078571429	0.079710145	33	420	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:music.composer	0.000309509	0.001343048	∞	0.0234055	40	0	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:music.composer	0.000309509	0.001343048	0.0234055	0.0234055	40	1709	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.composer	0.000688657	0.002988282	0.012447552	0.012447552	89	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:music.composer	0.000696395	0.003021858	0.012559308	0.012559308	90	7166	?a
+?a  <ns:type.object.type>  ns:music.artist   => ?a  <ns:type.object.type>  ns:music.composer	0.000541641	0.002350334	0.107033639	0.107033639	70	654	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.composer	0.000688657	0.002988282	0.012447552	0.012447552	89	7150	?a
+?a  <ns:type.object.type>  ns:music.group_member   => ?a  <ns:type.object.type>  ns:music.composer	0.000386886	0.00167881	0.118764846	0.118764846	50	421	?a
+?a  <ns:type.object.type>  ns:music.group_member   => ?a  <ns:type.object.type>  ns:music.composer	0.000386886	0.00167881	0.118764846	0.118764846	50	421	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.composer	0.000688657	0.002988282	0.012447552	0.012447552	89	7150	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.composer	0.000309509	0.001343048	0.057636888	0.057636888	40	694	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:music.composer	0.000557116	0.002417486	0.019022457	0.019022457	72	3785	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.composer	0.000247607	0.001074438	0.024390244	0.024390244	32	1312	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.composer	0.000239869	0.001040862	0.04155496	0.04155496	31	746	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:music.composer	0.000479739	0.002081724	0.022158685	0.022644266	62	2798	?a
+?a  rdf:type  <wordnet_composer_109947232>   => ?a  <ns:type.object.type>  ns:music.composer	0.000386886	0.00167881	0.769230769	0.793650794	50	65	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:music.composer	0.000239869	0.001040862	0.025101215	0.025101215	31	1235	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.composer	0.000247607	0.001074438	0.035555556	0.035555556	32	900	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:music.composer	0.000487476	0.002115301	0.0252	0.026130236	63	2500	?a
+?a  <ns:type.object.type>  ns:music.artist   => ?a  <ns:type.object.type>  ns:music.producer	0.000355935	0.001544505	0.070336391	0.070336391	46	654	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.composer	0.00068092	0.002954706	0.012350877	0.012350877	88	7125	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:music.producer	0.00044105	0.001913843	0.007954228	0.007954228	57	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.producer	0.000433312	0.001880267	0.007832168	0.007832168	56	7150	?a
+?a  <ns:type.object.type>  ns:music.group_member   => ?a  <ns:type.object.type>  ns:music.producer	0.000294033	0.001275896	0.090261283	0.090261283	38	421	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.producer	0.000433312	0.001880267	0.007832168	0.007832168	56	7150	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.producer	0.000433312	0.001880267	0.007859649	0.007859649	56	7125	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00044105	0.001913843	0.007972028	0.007972028	57	7150	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.producer	0.000433312	0.001880267	0.007832168	0.007832168	56	7150	?a
+?a  <ns:people.person.profession>  <Actor>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000286296	0.001242319	0.041666667	0.041666667	37	888	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000324984	0.0014102	0.062780269	0.062780269	42	669	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000239869	0.001040862	0.008190225	0.008190225	31	3785	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00034046	0.001477353	0.03562753	0.03562753	44	1235	?a
+?a  <ns:people.person.parents>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000294033	0.001275896	0.075396825	0.075396825	38	504	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00044105	0.001913843	0.008	0.008	57	7125	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000301771	0.001309472	0.043333333	0.043333333	39	900	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000317247	0.001376624	0.045707915	0.045707915	41	897	?a
+Exception in thread "Thread-3" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Tina_Fey> WHERE ?a <ns:type.object.type> ns:base.popstra.topic  <Tina_Fey> <ns:type.object.type> ns:user.narphorium.people.nndb_person  <Tina_Fey> ?p ns:base.summermovies2009.topic  ?a rdf:type ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000255345	0.001108015	0.161764706	0.161764706	33	204	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00044105	0.001913843	0.007972028	0.007972028	57	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00044105	0.001913843	0.007972028	0.007972028	57	7150	?a
+?a  <ns:type.object.type>  ns:base.popstra.celebrity   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00044105	0.001913843	0.814285714	0.814285714	57	70	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000247607	0.001074438	0.158415842	0.158415842	32	202	?a
+Exception in thread "Thread-13" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Tina_Fey> WHERE <Tina_Fey> <ns:type.object.type> ns:film.person_or_entity_appearing_in_film  ?e ?p <Tina_Fey>  <Tina_Fey> <hasGender> ?h  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countProjectionBindings(FactDatabase.java:976)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:328)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000448788	0.00194742	0.008093776	0.008093776	58	7166	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000255345	0.001108015	0.161764706	0.161764706	33	204	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000448788	0.00194742	0.008093776	0.008093776	58	7166	?a
+?a  <ns:type.object.type>  ns:film.actor   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000294033	0.001275896	0.033958892	0.033958892	38	1119	?a
+?a  <ns:type.object.type>  ns:film.person_or_entity_appearing_in_film   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000263083	0.001141591	0.142857143	0.142857143	34	238	?a
+Exception in thread "Thread-11" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Tina_Fey> WHERE ?a <ns:type.object.type> ns:base.popstra.topic  <Tina_Fey> <ns:type.object.type> ns:celebrities.celebrity  <Tina_Fey> ?p ns:base.summermovies2009.topic  ?a <ns:people.person.date_of_birth> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:film.actor   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000294033	0.001275896	0.033958892	0.033958892	38	1119	?a
+?a  <ns:type.object.type>  ns:celebrities.celebrity   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000232132	0.001007286	0.810810811	0.810810811	30	37	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00034046	0.001477353	0.118598383	0.118598383	44	371	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00034046	0.001477353	0.118598383	0.118598383	44	371	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.00034046	0.001477353	0.033536585	0.033536585	44	1312	?a
+?a  <ns:people.person.children>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000239869	0.001040862	0.056776557	0.056776557	31	546	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000301771	0.001309472	0.05227882	0.05227882	39	746	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000402362	0.001745962	0.018584703	0.018991965	52	2798	?a
+?a  rdf:type  <wordnet_actor_109765278>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000263083	0.001141591	0.080952381	0.082125604	34	420	?a
+?a  <ns:people.person.sibling_s..people.sibling_relationship.sibling>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.popstra.topic	0.000232132	0.001007286	0.075376884	0.075376884	30	398	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000301771	0.001309472	0.022820363	0.022820363	39	1709	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000301771	0.001309472	0.022820363	0.022820363	39	1709	?a
+?a  <ns:type.object.type>  ns:book.author   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000294033	0.001275896	0.028148148	0.028148148	38	1350	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000518427	0.002249605	0.009370629	0.009370629	67	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000518427	0.002249605	0.009349707	0.009349707	67	7166	?a
+?a  <ns:type.object.type>  ns:film.writer   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000324984	0.0014102	0.233333333	0.233333333	42	180	?a
+?a  <ns:type.object.type>  ns:film.writer   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000324984	0.0014102	0.233333333	0.233333333	42	180	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000518427	0.002249605	0.009370629	0.009370629	67	7150	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000518427	0.002249605	0.009370629	0.009370629	67	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000309509	0.001343048	0.030487805	0.030487805	40	1312	?a
+?a  <ns:people.person.profession>  <Screenwriter>   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000278558	0.001208743	0.202247191	0.202247191	36	178	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000232132	0.001007286	0.042613636	0.042613636	30	704	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000410099	0.001779539	0.014002642	0.014002642	53	3785	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000355935	0.001544505	0.016440315	0.016800584	46	2798	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000286296	0.001242319	0.029959514	0.029959514	37	1235	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.00034046	0.001477353	0.0176	0.018249689	44	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.film_story_contributor	0.000518427	0.002249605	0.009403509	0.009403509	67	7125	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.001516594	0.006580935	0.027351382	0.027351382	196	7166	?a
+?a  <ns:type.object.type>  ns:sports.pro_athlete   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.001516594	0.006580935	8.909090909	0.027256293	196	22	?a
+?a  <ns:type.object.type>  ns:sports.pro_athlete   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.001516594	0.006580935	0.261333333	0.261333333	196	750	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.001516594	0.006580935	0.027412587	0.027412587	196	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.001516594	0.006580935	0.027412587	0.027412587	196	7150	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.001516594	0.006580935	0.027412587	0.027412587	196	7150	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000348197	0.001510929	0.064841499	0.064841499	45	694	?a
+?a  <ns:people.person.gender>  <Female>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000433312	0.001880267	0.043276662	0.043310131	56	1294	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000874363	0.003794111	0.02985469	0.02985469	113	3785	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000294033	0.001275896	0.050938338	0.050938338	38	746	?a
+?a  rdf:type  <wordnet_medalist_110305062>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000549378	0.00238391	0.806818182	0.816091954	71	88	?a
+?a  rdf:type  <wordnet_player_110439851>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000239869	0.001040862	0.072941176	0.073459716	31	425	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000665444	0.002887553	0.0344	0.035669847	86	2500	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000913051	0.003961992	0.042172981	0.043097151	118	2798	?a
+?a  <hasGender>  <female>   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.000309509	0.001343048	0.063492063	0.06504065	40	630	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:olympics.olympic_athlete	0.001516594	0.006580935	0.027508772	0.027508772	196	7125	?a
+Exception in thread "Thread-15" java.util.ConcurrentModificationException
+	at java.util.ArrayList$SubList$1.checkForComodification(ArrayList.java:1103)
+	at java.util.ArrayList$SubList$1.next(ArrayList.java:1024)
+	at amie.data.EquivalenceChecker2.buildQueryGraph(EquivalenceChecker2.java:218)
+	at amie.data.EquivalenceChecker2.equal(EquivalenceChecker2.java:203)
+	at amie.query.Query.equals(Query.java:620)
+	at java.util.HashMap.removeEntryForKey(HashMap.java:569)
+	at java.util.HashMap.remove(HashMap.java:551)
+	at java.util.LinkedHashMap$LinkedHashIterator.remove(LinkedHashMap.java:383)
+	at amie.mining.AMIE$RDFMinerJob.pollQuery(AMIE.java:226)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:238)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:music.artist   => ?a  <ns:type.object.type>  ns:film.music_contributor	0.000232132	0.001007286	0.04587156	0.04587156	30	654	?a
+?a  <ns:type.object.type>  ns:music.artist   => ?a  <ns:type.object.type>  ns:film.music_contributor	0.000232132	0.001007286	0.04587156	0.04587156	30	654	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:film.music_contributor	0.000448788	0.00194742	0.008093776	0.008093776	58	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.music_contributor	0.00044105	0.001913843	0.007972028	0.007972028	57	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.music_contributor	0.00044105	0.001913843	0.007972028	0.007972028	57	7150	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.music_contributor	0.00044105	0.001913843	0.007972028	0.007972028	57	7150	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.music_contributor	0.000332722	0.001443777	0.061959654	0.061959654	43	694	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:film.music_contributor	0.000363673	0.001578081	0.012417437	0.012417437	47	3785	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:film.music_contributor	0.000247607	0.001074438	0.011436741	0.011687363	32	2798	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:film.music_contributor	0.000247607	0.001074438	0.0128	0.013272501	32	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.music_contributor	0.00044105	0.001913843	0.008	0.008	57	7125	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.bibkn.topic	0.000255345	0.001108015	0.00460508	0.00460508	33	7166	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.bibkn.topic	0.000255345	0.001108015	0.00460508	0.00460508	33	7166	?a
+?a  <ns:type.object.type>  ns:base.bibkn.author   => ?a  <ns:type.object.type>  ns:base.bibkn.topic	0.000247607	0.001074438	1	1	32	32	?a
+?a  <ns:type.object.type>  ns:book.author   => ?a  <ns:type.object.type>  ns:base.bibkn.topic	0.000247607	0.001074438	0.023703704	0.023703704	32	1350	?a
+?a  <ns:type.object.type>  ns:book.author   => ?a  <ns:type.object.type>  ns:base.bibkn.topic	0.000247607	0.001074438	0.023703704	0.023703704	32	1350	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.bibkn.topic	0.000247607	0.001074438	0.004475524	0.004475524	32	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.bibkn.topic	0.000247607	0.001074438	0.004475524	0.004475524	32	7150	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.bibkn.topic	0.000247607	0.001074438	0.004475524	0.004475524	32	7150	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.bibkn.topic	0.000247607	0.001074438	0.004491228	0.004491228	32	7125	?a
+?a  <ns:people.person.profession>  <Mathematician>   => ?a  <ns:type.object.type>  ns:base.bibkn.topic	0.000247607	0.001074438	0.820512821	0.820512821	32	39	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:government.politician	0.001764201	0.007655374	0.133411352	0.133411352	228	1709	?a
+?a  <ns:type.object.type>  ns:royalty.chivalric_order_member   => ?a  <ns:type.object.type>  ns:government.politician	0.000286296	0.001242319	0.44047619	0.44047619	37	84	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:government.politician	0.001764201	0.007655374	0.133411352	0.133411352	228	1709	?a
+?a  <ns:type.object.type>  ns:royalty.chivalric_order_member   => ?a  <ns:type.object.type>  ns:government.politician	0.000286296	0.001242319	0.44047619	0.44047619	37	84	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:government.politician	0.002839744	0.012322466	0.051214066	0.051214066	367	7166	?a
+?a  <ns:type.object.type>  ns:book.author   => ?a  <ns:type.object.type>  ns:government.politician	0.000309509	0.001343048	0.02962963	0.02962963	40	1350	?a
+<Nicholas_II_of_Russia>  <ns:type.object.type>  ns:royalty.noble_person  <ns:m.0cgk9xp>  ?p  ?h   => ?a  <ns:type.object.type>  ns:government.politician	0.000417837	0.001813115	0.163636364	0.163636364	54	330	?a
+Exception in thread "Thread-6" java.util.ConcurrentModificationException
+	at java.util.ArrayList$SubList.checkForComodification(ArrayList.java:1129)
+	at java.util.ArrayList$SubList.get(ArrayList.java:953)
+	at amie.data.FactDatabase$Instantiator.instantiate(FactDatabase.java:1307)
+	at amie.data.FactDatabase.countProjectionBindings(FactDatabase.java:976)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:236)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+	Suppressed: java.util.ConcurrentModificationException
+		at java.util.ArrayList$SubList.checkForComodification(ArrayList.java:1129)
+		at java.util.ArrayList$SubList.get(ArrayList.java:953)
+		at amie.data.FactDatabase$Instantiator.close(FactDatabase.java:1316)
+		at amie.data.FactDatabase.countProjectionBindings(FactDatabase.java:978)
+		... 3 more
+?a  <ns:type.object.type>  ns:royalty.noble_person   => ?a  <ns:type.object.type>  ns:government.politician	0.000417837	0.001813115	0.163636364	0.163636364	54	330	?a
+<Don_Nickles>  <ns:type.object.type>  ns:people.family_member  ?e  ?p  ?f   => ?a  <ns:type.object.type>  ns:government.politician	0.00044105	0.001913843	∞	∞	57	0	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:government.politician	0.002839744	0.012322466	0.051328671	0.051328671	367	7150	?a
+Exception in thread "Thread-16" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Ramsey_Clark> WHERE ?a <ns:type.object.type> ns:government.politician  <Ramsey_Clark> <ns:type.object.type> ns:user.narphorium.people.nndb_person  <Ramsey_Clark> ?p <wordnet_president_110467179>  ?a <ns:people.person.profession> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person   => ?a  <ns:type.object.type>  ns:government.politician	0.000332722	0.001443777	0.212871287	0.212871287	43	202	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:government.politician	0.002839744	0.012322466	0.051328671	0.051328671	367	7150	?a
+?a  <ns:type.object.type>  ns:government.u_s_congressperson   => ?a  <ns:type.object.type>  ns:government.politician	0.000456526	0.001980996	0.967213115	0.967213115	59	61	?a
+?a  <ns:type.object.type>  ns:government.u_s_congressperson   => ?a  <ns:type.object.type>  ns:government.politician	0.000456526	0.001980996	0.967213115	0.967213115	59	61	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:government.politician	0.000332722	0.001443777	0.210784314	0.210784314	43	204	?a
+?a  <ns:type.object.type>  ns:military.military_person   => ?a  <ns:type.object.type>  ns:government.politician	0.00027082	0.001175167	0.277777778	0.277777778	35	126	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:government.politician	0.000332722	0.001443777	0.210784314	0.210784314	43	204	?a
+?a  <ns:type.object.type>  ns:military.military_person   => ?a  <ns:type.object.type>  ns:government.politician	0.00027082	0.001175167	0.277777778	0.277777778	35	126	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:government.politician	0.002839744	0.012322466	0.051328671	0.051328671	367	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:government.politician	0.001276724	0.005540073	0.125762195	0.125762195	165	1312	?a
+?a  <ns:people.person.profession>  <Lawyer>   => ?a  <ns:type.object.type>  ns:government.politician	0.000301771	0.001309472	0.65	0.65	39	60	?a
+?a  <ns:people.person.profession>  <Politician>   => ?a  <ns:type.object.type>  ns:government.politician	0.001191609	0.005170735	0.706422018	0.706422018	154	218	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:government.politician	0.000758297	0.003290468	0.139204545	0.139204545	98	704	?a
+?a  <ns:people.person.children>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:government.politician	0.000487476	0.002115301	0.115384615	0.115384615	63	546	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:government.politician	0.000456526	0.001980996	0.08819133	0.08819133	59	669	?a
+?a  <ns:people.person.gender>  <Female>   => ?a  <ns:type.object.type>  ns:government.politician	0.000255345	0.001108015	0.025502318	0.025522042	33	1294	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:government.politician	0.002522497	0.010945842	0.086129458	0.086129458	326	3785	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:government.politician	0.000735084	0.003189739	0.127345845	0.127345845	95	746	?a
+?a  rdf:type  <wordnet_minister_110320863>   => ?a  <ns:type.object.type>  ns:government.politician	0.000232132	0.001007286	0.652173913	0.652173913	30	46	?a
+?a  rdf:type  <wordnet_president_110467179>   => ?a  <ns:type.object.type>  ns:government.politician	0.000294033	0.001275896	0.678571429	0.678571429	38	56	?a
+?a  rdf:type  <wordnet_politician_110451263>   => ?a  <ns:type.object.type>  ns:government.politician	0.000858887	0.003726958	0.578125	0.581151832	111	192	?a
+?a  rdf:type  <wordnet_sovereign_110628644>   => ?a  <ns:type.object.type>  ns:government.politician	0.000247607	0.001074438	0.143497758	0.14479638	32	223	?a
+?a  rdf:type  <wordnet_alumnus_109786338>   => ?a  <ns:type.object.type>  ns:government.politician	0.000789248	0.003424773	0.206477733	0.209016393	102	494	?a
+?a  rdf:type  <wordnet_officeholder_110371450>   => ?a  <ns:type.object.type>  ns:government.politician	0.000541641	0.002350334	0.95890411	0.95890411	70	73	?a
+?a  rdf:type  <wordnet_state_senator_110650076>   => ?a  <ns:type.object.type>  ns:government.politician	0.000247607	0.001074438	0.96969697	0.96969697	32	33	?a
+?a  rdf:type  <wordnet_lawyer_110249950>   => ?a  <ns:type.object.type>  ns:government.politician	0.000294033	0.001275896	0.527777778	0.550724638	38	72	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:government.politician	0.00200407	0.008696236	0.092566119	0.094594595	259	2798	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:government.politician	0.001261249	0.005472921	0.181111111	0.181111111	163	900	?a
+?a  <ns:people.person.parents>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:government.politician	0.000247607	0.001074438	0.063492063	0.063492063	32	504	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:government.politician	0.001207085	0.005237887	0.126315789	0.126315789	156	1235	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:government.politician	0.002081447	0.009031998	0.1076	0.111571962	269	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:government.politician	0.002839744	0.012322466	0.051508772	0.051508772	367	7125	?a
+?a  <isAffiliatedTo>  <Democratic_Party_(United_States)>   => ?a  <ns:type.object.type>  ns:government.politician	0.000294033	0.001275896	0.716981132	0.716981132	38	53	?a
+?a  <ns:people.person.nationality>  <United_Kingdom_of_Great_Britain_and_Ireland>   => ?a  <ns:type.object.type>  ns:government.politician	0.000255345	0.001108015	0.20754717	0.20754717	33	159	?a
+?a  <ns:people.person.nationality>  <Germany>   => ?a  <ns:type.object.type>  ns:government.politician	0.000239869	0.001040862	0.159793814	0.159793814	31	194	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:government.politician	0.000696395	0.003021858	0.100334448	0.100334448	90	897	?a
+Exception in thread "Thread-9" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Edward_VII> WHERE <Edward_VII> <ns:type.object.type> ns:common.topic  ?e ?p <Edward_VII>  <Tina_Fey> <ns:people.person.sibling_s> ?h  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countProjectionBindings(FactDatabase.java:976)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:328)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:celebrities.celebrity	0.000286296	0.001242319	0.005163271	0.005163271	37	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:celebrities.celebrity	0.000286296	0.001242319	0.005174825	0.005174825	37	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:celebrities.celebrity	0.000286296	0.001242319	0.005174825	0.005174825	37	7150	?a
+?a  <ns:type.object.type>  ns:base.popstra.celebrity   => ?a  <ns:type.object.type>  ns:celebrities.celebrity	0.000247607	0.001074438	0.457142857	0.457142857	32	70	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:celebrities.celebrity	0.000239869	0.001040862	0.083557951	0.083557951	31	371	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:celebrities.celebrity	0.000239869	0.001040862	0.083557951	0.083557951	31	371	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:celebrities.celebrity	0.000286296	0.001242319	0.005174825	0.005174825	37	7150	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:celebrities.celebrity	0.000239869	0.001040862	0.046337818	0.046337818	31	669	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:celebrities.celebrity	0.00027082	0.001175167	0.012508935	0.012783053	35	2798	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:celebrities.celebrity	0.000232132	0.001007286	0.033333333	0.033333333	30	900	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:celebrities.celebrity	0.000286296	0.001242319	0.005192982	0.005192982	37	7125	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.002406432	0.010442199	0.043496503	0.043496503	311	7150	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000557116	0.002417486	0.103746398	0.103746398	72	694	?a
+?a  <ns:people.person.profession>  <Film_producer>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000286296	0.001242319	0.202185792	0.202185792	37	183	?a
+?a  <ns:people.person.profession>  <Actor>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.001570758	0.006815969	0.228603604	0.228603604	203	888	?a
+?a  <ns:people.person.profession>  <Screenwriter>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000332722	0.001443777	0.241573034	0.241573034	43	178	?a
+?a  <ns:people.person.profession>  <Writer>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000379148	0.001645234	0.331081081	0.331081081	49	148	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000812461	0.003525501	0.156950673	0.156950673	105	669	?a
+?a  <ns:people.person.gender>  <Female>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000727346	0.003156163	0.072642968	0.072699149	94	1294	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.00166361	0.007218883	0.05680317	0.05680317	215	3785	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.001570758	0.006815969	0.16437247	0.16437247	203	1235	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.001114232	0.004834973	0.16	0.16	144	900	?a
+?a  <ns:people.person.parents>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000974953	0.004230601	0.25	0.25	126	504	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.001593971	0.006916697	0.0824	0.085441725	206	2500	?a
+?a  <hasGender>  <female>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.00071187	0.003089011	0.146031746	0.149593496	92	630	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.002406432	0.010442199	0.043649123	0.043649123	311	7125	?a
+?a  <ns:people.person.nationality>  <England>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000255345	0.001108015	0.204968944	0.204968944	33	161	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.001268986	0.005506497	0.182831661	0.182831661	164	897	?a
+?a  <ns:type.object.type>  ns:music.artist   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000371411	0.001611658	0.073394495	0.073394495	48	654	?a
+?a  <ns:type.object.type>  ns:music.artist   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000371411	0.001611658	0.073394495	0.073394495	48	654	?a
+?a  <ns:type.object.type>  ns:award.award_nominee   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000773772	0.00335762	0.331125828	0.331125828	100	302	?a
+<Vincent_van_der_Vinne>  <ns:type.object.type>  ns:people.person  <Pavlo_Tychyna>  ?p  ?h   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.002406432	0.010442199	0.043496503	0.043496503	311	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.002406432	0.010442199	0.043496503	0.043496503	311	7150	?a
+<Kurt_Aland>  <ns:type.object.type>  ns:user.narphorium.people.nndb_person  <Victor_Wong>  ?p  ?h   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000688657	0.002988282	0.440594059	0.440594059	89	202	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000688657	0.002988282	0.440594059	0.440594059	89	202	?a
+?a  <ns:type.object.type>  ns:base.popstra.celebrity   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000247607	0.001074438	0.457142857	0.457142857	32	70	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.00068092	0.002954706	0.431372549	0.431372549	88	204	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.00068092	0.002954706	0.431372549	0.431372549	88	204	?a
+?a  <ns:type.object.type>  ns:award.award_winner   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000572591	0.002484639	0.32034632	0.32034632	74	231	?a
+<Herman_J._Mankiewicz>  <ns:type.object.type>  ns:people.deceased_person  <Michael_Blodgett>  ?p  ?h   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.001091019	0.004734244	0.082504389	0.082504389	141	1709	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.001091019	0.004734244	0.082504389	0.082504389	141	1709	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.002406432	0.010442199	0.043399386	0.043399386	311	7166	?a
+?a  <ns:type.object.type>  ns:book.author   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000595805	0.002585367	0.057037037	0.057037037	77	1350	?a
+?a  <ns:type.object.type>  ns:film.producer   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000332722	0.001443777	0.201877934	0.201877934	43	213	?a
+?a  <ns:type.object.type>  ns:film.person_or_entity_appearing_in_film   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000665444	0.002887553	0.361344538	0.361344538	86	238	?a
+?a  <ns:type.object.type>  ns:film.actor   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.001640397	0.007118155	0.18945487	0.18945487	212	1119	?a
+?a  <ns:type.object.type>  ns:film.director   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000286296	0.001242319	0.183168317	0.183168317	37	202	?a
+?a  <ns:type.object.type>  ns:film.writer   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000324984	0.0014102	0.233333333	0.233333333	42	180	?a
+<Terry_Stone>  <ns:type.object.type>  ns:tv.tv_actor  <Robert_Hardy>  ?p  ?h   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.001245773	0.005405768	0.433962264	0.433962264	161	371	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.001245773	0.005405768	0.433962264	0.433962264	161	371	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.00166361	0.007218883	0.163871951	0.163871951	215	1312	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.001106494	0.004801397	0.203125	0.203125	143	704	?a
+?a  <ns:people.person.children>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000967215	0.004197025	0.228937729	0.228937729	125	546	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.001152921	0.005002854	0.199731903	0.199731903	149	746	?a
+?a  rdf:type  <wordnet_writer_110794014>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000379148	0.001645234	0.213043478	0.217777778	49	230	?a
+?a  rdf:type  <wordnet_alumnus_109786338>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000564854	0.002451063	0.147773279	0.149590164	73	494	?a
+?a  rdf:type  <wordnet_actor_109765278>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.001539807	0.006681664	0.473809524	0.480676329	199	420	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.002305841	0.010005708	0.106504646	0.108838568	298	2798	?a
+?a  <ns:people.person.sibling_s..people.sibling_relationship.sibling>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:influence.influence_node	0.000649969	0.002820401	0.211055276	0.211055276	84	398	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.00156302	0.006782393	0.028251748	0.028251748	202	7150	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000502952	0.002182453	0.093659942	0.093659942	65	694	?a
+?a  <ns:people.person.profession>  <Actor>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000804723	0.003491925	0.117117117	0.117117117	104	888	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000704133	0.003055434	0.136023916	0.136023916	91	669	?a
+?a  <ns:people.person.gender>  <Female>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000502952	0.002182453	0.050231839	0.050270688	65	1294	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.001060068	0.00459994	0.036195509	0.036195509	137	3785	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.001276724	0.005540073	0.133603239	0.133603239	165	1235	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.001029117	0.004465635	0.147777778	0.147777778	133	900	?a
+?a  <ns:people.person.parents>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000858887	0.003726958	0.220238095	0.220238095	111	504	?a
+?a  <ns:people.person.employment_history>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000239869	0.001040862	0.159793814	0.159793814	31	194	?a
+?a  <hasGender>  <female>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000502952	0.002182453	0.103174603	0.105691057	65	630	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.001021379	0.004432059	0.0528	0.054749067	132	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.00156302	0.006782393	0.028350877	0.028350877	202	7125	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.001137445	0.004935702	0.163879599	0.163879599	147	897	?a
+?a  <ns:type.object.type>  ns:music.artist   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000379148	0.001645234	0.074923547	0.074923547	49	654	?a
+?a  <ns:type.object.type>  ns:award.award_nominee   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000595805	0.002585367	0.254966887	0.254966887	77	302	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.00156302	0.006782393	0.028251748	0.028251748	202	7150	?a
+?a  <ns:type.object.type>  ns:base.popstra.celebrity   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000317247	0.001376624	0.585714286	0.585714286	41	70	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.001555282	0.006748816	0.985294118	0.985294118	201	204	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.001555282	0.006748816	0.985294118	0.985294118	201	204	?a
+?a  <ns:type.object.type>  ns:award.award_winner   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000533903	0.002316758	0.298701299	0.298701299	69	231	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.00071187	0.003089011	0.053832651	0.053832651	92	1709	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.00156302	0.006782393	0.028188669	0.028188669	202	7166	?a
+?a  <ns:type.object.type>  ns:tv.tv_personality   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000232132	0.001007286	0.434782609	0.434782609	30	69	?a
+?a  <ns:type.object.type>  ns:book.author   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000448788	0.00194742	0.042962963	0.042962963	58	1350	?a
+?a  <ns:type.object.type>  ns:film.producer   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000255345	0.001108015	0.154929577	0.154929577	33	213	?a
+?a  <ns:type.object.type>  ns:film.person_or_entity_appearing_in_film   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000665444	0.002887553	0.361344538	0.361344538	86	238	?a
+?a  <ns:type.object.type>  ns:film.actor   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000944002	0.004096297	0.109025916	0.109025916	122	1119	?a
+?a  <ns:type.object.type>  ns:music.group_member   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000286296	0.001242319	0.087885986	0.087885986	37	421	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000858887	0.003726958	0.299191375	0.299191375	111	371	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.001315413	0.005707954	0.129573171	0.129573171	170	1312	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000928527	0.004029144	0.170454545	0.170454545	120	704	?a
+?a  <ns:people.person.children>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000920789	0.003995568	0.217948718	0.217948718	119	546	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.00095174	0.004129873	0.164879357	0.164879357	123	746	?a
+?a  rdf:type  <wordnet_alumnus_109786338>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.00051069	0.002216029	0.133603239	0.135245902	66	494	?a
+?a  rdf:type  <wordnet_actor_109765278>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.00071187	0.003089011	0.219047619	0.222222222	92	420	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.001485643	0.006446631	0.068620443	0.070124178	192	2798	?a
+?a  <ns:people.person.sibling_s..people.sibling_relationship.sibling>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:user.narphorium.people.nndb_person	0.000564854	0.002451063	0.183417085	0.183417085	73	398	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:people.family_member	0.001888004	0.008192593	0.034125874	0.034125874	244	7150	?a
+?a  <ns:people.person.profession>  <Politician>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000232132	0.001007286	0.137614679	0.137614679	30	218	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000920789	0.003995568	0.177877429	0.177877429	119	669	?a
+?a  <ns:people.person.gender>  <Female>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000665444	0.002887553	0.066460587	0.066511988	86	1294	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:people.family_member	0.00122256	0.00530504	0.041743725	0.041743725	158	3785	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:people.family_member	0.0012922	0.005607226	0.135222672	0.135222672	167	1235	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000433312	0.001880267	0.062222222	0.062222222	56	900	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:people.family_member	0.001005904	0.004364906	0.052	0.053919535	130	2500	?a
+?a  <hasGender>  <female>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000549378	0.00238391	0.112698413	0.115447154	71	630	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:people.family_member	0.001888004	0.008192593	0.034245614	0.034245614	244	7125	?a
+?a  <ns:people.person.nationality>  <Germany>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000247607	0.001074438	0.164948454	0.164948454	32	194	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:people.family_member	0.001679086	0.007286036	0.126974839	0.126974839	217	1709	?a
+?a  <ns:type.object.type>  ns:royalty.chivalric_order_member   => ?a  <ns:type.object.type>  ns:people.family_member	0.000324984	0.0014102	0.5	0.5	42	84	?a
+?a  <ns:type.object.type>  ns:royalty.chivalric_order_member   => ?a  <ns:type.object.type>  ns:people.family_member	0.000324984	0.0014102	0.5	0.5	42	84	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:people.family_member	0.001888004	0.008192593	0.034049679	0.034049679	244	7166	?a
+?a  <ns:type.object.type>  ns:royalty.noble_person   => ?a  <ns:type.object.type>  ns:people.family_member	0.0012922	0.005607226	0.506060606	0.506060606	167	330	?a
+?a  <ns:type.object.type>  ns:royalty.noble_person   => ?a  <ns:type.object.type>  ns:people.family_member	0.0012922	0.005607226	0.506060606	0.506060606	167	330	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:people.family_member	0.001888004	0.008192593	0.034125874	0.034125874	244	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:people.family_member	0.001888004	0.008192593	0.034125874	0.034125874	244	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.family_member	0.001338626	0.005808683	0.131859756	0.131859756	173	1312	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000278558	0.001208743	0.051136364	0.051136364	36	704	?a
+?a  <ns:people.person.children>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000472001	0.002048148	0.111721612	0.111721612	61	546	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000479739	0.002081724	0.08310992	0.08310992	62	746	?a
+?a  rdf:type  <wordnet_prince_110472799>   => ?a  <ns:type.object.type>  ns:people.family_member	0.00027082	0.001175167	0.813953488	0.833333333	35	43	?a
+?a  rdf:type  <wordnet_knight_110238375>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000317247	0.001376624	0.773584906	0.788461538	41	53	?a
+?a  rdf:type  <wordnet_sovereign_110628644>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000974953	0.004230601	0.565022422	0.570135747	126	223	?a
+?a  rdf:type  <wordnet_princess_110474064>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000286296	0.001242319	0.578125	0.578125	37	64	?a
+?a  rdf:type  <wordnet_alumnus_109786338>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000294033	0.001275896	0.076923077	0.077868852	38	494	?a
+?a  rdf:type  <wordnet_duke_110038620>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000239869	0.001040862	0.632653061	0.632653061	31	49	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:people.family_member	0.001276724	0.005540073	0.058970693	0.060262966	165	2798	?a
+?a  <ns:people.person.sibling_s..people.sibling_relationship.sibling>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.family_member	0.000255345	0.001108015	0.082914573	0.082914573	33	398	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:baseball.baseball_player	0.000433312	0.001880267	0.00781468	0.00781468	56	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:baseball.baseball_player	0.000464263	0.002014572	0.008391608	0.008391608	60	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:baseball.baseball_player	0.000433312	0.001880267	0.00781468	0.00781468	56	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:baseball.baseball_player	0.000464263	0.002014572	0.008391608	0.008391608	60	7150	?a
+?a  <ns:type.object.type>  ns:sports.pro_athlete   => ?a  <ns:type.object.type>  ns:baseball.baseball_player	0.000464263	0.002014572	0.08	0.08	60	750	?a
+?a  <ns:type.object.type>  ns:sports.pro_athlete   => ?a  <ns:type.object.type>  ns:baseball.baseball_player	0.000464263	0.002014572	0.08	0.08	60	750	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:baseball.baseball_player	0.000464263	0.002014572	0.008391608	0.008391608	60	7150	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:baseball.baseball_player	0.000417837	0.001813115	0.077809798	0.077809798	54	694	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:baseball.baseball_player	0.000464263	0.002014572	0.015852048	0.015852048	60	3785	?a
+?a  rdf:type  <wordnet_ballplayer_109835506>   => ?a  <ns:type.object.type>  ns:baseball.baseball_player	0.000371411	0.001611658	0.857142857	0.872727273	48	56	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:baseball.baseball_player	0.000294033	0.001275896	0.013581129	0.013878744	38	2798	?a
+?a  rdf:type  <wordnet_player_110439851>   => ?a  <ns:type.object.type>  ns:baseball.baseball_player	0.000363673	0.001578081	0.110588235	0.111374408	47	425	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:baseball.baseball_player	0.000348197	0.001510929	0.018	0.018664455	45	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:baseball.baseball_player	0.000464263	0.002014572	0.008421053	0.008421053	60	7125	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:film.producer	0.00027082	0.001175167	0.020479813	0.020479813	35	1709	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:film.producer	0.00027082	0.001175167	0.020479813	0.020479813	35	1709	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:film.producer	0.001648135	0.007151731	0.029723695	0.029723695	213	7166	?a
+?a  <ns:type.object.type>  ns:film.person_or_entity_appearing_in_film   => ?a  <ns:type.object.type>  ns:film.producer	0.000301771	0.001309472	0.163865546	0.163865546	39	238	?a
+?a  <ns:type.object.type>  ns:film.actor   => ?a  <ns:type.object.type>  ns:film.producer	0.000603542	0.002618944	0.069705094	0.069705094	78	1119	?a
+?a  <ns:type.object.type>  ns:award.award_nominee   => ?a  <ns:type.object.type>  ns:film.producer	0.00051069	0.002216029	0.218543046	0.218543046	66	302	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.producer	0.001648135	0.007151731	0.02979021	0.02979021	213	7150	?a
+?a  <ns:type.object.type>  ns:film.director   => ?a  <ns:type.object.type>  ns:film.producer	0.000572591	0.002484639	0.366336634	0.366336634	74	202	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.producer	0.001648135	0.007151731	0.02979021	0.02979021	213	7150	?a
+?a  <ns:type.object.type>  ns:film.writer   => ?a  <ns:type.object.type>  ns:film.producer	0.000502952	0.002182453	0.361111111	0.361111111	65	180	?a
+?a  <ns:type.object.type>  ns:film.writer   => ?a  <ns:type.object.type>  ns:film.producer	0.000502952	0.002182453	0.361111111	0.361111111	65	180	?a
+Exception in thread "Thread-2" java.lang.UnsupportedOperationException: 3 variables in the projection triple are not yet supported: SELECT <Alicia_Keys> WHERE ?a <ns:type.object.type> ns:film.producer  <Alicia_Keys> <ns:type.object.type> ns:user.narphorium.people.topic  <Alicia_Keys> ?p <wordnet_singer_110599806>  ?a <ns:common.topic.notable_types> ?f  
+	at amie.data.FactDatabase.selectDistinct(FactDatabase.java:669)
+	at amie.data.FactDatabase.countDistinct(FactDatabase.java:599)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getInstantiatedEdges(MiningAssistantHeadVariables.java:343)
+	at amie.mining.assistant.MiningAssistantHeadVariables.getDanglingEdges(MiningAssistantHeadVariables.java:284)
+	at amie.mining.AMIE$RDFMinerJob.run(AMIE.java:250)
+	at java.lang.Thread.run(Thread.java:722)
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:film.producer	0.000255345	0.001108015	0.161764706	0.161764706	33	204	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:film.producer	0.000371411	0.001611658	0.129380054	0.129380054	48	371	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:film.producer	0.000371411	0.001611658	0.129380054	0.129380054	48	371	?a
+?a  <ns:type.object.type>  ns:award.award_winner   => ?a  <ns:type.object.type>  ns:film.producer	0.000348197	0.001510929	0.194805195	0.194805195	45	231	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.producer	0.001648135	0.007151731	0.02979021	0.02979021	213	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.producer	0.000557116	0.002417486	0.054878049	0.054878049	72	1312	?a
+?a  <ns:people.person.profession>  <Film_director>   => ?a  <ns:type.object.type>  ns:film.producer	0.000487476	0.002115301	0.45323741	0.45323741	63	139	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.producer	0.000232132	0.001007286	0.043227666	0.043227666	30	694	?a
+?a  <ns:people.person.profession>  <Film_producer>   => ?a  <ns:type.object.type>  ns:film.producer	0.001114232	0.004834973	0.786885246	0.786885246	144	183	?a
+?a  <ns:people.person.profession>  <Actor>   => ?a  <ns:type.object.type>  ns:film.producer	0.000533903	0.002316758	0.077702703	0.077702703	69	888	?a
+?a  <ns:people.person.profession>  <Screenwriter>   => ?a  <ns:type.object.type>  ns:film.producer	0.000479739	0.002081724	0.348314607	0.348314607	62	178	?a
+?a  <ns:people.person.profession>  <Television_producer>   => ?a  <ns:type.object.type>  ns:film.producer	0.000263083	0.001141591	0.419753086	0.419753086	34	81	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.producer	0.000433312	0.001880267	0.079545455	0.079545455	56	704	?a
+?a  <ns:people.person.children>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.producer	0.000394624	0.001712386	0.093406593	0.093406593	51	546	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.producer	0.000379148	0.001645234	0.073243647	0.073243647	49	669	?a
+?a  <ns:people.person.gender>  <Female>   => ?a  <ns:type.object.type>  ns:film.producer	0.00034046	0.001477353	0.034003091	0.034029389	44	1294	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:film.producer	0.001091019	0.004734244	0.037252312	0.037252312	141	3785	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.producer	0.000371411	0.001611658	0.064343164	0.064343164	48	746	?a
+?a  rdf:type  <wordnet_film_maker_110088390>   => ?a  <ns:type.object.type>  ns:film.producer	0.00027082	0.001175167	0.7	0.714285714	35	50	?a
+?a  rdf:type  <wordnet_actor_109765278>   => ?a  <ns:type.object.type>  ns:film.producer	0.000348197	0.001510929	0.107142857	0.108695652	45	420	?a
+?a  rdf:type  <wordnet_alumnus_109786338>   => ?a  <ns:type.object.type>  ns:film.producer	0.000247607	0.001074438	0.064777328	0.06557377	32	494	?a
+?a  rdf:type  <wordnet_film_director_110088200>   => ?a  <ns:type.object.type>  ns:film.producer	0.000263083	0.001141591	0.557377049	0.596491228	34	61	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:film.producer	0.000742821	0.003223315	0.034310222	0.035062089	96	2798	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.producer	0.000472001	0.002048148	0.067777778	0.067777778	61	900	?a
+?a  <ns:people.person.parents>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.producer	0.000410099	0.001779539	0.10515873	0.10515873	53	504	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:film.producer	0.000557116	0.002417486	0.058299595	0.058299595	72	1235	?a
+?a  <ns:people.person.sibling_s..people.sibling_relationship.sibling>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.producer	0.000286296	0.001242319	0.092964824	0.092964824	37	398	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:film.producer	0.000588067	0.002551791	0.0304	0.03152219	76	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.producer	0.001640397	0.007118155	0.029754386	0.029754386	212	7125	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:film.producer	0.000572591	0.002484639	0.082497213	0.082497213	74	897	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:military.military_person	0.000750559	0.003256892	0.056758338	0.056758338	97	1709	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:military.military_person	0.000750559	0.003256892	0.056758338	0.056758338	97	1709	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:military.military_person	0.000974953	0.004230601	0.017583031	0.017583031	126	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:military.military_person	0.000974953	0.004230601	0.017622378	0.017622378	126	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:military.military_person	0.000974953	0.004230601	0.017622378	0.017622378	126	7150	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:military.military_person	0.000974953	0.004230601	0.017622378	0.017622378	126	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000363673	0.001578081	0.035823171	0.035823171	47	1312	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000247607	0.001074438	0.045454545	0.045454545	32	704	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000905313	0.003928416	0.030911493	0.030911493	117	3785	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000355935	0.001544505	0.061662198	0.061662198	46	746	?a
+?a  rdf:type  <wordnet_alumnus_109786338>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000286296	0.001242319	0.074898785	0.075819672	37	494	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000704133	0.003055434	0.032523231	0.033235939	91	2798	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000348197	0.001510929	0.036437247	0.036437247	45	1235	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000425575	0.001846691	0.061111111	0.061111111	55	900	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000812461	0.003525501	0.042	0.043550394	105	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:military.military_person	0.000974953	0.004230601	0.017684211	0.017684211	126	7125	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:military.military_person	0.000386886	0.00167881	0.05574136	0.05574136	50	897	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.actor	0.008658511	0.037571769	0.156503497	0.156503497	1119	7150	?a
+?a  <ns:people.person.profession>  <Voice_acting>   => ?a  <ns:type.object.type>  ns:film.actor	0.00034046	0.001477353	0.785714286	0.785714286	44	56	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.actor	0.001091019	0.004734244	0.203170029	0.203170029	141	694	?a
+?a  <ns:people.person.profession>  <Film_producer>   => ?a  <ns:type.object.type>  ns:film.actor	0.000549378	0.00238391	0.387978142	0.387978142	71	183	?a
+?a  <ns:people.person.profession>  <Actor>   => ?a  <ns:type.object.type>  ns:film.actor	0.006221129	0.026995266	0.905405405	0.905405405	804	888	?a
+?a  <ns:people.person.profession>  <Screenwriter>   => ?a  <ns:type.object.type>  ns:film.actor	0.000502952	0.002182453	0.365168539	0.365168539	65	178	?a
+?a  <ns:people.person.profession>  <Television_producer>   => ?a  <ns:type.object.type>  ns:film.actor	0.000247607	0.001074438	0.395061728	0.395061728	32	81	?a
+?a  <ns:people.person.profession>  <Film_director>   => ?a  <ns:type.object.type>  ns:film.actor	0.000448788	0.00194742	0.417266187	0.417266187	58	139	?a
+?a  <ns:people.person.profession>  <Writer>   => ?a  <ns:type.object.type>  ns:film.actor	0.000278558	0.001208743	0.243243243	0.243243243	36	148	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.actor	0.001532069	0.006648088	0.295964126	0.295964126	198	669	?a
+?a  <ns:people.person.gender>  <Female>   => ?a  <ns:type.object.type>  ns:film.actor	0.002723678	0.011818823	0.27202473	0.272235112	352	1294	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:film.actor	0.004588469	0.019910687	0.15667107	0.15667107	593	3785	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:film.actor	0.002808793	0.012188161	0.293927126	0.293927126	363	1235	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.actor	0.001446954	0.00627875	0.207777778	0.207777778	187	900	?a
+?a  <ns:people.person.parents>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.actor	0.001740987	0.007554645	0.446428571	0.446428571	225	504	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:film.actor	0.002360005	0.010240741	0.122	0.126503526	305	2500	?a
+?a  <hasGender>  <female>   => ?a  <ns:type.object.type>  ns:film.actor	0.001338626	0.005808683	0.274603175	0.281300813	173	630	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.actor	0.008573396	0.037202431	0.155508772	0.155508772	1108	7125	?a
+?a  <ns:people.person.nationality>  <United_Kingdom_of_Great_Britain_and_Ireland>   => ?a  <ns:type.object.type>  ns:film.actor	0.000332722	0.001443777	0.270440252	0.270440252	43	159	?a
+?a  <ns:people.person.nationality>  <England>   => ?a  <ns:type.object.type>  ns:film.actor	0.000363673	0.001578081	0.291925466	0.291925466	47	161	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:film.actor	0.00244512	0.01061008	0.352285396	0.352285396	316	897	?a
+<ns:m.0jzmnkq>  <ns:type.object.type>  ns:music.artist  <ns:m.0j_kvty>  ?p  ?h   => ?a  <ns:type.object.type>  ns:film.actor	0.000897576	0.003894839	0.177370031	0.177370031	116	654	?a
+?a  <ns:type.object.type>  ns:music.artist   => ?a  <ns:type.object.type>  ns:film.actor	0.000897576	0.003894839	0.177370031	0.177370031	116	654	?a
+?a  <ns:type.object.type>  ns:broadcast.artist   => ?a  <ns:type.object.type>  ns:film.actor	0.000239869	0.001040862	0.645833333	0.645833333	31	48	?a
+?a  <ns:type.object.type>  ns:theater.theater_actor   => ?a  <ns:type.object.type>  ns:film.actor	0.000255345	0.001108015	0.76744186	0.76744186	33	43	?a
+?a  <ns:type.object.type>  ns:theater.theater_actor   => ?a  <ns:type.object.type>  ns:film.actor	0.000255345	0.001108015	0.76744186	0.76744186	33	43	?a
+?a  <ns:type.object.type>  ns:award.award_nominee   => ?a  <ns:type.object.type>  ns:film.actor	0.001098757	0.004767821	0.470198675	0.470198675	142	302	?a
+<Frederik,_Baron_van_Pallandt>  <ns:type.object.type>  ns:people.person  <Paula_Abdul>  ?p  ?h   => ?a  <ns:type.object.type>  ns:film.actor	0.008658511	0.037571769	0.156503497	0.156503497	1119	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.actor	0.008658511	0.037571769	0.156503497	0.156503497	1119	7150	?a
+?a  <ns:type.object.type>  ns:base.popstra.celebrity   => ?a  <ns:type.object.type>  ns:film.actor	0.000379148	0.001645234	0.7	0.7	49	70	?a
+?a  <ns:type.object.type>  ns:internet.social_network_user   => ?a  <ns:type.object.type>  ns:film.actor	0.000294033	0.001275896	0.535211268	0.535211268	38	71	?a
+?a  <ns:type.object.type>  ns:internet.social_network_user   => ?a  <ns:type.object.type>  ns:film.actor	0.000294033	0.001275896	0.535211268	0.535211268	38	71	?a
+<ns:m.0gyykm2>  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:film.actor	0.00095174	0.004129873	0.602941176	0.602941176	123	204	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:film.actor	0.00095174	0.004129873	0.602941176	0.602941176	123	204	?a
+?a  <ns:type.object.type>  ns:award.award_winner   => ?a  <ns:type.object.type>  ns:film.actor	0.000820199	0.003559077	0.458874459	0.458874459	106	231	?a
+<ns:m.09tzn6h>  <ns:type.object.type>  ns:people.deceased_person  <Will_Rogers,_Jr.>  ?p  ?h   => ?a  <ns:type.object.type>  ns:film.actor	0.001547544	0.00671524	0.117027501	0.117027501	200	1709	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:film.actor	0.001547544	0.00671524	0.117027501	0.117027501	200	1709	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:film.actor	0.008658511	0.037571769	0.156154061	0.156154061	1119	7166	?a
+?a  <ns:type.object.type>  ns:tv.tv_personality   => ?a  <ns:type.object.type>  ns:film.actor	0.000348197	0.001510929	0.652173913	0.652173913	45	69	?a
+?a  <ns:type.object.type>  ns:tv.tv_personality   => ?a  <ns:type.object.type>  ns:film.actor	0.000348197	0.001510929	0.652173913	0.652173913	45	69	?a
+?a  <ns:type.object.type>  ns:book.author   => ?a  <ns:type.object.type>  ns:film.actor	0.000448788	0.00194742	0.042962963	0.042962963	58	1350	?a
+<Patrick_Bruel>  <ns:type.object.type>  ns:film.person_or_entity_appearing_in_film  <ns:m.0gbyc05>  ?p  ?h   => ?a  <ns:type.object.type>  ns:film.actor	0.001152921	0.005002854	0.62605042	0.62605042	149	238	?a
+?a  <ns:type.object.type>  ns:film.person_or_entity_appearing_in_film   => ?a  <ns:type.object.type>  ns:film.actor	0.001152921	0.005002854	0.62605042	0.62605042	149	238	?a
+?a  <ns:type.object.type>  ns:film.director   => ?a  <ns:type.object.type>  ns:film.actor	0.000580329	0.002518215	0.371287129	0.371287129	75	202	?a
+?a  <ns:type.object.type>  ns:film.director   => ?a  <ns:type.object.type>  ns:film.actor	0.000580329	0.002518215	0.371287129	0.371287129	75	202	?a
+?a  <ns:type.object.type>  ns:user.alust.default_domain.processed_with_review_queue   => ?a  <ns:type.object.type>  ns:film.actor	0.000425575	0.001846691	0.282051282	0.282051282	55	195	?a
+?a  <ns:type.object.type>  ns:user.alust.default_domain.processed_with_review_queue   => ?a  <ns:type.object.type>  ns:film.actor	0.000425575	0.001846691	0.282051282	0.282051282	55	195	?a
+?a  <ns:type.object.type>  ns:film.writer   => ?a  <ns:type.object.type>  ns:film.actor	0.000495214	0.002148877	0.355555556	0.355555556	64	180	?a
+?a  <ns:type.object.type>  ns:film.writer   => ?a  <ns:type.object.type>  ns:film.actor	0.000495214	0.002148877	0.355555556	0.355555556	64	180	?a
+<Emilio_Estevez>  <ns:type.object.type>  ns:tv.tv_actor  <Jimmy_Carter>  ?p  ?h   => ?a  <ns:type.object.type>  ns:film.actor	0.002390956	0.010375046	0.832884097	0.832884097	309	371	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:film.actor	0.002390956	0.010375046	0.832884097	0.832884097	309	371	?a
+?a  <ns:type.object.type>  ns:music.group_member   => ?a  <ns:type.object.type>  ns:film.actor	0.00061128	0.00265252	0.187648456	0.187648456	79	421	?a
+?a  <ns:type.object.type>  ns:music.group_member   => ?a  <ns:type.object.type>  ns:film.actor	0.00061128	0.00265252	0.187648456	0.187648456	79	421	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.actor	0.002948072	0.012792533	0.290396341	0.290396341	381	1312	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.actor	0.002011808	0.008729812	0.369318182	0.369318182	260	704	?a
+?a  <ns:people.person.children>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.actor	0.001717774	0.007453917	0.406593407	0.406593407	222	546	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.actor	0.001593971	0.006916697	0.27613941	0.27613941	206	746	?a
+?a  rdf:type  <wordnet_singer_110599806>   => ?a  <ns:type.object.type>  ns:film.actor	0.000402362	0.001745962	0.468468468	0.481481481	52	111	?a
+?a  rdf:type  <wordnet_writer_110794014>   => ?a  <ns:type.object.type>  ns:film.actor	0.000247607	0.001074438	0.139130435	0.142222222	32	230	?a
+?a  rdf:type  <wordnet_alumnus_109786338>   => ?a  <ns:type.object.type>  ns:film.actor	0.000657706	0.002853977	0.172064777	0.174180328	85	494	?a
+?a  rdf:type  <wordnet_film_director_110088200>   => ?a  <ns:type.object.type>  ns:film.actor	0.000263083	0.001141591	0.557377049	0.596491228	34	61	?a
+?a  rdf:type  <wordnet_musician_110339966>   => ?a  <ns:type.object.type>  ns:film.actor	0.000332722	0.001443777	0.387387387	0.413461538	43	111	?a
+?a  rdf:type  <wordnet_artist_109812338>   => ?a  <ns:type.object.type>  ns:film.actor	0.000278558	0.001208743	0.297520661	0.313043478	36	121	?a
+?a  rdf:type  <wordnet_actor_109765278>   => ?a  <ns:type.object.type>  ns:film.actor	0.002909384	0.012624652	0.895238095	0.90821256	376	420	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:film.actor	0.003659943	0.015881543	0.169049321	0.172753835	473	2798	?a
+?a  <ns:people.person.sibling_s..people.sibling_relationship.sibling>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:film.actor	0.001152921	0.005002854	0.374371859	0.374371859	149	398	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:theater.theater_actor	0.000332722	0.001443777	0.006013986	0.006013986	43	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:theater.theater_actor	0.000332722	0.001443777	0.006000558	0.006000558	43	7166	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:theater.theater_actor	0.000247607	0.001074438	0.086253369	0.086253369	32	371	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:theater.theater_actor	0.000247607	0.001074438	0.086253369	0.086253369	32	371	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:theater.theater_actor	0.000332722	0.001443777	0.006013986	0.006013986	43	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:theater.theater_actor	0.000255345	0.001108015	0.025152439	0.025152439	33	1312	?a
+?a  <ns:people.person.profession>  <Actor>   => ?a  <ns:type.object.type>  ns:theater.theater_actor	0.000278558	0.001208743	0.040540541	0.040540541	36	888	?a
+?a  rdf:type  <wordnet_actor_109765278>   => ?a  <ns:type.object.type>  ns:theater.theater_actor	0.000286296	0.001242319	0.088095238	0.089371981	37	420	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:theater.theater_actor	0.00027082	0.001175167	0.012508935	0.012783053	35	2798	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:theater.theater_actor	0.000232132	0.001007286	0.024291498	0.024291498	30	1235	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:theater.theater_actor	0.000324984	0.0014102	0.005894737	0.005894737	42	7125	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.ontologies.ontology_instance	0.000239869	0.001040862	0.004335664	0.004335664	31	7150	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.ontologies.ontology_instance	0.000239869	0.001040862	0.004350877	0.004350877	31	7125	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.ontologies.ontology_instance	0.000239869	0.001040862	0.004335664	0.004335664	31	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.ontologies.ontology_instance	0.000239869	0.001040862	0.004335664	0.004335664	31	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.ontologies.ontology_instance	0.000363673	0.001578081	0.00655875	0.00655875	47	7166	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.ontologies.ontology_instance	0.000363673	0.001578081	0.00655875	0.00655875	47	7166	?a
+?a  <ns:type.object.type>  ns:music.artist   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000301771	0.001309472	0.059633028	0.059633028	39	654	?a
+?a  <ns:type.object.type>  ns:music.artist   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000301771	0.001309472	0.059633028	0.059633028	39	654	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000371411	0.001611658	0.006698298	0.006698298	48	7166	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000371411	0.001611658	0.006698298	0.006698298	48	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000363673	0.001578081	0.006573427	0.006573427	47	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000363673	0.001578081	0.006573427	0.006573427	47	7150	?a
+?a  <ns:type.object.type>  ns:music.group_member   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000286296	0.001242319	0.087885986	0.087885986	37	421	?a
+?a  <ns:type.object.type>  ns:music.group_member   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000286296	0.001242319	0.087885986	0.087885986	37	421	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000363673	0.001578081	0.006573427	0.006573427	47	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000232132	0.001007286	0.022865854	0.022865854	30	1312	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000239869	0.001040862	0.044668588	0.044668588	31	694	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000278558	0.001208743	0.009511229	0.009511229	36	3785	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000247607	0.001074438	0.042895442	0.042895442	32	746	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000317247	0.001376624	0.014653324	0.014974434	41	2798	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000263083	0.001141591	0.0136	0.014102032	34	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000355935	0.001544505	0.00645614	0.00645614	46	7125	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:broadcast.artist	0.000239869	0.001040862	0.034559643	0.034559643	31	897	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.schemastaging.person_extra	0.000278558	0.001208743	0.005023723	0.005023723	36	7166	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:base.schemastaging.person_extra	0.000278558	0.001208743	0.005023723	0.005023723	36	7166	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.schemastaging.person_extra	0.000278558	0.001208743	0.005034965	0.005034965	36	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.schemastaging.person_extra	0.000278558	0.001208743	0.005034965	0.005034965	36	7150	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.schemastaging.person_extra	0.000278558	0.001208743	0.005034965	0.005034965	36	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:base.schemastaging.person_extra	0.000232132	0.001007286	0.022865854	0.022865854	30	1312	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:base.schemastaging.person_extra	0.00027082	0.001175167	0.012508935	0.012783053	35	2798	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:base.schemastaging.person_extra	0.000278558	0.001208743	0.005052632	0.005052632	36	7125	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000433312	0.001880267	0.00781468	0.00781468	56	7166	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000433312	0.001880267	0.00781468	0.00781468	56	7166	?a
+?a  <ns:type.object.type>  ns:sports.pro_athlete   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000433312	0.001880267	0.074666667	0.074666667	56	750	?a
+?a  <ns:type.object.type>  ns:sports.pro_athlete   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000433312	0.001880267	0.074666667	0.074666667	56	750	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000433312	0.001880267	0.007832168	0.007832168	56	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000433312	0.001880267	0.007832168	0.007832168	56	7150	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000433312	0.001880267	0.007832168	0.007832168	56	7150	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000286296	0.001242319	0.053314121	0.053314121	37	694	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000379148	0.001645234	0.012945839	0.012945839	49	3785	?a
+?a  rdf:type  <wordnet_football_player_110101634>   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000363673	0.001578081	0.155115512	0.155629139	47	303	?a
+?a  rdf:type  <wordnet_player_110439851>   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000355935	0.001544505	0.108235294	0.109004739	46	425	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000363673	0.001578081	0.016797713	0.017165814	47	2798	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000324984	0.0014102	0.046666667	0.046666667	42	900	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000355935	0.001544505	0.0184	0.01907922	46	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000433312	0.001880267	0.007859649	0.007859649	56	7125	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:american_football.football_player	0.000317247	0.001376624	0.045707915	0.045707915	41	897	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000580329	0.002518215	0.043885313	0.043885313	75	1709	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000649969	0.002820401	0.011722021	0.011722021	84	7166	?a
+?a  <ns:type.object.type>  ns:royalty.noble_person   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000425575	0.001846691	0.166666667	0.166666667	55	330	?a
+?a  <ns:type.object.type>  ns:royalty.noble_person   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000425575	0.001846691	0.166666667	0.166666667	55	330	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000649969	0.002820401	0.011748252	0.011748252	84	7150	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000649969	0.002820401	0.011748252	0.011748252	84	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000472001	0.002048148	0.046493902	0.046493902	61	1312	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000324984	0.0014102	0.062780269	0.062780269	42	669	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000580329	0.002518215	0.019815059	0.019815059	75	3785	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000232132	0.001007286	0.040214477	0.040214477	30	746	?a
+?a  rdf:type  <wordnet_knight_110238375>   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000232132	0.001007286	0.566037736	0.576923077	30	53	?a
+?a  rdf:type  <wordnet_sovereign_110628644>   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000286296	0.001242319	0.165919283	0.167420814	37	223	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000433312	0.001880267	0.020014296	0.020452885	56	2798	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000472001	0.002048148	0.049392713	0.049392713	61	1235	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000417837	0.001813115	0.0216	0.022397345	54	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:royalty.chivalric_order_member	0.000649969	0.002820401	0.011789474	0.011789474	84	7125	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.group_member	0.003257581	0.014135581	0.058881119	0.058881119	421	7150	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000796985	0.003458349	0.148414986	0.148414986	103	694	?a
+?a  <ns:people.person.profession>  <Musician>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000379148	0.001645234	0.816666667	0.816666667	49	60	?a
+?a  <ns:people.person.profession>  <Songwriter>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000232132	0.001007286	0.769230769	0.769230769	30	39	?a
+?a  <ns:people.person.profession>  <Actor>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000394624	0.001712386	0.057432432	0.057432432	51	888	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000417837	0.001813115	0.080717489	0.080717489	54	669	?a
+?a  <ns:people.person.gender>  <Female>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000402362	0.001745962	0.040185471	0.040216551	52	1294	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:music.group_member	0.00149338	0.006480207	0.050990753	0.050990753	193	3785	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000518427	0.002249605	0.054251012	0.054251012	67	1235	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000394624	0.001712386	0.056666667	0.056666667	51	900	?a
+?a  <ns:people.person.parents>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000410099	0.001779539	0.10515873	0.10515873	53	504	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000889838	0.003861263	0.046	0.047698051	115	2500	?a
+?a  <hasGender>  <female>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000294033	0.001275896	0.06031746	0.061788618	38	630	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.group_member	0.003257581	0.014135581	0.059087719	0.059087719	421	7125	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000588067	0.002551791	0.084726867	0.084726867	76	897	?a
+?a  <ns:type.object.type>  ns:music.artist   => ?a  <ns:type.object.type>  ns:music.group_member	0.002692727	0.011684518	0.532110092	0.532110092	348	654	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:music.group_member	0.000386886	0.00167881	0.029256875	0.029256875	50	1709	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:music.group_member	0.000386886	0.00167881	0.029256875	0.029256875	50	1709	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:music.group_member	0.003257581	0.014135581	0.058749651	0.058749651	421	7166	?a
+?a  <ns:type.object.type>  ns:film.person_or_entity_appearing_in_film   => ?a  <ns:type.object.type>  ns:music.group_member	0.000394624	0.001712386	0.214285714	0.214285714	51	238	?a
+?a  <ns:type.object.type>  ns:award.award_nominee   => ?a  <ns:type.object.type>  ns:music.group_member	0.000355935	0.001544505	0.152317881	0.152317881	46	302	?a
+<ns:m.0n74c88>  <ns:type.object.type>  ns:people.person  <Daniel_Barenboim>  ?p  ?h   => ?a  <ns:type.object.type>  ns:music.group_member	0.003257581	0.014135581	0.058881119	0.058881119	421	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.group_member	0.003257581	0.014135581	0.058881119	0.058881119	421	7150	?a
+?a  <ns:type.object.type>  ns:internet.social_network_user   => ?a  <ns:type.object.type>  ns:music.group_member	0.000332722	0.001443777	0.605633803	0.605633803	43	71	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:music.group_member	0.000301771	0.001309472	0.191176471	0.191176471	39	204	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:music.group_member	0.000301771	0.001309472	0.191176471	0.191176471	39	204	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:music.group_member	0.00044105	0.001913843	0.153638814	0.153638814	57	371	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:music.group_member	0.00044105	0.001913843	0.153638814	0.153638814	57	371	?a
+?a  <ns:type.object.type>  ns:award.award_winner   => ?a  <ns:type.object.type>  ns:music.group_member	0.000263083	0.001141591	0.147186147	0.147186147	34	231	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000557116	0.002417486	0.054878049	0.054878049	72	1312	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000379148	0.001645234	0.069602273	0.069602273	49	704	?a
+?a  <hasMusicalRole>  <wordnet_guitar_103467517>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000232132	0.001007286	0.857142857	0.857142857	30	35	?a
+?a  <ns:people.person.children>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000332722	0.001443777	0.078754579	0.078754579	43	546	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000487476	0.002115301	0.084450402	0.084450402	63	746	?a
+?a  rdf:type  <wordnet_singer_110599806>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000495214	0.002148877	0.576576577	0.592592593	64	111	?a
+?a  rdf:type  <wordnet_musician_110339966>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000580329	0.002518215	0.675675676	0.721153846	75	111	?a
+?a  rdf:type  <wordnet_artist_109812338>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000317247	0.001376624	0.338842975	0.356521739	41	121	?a
+?a  rdf:type  <wordnet_actor_109765278>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000286296	0.001242319	0.088095238	0.089371981	37	420	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:music.group_member	0.001137445	0.004935702	0.052537527	0.053688824	147	2798	?a
+?a  <ns:people.person.sibling_s..people.sibling_relationship.sibling>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.group_member	0.000294033	0.001275896	0.095477387	0.095477387	38	398	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:tv.tv_writer	0.000332722	0.001443777	0.006013986	0.006013986	43	7150	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:tv.tv_writer	0.000332722	0.001443777	0.006000558	0.006000558	43	7166	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:tv.tv_writer	0.000332722	0.001443777	0.006013986	0.006013986	43	7150	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:tv.tv_writer	0.000247607	0.001074438	0.008454425	0.008454425	32	3785	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:tv.tv_writer	0.000239869	0.001040862	0.011079342	0.011322133	31	2798	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:tv.tv_writer	0.000332722	0.001443777	0.006035088	0.006035088	43	7125	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:people.measured_person	0.001214822	0.005271464	0.021909015	0.021909015	157	7166	?a
+<Laurent_Robinson>  <ns:type.object.type>  ns:sports.pro_athlete  <Nick_Roach>  ?p  ?h   => ?a  <ns:type.object.type>  ns:people.measured_person	0.001021379	0.004432059	0.176	0.176	132	750	?a
+?a  <ns:type.object.type>  ns:sports.pro_athlete   => ?a  <ns:type.object.type>  ns:people.measured_person	0.001021379	0.004432059	0.176	0.176	132	750	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:people.measured_person	0.001214822	0.005271464	0.021958042	0.021958042	157	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:people.measured_person	0.001214822	0.005271464	0.021958042	0.021958042	157	7150	?a
+?a  <ns:type.object.type>  ns:base.schemastaging.athlete_extra   => ?a  <ns:type.object.type>  ns:people.measured_person	0.000549378	0.00238391	0.97260274	0.97260274	71	73	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:people.measured_person	0.001214822	0.005271464	0.021958042	0.021958042	157	7150	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.000425575	0.001846691	0.041920732	0.041920732	55	1312	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.000858887	0.003726958	0.159942363	0.159942363	111	694	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.00034046	0.001477353	0.0625	0.0625	44	704	?a
+?a  <ns:people.person.children>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.000232132	0.001007286	0.054945055	0.054945055	30	546	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.000410099	0.001779539	0.07922272	0.07922272	53	669	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.001013642	0.004398482	0.034610304	0.034610304	131	3785	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.000348197	0.001510929	0.060321716	0.060321716	45	746	?a
+?a  rdf:type  <wordnet_football_player_110101634>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.000332722	0.001443777	0.141914191	0.142384106	43	303	?a
+?a  rdf:type  <wordnet_player_110439851>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.000750559	0.003256892	0.228235294	0.22985782	97	425	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.001029117	0.004465635	0.047533953	0.048575603	133	2798	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.000394624	0.001712386	0.041295547	0.041295547	51	1235	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.000487476	0.002115301	0.07	0.07	63	900	?a
+?a  <ns:people.person.parents>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.00044105	0.001913843	0.113095238	0.113095238	57	504	?a
+?a  <ns:people.person.sibling_s..people.sibling_relationship.sibling>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.000363673	0.001578081	0.118090452	0.118090452	47	398	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.000874363	0.003794111	0.0452	0.046868519	113	2500	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:people.measured_person	0.001214822	0.005271464	0.022035088	0.022035088	157	7125	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:people.measured_person	0.000502952	0.002182453	0.072463768	0.072463768	65	897	?a
+?a  <rdf:type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.artist	0.005044995	0.021891683	0.091188811	0.091188811	652	7150	?a
+?a  <ns:people.person.profession>  <Singer-songwriter>   => ?a  <ns:type.object.type>  ns:music.artist	0.000239869	0.001040862	0.96875	0.96875	31	32	?a
+?a  <ns:people.person.profession>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.artist	0.001067806	0.004633516	0.198847262	0.198847262	138	694	?a
+?a  <ns:people.person.profession>  <Musician>   => ?a  <ns:type.object.type>  ns:music.artist	0.000371411	0.001611658	0.8	0.8	48	60	?a
+?a  <ns:people.person.profession>  <Songwriter>   => ?a  <ns:type.object.type>  ns:music.artist	0.000294033	0.001275896	0.974358974	0.974358974	38	39	?a
+?a  <ns:people.person.profession>  <Actor>   => ?a  <ns:type.object.type>  ns:music.artist	0.000665444	0.002887553	0.096846847	0.096846847	86	888	?a
+?a  <ns:people.person.sibling_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.artist	0.000673182	0.00292113	0.130044843	0.130044843	87	669	?a
+?a  <ns:people.person.gender>  <Female>   => ?a  <ns:type.object.type>  ns:music.artist	0.000673182	0.00292113	0.067233385	0.067285383	87	1294	?a
+?a  <ns:people.person.gender>  <Male>   => ?a  <ns:type.object.type>  ns:music.artist	0.002058234	0.00893127	0.070277411	0.070277411	266	3785	?a
+?a  <ns:people.person.spouse_s..people.marriage.type_of_union>  <Spouse>   => ?a  <ns:type.object.type>  ns:music.artist	0.000766034	0.003324044	0.080161943	0.080161943	99	1235	?a
+?a  <ns:people.person.education>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.artist	0.000642231	0.002786825	0.092222222	0.092222222	83	900	?a
+?a  <ns:people.person.parents>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.artist	0.000603542	0.002618944	0.154761905	0.154761905	78	504	?a
+?a  <hasGender>  <male>   => ?a  <ns:type.object.type>  ns:music.artist	0.001408265	0.006110869	0.0728	0.07548735	182	2500	?a
+?a  <hasGender>  <female>   => ?a  <ns:type.object.type>  ns:music.artist	0.000549378	0.00238391	0.112698413	0.115447154	71	630	?a
+?a  <ns:common.topic.notable_types>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.artist	0.005037257	0.021858107	0.091368421	0.091368421	651	7125	?a
+?a  <ns:people.person.nationality>  <>   => ?a  <ns:type.object.type>  ns:music.artist	0.000789248	0.003424773	0.113712375	0.113712375	102	897	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:music.artist	0.000688657	0.002988282	0.052077238	0.052077238	89	1709	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:music.artist	0.000688657	0.002988282	0.052077238	0.052077238	89	1709	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:music.artist	0.00506047	0.021958836	0.091264304	0.091264304	654	7166	?a
+?a  <ns:type.object.type>  ns:book.author   => ?a  <ns:type.object.type>  ns:music.artist	0.000247607	0.001074438	0.023703704	0.023703704	32	1350	?a
+?a  <ns:type.object.type>  ns:film.person_or_entity_appearing_in_film   => ?a  <ns:type.object.type>  ns:music.artist	0.000526165	0.002283182	0.285714286	0.285714286	68	238	?a
+?a  <ns:type.object.type>  ns:award.award_nominee   => ?a  <ns:type.object.type>  ns:music.artist	0.000456526	0.001980996	0.195364238	0.195364238	59	302	?a
+<ns:m.0q57sd7>  <ns:type.object.type>  ns:people.person  <Micky_Dolenz>  ?p  ?h   => ?a  <ns:type.object.type>  ns:music.artist	0.005044995	0.021891683	0.091188811	0.091188811	652	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:music.artist	0.005044995	0.021891683	0.091188811	0.091188811	652	7150	?a
+?a  <ns:type.object.type>  ns:internet.social_network_user   => ?a  <ns:type.object.type>  ns:music.artist	0.000402362	0.001745962	0.732394366	0.732394366	52	71	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:music.artist	0.000394624	0.001712386	0.25	0.25	51	204	?a
+?a  <ns:type.object.type>  ns:user.narphorium.people.topic   => ?a  <ns:type.object.type>  ns:music.artist	0.000394624	0.001712386	0.25	0.25	51	204	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:music.artist	0.000657706	0.002853977	0.229110512	0.229110512	85	371	?a
+?a  <ns:type.object.type>  ns:tv.tv_actor   => ?a  <ns:type.object.type>  ns:music.artist	0.000657706	0.002853977	0.229110512	0.229110512	85	371	?a
+?a  <ns:type.object.type>  ns:award.award_winner   => ?a  <ns:type.object.type>  ns:music.artist	0.000355935	0.001544505	0.199134199	0.199134199	46	231	?a
+?a  <ns:people.person.spouse_s>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.artist	0.000812461	0.003525501	0.080030488	0.080030488	105	1312	?a
+?a  <ns:people.person.spouse_s..people.marriage.spouse>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.artist	0.000564854	0.002451063	0.103693182	0.103693182	73	704	?a
+?a  <hasMusicalRole>  <wordnet_guitar_103467517>   => ?a  <ns:type.object.type>  ns:music.artist	0.000263083	0.001141591	0.971428571	0.971428571	34	35	?a
+?a  <ns:people.person.children>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.artist	0.000479739	0.002081724	0.113553114	0.113553114	62	546	?a
+?a  <ns:people.person.places_lived>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.artist	0.00071187	0.003089011	0.123324397	0.123324397	92	746	?a
+?a  rdf:type  <wordnet_singer_110599806>   => ?a  <ns:type.object.type>  ns:music.artist	0.000719608	0.003122587	0.837837838	0.861111111	93	111	?a
+?a  rdf:type  <wordnet_composer_109947232>   => ?a  <ns:type.object.type>  ns:music.artist	0.000317247	0.001376624	0.630769231	0.650793651	41	65	?a
+?a  rdf:type  <wordnet_alumnus_109786338>   => ?a  <ns:type.object.type>  ns:music.artist	0.000317247	0.001376624	0.082995951	0.084016393	41	494	?a
+?a  rdf:type  <wordnet_musician_110339966>   => ?a  <ns:type.object.type>  ns:music.artist	0.00071187	0.003089011	0.828828829	0.884615385	92	111	?a
+?a  rdf:type  <wordnet_artist_109812338>   => ?a  <ns:type.object.type>  ns:music.artist	0.000332722	0.001443777	0.355371901	0.373913043	43	121	?a
+?a  rdf:type  <wordnet_actor_109765278>   => ?a  <ns:type.object.type>  ns:music.artist	0.000541641	0.002350334	0.166666667	0.169082126	70	420	?a
+?a  rdf:type  <wordnet_person_100007846>   => ?a  <ns:type.object.type>  ns:music.artist	0.001826102	0.007923983	0.084345961	0.086194302	236	2798	?a
+?a  <ns:people.person.sibling_s..people.sibling_relationship.sibling>  <ns:m.0>   => ?a  <ns:type.object.type>  ns:music.artist	0.000456526	0.001980996	0.148241206	0.148241206	59	398	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:film.director	0.000294033	0.001275896	0.022235225	0.022235225	38	1709	?a
+?a  <ns:type.object.type>  ns:people.deceased_person   => ?a  <ns:type.object.type>  ns:film.director	0.000294033	0.001275896	0.022235225	0.022235225	38	1709	?a
+?a  <ns:type.object.type>  ns:common.topic   => ?a  <ns:type.object.type>  ns:film.director	0.00156302	0.006782393	0.028188669	0.028188669	202	7166	?a
+?a  <ns:type.object.type>  ns:film.person_or_entity_appearing_in_film   => ?a  <ns:type.object.type>  ns:film.director	0.000232132	0.001007286	0.12605042	0.12605042	30	238	?a
+?a  <ns:type.object.type>  ns:film.person_or_entity_appearing_in_film   => ?a  <ns:type.object.type>  ns:film.director	0.000232132	0.001007286	0.12605042	0.12605042	30	238	?a
+?a  <ns:type.object.type>  ns:award.award_nominee   => ?a  <ns:type.object.type>  ns:film.director	0.000464263	0.002014572	0.198675497	0.198675497	60	302	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.director	0.00156302	0.006782393	0.028251748	0.028251748	202	7150	?a
+?a  <ns:type.object.type>  ns:people.person   => ?a  <ns:type.object.type>  ns:film.director	0.00156302	0.006782393	0.028251748	0.028251748	202	7150	?a
+Exception in thread "Thread-1" java.util.ConcurrentModificationException
+	at java.util.ArrayList$SubList$1.checkForComodification(ArrayList.java:1103)
+	at java.util.ArrayList$SubList$1.next(ArrayList.java:1024)
+	at java.util.AbstractCollection.addAll(AbstractCollection.java:333)
+	at java.util.TreeSet.addAll(TreeSet.java:312)
+	at amie.query.Query.getRuleString(Query.java:642)
+	at amie.query.Query.getRuleFullString(Query.java:667)
+	at amie.mining.AMIE$RuleConsumer.run(AMIE.java:174)
+	at java.lang.Thread.run(Thread.java:722)
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <rdf:type> ?f  ?i <ns:type.object.type> ?b   has taken 34012 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <rdf:type> ?f  ?i <rdf:type> ?b   has taken 21514 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <rdf:type> ?f  ?i <ns:type.object.type> ?f   has taken 57278 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <rdf:type> ?f  ?i <rdf:type> ?f   has taken 57526 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <rdf:type> ?f  ?i <ns:common.topic.notable_types> ?f   has taken 47698 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <ns:people.person.date_of_birth> ?f  ?i <ns:type.object.type> ?b   has taken 21148 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <ns:people.person.gender> ?f  ?i <ns:type.object.type> ?b   has taken 24177 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <ns:common.topic.notable_types> ?f  ?i <ns:type.object.type> ?b   has taken 34776 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <ns:common.topic.notable_types> ?f  ?i <rdf:type> ?b   has taken 21633 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <ns:common.topic.notable_types> ?f  ?i <ns:common.topic.notable_types> ?b   has taken 22211 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <ns:common.topic.notable_types> ?f  ?i <ns:type.object.type> ?f   has taken 58138 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <ns:common.topic.notable_types> ?f  ?i <rdf:type> ?f   has taken 59425 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <ns:common.topic.notable_types> ?f  ?i <ns:common.topic.notable_types> ?f   has taken 58405 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <ns:type.object.type> ?f  ?i <rdf:type> ?b   has taken 20670 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <ns:type.object.type> ?f  ?i <ns:common.topic.notable_types> ?b   has taken 20756 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <ns:type.object.type> ?f  ?i <rdf:type> ?f   has taken 47964 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a <ns:type.object.type> ?f  ?i <ns:common.topic.notable_types> ?f   has taken 47648 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?a rdf:type ?f  ?i <ns:type.object.type> ?b   has taken 22246 ms
+countProjectionBindings var=?j in ?a <ns:type.object.type> ?b  ?e <ns:type.object.type> ?b  ?e <ns:people.person.place_of_birth> ?j   has taken 20167 ms
+countProjectionBindings var=?j in ?a <ns:type.object.type> ?b  ?e <ns:type.object.type> ?b  ?e <ns:people.person.date_of_birth> ?j   has taken 39447 ms
+countProjectionBindings var=?j in ?a <ns:type.object.type> ?b  ?e <ns:type.object.type> ?b  ?e <created> ?j   has taken 23404 ms
+countProjectionBindings var=?j in ?a <ns:type.object.type> ?b  ?e <ns:type.object.type> ?b  ?e <actedIn> ?j   has taken 21637 ms
+countProjectionBindings var=?j in ?a <ns:type.object.type> ?b  ?e <ns:type.object.type> ?b  ?e <hasWebsite> ?j   has taken 22557 ms
+countProjectionBindings var=?j in ?a <ns:type.object.type> ?b  ?e <ns:type.object.type> ?b  ?e <participatedIn> ?j   has taken 21384 ms
+countProjectionBindings var=?j in ?a <ns:type.object.type> ?b  ?e <ns:type.object.type> ?b  ?e <isLocatedIn> ?j   has taken 34820 ms
+countProjectionBindings var=?j in ?a <ns:type.object.type> ?b  ?e <ns:type.object.type> ?b  ?e rdf:type ?j   has taken 31843 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?e <ns:type.object.type> ?b  ?i <ns:people.person.place_of_birth> ?e   has taken 24753 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?e <ns:type.object.type> ?b  ?i <ns:people.person.profession> ?e   has taken 25542 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?e <ns:type.object.type> ?b  ?i <ns:people.person.nationality> ?e   has taken 21491 ms
+countProjectionBindings var=?i in ?a <ns:type.object.type> ?b  ?e <ns:type.object.type> ?b  ?i <isLocatedIn> ?e   has taken 37151 ms
+countProjectionBindings var=?j in ?a <ns:type.object.type> ?b  ?e <rdf:type> ?b  ?e <ns:type.object.type> ?j   has taken 20601 ms
+countProjectionBindings var=?j in ?a <ns:type.object.type> ?b  ?e <ns:common.topic.notable_types> ?b  ?e <ns:type.object.type> ?j   has taken 20844 ms

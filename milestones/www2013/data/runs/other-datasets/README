@@ -1,0 +1,2 @@
+The file yago2_vanillasetting_constants.new.tsv is the output of AMIE using the vanilla settings and allowing constants when the head coverage is normalized using the size of the head 
+relation no matter if any of the head positions is a constants.

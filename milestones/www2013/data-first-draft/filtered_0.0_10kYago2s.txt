@@ -1,0 +1,82 @@
+playsFor(A,B):-entity(A),isAffiliatedTo(A,B)
+bodyFrq: 0.0824 support: 0.0533 confidence: 0.646844660194175
+directed(A,B):-entity(A),created(A,B)
+bodyFrq: 0.0362 support: 0.0033 confidence: 0.0911602209944751
+diedIn(A,B):-entity(A),wasBornIn(A,B)
+bodyFrq: 0.1024 support: 0.0039 confidence: 0.0380859375
+livesIn(A,B):-entity(A),wasBornIn(A,B)
+bodyFrq: 0.1024 support: 0.0013 confidence: 0.0126953125
+livesIn(A,B):-entity(A),isCitizenOf(A,B)
+bodyFrq: 0.0243 support: 0.0014 confidence: 0.0576131687242798
+isMarriedTo(B,A):-entity(A),isMarriedTo(A,B)
+bodyFrq: 0.0112 support: 0.0112 confidence: 1.0
+hasGender(A,C):-entity(A),isAffiliatedTo(A,B),hasGender(B,C)
+bodyFrq: 9.0E-4 support: 9.0E-4 confidence: 1.0
+isCitizenOf(A,C):-entity(A),isAffiliatedTo(A,B),isLocatedIn(B,C)
+bodyFrq: 0.023 support: 0.0011 confidence: 0.0478260869565217
+isLocatedIn(A,C):-entity(A),owns(A,B),isLocatedIn(B,C)
+bodyFrq: 0.0028 support: 9.0E-4 confidence: 0.321428571428571
+hasGender(A,C):-entity(A),created(A,B),hasGender(B,C)
+bodyFrq: 0.0010 support: 7.0E-4 confidence: 0.7
+hasWebsite(C,B):-entity(A),hasWebsite(A,B),isLocatedIn(A,C)
+bodyFrq: 0.0657 support: 7.0E-4 confidence: 0.0106544901065449
+hasGender(C,B):-entity(A),hasGender(A,B),hasChild(A,C)
+bodyFrq: 0.0051 support: 0.0039 confidence: 0.764705882352941
+hasGender(C,B):-entity(A),hasGender(A,B),hasChild(C,A)
+bodyFrq: 0.0064 support: 0.0047 confidence: 0.734375
+hasGender(C,B):-entity(A),hasGender(A,B),influences(A,C)
+bodyFrq: 0.0042 support: 0.0038 confidence: 0.904761904761905
+hasGender(C,B):-entity(A),hasGender(A,B),holdsPoliticalPosition(A,C)
+bodyFrq: 0.0029 support: 0.0014 confidence: 0.482758620689655
+hasGender(C,B):-entity(A),hasGender(A,B),isMarriedTo(A,C)
+bodyFrq: 0.0107 support: 5.0E-4 confidence: 0.0467289719626168
+hasGender(C,B):-entity(A),hasGender(A,B),isMarriedTo(C,A)
+bodyFrq: 0.0107 support: 5.0E-4 confidence: 0.0467289719626168
+hasGender(C,B):-entity(A),hasGender(A,B),hasAcademicAdvisor(A,C)
+bodyFrq: 0.0011 support: 0.0011 confidence: 1.0
+isLocatedIn(A,C):-entity(A),isLocatedIn(A,B),isLocatedIn(B,C)
+bodyFrq: 0.3451 support: 0.1541 confidence: 0.446537235583889
+happenedIn(C,A):-entity(A),isLocatedIn(A,B),participatedIn(B,C)
+bodyFrq: 0.1904 support: 6.0E-4 confidence: 0.00315126050420168
+isLocatedIn(A,C):-entity(A),isLocatedIn(A,B),dealsWith(B,C)
+bodyFrq: 0.0882 support: 5.0E-4 confidence: 0.00566893424036281
+isLocatedIn(A,C):-entity(A),isLocatedIn(A,B),hasCapital(B,C)
+bodyFrq: 0.2038 support: 0.0037 confidence: 0.0181550539744848
+isCitizenOf(A,C):-entity(A),wasBornIn(A,B),isLocatedIn(B,C)
+bodyFrq: 0.1013 support: 0.0058 confidence: 0.0572556762092794
+livesIn(A,C):-entity(A),wasBornIn(A,B),isLocatedIn(B,C)
+bodyFrq: 0.1013 support: 7.0E-4 confidence: 0.0069101678183613
+isLocatedIn(C,B):-entity(A),wasBornIn(A,B),graduatedFrom(A,C)
+bodyFrq: 0.0072 support: 8.0E-4 confidence: 0.111111111111111
+hasCapital(C,B):-entity(A),wasBornIn(A,B),isCitizenOf(A,C)
+bodyFrq: 0.0082 support: 8.0E-4 confidence: 0.0975609756097561
+isCitizenOf(A,C):-entity(A),graduatedFrom(A,B),isLocatedIn(B,C)
+bodyFrq: 0.0155 support: 0.0019 confidence: 0.12258064516129
+livesIn(A,C):-entity(A),graduatedFrom(A,B),isLocatedIn(B,C)
+bodyFrq: 0.0155 support: 7.0E-4 confidence: 0.0451612903225806
+isCitizenOf(A,C):-entity(A),diedIn(A,B),isLocatedIn(B,C)
+bodyFrq: 0.0281 support: 0.0020 confidence: 0.0711743772241993
+hasCapital(C,B):-entity(A),diedIn(A,B),isCitizenOf(A,C)
+bodyFrq: 0.0033 support: 0.0011 confidence: 0.333333333333333
+happenedIn(A,C):-entity(A),happenedIn(A,B),isLocatedIn(B,C)
+bodyFrq: 0.0035 support: 6.0E-4 confidence: 0.171428571428571
+actedIn(C,B):-entity(A),actedIn(A,B),isMarriedTo(A,C)
+bodyFrq: 0.0029 support: 5.0E-4 confidence: 0.172413793103448
+actedIn(C,B):-entity(A),actedIn(A,B),isMarriedTo(C,A)
+bodyFrq: 0.0029 support: 5.0E-4 confidence: 0.172413793103448
+isLocatedIn(C,B):-entity(A),isCitizenOf(A,B),livesIn(A,C)
+bodyFrq: 0.0034 support: 0.0021 confidence: 0.617647058823529
+livesIn(A,C):-entity(A),livesIn(A,B),isLocatedIn(B,C)
+bodyFrq: 0.0148 support: 0.0031 confidence: 0.209459459459459
+livesIn(A,C):-entity(A),livesIn(A,B),hasCapital(B,C)
+bodyFrq: 0.0055 support: 9.0E-4 confidence: 0.163636363636364
+hasChild(C,B):-entity(A),hasChild(A,B),isMarriedTo(A,C)
+bodyFrq: 0.0023 support: 0.0016 confidence: 0.695652173913043
+hasChild(C,B):-entity(A),hasChild(A,B),isMarriedTo(C,A)
+bodyFrq: 0.0023 support: 0.0016 confidence: 0.695652173913043
+hasChild(C,A):-entity(A),hasChild(B,A),isMarriedTo(B,C)
+bodyFrq: 0.0029 support: 0.0014 confidence: 0.482758620689655
+isConnectedTo(A,C):-entity(A),isConnectedTo(A,B),isConnectedTo(B,C)
+bodyFrq: 8.0E-4 support: 7.0E-4 confidence: 0.875
+influences(A,C):-entity(A),influences(A,B),influences(B,C)
+bodyFrq: 0.0021 support: 7.0E-4 confidence: 0.333333333333333

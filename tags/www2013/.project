@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>AMIE</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>include/basics</name>
+			<type>2</type>
+			<location>/local/home/lgalarra/Documents/AssociationRuleMining/basics2s/src/basics</location>
+		</link>
+		<link>
+			<name>include/javatools</name>
+			<type>2</type>
+			<location>/local/home/lgalarra/Documents/AssociationRuleMining/javatools/src/javatools</location>
+		</link>
+	</linkedResources>
+</projectDescription>

@@ -1,0 +1,181 @@
+%\documentclass{sig-alternate}
+\documentclass{www2013-accepted}
+\renewcommand{\baselinestretch}{1}
+\usepackage[
+        pdftex,
+        %letterpaper,
+		a4paper=true
+		bookmarks=true,
+        bookmarksopen=false,
+        bookmarksnumbered=true,
+        colorlinks=true,
+		linkcolor=blue,
+		citecolor=blue,
+		filecolor=blue,
+		urlcolor=blue, 
+        pdfauthor={Luis Galarraga, Christina Teflioudi, Katja Hose, Fabian M. Suchanek},
+        pdftitle={AMIE: Association Rule Mining under Incomplete Evidence in Ontological Knowledge Bases},
+        plainpages=false,
+        pdfpagelabels,
+]{hyperref}
+\usepackage{cite}
+%\usepackage[a4paper=true]{hyperref}
+\usepackage{color}
+\usepackage{tikz}
+\usepackage{graphicx} 
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage[american]{babel}
+
+\newcounter{figureCounter}
+
+% Puts a figure there where you put the command -- not somewhere else
+\newcommand{\ffigure}[4]{% \ffigure{Table | Figure}{label}{title}{imagecommand}
+  \refstepcounter{figureCounter} \label{#2}
+  {\centering
+	  #4\ \nopagebreak[4]\\\nopagebreak[4]
+	  {\bf #1 \ref{#2}: #3}\ \\[0.3cm]
+  }
+}
+\makeatletter
+%\def\@copyrightspace{\relax}
+\def\@maketitle{\newpage
+ \null
+ \setbox\@acmtitlebox\vbox{%
+\baselineskip 20pt
+\vskip 2em                   % Vertical space above title.
+   \begin{center}
+    {\ttlfnt \@title\par}       % Title set in 18pt Helvetica (Arial) bold size.
+    \vskip 1.5em                % Vertical space after title.
+%This should be the subtitle.
+{\subttlfnt \the\subtitletext\par}\vskip 1.25em%\fi
+    {\baselineskip 16pt\aufnt   % each author set in \12 pt Arial, in a
+     \lineskip .5em             % tabular environment
+     \begin{tabular}[t]{c}\@author
+     \end{tabular}\par}
+    \vskip 1.5em               % Vertical space after author.
+   \end{center}}
+ \dimen0=\ht\@acmtitlebox
+% \advance\dimen0 by -12.75pc\relax % comment by Marco Daniel
+ \unvbox\@acmtitlebox
+ \ifdim\dimen0<0.0pt\relax\vskip-\dimen0\fi}
+\makeatother
+
+\renewcommand{\paragraph}[1]{\noindent\textbf{#1.}}
+
+% \comment{Person}{text}
+\newcommand{\comment}[2]{{\color{red}{#1: #2}}}
+
+\newcommand{\ignore}[1]{}
+
+\newcommand{\indented}[1]{
+\begin{tabbing}
+hallo\=\+\kill
+#1
+\end{tabbing}
+}
+
+\newcommand{\details}[1]{{\color{green}\{Details:}#1{\color{green}\}}}
+
+\begin{document}
+
+\conferenceinfo{WWW}{'13 Rio de Janeiro, Brazil}
+
+\title{AMIE: Association Rule Mining under Incomplete Evidence\\in Ontological Knowledge Bases\vspace{-0.5cm}}
+
+
+\numberofauthors{1} 
+\author{
+% 1st. author
+\alignauthor
+Luis Gal\'arraga$^1$, Christina Teflioudi$^1$, Katja Hose$^2$, Fabian M. Suchanek$^1$ \\
+       \affaddr{$^1$Max-Planck Institute for Informatics, Saarbr\"ucken, Germany}\\
+       \affaddr{$^2$Aalborg University, Aalborg, Denmark}\\
+       \email{$^1$\{lgalarra, chteflio, suchanek\}@mpi-inf.mpg.de, $^2$\{khose\}@cs.aau.dk}\\
+       \email{}
+% 2nd. author
+%\alignauthor
+%Christina Teflioudi \\
+%       \affaddr{Max-Planck Institute for Informatics}\\
+%       \affaddr{Saarbr\"ucken, Germany}\\
+%       \email{chteflio@mpi-inf.mpg.de}
+%\and  % use '\and' if you need 'another row' of author names
+% 3rd. author
+%\alignauthor 
+%Katja Hose \\
+%       \affaddr{Max-Planck Institute for Informatics}\\
+%       \affaddr{Saarbr\"ucken, Germany}\\
+%       \email{khose@mpi-inf.mpg.de}
+% 4th. author
+%\alignauthor 
+%Fabian M. Suchanek \\
+%       \affaddr{Max-Planck Institute for Informatics}\\
+%       \affaddr{Saarbr\"ucken, Germany}\\
+%       \email{suchanek@mpi-inf.mpg.de}
+}
+
+%\date{30 July 1999}
+
+
+\maketitle
+\begin{abstract}
+Recent advances in information extraction have led to huge knowledge bases (KBs), which capture knowledge in a ma\-chine-readable format. 
+Inductive Logic Programming (ILP) can be used to mine logical rules from the KB.
+These rules can help deduce and add missing knowledge to the KB.
+While ILP is a mature field, mining logical rules from KBs is different in two aspects: First, current rule mining systems are easily overwhelmed by the amount of data (state-of-the art systems cannot even run on today's KBs). Second, ILP usually requires counterexamples. KBs, however, implement the open world assumption (OWA), meaning that absent data cannot be used as counterexamples. 
+In this paper, we develop a rule mining model that is explicitly tailored to support the OWA scenario. It is inspired by association rule mining and introduces a novel measure for confidence.
+Our extensive experiments show that our approach outperforms state-of-the-art approaches in terms of precision and coverage.
+Furthermore, our system, AMIE, mines rules orders of magnitude faster than state-of-the-art approaches. 
+\end{abstract}
+
+\category{H2.8}{Information Systems}{Database Applications}
+
+\terms{Algorithms}
+
+\keywords{Rule Mining, Inductive Logic Programming, ILP}
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+\section{Introduction}
+\label{sec:introduction}
+\input{introduction}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+\section{Related Work}
+\label{sec:relatedWork}
+\input{relatedwork}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+\section{Preliminaries}
+\label{sec:preliminaries}
+\input{preliminaries}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+\section{Mining Model}
+\label{sec:model}
+\input{model}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+\section{AMIE}
+\label{sec:alg}
+\input{algorithm}
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+\section{Experiments}
+\label{sec:experiments}
+\input{experiments}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+\section{Conclusion}
+\label{sec:conclusion}
+\input{conclusion}
+
+\bibliographystyle{abbrv}
+\small
+\bibliography{references}  
+
+\end{document}

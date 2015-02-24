@@ -1,0 +1,386 @@
+<P._Rajagopalachari>	<holdsPoliticalPosition>	<Dewan>	False	Also a president of some council
+<Jan_Brewer>	<holdsPoliticalPosition>	<Secretary_of_State_of_Arizona>	False
+<James_R._Clapper>	<holdsPoliticalPosition>	<Director_of_National_Intelligence>	false	One missing
+<James_R._Clapper>	<holdsPoliticalPosition>	<Director_of_the_Defense_Intelligence_Agency>
+<James_R._Clapper>	<holdsPoliticalPosition>	<Under_Secretary_of_Defense_for_Intelligence>
+<Bill_Northey>	<holdsPoliticalPosition>	<Iowa_Secretary_of_Agriculture>	True
+<Tihon_Konstantinov>	<holdsPoliticalPosition>	<Prime_Minister_of_Moldova>	True
+<Elijah_Gates>	<holdsPoliticalPosition>	<State_Treasurer_of_Missouri>	False
+<Happy_Chandler>	<holdsPoliticalPosition>	<Governor_of_Kentucky>	False
+<Petru_Cazacu>	<holdsPoliticalPosition>	<Prime_Minister_of_Moldova>	True
+<Paul_Godfrey>	<holdsPoliticalPosition>	<Chairman_of_the_Municipality_of_Metropolitan_Toronto>	True
+<Hervé_Morin>	<holdsPoliticalPosition>	<Minister_of_Defence_(France)>	False
+<Robert_Walker,_Baron_Walker_of_Gestingthorpe>	<holdsPoliticalPosition>	<Lord_Justice_of_Appeal>	False
+<Koji_Kakizawa>	<holdsPoliticalPosition>	<Minister_for_Foreign_Affairs_(Japan)>	False
+<Gaspar_Martins>	<holdsPoliticalPosition>	<Permanent_Representative>	False
+<Greg_Selinger>	<holdsPoliticalPosition>	<Minister_of_Finance_(Manitoba)>	False
+<Tomiichi_Murayama>	<holdsPoliticalPosition>	<Prime_Minister_of_Japan>	false	seems to be a bad relation for PCA, because usually people have more offices than the ones mentioned in infoboxes, and often we don't get them all
+<Violeta_Chamorro>	<holdsPoliticalPosition>	<President_of_Nicaragua>	True
+<Brad_Ward>	<holdsPoliticalPosition>	<Minister_without_portfolio>	False
+<Brad_Ward>	<holdsPoliticalPosition>	<Member_of_Provincial_Parliament_(Ontario)>
+<Nicasius_de_Sille>	<holdsPoliticalPosition>	<Deputy_(legislator)>	False
+<Joe_Hagin>	<holdsPoliticalPosition>	<White_House_Deputy_Chief_of_Staff>	False
+<Jacob_Zuma>	<holdsPoliticalPosition>	<Member_of_Parliament>	True
+<Jacob_Zuma>	<holdsPoliticalPosition>	<President_of_South_Africa>
+<Jacob_Zuma>	<holdsPoliticalPosition>	<Deputy_President_of_South_Africa>
+<Helen_Herron_Taft>	<holdsPoliticalPosition>	<First_Lady_of_the_United_States>	True
+<Charles_Falconer,_Baron_Falconer_of_Thoroton>	<holdsPoliticalPosition>	<Secretary_of_State_for_Constitutional_Affairs>	False
+<Charles_Falconer,_Baron_Falconer_of_Thoroton>	<holdsPoliticalPosition>	<Secretary_of_State_for_Justice>
+<Joe_Biden>	<holdsPoliticalPosition>	<Vice_President_of_the_United_States>	False
+<Abulhassan_Banisadr>	<holdsPoliticalPosition>	<President_of_Iran>	False
+<Reino_Kuuskoski>	<holdsPoliticalPosition>	<Prime_Minister_of_Finland>	False
+<Ştefan_Pirogan>	<holdsPoliticalPosition>	<Mayor_of_Bălţi>	False
+<Ata'ollah_Mohajerani>	<holdsPoliticalPosition>	<Vice_President_of_Iran>	False
+<Alexandru_Stoianoglo>	<holdsPoliticalPosition>	<President_of_the_Moldovan_Parliament>	True	He is president of the Parlament which subsumes the position member of parlament.
+<Antonio_Pedro_Monteiro_Lima>	<holdsPoliticalPosition>	<Permanent_Representative>	False
+<Rahm_Emanuel>	<holdsPoliticalPosition>	<White_House_Chief_of_Staff>	False
+
+<Malik_Rahim>	<isAffiliatedTo>	<Green_Party_(United_States)>	True
+<Prem_Nazir>	<isAffiliatedTo>	<Indian_National_Congress>	True
+<Albert_Cole_(Massachusetts)>	<isAffiliatedTo>	<Republican_Party_(United_States)>	True
+<Bud_Cullen>	<isAffiliatedTo>	<Liberal_Party_of_Canada>	True
+<Madoff_investment_scandal>	<isAffiliatedTo>	<Democratic_Party_(United_States)>
+<Shirley_Abrahamson>	<isAffiliatedTo>	<Democratic_Party_(United_States)>	True
+<James_Gralton>	<isAffiliatedTo>	<Communist_Party_of_Ireland>	True
+<David_Lloyd_George>	<isAffiliatedTo>	<Liberal_Party_(UK)>	True
+<Khuang_Abhaiwongse>	<isAffiliatedTo>	<Democrat_Party_(Thailand)>	True
+<John_Michael_Manos>	<isAffiliatedTo>	<Republican_Party_(United_States)>	True	this relation is good for the PCA. Is it functional?
+<Cesar_Montano>	<isAffiliatedTo>	<Lakas-CMD>	True
+<Chatichai_Choonhavan>	<isAffiliatedTo>	<Thai_Nation_Party>	False
+<Terrence_O'Donnell>	<isAffiliatedTo>	<Republican_Party_(United_States)>	True
+<William_Hawrelak>	<isAffiliatedTo>	<Independent_(politician)>	False
+<David_Boushy>	<isAffiliatedTo>	<Progressive_Conservative_Party_of_Ontario>	True
+<Ben_Bernanke>	<isAffiliatedTo>	<Republican_Party_(United_States)>	True
+<C._Everett_Koop>	<isAffiliatedTo>	<Republican_Party_(United_States)>	True
+<Norman_Bethune>	<isAffiliatedTo>	<Communist_Party_of_Canada>	True
+<Jeff_Chapman_(Georgia_politician)>	<isAffiliatedTo>	<Republican_Party_(United_States)>	True
+<Andrew_S._Brandt>	<isAffiliatedTo>	<Progressive_Conservative_Party_of_Canada>	True	YAGO stores him as "Andy Brandt" who is a sportsman.
+<Andrew_S._Brandt>	<isAffiliatedTo>	<Progressive_Conservative_Party_of_Ontario>
+<Andrew_S._Brandt>	<isAffiliatedTo>	<Canadian_Alliance>
+
+<Kirk_Windstein>	<hasMusicalRole>	<wordnet_guitar_103467517>	False
+<Serj_Tankian>	<hasMusicalRole>	<wordnet_piano_103928116>	false	extraction problems
+<Serj_Tankian>	<hasMusicalRole>	<wordnet_theremin_104419642>
+<Serj_Tankian>	<hasMusicalRole>	<wordnet_guitar_103467517>
+<Serj_Tankian>	<hasMusicalRole>	<wordnet_synthesist_110687231>
+<Wayne_Watson>	<hasMusicalRole>	<wordnet_guitar_103467517>	false
+<Koen_Wauters>	<hasMusicalRole>	<wordnet_singer_110599806>	true
+<Chris_Peterson_(producer)>	<hasMusicalRole>	<wordnet_keyboard_103614007>	true
+<Dominguinhos>	<hasMusicalRole>	<wordnet_accordion_102672831>	false
+<Laurence_Juber>	<hasMusicalRole>	<wordnet_lute_114706214>	false
+<Jimmy_Pop>	<hasMusicalRole>	<wordnet_guitar_103467517>	false
+<Daniel_Weidlein>	<hasMusicalRole>	<wordnet_flute_103372029>	false
+<Rick_Vincent>	<hasMusicalRole>	<wordnet_singing_100545501>	true
+<Mat_Zo>	<hasMusicalRole>	<wordnet_synthesist_110687231>	false
+<Jimmy_Nail>	<hasMusicalRole>	<wordnet_guitar_103467517>	false
+<Sarah_Jarosz>	<hasMusicalRole>	<wordnet_banjo_102787622>	false
+<Sarah_Jarosz>	<hasMusicalRole>	<wordnet_guitar_103467517>
+<Ju-ken>	<hasMusicalRole>	<wordnet_bass_fiddle_102803934>	false
+<Ju-ken>	<hasMusicalRole>	<wordnet_bass_guitar_102804123>
+<Franka_Batelić>	<hasMusicalRole>	<wordnet_singer_110599806>	true
+<Franka_Batelić>	<hasMusicalRole>	<wordnet_guitar_103467517>
+<Mac_McCaughan>	<hasMusicalRole>	<wordnet_guitar_103467517>	false	Fails mainly due to restrictive extractions. Wikipedia contains all the information (I assume)
+<Simple_Kid>	<hasMusicalRole>	<wordnet_banjo_102787622>
+<Simple_Kid>	<hasMusicalRole>	<wordnet_guitar_103467517>
+<Simple_Kid>	<hasMusicalRole>	<wordnet_harmonica_103494278>
+<Tobi_Vail>	<hasMusicalRole>	<wordnet_piano_103928116>
+<Tobi_Vail>	<hasMusicalRole>	<wordnet_guitar_103467517>
+<Laura_Jean>	<hasMusicalRole>	<wordnet_guitar_103467517>
+<Matt_King_(singer)>	<hasMusicalRole>	<wordnet_guitar_103467517>	False
+<Freddie_Stevenson>	<hasMusicalRole>	<wordnet_piano_103928116>	False
+<Freddie_Stevenson>	<hasMusicalRole>	<wordnet_guitar_103467517>
+<Richard_Maltby,_Sr.>	<hasMusicalRole>	<wordnet_cornet_103110669>	False
+<Rent_Romus>	<hasMusicalRole>	<wordnet_soprano_110625546>	False
+<Rent_Romus>	<hasMusicalRole>	<wordnet_alto_109786115>
+<Tanita_Tikaram>	<hasMusicalRole>	<wordnet_piano_103928116>	False
+<Isaac_Hayes>	<hasMusicalRole>	<wordnet_singing_100545501>	False
+<Isaac_Hayes>	<hasMusicalRole>	<wordnet_keyboard_instrument_103614532>
+<Devin_Townsend>	<hasMusicalRole>	<wordnet_guitar_103467517>	False
+<Devin_Townsend>	<hasMusicalRole>	<wordnet_bass_guitar_102804123>
+<Julian_Knowles>	<hasMusicalRole>	<wordnet_electric_guitar_103272010>	True
+<Julian_Knowles>	<hasMusicalRole>	<wordnet_laptop_103642806>
+<Deric_Ruttan>	<hasMusicalRole>	<wordnet_guitar_103467517>	True
+<Deric_Ruttan>	<hasMusicalRole>	<wordnet_harmonica_103494278>
+<Clayhill>	<hasMusicalRole>	<wordnet_singer_110599806>	False
+<Mark_Frith_(musician)>	<hasMusicalRole>	<wordnet_piano_103928116>	False
+<Mark_Frith_(musician)>	<hasMusicalRole>	<wordnet_guitar_103467517>
+
+<Jim_Coane>	<hasWonPrize>	<Emmy_Award>	False	His multiple awards are listed in the article's text and therefore YAGO could not extract them.
+<Franz_Mattenklott>	<hasWonPrize>	<German_Cross>	False	YAGO contains only the awards located at the info-box which is just part of the whole list of awards.
+<Franz_Mattenklott>	<hasWonPrize>	<Knight's_Cross_of_the_Iron_Cross>
+<Marco_Benevento>	<hasWonPrize>	<Jammy_Award>	False	It seems the info was extracted from the wiki-categories, although I do not understand why the other awards were not extracted as they also appear as categories.
+<Rolf_Bering>	<hasWonPrize>	<Knight's_Cross_of_the_Iron_Cross>	False	YAGO contains only the awards located at the info-box which is just part of the whole list of awards.
+<Grantley_Fielke>	<hasWonPrize>	<Magarey_Medal>	False	YAGO contains only the awards located at the wiki-categories which is just part of the whole list of awards.
+<Rob_Mathes>	<hasWonPrize>	<Grammy_Award>	True	YAGO contains only the awards located at the wiki-categories which is just part of the whole list of awards.
+<M._King_Hubbert>	<hasWonPrize>	<Penrose_Medal>	False	YAGO contains only the awards located at the wiki-categories which is just part of the whole list of awards.
+<Randall_Wallace>	<hasWonPrize>	<Writers_Guild_of_America_Award>	False	YAGO contains only the awards located at the wiki-categories which is just part of the whole list of awards.
+<Bill_Cubbins>	<hasWonPrize>	<Trevor_Barker_Award>	False	YAGO contains only the awards located at the wiki-categories which is just part of the whole list of awards.
+<James_Rogers_(VC)>	<hasWonPrize>	<Mentioned_in_Despatches>	False	YAGO contains only the awards located at the wiki-categories and info-boxes which is just part of the whole list of awards.
+<James_R._Clapper>	<hasWonPrize>	<Air_Medal>
+<James_R._Clapper>	<hasWonPrize>	<Legion_of_Merit>
+<Frederick_Kroesen>	<hasWonPrize>	<Purple_Heart>	False	YAGO contains only the awards located at the wiki-categories and info-boxes which is just part of the whole list of awards.
+<Frederick_Kroesen>	<hasWonPrize>	<Silver_Star>	False
+<Frederick_Kroesen>	<hasWonPrize>	<Air_Medal>
+<Frederick_Kroesen>	<hasWonPrize>	<Bronze_Star_Medal>
+<Frederick_Kroesen>	<hasWonPrize>	<Distinguished_Flying_Cross_(United_States)>
+<Frederick_Kroesen>	<hasWonPrize>	<Legion_of_Merit>
+<Harry_Goonatilake>	<hasWonPrize>	<Sri_Lanka_Armed_Services_Long_Service_Medal>	True
+<Harry_Goonatilake>	<hasWonPrize>	<Ceylon_Armed_Services_Long_Service_Medal>
+<Harry_Goonatilake>	<hasWonPrize>	<Uttama_Seva_Padakkama>
+<Jerry_Dolyn_Brown>	<hasWonPrize>	<National_Heritage_Fellowship>	False
+<Robert_M._Polich,_Sr.>	<hasWonPrize>	<Purple_Heart>	True
+<Robert_M._Polich,_Sr.>	<hasWonPrize>	<Air_Medal>
+<Robert_M._Polich,_Sr.>	<hasWonPrize>	<Prisoner_of_War_Medal>
+<Robert_M._Polich,_Sr.>	<hasWonPrize>	<Distinguished_Flying_Cross_(United_States)>
+<Leonard_Slatter>	<hasWonPrize>	<Distinguished_Flying_Cross_(United_Kingdom)>	False
+<Leonard_Slatter>	<hasWonPrize>	<Medal_bar>
+<John_J._Pershing>	<hasWonPrize>	<Silver_Star>	False
+<John_J._Pershing>	<hasWonPrize>	<Pulitzer_Prize_for_History>
+<John_J._Pershing>	<hasWonPrize>	<Légion_d'honneur>
+<John_J._Pershing>	<hasWonPrize>	<Distinguished_Service_Medal_(Army)>
+<John_J._Pershing>	<hasWonPrize>	<Distinguished_Service_Cross_(United_States)>
+<Frank_Robinson>	<hasWonPrize>	<Major_League_Baseball_Rookie_of_the_Year_Award>	False
+<Oliver_P._Echols>	<hasWonPrize>	<Purple_Heart>	True
+<Oliver_P._Echols>	<hasWonPrize>	<Legion_of_Merit>
+<Oliver_P._Echols>	<hasWonPrize>	<Distinguished_Service_Medal_(Army)>
+<Dana_Ivey>	<hasWonPrize>	<Drama_Desk_Award>	False
+<Otto-Ernst_Ottenbacher>	<hasWonPrize>	<Knight's_Cross_of_the_Iron_Cross>	False
+<Joe_M._Nishimoto>	<hasWonPrize>	<Medal_of_Honor>	False
+<Alsou>	<hasWonPrize>	<MTV_Europe_Music_Awards>	False
+<Alsou>	<hasWonPrize>	<World_Music_Awards>
+<Richard_Franklin_(director)>	<hasWonPrize>	<Australian_Film_Institute_Award_for_Best_Screenplay>	Unknown	I cannot even verify this award.
+<Todd_Reesing>	<hasWonPrize>	<Davey_O'Brien_Award>	True
+<Paul_Vathis>	<hasWonPrize>	<Pulitzer_Prize_for_Photography>	True
+<Matthew_A._Zimmerman>	<hasWonPrize>	<Legion_of_Merit>	True
+<Matthew_A._Zimmerman>	<hasWonPrize>	<Gallantry_Cross_(Vietnam)>
+<Matthew_A._Zimmerman>	<hasWonPrize>	<Army_Service_Ribbon>
+<Matthew_A._Zimmerman>	<hasWonPrize>	<Bronze_Star_Medal>
+<Matthew_A._Zimmerman>	<hasWonPrize>	<Vietnam_Campaign_Medal>
+<Matthew_A._Zimmerman>	<hasWonPrize>	<Joint_Meritorious_Unit_Award>
+<Matthew_A._Zimmerman>	<hasWonPrize>	<Commendation_Medal>
+<Matthew_A._Zimmerman>	<hasWonPrize>	<Vietnam_Service_Medal>
+<Matthew_A._Zimmerman>	<hasWonPrize>	<Defense_Meritorious_Service_Medal>
+<Matthew_A._Zimmerman>	<hasWonPrize>	<Overseas_Service_Ribbon>
+<Matthew_A._Zimmerman>	<hasWonPrize>	<National_Defense_Service_Medal>
+<Matthew_A._Zimmerman>	<hasWonPrize>	<Meritorious_Service_Medal_(United_States)>
+<Donald_E._Ballard>	<hasWonPrize>	<Medal_of_Honor>	True
+<Jerry_Duplessis>	<hasWonPrize>	<Grammy_Award>	True
+<Eddie_Albert>	<hasWonPrize>	<Bronze_Star_Medal>	False
+
+<Ronald_Reagan>	<isPoliticianOf>	<California>	True
+<Elisha_Dyer>	<isPoliticianOf>	<Rhode_Island>	True
+<Alexander_Randall>	<isPoliticianOf>	<Wisconsin>	True
+<Happy_Chandler>	<isPoliticianOf>	<Kentucky>	True
+<Arthur_T._Hannett>	<isPoliticianOf>	<New_Mexico>	True
+<Edwin_L._Mechem>	<isPoliticianOf>	<New_Mexico>	True
+<Oscar_Branch_Colquitt>	<isPoliticianOf>	<Texas>	True
+<James_H._Hawley>	<isPoliticianOf>	<Idaho>	True
+<Armand_Beauvais>	<isPoliticianOf>	<Louisiana>	True
+<William_Trousdale>	<isPoliticianOf>	<Tennessee>	True
+<Orville_Freeman>	<isPoliticianOf>	<Minnesota>	True
+<James_O._Davidson>	<isPoliticianOf>	<Wisconsin>	True
+<Joseph_Wanton>	<isPoliticianOf>	<Rhode_Island>	True
+<John_J._Hickey>	<isPoliticianOf>	<Wyoming>	True
+<Edward_Coles>	<isPoliticianOf>	<Illinois>	True
+<Charles_S._Morehead>	<isPoliticianOf>	<Kentucky>	True
+<Sherman_W._Tribbitt>	<isPoliticianOf>	<Delaware>	True
+<Charles_H._Russell>	<isPoliticianOf>	<Nevada>	True
+<W._Lee_O'Daniel>	<isPoliticianOf>	<Texas>	True
+<Elisha_M._Pease>	<isPoliticianOf>	<Texas>	True
+<Samuel_B._Moore>	<isPoliticianOf>	<Alabama>	True
+<Job_Adams_Cooper>	<isPoliticianOf>	<Colorado>	True
+<William_Sprague_III>	<isPoliticianOf>	<Rhode_Island>	True
+<James_M._Cox>	<isPoliticianOf>	<Ohio>	True
+<Dick_Celeste>	<isPoliticianOf>	<Ohio>	True
+<Jacques_Villeré>	<isPoliticianOf>	<Louisiana>	True
+<Charles_Polk,_Jr.>	<isPoliticianOf>	<Delaware>	True
+<David_Hazzard>	<isPoliticianOf>	<Delaware>	True
+<Joseph_Duncan_(politician)>	<isPoliticianOf>	<Illinois>	True
+<Samuel_H._Huntington>	<isPoliticianOf>	<Ohio>	True
+
+<Quebec>	<dealsWith>	<United_Kingdom>	False	Unclear why YAGO does not contain all the countries that appear in the infoboxes. Maybe wikipedia was not up-to-date at that moment.
+<Quebec>	<dealsWith>	<Netherlands>
+<Quebec>	<dealsWith>	<Algeria>
+<Quebec>	<dealsWith>	<France>
+<Quebec>	<dealsWith>	<Germany>
+<Quebec>	<dealsWith>	<Japan>
+<Macau>	<dealsWith>	<Hong_Kong>	False	Unclear why YAGO does not contain all the countries that appear in the infoboxes. Maybe wikipedia was not up-to-date at that moment.
+<Macau>	<dealsWith>	<Germany>
+<Malta>	<dealsWith>	<Italy>	False	Unclear why YAGO does not contain all the countries that appear in the infoboxes. Maybe wikipedia was not up-to-date at that moment.
+<Malta>	<dealsWith>	<Hong_Kong>
+<Malta>	<dealsWith>	<France>
+<Malta>	<dealsWith>	<Japan>
+<Malta>	<dealsWith>	<Germany>
+<Malta>	<dealsWith>	<Singapore>
+<Japan>	<dealsWith>	<Saudi_Arabia>	False	Unclear why YAGO does not contain all the countries that appear in the infoboxes. Maybe wikipedia was not up-to-date at that moment.
+<Japan>	<dealsWith>	<People's_Republic_of_China>
+<Japan>	<dealsWith>	<Hong_Kong>
+<Japan>	<dealsWith>	<Indonesia>
+<Puerto_Rico>	<dealsWith>	<Republic_of_Ireland>	False	Some trade partners are mentioned only in the article text.
+<Puerto_Rico>	<dealsWith>	<United_Kingdom>
+<Puerto_Rico>	<dealsWith>	<Dominican_Republic>
+<Puerto_Rico>	<dealsWith>	<Netherlands>
+<Puerto_Rico>	<dealsWith>	<Japan>
+<Nepal>	<dealsWith>	<India>	False	Some trade partners are mentioned only in the article text.
+<Nepal>	<dealsWith>	<USA>
+<Nepal>	<dealsWith>	<Japan>
+<Nepal>	<dealsWith>	<Germany>
+<Nepal>	<dealsWith>	<People's_Republic_of_China>
+<Turkmenistan>	<dealsWith>	<Italy>	False	Some trade partners are mentioned only in the article text. Unclear why YAGO does not contain all the countries that appear in the infoboxes. Maybe wikipedia was not up-to-date at that moment.
+<Turkmenistan>	<dealsWith>	<Iran>
+<Turkmenistan>	<dealsWith>	<Russia>
+<Turkmenistan>	<dealsWith>	<France>
+<Turkmenistan>	<dealsWith>	<Ukraine>
+<Turkmenistan>	<dealsWith>	<Germany>
+<Democratic_Republic_of_the_Congo>	<dealsWith>	<Zambia>	True	Still this relation is not necessarily complete in Wikipedia.
+<Democratic_Republic_of_the_Congo>	<dealsWith>	<South_Africa>
+<Democratic_Republic_of_the_Congo>	<dealsWith>	<Zimbabwe>
+<Democratic_Republic_of_the_Congo>	<dealsWith>	<Belgium>
+<Democratic_Republic_of_the_Congo>	<dealsWith>	<Kenya>
+<Democratic_Republic_of_the_Congo>	<dealsWith>	<Finland>
+<Democratic_Republic_of_the_Congo>	<dealsWith>	<France>
+<Democratic_Republic_of_the_Congo>	<dealsWith>	<People's_Republic_of_China>
+<Sweden>	<dealsWith>	<Denmark>	False	Unclear why YAGO does not contain all the countries that appear in the infoboxes. Maybe wikipedia was not up-to-date at that moment.
+<Sweden>	<dealsWith>	<Belgium>
+<Sweden>	<dealsWith>	<Russia>
+<Sweden>	<dealsWith>	<Netherlands>
+<Sweden>	<dealsWith>	<France>
+<Sweden>	<dealsWith>	<Finland>
+<Sweden>	<dealsWith>	<Germany>
+<Sweden>	<dealsWith>	<Norway>
+<Belize>	<dealsWith>	<Côte_d'Ivoire>	False	Unclear why YAGO does not contain all the countries that appear in the infoboxes. Maybe wikipedia was not up-to-date at that moment.
+<Belize>	<dealsWith>	<Thailand>
+<Belize>	<dealsWith>	<Cuba>
+<Belize>	<dealsWith>	<Guatemala>
+<Thailand>	<dealsWith>	<Singapore>	False	Unclear why YAGO does not contain all the countries in the infoboxes.
+<Thailand>	<dealsWith>	<Hong_Kong>
+<Thailand>	<dealsWith>	<Malaysia>
+<Thailand>	<dealsWith>	<Japan>
+<Thailand>	<dealsWith>	<People's_Republic_of_China>
+<Nagorno-Karabakh>	<dealsWith>	<Armenia>	True
+<Tanzania>	<dealsWith>	<South_Africa>	True
+<Tanzania>	<dealsWith>	<Japan>
+<Tanzania>	<dealsWith>	<India>
+<Tanzania>	<dealsWith>	<Kenya>
+<Tanzania>	<dealsWith>	<United_Arab_Emirates>
+<Tanzania>	<dealsWith>	<Netherlands>
+<Tanzania>	<dealsWith>	<Germany>
+<Tanzania>	<dealsWith>	<People's_Republic_of_China>
+<Singapore>	<dealsWith>	<Hong_Kong>	False	Unclear why YAGO does not contain all the countries in the infoboxes.
+<Singapore>	<dealsWith>	<Malaysia>
+<Singapore>	<dealsWith>	<Japan>
+<Singapore>	<dealsWith>	<Indonesia>
+<Jordan>	<dealsWith>	<Saudi_Arabia>	False	Unclear why YAGO does not contain all the countries in the infoboxes.
+<Jordan>	<dealsWith>	<India>
+<Jordan>	<dealsWith>	<United_Arab_Emirates>
+<Jordan>	<dealsWith>	<Egypt>
+<Jordan>	<dealsWith>	<Syria>
+<Jordan>	<dealsWith>	<Iraq>
+<Jordan>	<dealsWith>	<Germany>
+<New_Zealand>	<dealsWith>	<Japan>	False	Unclear why YAGO does not contain all the countries in the infoboxes. Remarkable that Australia does not appear on the list.
+<New_Zealand>	<dealsWith>	<Malaysia>
+<New_Zealand>	<dealsWith>	<Germany>
+<New_Zealand>	<dealsWith>	<Singapore>
+<Ghana>	<dealsWith>	<India>	False	Unclear why YAGO does not contain all the countries in the infoboxes.
+<Ghana>	<dealsWith>	<United_Kingdom>
+<Ghana>	<dealsWith>	<Nigeria>
+<Ghana>	<dealsWith>	<Netherlands>
+<Ghana>	<dealsWith>	<France>
+<Ghana>	<dealsWith>	<Ukraine>
+<Republic_of_Ireland>	<dealsWith>	<United_Kingdom>	False	Unclear why YAGO does not contain all the countries in the infoboxes.
+<Republic_of_Ireland>	<dealsWith>	<Netherlands>
+<Republic_of_Ireland>	<dealsWith>	<Germany>
+<Russia>	<dealsWith>	<Italy>	False	Unclear why YAGO does not contain all the countries in the infoboxes.
+<Russia>	<dealsWith>	<Poland>
+<Russia>	<dealsWith>	<Netherlands>
+<Russia>	<dealsWith>	<Japan>
+<Russia>	<dealsWith>	<Ukraine>
+<Russia>	<dealsWith>	<Germany>
+<Egypt>	<dealsWith>	<Saudi_Arabia>	False	Unclear why YAGO does not contain all the countries in the infoboxes.
+<Egypt>	<dealsWith>	<Syria>
+<Angola>	<dealsWith>	<Chile>	False	Unclear why YAGO does not contain all the countries in the infoboxes.
+<Angola>	<dealsWith>	<Brazil>
+<Angola>	<dealsWith>	<Portugal>
+<Angola>	<dealsWith>	<South_Africa>
+<Angola>	<dealsWith>	<France>
+<Angola>	<dealsWith>	<People's_Republic_of_China>
+<Tajikistan>	<dealsWith>	<Iran>	False	Unclear why YAGO does not contain all the countries in the infoboxes.
+<Tajikistan>	<dealsWith>	<Russia>
+<Tajikistan>	<dealsWith>	<Kazakhstan>
+<Tajikistan>	<dealsWith>	<Uzbekistan>
+<Tajikistan>	<dealsWith>	<Netherlands>
+<Brazil>	<dealsWith>	<Nigeria>	False	Unclear why YAGO does not contain all the countries in the infoboxes.
+<Brazil>	<dealsWith>	<Netherlands>
+<Brazil>	<dealsWith>	<Japan>
+<Brazil>	<dealsWith>	<Germany>
+<Brazil>	<dealsWith>	<People's_Republic_of_China>
+<Ecuador>	<dealsWith>	<Chile>	False	Unclear why YAGO does not contain all the countries in the infoboxes.
+<Ecuador>	<dealsWith>	<Brazil>
+<Hong_Kong>	<dealsWith>	<Japan>	False	Unclear why YAGO does not contain all the countries in the infoboxes.
+<Hong_Kong>	<dealsWith>	<Singapore>
+<Kenya>	<dealsWith>	<South_Africa>	False
+<Kenya>	<dealsWith>	<Japan>
+<Kenya>	<dealsWith>	<Saudi_Arabia>
+<Kenya>	<dealsWith>	<Pakistan>
+<Kenya>	<dealsWith>	<United_Kingdom>
+<Kenya>	<dealsWith>	<Uganda>
+<Kenya>	<dealsWith>	<United_Arab_Emirates>
+<Kenya>	<dealsWith>	<Tanzania>
+<Kenya>	<dealsWith>	<Netherlands>
+<Kenya>	<dealsWith>	<India>
+<Kenya>	<dealsWith>	<People's_Republic_of_China>
+<Malaysia>	<dealsWith>	<Singapore>	False
+<Malaysia>	<dealsWith>	<Thailand>
+<Malaysia>	<dealsWith>	<Hong_Kong>
+<Malaysia>	<dealsWith>	<Japan>
+<Malaysia>	<dealsWith>	<Germany>
+<Malaysia>	<dealsWith>	<Indonesia>
+<Italy>	<dealsWith>	<Libya>	False
+<Italy>	<dealsWith>	<Russia>
+<Italy>	<dealsWith>	<Spain>
+<Italy>	<dealsWith>	<Netherlands>
+<Italy>	<dealsWith>	<France>
+<Italy>	<dealsWith>	<Germany>
+<Somalia>	<dealsWith>	<Oman>	False
+<Somalia>	<dealsWith>	<Saudi_Arabia>
+<Somalia>	<dealsWith>	<Kenya>
+<Somalia>	<dealsWith>	<United_Arab_Emirates>
+<Somalia>	<dealsWith>	<India>
+<Somalia>	<dealsWith>	<Djibouti>
+<Somalia>	<dealsWith>	<Yemen>
+<Bahrain>	<dealsWith>	<Saudi_Arabia>	False
+<Bahrain>	<dealsWith>	<United_Kingdom>
+<Bahrain>	<dealsWith>	<United_Arab_Emirates>
+<Bahrain>	<dealsWith>	<Japan>
+<Bahrain>	<dealsWith>	<Germany>
+
+<Ashitha>	<wasBornIn>	<Mumbai>
+<Han_Geng>	<wasBornIn>	<Mudanjiang>
+<T._J._Fast>	<wasBornIn>	<Calgary>
+<François_Naville>	<wasBornIn>	<Neuchâtel>
+<Nathanael_Greene>	<wasBornIn>	<Warwick,_Rhode_Island>
+<Douglas_Lennox-Silva>	<wasBornIn>	<Fort_Lauderdale,_Florida>
+<Franz_Mattenklott>	<wasBornIn>	<Zielona_Góra>
+<Norman_McNaughton>	<wasBornIn>	<London>
+<Rolf_Bering>	<wasBornIn>	<Bochum>
+<Shiima_Xion>	<wasBornIn>	<Los_Angeles>
+<Philip_Lehman>	<wasBornIn>	<New_York_City>
+<David_Willetts>	<wasBornIn>	<Birmingham>
+<Randall_Wallace>	<wasBornIn>	<Jackson,_Tennessee>
+<Steve_Harvey>	<wasBornIn>	<Welch,_West_Virginia>
+<Kan_Otake>	<wasBornIn>	<Yashio,_Saitama>
+<Hirotaka_Egusa>	<wasBornIn>	<Fukuyama,_Hiroshima>
+<Tomoo_Amino>	<wasBornIn>	<Tokyo>
+<Bob_Stoker>	<wasBornIn>	<Belfast>
+<IchirM_Nagai>	<wasBornIn>	<Ikeda,_Osaka>
+<Richard_Lehman_(CIA_officer)>	<wasBornIn>	<St._Louis,_Missouri>
+<Mario_Romancini>	<wasBornIn>	<São_Paulo>
+<René_Vilbre>	<wasBornIn>	<Rakvere>
+<Erika_Thijs>	<wasBornIn>	<Hasselt>
+<Ilya_Kablukov>	<wasBornIn>	<Moscow>
+<Laura_Albert>	<wasBornIn>	<New_York_City>
+<Mikael_Lidhammar>	<wasBornIn>	<Luleå>
+<Phil_Larkin>	<wasBornIn>	<Kilkenny>
+<June_Gable>	<wasBornIn>	<New_York_City>
+<Robert_R._Jennings>	<wasBornIn>	<Wichita,_Kansas>
+<John_Baptist_Franz>	<wasBornIn>	<Springfield,_Illinois>

@@ -1,0 +1,17 @@
+?a  <isKnownFor>  ?b   => ?a  <created>  ?b	14	13	2
+?a  <actedIn>  ?b  ?a  <produced>  ?b   => ?a  <directed>  ?b	0	30	0
+?b  <hasChild>  ?a  ?b  <isMarriedTo>  ?a   => ?a  <hasChild>  ?b	0	12	0
+?a  <created>  ?b  ?a  <directed>  ?b   => ?a  <actedIn>  ?b	2	28	0
+?a  <hasChild>  ?b  ?b  <isMarriedTo>  ?a   => ?a  <isMarriedTo>  ?b	4	0	0
+?a  <actedIn>  ?b  ?a  <produced>  ?b   => ?a  <created>  ?b	4	26	0
+?b  <hasChild>  ?a  ?a  <hasChild>  ?b   => ?a  <isMarriedTo>  ?b	0	2	0
+?a  <created>  ?b   => ?a  <produced>  ?b	0	23	2
+?b  <hasChild>  ?a  ?a  <isMarriedTo>  ?b   => ?a  <hasChild>  ?b	0	9	0
+?a  <participatedIn>  ?f  ?b  <participatedIn>  ?f   => ?a  <participatedIn>  ?b	0	30	0
+?a  <directed>  ?b  ?a  <produced>  ?b   => ?a  <actedIn>  ?b	0	23	1
+?a  <created>  ?b   => ?a  <directed>  ?b	0	29	0
+?a  <actedIn>  ?b  ?a  <directed>  ?b   => ?a  <created>  ?b	8	20	2
+?a  <created>  ?b  ?a  <produced>  ?b   => ?a  <actedIn>  ?b	0	28	0
+?a  <actedIn>  ?b  ?a  <directed>  ?b   => ?a  <produced>  ?b	3	21	6
+?a  <created>  ?f  ?f  <hasChild>  ?b   => ?a  <created>  ?b	6	1	0
+?e  <participatedIn>  ?b  ?a  <participatedIn>  ?e   => ?a  <participatedIn>  ?b	0	1	0

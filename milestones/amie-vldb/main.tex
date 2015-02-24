@@ -1,0 +1,265 @@
+%%%%%%%%%%%%%%%%%%%%%%% file template.tex %%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This is a general template file for the LaTeX package SVJour3
+% for Springer journals.          Springer Heidelberg 2010/09/16
+%
+% Copy it to a new file with a new name and use it as the basis
+% for your article. Delete % signs as needed.
+%
+% This template includes a few options for different layouts and
+% content for various journals. Please consult a previous issue of
+% your journal as needed.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% First comes an example EPS file -- just ignore it and
+% proceed on the \documentclass line
+% your LaTeX will extract the file if required
+% \begin{filecontents*}{example.eps}
+% %!PS-Adobe-3.0 EPSF-3.0
+% %%BoundingBox: 19 19 221 221
+% %%CreationDate: Mon Sep 29 1997
+% %%Creator: programmed by hand (JK)
+% %%EndComments
+% gsave
+% newpath
+%   20 20 moveto
+%   20 220 lineto
+%   220 220 lineto
+%   220 20 lineto
+% closepath
+% 2 setlinewidth
+% gsave
+%   .4 setgray fill
+% grestore
+% stroke
+% grestore
+% \end{filecontents*}
+%
+\RequirePackage{fix-cm}
+%
+%\documentclass{svjour3}                     % onecolumn (standard format)
+%\documentclass[smallcondensed]{svjour3}     % onecolumn (ditto)
+%\documentclass[smallextended]{svjour3}       % onecolumn (second format)
+\documentclass[twocolumn]{svjour3}          % twocolumn
+%
+\smartqed  % flush right qed marks, e.g. at end of proof
+%
+\usepackage[
+        pdftex,
+        %letterpaper,
+	a4paper=true,
+	bookmarks=true,
+        bookmarksopen=false,
+        bookmarksnumbered=true,
+        colorlinks=true,
+	linkcolor=blue,
+	citecolor=blue,
+	filecolor=blue,
+	urlcolor=blue,
+        pdfauthor={Luis Galarraga, Christina Teflioudi, Katja Hose, Fabian M. Suchanek},
+        pdftitle={AMIE: Association Rule Mining under Incomplete Evidence in Ontological Knowledge Bases},
+        plainpages=false,
+        pdfpagelabels,
+]{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{cite}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{caption}
+\usepackage{footnote}
+\usepackage{balance}
+\usepackage[english]{babel} 
+
+\newcommand{\indented}[1]{
+\begin{tabbing}
+hallo\=\+\kill
+#1
+\end{tabbing}
+}
+
+% Puts a figure there where you put the command -- not somewhere else
+% \newcommand{\ffigure}[4]{% \ffigure{Table | Figure}{label}{title}{imagecommand}
+%   \refstepcounter{figureCounter} \label{#2}
+%   {\centering
+% 	  #4\ \nopagebreak[4]\\\nopagebreak[4]
+% 	  {\bf #1 \ref{#2}: #3}\ \\[0.3cm]
+%   }
+% }
+
+%\newcommand{\www}[1]{{\color{blue}#1}}
+\newcommand{\www}[1]{#1}
+
+%\newcommand{\comment}[2]{{\color{red}{#1: #2}}}
+\newcommand{\comment}[2]{}
+\renewcommand{\paragraph}[1]{\noindent\textbf{#1.}}
+\renewcommand{\vec}[1]{\overrightarrow{#1}}
+\newcommand{\ignore}[1]{}
+%\newcounter{figureCounter}
+
+%
+% \usepackage{mathptmx}      % use Times fonts if available on your TeX system
+%
+% insert here the call for the packages your document requires
+%\usepackage{latexsym}
+% etc.
+%
+% please place your own definitions here and don't use \def but
+% \newcommand{}{}
+%
+% Insert the name of "your journal" with
+% \journalname{myjournal}
+%
+
+\sloppy
+
+\begin{document}
+
+% cover letter
+\begin{figure*}[t!]
+\hspace{.1\textwidth}
+\begin{minipage}{.8\textwidth}
+  \begin{centering}
+%    \LARGE\textbf{Summary of changes}
+    \LARGE\textbf{Cover letter}
+    \vspace{.3em}
+  \end{centering}
+
+  \large
+%This article is an extended version of our WWW paper on rule mining in ontological knowledge bases~\cite{amie}.
+%We revised the paper throughout and included several new results and  experiments.
+This article is based on our previous work~\cite{amie} on rule mining in ontological knowledge bases that we published at the WWW conference 2013 and was awarded 
+the best student paper award. The work presented in this article extends the basic approach in several ways and includes new results and experiments.
+
+The original WWW paper introduced AMIE, a system for rule mining under incomplete evidence in ontological knowledge bases (KBs).
+Although AMIE was able to successfully mine rules from KBs (such as YAGO2~\cite{yago2}) for which other state-of-the-art ILP systems fail, it was still unable to run in acceptable time over very large KBs (such as YAGO2s~\cite{yago2s} and DBpedia 3.8~\cite{dbpedia}).
+
+%In this article, we present additionally AMIE+. AMIE+ (Sec.~\ref{sec:improvements}) introduces a series of runtime improvements over AMIE.
+In this article, we present AMIE+, an approach that introduces a series of improvements over AMIE (Sec.~\ref{sec:improvements}).
+We describe sophisticated query rewriting, pruning, upper bounds on the rule confidence, and confidence score approximations, which help AMIE+ explore the search space more efficiently.
+%takes advantage of the maximum rule length to prune the search space, makes use of query rewriting and caching when possible,
+%and avoids the execution of expensive queries for less promising rules by the use of a confidence upper bound and confidence approximation.
+Our experimental results show that AMIE+ provides a huge speedup over AMIE while producing comparable results.
+In addition, we conducted a qualitative evaluation (Sec.~\ref{pcaEvaluation}) in order to investigate the basic assumption of AMIE, the Partial Completeness Assumption. %Assumption (PCA), leads to unsatisfactory results.
+%We report our findings and suggest possible solutions that strengthen AMIE's performance even when PCA behaves suboptimal.
+% Fabian: Let's not emphasize problems early on...
+We also re-organized the paper, added more background on alternative approaches,  and improved the overall presentation.
+
+\end{minipage}
+\end{figure*}
+
+\title{Fast Rule Mining in Ontological Knowledge Bases\\ with AMIE+}
+
+
+\author{Luis Gal\'arraga\and
+        Christina Teflioudi \and Katja Hose \and Fabian M. Suchanek
+}
+
+%\authorrunning{Short form of author list} % if too long for running head
+
+\institute{L. Gal\'arraga and F. M. Suchanek \at
+              T\'el\'ecom ParisTech \\
+              Paris, France\\
+              E-mail: \{galarrag, suchanek\}@enst.fr \\
+           \and
+           C. Teflioudi\at
+              Max Planck Institute for Informatics\\
+			  Saarbr\"ucken, Germany \\
+	      E-mail: chteflio@mpi-inf.mpg.de
+			  \and
+	       K. Hose \at
+		   Aalborg University\\
+		   Aalborg, Denmark \\
+	      E-mail: khose@cs.aau.dk
+}
+
+\date{Received: date / Accepted: date}
+% The correct dates will be entered by the editor
+
+
+\maketitle
+
+\begin{abstract}
+Recent advances in information extraction have led to huge knowledge bases (KBs), which capture knowledge in a ma\-chine-readable format.
+Inductive Logic Programming (ILP) can be used to mine logical rules from these KBs, such as ``If two persons are married, then they (usually) live in the same city''.
+While ILP is a mature field, mining logical rules from KBs is difficult, because KBs implement the open world assumption.
+This means that absent information cannot be taken as counterexamples.
+AMIE~\cite{amie} shows how rules can be mined effectively from KBs even in the absence of counterexamples.
+In this paper, we show how this mining process can be optimized to support even on large-scale KBs with more than 12M statements -- in a matter of hours instead of days.
+Extensive experiments show how our new approach, AMIE+, extends to areas of mining that were previously beyond reach.
+\keywords{Rule Mining \and Inductive Logic Programming \and ILP \and Knowledge Bases}
+\end{abstract}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Introduction}
+\label{sec:introduction}
+\input{introduction}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Related Work}
+\label{sec:relatedWork}
+\input{relatedwork}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Preliminaries}
+\label{sec:preliminaries}
+\input{preliminaries}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+% \section{Mining Model}
+% \label{sec:model}
+% \input{model}
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Confidence Measures}
+\label{sec:pca}
+\input{pca}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{AMIE}
+\label{sec:alg}
+\input{algorithm}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Scalability Improvements: AMIE+}
+\label{sec:improvements}
+\input{improvements}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Experiments}
+\label{sec:experiments}
+\input{experiments}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Conclusion}
+\label{sec:conclusion}
+\input{conclusion}
+
+%\begin{acknowledgements}
+%If you'd like to thank anyone, place your comments here
+%and remove the percent signs.
+%\end{acknowledgements}
+
+% BibTeX users please use one of
+%\bibliographystyle{spbasic}      % basic style, author-year citations
+\balance
+\bibliographystyle{spmpsci}      % mathematics and physical sciences
+%\bibliographystyle{spphys}       % APS-like style for physics
+\bibliography{references}   % name your BibTeX data base
+
+
+\end{document}
+% end of file template.tex

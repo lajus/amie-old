@@ -1,0 +1,11 @@
+% feel free to move this part around to the most appropriate place
+ALEPH\footnote{\url{http://www.cs.ox.ac.uk/activities/machlearn/Aleph/aleph_toc.html}} is a general purpose ILP system which implements Muggleton's Inverse Entailment algorithm\cite{Muggleton95inverseentailment} in Prolog. It employs a general to specific search and it encorporates a variaty of different evaluation functions for measuring the goodness of the rules and a variaty of different search strategies. 
+
+The user needs to specify which is the target predicate for the learning (the predicate appearing on the head of the clause) and a series of type and mode declarations (similar to WARMR) which will be used as a language bias in order to restrict the search space. Apart from that, the user needs to provide Aleph with files containing the background knowledge, positive and negative examples for the target predicate. 
+
+Aleph provides an implementation also for the standard positive-only learning evaluation score in ILP, which was devised by Muggelton in\cite{Muggleton:1996:LPD:647996.742465}:
+\[
+ Score = log(P)-log\frac{R+1}{Rsize+2}-\frac{L}{P}
+\]
+
+Where $P$ is the number of positives covered, $R$ is the number of randoms covered, $Rsize$ is the total number of randoms and $L$ is the number of literals in the hypothesis. The intuition behind it is that a good rule should cover many positive examples, few or no randomly generated examples (i.e. will not be an overly general rule) and it will do so by using the smallest possible number of literals (high compression). 

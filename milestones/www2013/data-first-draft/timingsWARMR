@@ -1,0 +1,51 @@
+  
+yago10k seed entities 4 levels no types no constants on yago2s
+0 (None                ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 3e-07).
+  1 (Transform           ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 3e-07).
+  2 (Compile             ) :      2.8040s. GC:      1.2210s. (   2.804 - 5 * 3e-07).
+  3 (Execute             ) :  69197.9570s. GC:      0.0000s. (6.92e+04 - 5 * 3e-07).
+  4 (Refine              ) :     21.6250s. GC:      0.7750s. (   21.62 - 3 * 3e-07).
+  5 (Apriori             ) :     -0.0000s. GC:      0.0000s. (       0 - 1 * 3e-07).
+  6 (Unpack              ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 3e-07).
+  7 (Collect stat        ) :      3.3500s. GC:      0.1100s. (    3.35 - 10 * 3e-07).
+  8 (IO                  ) :      0.4970s. GC:      0.0000s. (   0.497 - 13 * 3e-07).
+  9 (VF parent           ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 3e-07).
+ 10 (VF cand             ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 3e-07).
+ 11 (VF infreq           ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 3e-07).
+Total: 69226.2330s.
+Total GC: 2.1060s.
+
+yago10k seed entities 4 levels no types constants on diedIn only 20 constants on yago2s
+  0 (None                ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 0).
+  1 (Transform           ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 0).
+  2 (Compile             ) :      3.1010s. GC:      1.3210s. (   3.101 - 5 * 0).
+  3 (Execute             ) :  71008.9260s. GC:      0.0000s. (7.101e+04 - 5 * 0).
+  4 (Refine              ) :     24.4370s. GC:      0.7740s. (   24.44 - 3 * 0).
+  5 (Apriori             ) :      0.0000s. GC:      0.0000s. (       0 - 1 * 0).
+  6 (Unpack              ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 0).
+  7 (Collect stat        ) :      5.4670s. GC:      0.0800s. (   5.467 - 10 * 0).
+  8 (IO                  ) :      0.5640s. GC:      0.0000s. (   0.564 - 13 * 0).
+  9 (VF parent           ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 0).
+ 10 (VF cand             ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 0).
+ 11 (VF infreq           ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 0).
+Total: 71042.4950s.
+Total GC: 2.1750s.
+
+yago10k seed entities 4 levels no types constants on diedIn only 20 constants on yago2
+  0 (None                ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 4e-07).
+  1 (Transform           ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 4e-07).
+  2 (Compile             ) :      1.5870s. GC:      0.4560s. (   1.587 - 4 * 4e-07).
+  3 (Execute             ) : 305928.9450s. GC:      0.0000s. (3.059e+05 - 4 * 4e-07).
+  4 (Refine              ) :     17.5780s. GC:      0.1790s. (   17.58 - 3 * 4e-07).
+  5 (Apriori             ) :     -0.0000s. GC:      0.0000s. (       0 - 1 * 4e-07).
+  6 (Unpack              ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 4e-07).
+  7 (Collect stat        ) :      0.9500s. GC:      0.0000s. (    0.95 - 8 * 4e-07).
+  8 (IO                  ) :      0.2870s. GC:      0.0000s. (   0.287 - 12 * 4e-07).
+  9 (VF parent           ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 4e-07).
+ 10 (VF cand             ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 4e-07).
+ 11 (VF infreq           ) :      0.0000s. GC:      0.0000s. (       0 - 0 * 4e-07).
+Total: 305949.3470s.
+Total GC: 0.6350s.
+
+
+

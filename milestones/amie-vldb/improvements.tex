@@ -1,0 +1,1174 @@
+Since the publication of the original AMIE framework~\cite{amie}, we have extended it with a series of improvements that allow the system to run over very large KBs.
+In the following, we will introduce and discuss these extensions and refer to the extended version of AMIE as AMIE+.
+As usual when tuning a system, there are two kinds of techniques  to improve the performance:
+those that increase performance by improving the efficiency of the algorithms and those that gain efficiency at the expense of result quality.
+Hence, in the following, we first discuss  improvements over AMIE that preserve the quality of the original results and then extensions based on approximations,
+which can potentially lead to a lower recall.
+% \comment{Katja}{Output is not exactly preserved as less rules are output. Text adapted accordingly.} \comment{Luis: }{I have made a couple of changes here. Have a look}
+%In the first part of this section we discuss improvements over AMIE that preserve AMIE's original output. In the second part we discuss extensions based on approximations, which can potentially lead to a different output.
+% In this section, we describe a series of improvements over the standard AMIE algorithm as it was initially presented in~\cite{amie}, which allows her to run over very large knowledge bases.
+% In the following, we denote this new version of AMIE as AMIE+
+
+%\subsection{Pruning by Bounds}
+\subsection{Lossless Optimizations}
+% \comment{Katja}{I changed the name of the subsection}
+\label{prunebound}
+
+% The techniques discussed in this subsection do not affect the quality of the result, i.e., runtime is improved, for instance, by applying pruning techniques
+% that still produce the same results as AMIE and only low quality rules are pruned from the output that would not be useful to any application anyway.
+
+The techniques discussed in this subsection do not alter the output of AMIE. They include speeding up projection queries
+by means of query rewriting and caching or leveraging further constraints in the form of confidence thresholds or
+rule size limits. They allow for avoiding the execution of unnecessary queries for rules that will not be output anyway.
+% avoiding the run of unnecessary queries or taking advantage of c
+% that cannot be output in any case and filter out rules that are expensive to calculate, but have a very low confidence value, by the use of a confidence upper bound which is cheaper to compute.
+% \comment{Luis: }{I do not get it. The lossless optimizations are meant to prune
+% intermediate results, not the output}
+%\comment{Chris}{ok, I rewrote that have a look if you like it more} \comment{Luis}{Christina, let me know if you are ok with my rewrite}
+
+\subsubsection{Maximum Rule Length}
+
+The maximum rule length $n$ is an input parameter for our system. AMIE stops exploring the search space as soon as all rules with a length of at most $n$ have been produced.
+In the experiments,
+we used $n=3$ though AMIE can mine longer rules. As we show later in the experimental section,
+rules with more than 3 atoms are less interesting because they often capture trivial relationships. Besides, their support tends to be very low.
+
+For AMIE+, we improved this pruning strategy as follows.
+% makes use of the maximum rule length to prune the search space even further.
+During the mining process, AMIE creates connected rules by applying all possible mining operators (line 9 in Algorithm~\ref{rm}) on previously created rules.
+This means that for a not-yet-closed rule of length $n-1$, AMIE applies, among others, the add-dangling-atom operator ($\mathcal{O}_D$). This results in a non-closed rule,
+which will still not be output. Since the rule has the maximum length $n$, it will not be further refined.
+Hence, the application of the operator $\mathcal{O}_D$ to open rules of size $n-1$ is useless.
+For this reason, AMIE+ refines open rules of length $n-1$ only by means of the add-closing-atom-operator ($\mathcal{O}_C$).
+
+\subsubsection{Perfect rules}
+By definition, a rule cannot achieve a PCA confidence that is higher than 100\%. Thus, once a rule has achieved 100\% PCA confidence, we can stop adding new atoms. This is because the confidence cannot increase and the support can only decrease. Hence, any refinement is futile. We call rules with 100\% PCA confidence \emph{perfect rules}.
+%A rule is perfect if it has 100\% PCA confidence. Since PCA confidence is not monotonic, the refinements of a perfect rule may not be perfect. This situation leads to a sub-optimal scenario where we obtain longer, more complex and less confident rules, having already a simpler and perfect hypothesis. For this reason, AMIE+ stops specializing perfect rules, i.e., once a rule is identified as perfect, it is not enqueued for further refinement.
+
+\subsubsection{Query Rewriting and Caching}
+In some cases, a query in the rule mining process contains redundant atoms. 
+%\ignore{Fabian: rather than saying how bad AMIE is, let's say how cool AMIE+ is:
+%AMIE relies on its own in-memory database implementation, which is optimized for the projection queries (Section~\ref{projectionQueries}).
+%% required for the application of the different mining operators (line 9 in Algorithm~\ref{rm}).
+%However, AMIE's database is not optimized for redundant atoms in queries (i.e., it does not implement any sort of query rewriting for performance purposes).
+%Therefore, redundant atoms will still slow down the query response time even if the query accepts a much simpler formulation.
+%In the following, we illustrate the problem and the solution of AMIE+ in terms of an example.
+%}
+Assume, for instance, that we dequeue the intermediate non-closed rule
+\indented{$citizenOf(z,y)\Rightarrow citizenOf(x,y)$}
+and we want to further refine it by applying the $\mathcal{O}_D$ operator. The operator will add either $?r(w,z)$ or $?r(z,w)$ to the rule. Thus,
+one of the possible count-projection queries is:
+\indented{SELECT $?r$, COUNT($citizenOf(x,y)$) \\
+WHERE $citizenOf(x,y) \; \wedge \; $ \\$citizenOf(z,y)\;\wedge\; ?r(w,z)$ \\
+SUCH THAT COUNT($citizenOf(x,y)$)$>= k$}
+Note that the atom $citizenOf(z,y)$ cannot restrict the result of the count statement any more than the atom $citizenOf(x,y)$ already does, i.e.,
+if the rule  ``$\Rightarrow citizenOf(x,y)$'' has enough support to pass the threshold, so will the rule ``$citizenOf(z,y)\Rightarrow citizenOf(x,y)$''.
+If we substitute $z$ with $x$ in the original query, we get:
+\indented{SELECT $?r$, COUNT($citizenOf(x,y)$) \\
+WHERE $citizenOf(x,y) \; \wedge \; $ \\
+ $citizenOf(x,y)$ $\wedge\; ?r(w,x)$ \\
+SUCH THAT COUNT($citizenOf(x,y)$)$>= k$}
+which in turn can be rewritten as:
+\indented{SELECT $?r$, COUNT($citizenOf(x,y)$) \\
+WHERE $citizenOf(x,y) $ $\wedge\; ?r(w,x)$\\
+SUCH THAT COUNT($citizenOf(x,y)$)$>= k$}
+This query has already been fired in previous steps, as one of the ways to apply the operator add-dangling-atom ($\mathcal{O_D}$) to the rule
+``$\Rightarrow citizenOf(x,y)$''.
+%which is the projection query corresponding to the rule ``$\Rightarrow citizenOf(x,y)$''.
+%Since this rule is shorter than the original rule, and since our algorithm performs a breadth first search, this query was already evaluated in a previous step.
+Therefore, AMIE+ caches the results of previous queries. Whenever a new query can be rewritten into a previous one, AMIE+ reuses the result of the previous query instead of evaluating the query anew.%This means that if we cache the result of the shorter rule, we can reuse it for the longer rule.
+
+
+
+\subsubsection{Confidence Upper Bounds}
+\label{upperBound}
+
+%\comment{Luis: }{In the original AMIE paper we never mention thresholding on confidence, so I think we have to change the argument here.}
+\paragraph{Confidence Thresholding}
+Most rule mining applications have no use for rules with low confidences. For example, predictions based on rules with 1\% confidence are not useful in practice.
+%Most applications of rule mining do not need low confidence rules. For instance, it does not make sense at all to make predictions based on a rule with 1\% confidence.
+Based on this observation, AMIE+ accepts a minimum confidence threshold for both the PCA and the standard confidence. However,
+due to the non-monotonic behavior of the confidence metrics, Algorithm~\ref{rm} does not use these thresholds for pruning.
+Hence, pruning based on confidence thresholds is applied only directly before the rules are output. Consequently, only the output is influenced, not the runtime.
+
+
+\paragraph{Pruning} For AMIE+, we have developed a way to use minimum confidence thresholds to improve the performance of the system.  We use the confidence threshold to avoid evaluating expensive queries that would lead
+to low confidence rules.
+%As we have already discussed in Algorithm~\ref{rm} (line 6), AMIE adds a rule in the result set only if this rule has a confidence value above the confidence threshold.
+By the time AMIE has to calculate the confidence of a rule, the system already knows the support of the rule.
+Recall that confidence and PCA confidence (see Sections~\ref{subsubsec:stdConf} and \ref{subsubsec:pcaConf}) are defined as:
+\[conf(\vec{B} \Rightarrow r(x,y)) := \frac{supp(\vec{B} \wedge r(x,y))}{\#(x,y): \exists z_1,...,z_m: \vec{B}}\]
+and
+\begin{multline*}
+conf_{pca}(\vec{B} \Rightarrow r(x,y)) :=\\
+\frac{supp(\vec{B} \wedge r(x,y))}{\#(x,y): \exists z_1,...,z_m,y': \vec{B} \wedge r(x,y')}
+\end{multline*}
+\noindent Given that support is known, the remaining step is to fire the queries for the denominators of the confidence expressions
+(see Sections~\ref{subsubsec:stdConf} and \ref{subsubsec:pcaConf}), denoted as $dnm_{std}$ and $dnm_{pca}$:
+\begin{equation} \label{eq:denomStandardConf}
+ dnm_{std}(\vec{B} \Rightarrow r(x,y)):= \#(x,y): \exists z_1,...,z_m: \vec{B}
+\end{equation}
+and
+\begin{equation} \label{eq:denomPCA}
+\begin{array}{rl}
+dnm_{pca}(\vec{B} \Rightarrow r(x,y)) := {}& \#(x,y): \exists z_1,...,z_m,y': \\ &\quad \vec{B} \wedge r(x,y')
+\end{array}
+\end{equation}
+
+\noindent In some cases, such queries are very expensive and have a great impact on the overall running time. As an example,
+consider the low confidence rule R: \[citizenOf(x,z)\:\wedge\:citizenOf(y,z) \Rightarrow married(x,y)\]
+It implies that people of the same citizenship are all married to each other.
+The corresponding denominator expressions for the standard confidence (Equation~\ref{eq:denomStandardConf}) and the PCA confidence (Equation~\ref{eq:denomPCA}) are:
+\begin{equation*}
+\begin{array}{rl}
+dnm_{std}(R) := & \#(x,y): \exists z: citizenOf(x,z)\\ & \wedge\; citizenOf(y,z)
+\end{array}
+\label{eq:denomStandardCofn}
+\end{equation*}
+\begin{equation*}
+\begin{array}{rl}
+dnm_{pca}(R) := &\#(x,y): \exists z, y': citizenOf(x,z)  \\
+  &\wedge\; citizenOf(y,z) \wedge isMarried(x,y') \label{eq:denomPCA}
+\end{array}
+\end{equation*}
+
+These values are very large and therefore expensive to calculate. Besides, it is obvious that the example rule has low quality, and
+that it will be filtered out in the sequel by any reasonable confidence threshold.
+
+In the following, we devise an upper bound to prune expensive and low quality rules without having to evaluate their exact confidences.
+Consider rules of the forms
+$$ r(x,z) \wedge r(y,z) \Rightarrow r_h(x,y) $$
+$$ r(z,x) \wedge r(z,y) \Rightarrow r_h(x,y) $$
+For the sake of brevity, we will derive confidence bounds for the first form of rules as the process is analogous for the second case.
+To calculate the standard confidence of our rules, we need to divide the support by the expression:
+$$
+dnm_{std} := \#(x,y): \exists z: r(x,z) \wedge r(y,z)
+$$
+Since both atoms contain the same relation, we know that all the entities of $z$ in the first atom
+will join with the second atom. Furthermore,
+we know that the join will result in \emph{at least} one $y$-value for each binding of $x$, i.e., the case where $y=x$. This allows us to rewrite
+the expression as
+$$
+dnm_{std} \ge \#(x,x): \exists z:  r(x,z) \wedge r(x,z)
+$$
+which can be further simplified into:
+\begin{equation}
+ dnm_{std} \ge \#x: \exists z:  r(x,z)  \label{eq:stdBoundDenom}
+\end{equation}
+This expression can be calculated in constant time with the indexes of our in-memory database (see Section~\ref{subsec:implementation} for more details on the in-memory database).
+%\comment{Katja}{Reference to section that explains why?} \comment{Luis}{What do you think now? We may have to detail Section~\ref{subsec:implementation} a little bit more}
+%\comment{Katja}{If we state here that some indexes do the trick for us, we need to explain somewhere what indexes these are, either here here or in another section. Depends on how ``complicated'' the indexes are.}
+% Fabian: This query and the indexes are trivial
+The same rationale can be applied to the denominator of the PCA confidence
+$$
+dnm_{pca} := \#(x,y): \exists z, y': r(x,z) \wedge r(y,z) \wedge r_h(x,y)
+$$
+This implies
+\begin{equation} \label{eq:pcaBoundDenom}
+dnm_{pca} \ge \#x: \exists \;z, y':  r(x,z) \wedge r_h(x,y')
+\end{equation}
+Although this expression requires to fire a query, it contains fewer atoms than the original expression and counts instances
+of a single variable instead of pairs. It is therefore much cheaper than the original query.
+
+% \comment{Fabian}{Equation labeling does not work. In any case, equations and rules need some formatting}
+% \comment{Katja}{Equation numbering seems to work now.}
+Both Inequalities \ref{eq:stdBoundDenom} and \ref{eq:pcaBoundDenom}
+define lower bounds for the number of pairs in the denominator expressions of the standard
+and the PCA confidence, respectively. Thus, they constitute hard upper bounds for these scores.
+AMIE+ first checks if an upper bound can be computed for the rule. If so, it computes the bound according to Inequality~\ref{eq:pcaBoundDenom}.
+If the bound is below the confidence threshold, it reports the upper bound as confidence value and the calculation of the exact confidence according to Equation~\ref{eq:pcaConf} is skipped.
+Otherwise, it calculates confidence as in Equation~\ref{eq:pcaConf} and returns the result.
+
+%\comment{Katja}{Maybe continue the running example from above with some real numbers?} \comment{Luis}{The approximation is applied to a much broader set of rules, so I think it is fine to change the example.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%    Pruning by approximation    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Pruning by Approximation}
+\label{subsec:pruningbyapprox}
+The bound for the confidence that we derived in Section~\ref{upperBound} is applicable only when the same relation appears twice in the body.
+In the following, we show how to approximate confidence for rules of a more general form. Our goal is to devise an approximation that is (1) fast to compute and (2) more likely to overestimate confidence than to underestimate it. This is because we will use the approximation to prune rules, and we want to avoid pruning rules that have a higher confidence in reality.
+% with low confidence, we require our method to meet two criteria: (a) it shall be fast to compute
+%and (b) it shall not prune confident rules. The first criterion meanthe formula rely on cheap queries or precomputed values, whereas the second suggests to be
+%more tolerant to over-estimation than under-estimation of the confidence score.
+Since support is always calculated for rules, our aim is to derive a conservative approximation for $dnm_{pca}$ (or $dnm_{std}$) denoted by
+$\widehat{dnm}_{pca}$. By plugging this expression into the confidence formula, we get
+\begin{equation} \label{eq:pcaApproxConf}
+  \widehat{conf}_{pca}(R):=\frac{supp(R)}{\widehat{dnm}_{pca}(R)}
+\end{equation}
+
+\ignore{
+The bound for the confidence that we derived in Section~\ref{upperBound} is applicable only for the case that the same relation appears twice in the body.
+In the following, we will devise a formula that approximates confidence and is applicable to rules of more general form.
+We want to derive an approximation of $dnm_{pca}$ (or $dnm_{std}$) that is fast to compute and
+preserves does not prune rules .
+We will require some preprocessing of the KB to achieve these desiderata. %., but we will try to avoid firing complex queries to the database.
+Regarding the quality of the output, we would like our approximation of confidence to be more often an over-estimation than an under-estimation of the actual value,
+in order to avoid undesired pruning of good rules.
+This means that we can allow $dnm_{pca}$ (or $dnm_{std}$) to be under-estimated.
+
+In the following we will focus on how to approximate $dnm_{pca}$. Given an approximation for $dnm_{pca}$, $\widehat{dnm}_{pca}$, the expression:
+\begin{equation} \label{eq:pcaApproxConf}
+  \widehat{conf}_{pca}(R):=\frac{supp(R)}{\widehat{dnm}_{pca}(R)}
+\end{equation}
+}
+
+\noindent where $\widehat{conf}_{pca}(R)$ becomes an approximation for the PCA confidence.
+We remark that approximating the confidence
+is worthwhile only if the $dnm$ query is expected to be expensive.
+This is mainly the case when the body of the rule contains more than 1 atom and variables other than the ones that appear in the head. % (line 2 of Algorithm~\ref{ApproxAlgo}).
+Queries for rules that contain constants, that consist of only 1 atom in the body, or that contain no intermediate variables (e.g., $bornIn(x,y) \wedge diedIn(x,y) \Rightarrow livesIn(x,y)$), are usually very selective and therefore not expensive.
+
+In the following, we first describe a running example  and then introduce the approximation formula for the general case.
+Finally, we discuss the underlying assumptions of the approach.
+
+\ignore{\subsubsection{Explanatory Example}}
+\subsubsection{Approximate Confidence Denominator}
+
+Let us consider as an example the low confidence rule
+\[
+ directed(x_0,x_1) \wedge hasActor(x_1,x_2) \Rightarrow married(x_0,x_2)
+\]
+which implies that a director is married to all actors that acted in his movies.
+We need to find out how many actors correspond to each director in the body of the rule.
+Therefore we take a walk through the path $x_0 \rightarrow x_1 \rightarrow x_2$, connecting a director to his potential actors. If $fun(r)$ and $ifun(r)$
+denote the functionality and inverse functionality of the relation $r$, respectively, then
+walking through this path involves the following steps:
+\begin{enumerate} \itemsep +0.3ex
+ \item For each director $x_0$, the relation $directed$ will produce on average $\frac{1}{fun(directed)}$ movies $x_1$.
+ \item Some or all of these movies will find join partners in the $x_1$ variable  of $hasActor$.
+ \item For each movie $x_1$, $hasActor$ will produce on average $\frac{1}{fun(hasActor)}$ actors $x_2$.
+ \item Each of these actors in $x_2$ acted on average in  $\frac{1}{ifun(hasActor)}$ movies of the $hasActor$ relation.
+\end{enumerate}
+After step 2, we can approximate the number of distinct movies that bind to the variable $x_1$ for each director in the variable $x_0$ as:
+$$
+ num_{x_1 \; per \; x_0} := \frac{ov_{os}(directed,hasActor)}{|rng(directed)| \times fun(directed)}
+$$
+Here, $|rng(directed)|$ is the number of distinct directors in the range of $directed$ and $ov_{os}(directed,hasActor)$ denotes the distinct movies in the overlap between the objects of $directed$ and the subjects of $hasActor$.
+The term $\frac{1}{fun(directed)}$ corresponds to step  1.
+%In order to approximate the join of step 2 we use the first ratio. %\comment{Katja}{Formulation might be a bit unclear. Fabian: I think this was superfluous}
+The assumption in our join estimation is that the movies that exist in the overlap of $directed$  and $hasActor$ are uniformly distributed between the different directors in $directed$.
+
+For steps 3 and 4, we can approximate the number of actors in the variable $x_2$ for each movie in the variable $x_1$ as follows:
+$$
+ num_{x_2 \; per \; x_1} := \frac{ifun(hasActor)}{fun(hasActor)}
+$$
+The term $\frac{1}{fun(hasActor)}$ corresponds to step 3. At the end of step 3, we already have for a single director in $x_0$ a bag of actors in $x_2$ that correspond to it.
+However, these are not necessarily distinct actors, since $x_0$ and $x_2$ are connected through the variable $x_1$ (movies). Therefore, a duplicate elimination step is needed.
+To see why, assume that each director has directed on average 3 movies and that each movie has 5 actors. Then, the rule will produce on average 15 actors $x_2$ for each director $x_0$.
+However, there is no guarantee that these actors will all be different from each other.
+If the director trusts specific actors and collaborates repeatedly with them in some or all of his movies, there will be less than 15 distinct actors.
+
+The term $\frac{1}{ifun(hasActor)}$ achieves this duplicate elimination: each actor contributes in the final count with a weight $ifun(hasActor)$, which expresses the extend to which this actor exclusively belongs to a movie.
+%$\frac{1}{ifun(hasActor)}$ is the number of movies ($x_1$) of $hasActor$  in which a single actor ($x_2$) acted. Therefore, a single actor $x_2$ exclusively belongs to each of these movies up to $ifun(hasActor)$.
+
+In the way we use the duplicate elimination, a single actor $x_2$ belongs to $\frac{1}{ifun(hasActor)}$ different movies $x_1$, which are chosen from \emph{all} the movies in  $hasActor$ (e.g., 3 movies per actor).
+In reality, we want the number of different movies chosen from those that remain after step 2 ($num_{x_1\; per \; x_0}$), % that correspond to the same $x_2$,
+i.e., the average number of movies by the same director that an actor acts in (e.g., 2 movies per actor, which is less than 3). % $\leq$ 3).
+In other words, in step 4, we employ a very pessimistic scenario, which causes $dnm_{per\; x_0}$ to be an underestimation, and the overall confidence approximation to be an overestimation of the actual confidence.
+
+To summarize, we can estimate the number of actors $x_2$ that are supposed to be married with each director $x_0$ as:
+$$
+ dnm_{per\; x_0} :=  num_{x_1 \; per \; x_0} \times num_{x_2 \; per \; x_1}
+$$
+\noindent To calculate $\widehat{dnm}_{std}$, we multiply $dnm_{per\; x_0}$ with the number of distinct directors in $directed$ that join with the head relation $married$, i.e., $ov_{ss}(directed, married)$.
+
+If we generalize this example to rules of the form $r_0(x_0,x_1) \wedge r_1(x_1,x_2) \Rightarrow r_h(x_0,x_2)$, the approximation of the denominator expression becomes
+\[
+  \widehat{dnm}_{pca}(R) := ov(r_0, r_h)\frac{ifun(r_1) \times ov(r_0,r_1)}{fun(r_1) \times |rng(r_0)| \times fun(r_0)}
+\]
+\noindent where $ov$ can denote $ov_{ss}$, $ov_{so}$, or $ov_{oo}$ depending on the joining variables of the arguments.
+
+\ignore{
+% Next, we discuss the use of the approximation formula within AMIE+ and we will summarize the underlying assumptions of this section.
+Next, we describe the problem in the general case and introduce the approximation formula
+
+
+\subsubsection{Approximate Confidence Denominator}
+
+Consider a rule of the following general form:
+$$
+  r_1(x_1,y_1) \wedge r_2(x_2,y_2) \wedge ... \wedge r_n(x_n,y_n) \Rightarrow r_h(x_h,y_h)
+$$
+\comment{Luis}{Here we should say ``consider closed Horn rules of the form`` XXX with exact ``n'' number of variables.
+That would exclude the non-expensive ones}
+\comment{Chris}{how about the rule $r_1(x,y), r_2(x,y)\Rightarrow r_h(x,y)$. For this rule n=2= number of variables = number of atoms in body. But the rule is not expensive.}
+Since all atoms in a rule in AMIE are connected, and since all variables appear at least twice, we can always rearrange the rule, such that its body yields  ``paths'' from $x_0$ to $x_n$. Such paths take the following form:
+
+$$
+  r_1(x_0,x_1) \wedge r_2(x_1,x_2) \wedge ... \wedge r_n(x_{n-1},x_n) \Rightarrow r_h(x_0,x_n)
+$$
+
+
+For this arrangement, some relations may have been replaced by their inverses and some atoms may have to be swapped. Some atoms may have to be omitted.
+\comment{Chris}{See how to change this:}
+There may be multiple paths from $x_0$ to $x_n$ for a given rule.
+However, since AMIE mines rules with up to 3 atoms and we make use of the approximation only if all variables appear exactly 2 times in the rule
+\comment{Fabian}{If we do this only for the case where n=3, there is no need to have n variables and relations here! Do we want to stay general, or we treat only n=3?},
+we are only interested in rule with a single path in their body: \comment{Fabian}{What if there are multiple?}
+
+\[
+ x_0 \xrightarrow[r_1]{}x_1 \xrightarrow[r_2]{}     x_2 \xrightarrow[r_3]{}...  \xrightarrow[r_{n-1}]{}  x_{n-1}  \xrightarrow[r_n]{}   x_n
+\]
+
+To compute the PCA confidence, we have to calculate $dnm_{pca}$:
+$$
+\begin{array}{rl}
+dnm_{pca}(R):=&\#(x_0,x_n): r_1(x_0,x_1) \wedge ...\\& \wedge r_n(x_{n-1},x_n) \wedge r_h(x_0,y)
+\end{array}
+$$
+
+Assume that there are $num_0$ distinct values of $x_0$ in the above set and that on average each of these entities correspond to $dnm_{per\; x_0}$ entities in $x_n$.
+Then $dnm_{pca}$ can be approximated as:
+\[
+  \widehat{dnm}_{pca}(R) := num_0 \; dnm_{per\; x_0}
+\]
+
+Let us define an overlap function for two relations $r$ and $s$ as:
+$$ov(r,s) := \# y: \exists x,z: r(x,y) \wedge s(y,z)$$
+
+In the following we will make the assumption that the object-subject overlap of $r_{i}$ and $r_{i+1}$ in the path is independent of the joins of all other relations apart from $r_{i}$ and $r_{i+1}$.
+Then, $num_0:=ov(r_h^{-1},r_1)$ and
+
+\begin{equation} \label{eq:pcaApproxDenom}
+   \widehat{dnm}_{pca}(R) = ov(r_h^{-1},r_1) \; dnm_{per\; x_0}
+\end{equation}
+
+
+For calculating $dnm_{per\; x_0}$ we perform a walk through the path from $x_0$ to $x_n$, moving through all variables starting from $x_0$ until we reach $x_n$.
+For each step from $x_i$ to $x_{i+1}$, we perform one or several of the following operations:
+
+\begin{itemize}
+ \item \emph{Produce Operation:} multiply by $1/fun(r_{i+1})$. Applies always. E.g., steps 1 and 3 of explanatory example.
+ \item \emph{Join Operation:} multiply by $\frac{ov(r_{i+1}, r_{i+2})}{|range(r_{i+1})|}$, where $|range(r_{i+1})|$ is the number of distinct entities in the range of $r_{i+1}$.
+Applies if there exists a variable $x_{i+2}$. E.g., step 2   of explanatory example.
+ \item \emph{Eliminate Duplicates Operation:} multiply by $ifun(r_{i+1})$. Applies if there exists a variable $x_{i-1}$.  E.g., step 4   of explanatory example.
+\end{itemize}
+
+If we follow the path from $x_0$ to $x_n$ by applying  the 3 different operations as indicated, we calculate $dnm_{per\; x_0}$ as follows:
+
+\begin{equation} \label{eq:pcaApproxDenomPerX0}
+ dnm_{per\; x_0}= \frac{1}{fun(r_1)} \prod_{i=2}^n \frac{ov(r_{i-1},r_i) \times ifun(r_i)}{|range(r_{i-1})| \times fun(r_i)}
+\end{equation}
+
+Next, we discuss the use of the approximation formula within AMIE+ and we will summarize the underlying assumptions of this section.
+
+}
+
+\subsubsection{Discussion}
+
+\paragraph{Application} We precompute the functionalities,
+the inverse functionalities, and the overlaps between each pair of relations when the KB is loaded
+into the in-memory database. This results in longer loading times but pays off easily during rule mining. The size of the ranges of the relations is given by
+our indexes in constant time.
+After this preprocessing, the approximation of the confidence can be computed as a simple product of precomputed values without actually firing a single query.
+We apply the approximation only if the query has 3 atoms, contains no constants and each variable occurs exactly 2 times.
+If the approximated value is smaller than the threshold, we abandon the rule.
+Otherwise, we compute the exact PCA confidence and proceed as usual.
+
+\paragraph{Assumptions} Our approximation makes a series of assumptions.
+First, we make use of functionalities as average values. In other words, we assume that for any relation all objects are uniformly distributed among the subjects (which corresponds to a zero variance).
+In reality, this is not always the case. Additionally,
+the estimation of the expression $num_{x_1 \; per \; x_0}$ uses the term $\frac{ov(r_0, r_1)}{|range(r_0)|}$.
+This term assumes that the entities in the overlap are uniformly distributed among the entities in the range of $r_0$. This also introduces some error that depends on the variance of the real distribution.
+Nevertheless, the duplicate elimination largely underestimates the count of $dnm_{per\; x_0}$, and therefore we expect our approximation to usually
+result in an overestimation of the actual confidence. This is indeed the case, as our experiments in Section \ref{amiepm} will show.
+%This means that, even though it is an approximation, it will not let AMIE+ drop many good rules.
+% Our approximation depends on assumptions that hardly hold in practice. However, it is fast to calculate exactly because of these simplifying assumptions.
+%The fast computation and small rate of false pruning make our approximated confidence an attractive solution for scalable rule mining. Fabian: We don't have experiments for this
+
+% \paragraph{Assumptions} Our approximation makes a series of assumptions.
+% First, for the produce operation, we make use of functionalities as average values. In other words, we assume that for any relation all objects are uniformly distributed among the subjects (which corresponds to a zero variance).
+% In reality, this is not always the case. There is some variance, which will introduce some error each time the produce operator is applied.
+% When joining $r_i(x_{i-1}, x_i) \wedge r_{i+1}(x_i, x_{i+1})$, our join operation uses the term $\frac{ov(r_{i}, r_{i+1})}{|range(r_{i})|}$.
+% This term assumes that the entities in the overlap are uniformly distributed among the entities in the range of $r_i$. This also introduces some error that depends on the variance of the real distribution.
+% Apart from that, this term ignores the influence of the previously performed joins on the current join. As a result, the term over-estimates the actual result of join.
+% On the other hand, as we have already seen, the eliminate duplicates operation heavily under-estimates the number of produced entities.
+% Therefore, in the end, the formula may either over- or under-estimate the real confidence.
+% However, since our choice of handling the duplicates  usually \emph{largely} under-estimates $denom_{per\; x_0}$, we expect that our approximation will usually result in an overestimation of the actual confidence.
+% This means that, even though it is an approximation, it will not let AMIE drop many good rules.
+% Our approximation depends on assumptions that hardly hold in practice. However, it is fast to calculate exactly because of these simplifying assumptions.
+% The fast computation and small rate of false pruning make our approximated confidence an attractive solution.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\ignore{
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Pruning by Approximation}
+
+In the following we present our technique for improving runtime by applying an approximation. We first introduce the intuition that justifies the technique and formalize the approach afterwards.
+
+\subsubsection{Intuition}
+
+%Recall from Section~\ref{upperBound} that AMIE often encounters  low quality rules which are expensive to evaluate (expensive query for confidence denominator).
+The bound for the confidence that we derived in Section~\ref{upperBound} is applicable only for the case that the same relation appears twice in the body.
+%In this section,
+In the following,
+we will devise a formula approximating confidence, applicable to rules of more general form.
+% If the approximate confidence is below the confidence threshold, AMIE+ will not calculate the actual confidence, but it will directly prune out the rule.
+% Table~\ref{notation_appr} provides an overview of the notation used for the analysis.
+% describes all notation used in the analysis of this paragraph.
+As an example, consider the rule $R$:
+$$
+ \emph{livesIn}(x,z) \wedge \emph{bornIn}(y,z) \Rightarrow  \emph{hasChild}(x,y)
+$$
+This rule implies that all people that lived in a place are parents of all people who were born in the same place. Intuitively, we expect this rule to make many wrong predictions.  Its PCA confidence is
+$$
+\hspace*{-3ex}
+\frac{supp(R)}{\#(x,y): \exists z, y': livesIn(x,z) \wedge \emph{bornIn}(y,z) \wedge  \emph{hasChild}(x,y')}
+$$
+The denominator of this PCA confidence is huge: It is the product of all people who live somewhere with a child and the number of people who were born in that place. Therefore, the query for this calculation can be extremely expensive.
+% \comment{Katja}{Add reference and relate to the section that introduces the standard algorithm.}
+%In the following, we present a method to approximate the denominator without actually executing the query.
+% Fabian: staying with the intuition here, swiping intersection of relations under the rock
+Hence, we want to avoid the expensive computation and approximate the denominator. Let us look at one particular person $x$. We want to estimate how many distinct people $y$ there can be for this specific person $x$.
+This can be estimated as follows
+
+\begin{enumerate} \itemsep +0.3ex
+ \item For each entity $x$, $livesIn$ will produce on average $\frac{1}{fun(livesIn)}$ entities for variable $z$.
+ \item Some or all of these entities will find join partners in the $z$ variable of $bornIn$.
+% Some or all of these entities will be able to get joined with the entities in the $z$ variable of $bornIn$.
+ \item For each entity $z$, $bornIn$ will produce on average $\frac{1}{ifun(bornIn)}$ entities for variable $y$.
+  \item Each of these entities in $y$ matches on average $\frac{1}{fun(bornIn)}$ entities for the $z$ variable of $bornIn$.
+% \item Each of these entities in $y$ belongs on average to $\frac{1}{fun(bornIn)}$ entities in the $z$ variable of $bornIn$.
+\end{enumerate}
+For steps 1 and 2, we can approximate the number of entities in the variable $z$ for each entity in the variable $x$ as follows:
+$$
+ num_{z \; per \; x}= \frac{ov(livesIn,bornIn)}{|range(livesIn)| \times fun(livesIn)}
+$$
+Here, $|range(livesIn)|$ is the number of distinct entities in the range of $livesIn$ and $ov(livesIn,bornIn)$ denotes the distinct entities in the overlap between the objects of $livesIn$ and the objects of $bornIn$. The term $\frac{1}{fun(livesIn)}$ corresponds to step  1. In order to approximate the join of step 2 we use the first ratio. \comment{Katja}{Formulation might be a bit unclear.}
+The assumption here is that the objects of $livesIn$ ($z$) succeed or fail in the join with $bornIn$ for each single subject of $livesIn$ with the same proportion as it happens in the whole population of $livesIn$'s subjects.
+
+From steps 3 and 4 we can approximate the number of entities in the variable $y$ for each entity in the variable $z$ as follows:
+$$
+ num_{y \; per \; z}= \frac{fun(diedIn)}{ifun(bornIn)}
+$$
+The term $\frac{1}{ifun(bornIn)}$ corresponds to step 3. At the end of step 3, we already have for a single $x$ a bag of $y$s that correspond to it.
+However, these are not necessarily distinct $y$s, since $x$ and $y$s are connected through variable $z$.
+\comment{Chris}{this is a part of the previous write-up that I discuss a different rule.}
+In the example, if each parent has on average 3 children, this rule will produce on average 3 places of residence $y$ for each parent $x$. However, there is no guarantee that these places will all be different from each other.
+If 2 or all children are born in the same city, then the rule will create less than 3 distinct places of residence $y$ for a given parent.
+%In an even more extreme scenario,  the rule $hasDistrict(x,z) \wedge hasState(z,y) \Rightarrow hasState(x,y)$,
+%will produce for each city $x$ as many states $y$ as the districts of this city, but all of them will in reality be the same state.
+The term $\frac{1}{fun(bornIn)}$ (step 4) helps us address this issue: each subject of $bornIn$($y$) contributes in the final count with a weight ($fun(bornIn)$) expressing the extend which
+this object exclusively belongs to an object of $bornIn$($z$):
+$\frac{1}{fun(bornIn)}$ is the number of objects ($z$) of $bornIn$  which a single subject ($y$) corresponds to. Therefore, a single subject $y$ exclusively belongs to each of these subjects $z$ up to $fun(bornIn)$.
+
+A single $y$ belongs to $\frac{1}{fun(bornIn)}$ different $z$ chosen from \emph{all} the distinct subjects $z$ that the relation $bornIn$ has.
+\comment{Fabian:}{unclear here:} In reality, we want the number of different $z$ chosen from those that remain after step 2 ($num_{z\; per \; x}$) that correspond to the same $y$, which is more expensive to compute.
+In other words, in step 4 we employ a very pessimistic scenario, which leads to an underestimation (?) of the actual value.
+
+This estimation gives us the number of distinct values for $y$ for a given value of $x$.
+If we want to know the number of pairs $(x,y)$, we just have to multiply this value by the number of distinct $x$.
+The number of people $x$ can be estimated relatively easily by intersecting \emph{livesIn} with \emph{hasChild}.
+Thus, we can estimate the number of pairs $(x,y)$.
+If this number is huge, then the denominator of the PCA confidence is large, and hence the PCA confidence must be small.
+Thus, the rule can be pruned. In the following, we describe the procedure in detail for the general case.
+
+% If the approximated confidence is below the confidence threshold, then AMIE does not have to execute the query, but can directly prune out the rule.
+% %Otherwise, the rule is not evaluated, it will not be output, but in general should be considered for further refinement.
+%
+
+\comment{Katja}{For a subsection named ``intuition'', this is already very formal. But I don't have a good idea how to explain it even more intuitively.}
+
+
+
+\subsubsection{Formal Description}
+
+In the following, we focus on rules with only variables because rules with constants usually result in queries that are much more selective and can therefore be executed efficiently.
+\comment{Katja}{is that the formal rule that decides when to apply approximation? Where in the text do we explain, how a user/algorithm can control the pruning?}
+Consider the following rule
+$$
+  r_1(x_1,y_1) \wedge r_2(x_2,y_2) \wedge ... \wedge r_n(x_n,y_n) \Rightarrow r_h(x_h,y_h)
+$$
+Since all atoms in a rule in AMIE are connected, and since all variables appear at least twice, we can always rearrange the rule to yield a ``path'' from $x_0$ to $x_n$. Such a path takes the following form:
+% \comment{Fabian}{Is that right?}\comment{Katja}{How about rules such as $r_1(x_0,x_1) \wedge r_2(x_1,x_2) \wedge r_3(x_2, x_3) \wedge r_4(x_1, x_4) \wedge r_5(x_4,x_5) \wedge r_6(x_3,x_5)$?}
+% \comment{Katja}{Some more explanation on the reordering and conversion of the variables could be useful.}
+$$
+  r_1(x_0,x_1) \wedge r_2(x_1,x_2) \wedge ... \wedge r_n(x_{n-1},x_n) \Rightarrow r_h(x_0,x_n)
+$$
+For this arrangement, some relations may have been replaced by their inverses, some atoms may have to be swapped, and some atoms may have to be omitted. There may be multiple paths from $x_0$ to $x_n$ for a given rule. However, since any path has at most as many atoms as the original rule, the support of the path rule will always be greater than the support of the original rule -- no matter which path we choose. This is an important property because we aim at overestimating confidence and strictly avoiding underestimations.
+%want to overestimate confidence.
+To compute the PCA confidence, we have to calculate
+$$
+ \#(x_0,x_n): r_1(x_0,x_1) \wedge ... \wedge r_n(x_{n-1},x_n) \wedge r_h(x_0,y)
+$$
+%which we re-arrange with $r_0=r_h^{-1}$ as
+%\[
+% %\#(x_0,x_n): r_0(y,x_0) \wedge r_1(x_0,x_1) \wedge ... \wedge r_n(x_{n-1},x_n)
+% %\]
+For every value of $x_0$, we want to compute the number of possible $x_n$. Assume we know how many distinct values of $x_0$ exist ($num_0$), then the average number of values for $x_1$ is
+%Assume that we know how many distinct values of $x_0$ there are. Call this quantity $num_0$. Then the average number of values for $x_1$ is
+$$\frac{num_0}{fun(r_1)}$$
+% These values will not be all distinct. Two different values for $x_0$ may give rise to the same value for $x_1$. Therefore, the average number of \emph{distinct} values for $x_1$ is
+% \[num(x_1) := \frac{num(x_0) \times ifun(r_1)}{fun(r_1)}\]
+Next, let us compute the number of distinct values for $x_2$. When we join $r_1$ and $r_2$, not all values for $x_1$ will remain. Hence, we make use of the overlap function
+$$ov(r,s) := \# y: \exists x,z: r(x,y) \wedge s(y,z)$$
+This function computes the size of the join between $r$'s second variable and $s$'s first variable.
+%This function computes the size of the join of $r$ on the second variable with $s$ on the first variable.
+Then, the average number of values for $x_1$ that remain after the join is
+$$num_1 \times \frac{ov(r_1,r_2)}{|range(r_1)|}$$
+ With the same argumentation as above, the average number of distinct values for $x_2$ is
+$$num_2 := num_1 \times \frac{ov(r_1,r_2) \times ifun(r_2)}{|range(r_1)| \times fun(r_2)}$$
+ If we iterate this procedure over all atoms, we obtain
+$$num_n = \frac{num_0 \times ifun(r_1)}{fun(r_1)} \prod_{i=2}^n \frac{ov(r_{i-1},r_i) \times ifun(r_i)}{|range(r_{i-1})| \times fun(r_i)}$$
+Each value of $x_0$ will on average be involved in $num_n$ distinct values for $x_n$.
+%Every value of $x_0$ will give rise, on average, to $num_n$ distinct values for $x_n$.
+We know that $x_0$ results from a join of $r_h$ and $r_1$, i.e., $num_0 := ov(r_h^{-1},r_1)$. This yields
+$$\frac{ov(r_h^{-1},r_1) \times ifun(r_1)}{fun(r_1)} \prod_{i=2}^n \frac{ov(r_{i-1},r_i) \times ifun(r_i)}{|range(r_{i-1})| \times fun(r_i)}$$
+This is the approximation that we use for the number of pairs $\#(x_0,x_n)$ in our query.
+
+\comment{Katja}{Isn't here somewhat missing the conclusion, i.e., and based on in this estimation, we can prune... whenever...?}
+
+
+
+\subsubsection{Discussion}
+
+\comment{Katja}{At the moment, there is no ``bridge'' that relates the discussion much to the text before.}
+\paragraph{Application} We precompute the functionalities, the inverse functionalities, and the ranges for all relations.
+Furthermore, we precompute the overlap between each pair of relations. This results in a slight loss of time when loading the KB, but pays off easily during rule mining.
+This means that our approximation of the confidence can be computed as a simple product of precomputed values without actually firing a query.
+We apply the approximation only if the query has more than 2 atoms, if it contains no constants, and if we cannot compute a bound for the confidence as outlined in Section \ref{prunebound}.
+ In that case, we approximate the PCA confidence. If the approximate value is smaller than the threshold, we abandon the rule. Otherwise, we compute the exact PCA confidence and proceed as usual. \comment{Fabian}{Is that right?}
+\comment{Katja}{Perhaps a pseudocode algorithm?}
+
+\paragraph{Properties} Our approximation assumes that all outgoing links of a relation are uniformly distributed. That is \comment{Fabian}{Formal argument here}
+
+In that case,
+% Fabian: we never apply the approximation in this case
+% the approximate confidence formula for rules of the form $r_1(x,y)\Rightarrow r_h(x,y)$  is exact.
+the overlap terms are giving the exact values for rules of the form $r_1(x,z) \wedge r_{1} ^{-1}(z,y)\Rightarrow r_h(x,y)$ (e.g., $actedIn(x,z)\wedge actedIn(y,z)\Rightarrow married(x,y)$). Since the number of $y$s is in general underestimated by our formula, the approximate confidence formula is an upper bound for the real confidence. If the relations in the body are different, the overlap terms will be correct only if we can make an independence assumption. \comment{Fabian}{Formal description of what independence is goes here}
+
+In all other cases, the overlap terms will over-estimate the number of entities in $x_0$ and intermediate variables. Since we are underestimating the number of
+entities in $x_n$, the approximation can over- or under-estimate real confidence.
+However, since our choice of handling duplicates in step 4 usually largely underestimates, we expect that our approximation will usually overestimate the actual confidence.
+This means that our approximation will not result in a big loss of good rules.
+\comment{Fabian}{The following is unclear to me. Is it necessary?} Theoretically, one could even set a lower threshold for the approximation than for the actual confidence in order to further reduce the chances of pruning good rules.
+On the other hand, calculating the approximation is cheap and it only requires some preprocessing for the computation of functionalities, distinct entities for each variable of each relation (e.g., $range(r_1)$)
+and the corresponding overlap of entities for all pairs of variables of all possible relations (e.g., $ov_{os}(r_1\wedge r_2)$).
+These two facts (fast computation and small rate of false pruning) make the usage of the approximated confidence an attractive solution.
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% \comment{Fabian}{Is that exactly the formula that we want?
+% If so, we can merge this with Christina's explications below, which are more illustrative and also explain the underestimation.
+% My formula has one more $ifun(r_1)$ than Christina's. Which one is right?}
+%
+% \comment{Chris}{when you move from $x_0$ to $x_1$ through $r_1$ the only way to have duplicates is $r_1$ to have the same facts many times.
+% If very relation has distinct facts it cannot produce duplicate $x_1$s. For the next steps and since there are intermediate variables
+% (e.g., $x_1$ between $x_0$ and $x_2$) then indeed it is possible to have duplicates.}
+
+\ignore{
+\begin{table*}
+\caption{\label{notation_appr}Notation used for approximated confidence}
+ \begin{tabular}{l|l}
+\textbf{Symbol}		  & \textbf{Description}  	\\
+\hline
+  $num_{v\; per \; u}$	&number of entities in variable $v$ produced \emph{per entity} in variable $u$	\\
+  $|range(r)|$		&number of distinct entities in the range of relation $r$	\\
+  $|domain(r)|$		&number of distinct entities in the domain of relation $r$	\\
+  $1/fun(r)$		&average number of distinct entities in the range of relation $r$ \emph{per subject entity} (number of objects per subject)	\\
+  $1/ifun(r)$		&average number of distinct entities in the domain of relation $r$ \emph{per object entity} (number of subjects per object)	\\
+  $ov_{ij}(r_1,r2)$	&where $i,j \in \{s,o\}$ for $s$:subject and $o$: object. The entities in the overlap of $r_1, r_2$ at the corresponding positions\\
+  $\widehat {Body}_{per\; x}$	&approximate expression for facts produced by the body \emph{per entity} of the input variable $x$.\\
+\end{tabular}
+\end{table*}
+}
+
+\ignore{
+As a first step, consider the rule:
+\[
+ r_1(x,y)\Rightarrow r_h(x,y)
+\]
+
+
+and assume $x$ is the input variable.
+We will try to derive first an expression for the average facts produced by the body per input entity  $\widehat {Body}_{per\; x}$ and then we will try to approximate confidence.
+For this reason, we will start with the input variable $x$ we will try to find a path through the atoms in the body (in this case there is only 1 atom) until we reach the output variable $y$.
+Assuming that all outgoing links across all entities within a relation are uniformly distributed, $\widehat {Body}_{per\; x}$ for our rule will be:
+
+\[
+ \widehat {Body}_{per\; x} = num_{y \; per \; x}=\frac{1}{fun(r_1)}
+\]
+
+where $ num_{y \; per \; x}$ is the number of distinct entities in variable $y$ per entity in variable $x$. In other words, for each input entity $x$ the body of the rule with produce on average $1/fun(r_1)$ facts.
+Since in the path between $x$ and $y$ in the body of the rule there is only one relation and we know that a relation contains distinct facts, we are sure that all $y$s produced for a given $x$ are distinct.
+If we multiply $\widehat {Body}_{per\; x}$ with the number of the expected distinct entities in the subject of $r_1$ ($|domain(r_1)|$) we get an approximation of the body size.
+If we multiply it, instead, with the common entities in the subject of $r_h$ and $r_1$ we get an approximation of the denominator of PCA confidence.
+Therefore, the formula for approximating PCA confidence will now take the form:
+
+\[
+\widehat{Conf}_{pca}=\frac{support}{ov_{ss}(r_h,r_1)\widehat {Body}_{per\; x}}
+\]
+
+where by $ov_{ss}(r_h,r_1)$ we denote the distinct entities in the overlap between the subjects of $r_1$ and $r_h$.
+Up to this point, our only assumption is that all outgoing links across all entities within a relation are uniformly distributed and in this case our approximation is exact.
+}
+
+\ignore{
+Assume now that we have 2 atoms in the body of the rule and the rule contains one intermediate variable:
+\[ r_1(x,z) \wedge r_2(z,y)  \Rightarrow r_h(x,y) \]
+
+For this rule there is only one path from a single $x$ to its (possibly many) $y$s: through variable $z$. This path includes the following steps:
+\begin{enumerate}
+ \item For each entity $x$, $r_1$ will produce on average $1/fun(r_1)$ entities for variable $z$.
+ \item Some or all of the entities in the $z$ variable of $r_1$ (of the step 1) will be able to get joined with the entities in the $z$ variable of $r_2$.
+ \item For each entity $z$, $r_2$ will produce on average $1/fun(r_2)$ entities in the $y$ variable.
+ \item Each of the entities in $y$, produced in step 3, belongs on average to $1/ifun(r_2)$ entities in the $z$ variable of $r_2$.
+\end{enumerate}
+
+From steps 1 and 2 we can approximate the number of entities in variable $z$ per entity in variable $x$:
+
+\[
+ num_{z \; per \; x}= \frac{ov_{os}(r_1,r_2)}{|range(r_1)| \times fun(r_1)}
+\]
+
+where by $|range(r)|$ we denote the number of distinct entities in the range of $r$ and by $ov_{os}(r_1,r_2)$ we denote the distinct entities in the overlap between the objects of $r_1$ and the subjects of $r_2$.
+The term $1/fun(r_1)$ corresponds to step  1. In order to approximate the join of step 2 we use the first ratio.
+The assumption here is that the objects of $r_1$ ($z$s) succeed or fail (in the join with $r_2$) for each single subject of $r_1$ with the same proportion as it happens in the whole population of $r_1$'s subjects.
+
+From steps 3 and 4 we can approximate the number of entities in variable $y$ per entity in variable $z$:
+\[
+ num_{y \; per \; z}= \frac{ifun(r_2)}{fun(r_2)}
+\]
+
+The term $1/fun(r_2)$ corresponds to step 3. Note that at the end of step 3, we already have for a single $x$ a bag of $y$s that correspond to it.
+However, these are not necessary distinct $y$s, since $x$ and $y$s are connected through the variable $z$.
+Consider, for example, the rule $hasChild(x,z) \wedge bornIn(z,y)\Rightarrow livesIn(x,y)$. If each parent has on average 3 children, this rule will produce on average 3 places of residence $y$ for each parent $x$.
+However there is no guarantee that these places will all be different from each other.
+If for a parent 2 or all of the children are born in the same city, then the rule will create less than 3 distinct places of residence $y$ for this parent.
+In an even more extreme scenario,  the rule $hasDistrict(x,z) \wedge hasState(z,y) \Rightarrow hasState(x,y)$,
+will produce for each city $x$ as many states $y$ as the districts of this city, but all of them will in reality be the same state.
+The term $1/ifun(r_2)$ (step 4) helps us address exactly this issue: each object of $r_2$ ($y$) contributes in the final count with a weight ($ifun(r_2)$) expressing the extend up to which
+this object exclusively belongs to a subject of $r_2$ ($z$):
+$1/ifun(r_2)$ is the number of subjects($z$) of $r_2$  to which a single object($y$) corresponds. Therefore a single object $y$ exclusively belongs to each of these subjects $z$ up to $ifun(r_2)$.
+
+Note that a single $y$ belongs to $1/ifun(r_2)$ different $z$ chosen from \emph{all} the distinct subjects $z$ that the relation $r_2$ has.
+In reality what we want is the number of different $z$ chosen from those that survive step 2 ($num_{z\; per \; x}$) that correspond to the same $y$, which is more expensive to compute.
+In other words, in step 4 we employ a very pessimistic scenario for $ \widehat {Body}_{per\; x}$ which leads to an overestimation of the actual confidence.
+Therefore, $ \widehat {Body}_{per\; x} $ will now become:
+\[
+ \widehat {Body}_{per\; x}  =  num_{z \; per \; x}num_{y \; per \; z}
+\]
+\[
+ \widehat {Body}_{per\; x}  =  \frac{ov_{os}(r_1,r_2)\;ifun(r_2)}{fun(r_1)\;|range(r_1)|\;fun(r_2)}
+\]
+If we now want to calculate PCA confidence, we should multiply $  \widehat {Body}_{per\; x} $ with the common entities in $x$ between head and body.
+If we make an independence assumption we can approximate this number with the common entities between $r_h$ and $r_1$ ($ov_{ss}(r_h,r_1)$).
+Now let us assume that the rule takes the more general form:
+\[
+ r_1(x_1,x_2)\wedge r_2(x_2,x_3) \wedge ... \wedge r_m(x_{m},x_{m+1}) \Rightarrow r_h(x_1,x_{m+1})
+\]
+Our approximated confidence will take the form:
+\[
+\widehat{Conf}_{pca}=\frac{support}{ov_{ss}(r_h,r_1)  \widehat {Body}_{per\; x} }
+\]
+ where
+\begin{eqnarray*}
+ \widehat {Body}_{per\; x}  	&=& num_{x_2\; per \; x_1}\;num_{x_3\; per \; x_2}\;...\;num_{x_{m+1}\; per \; x_{m}} \\
+		&=& \frac{1}{fun(r_1)}   \prod_{i=2}^{m}\frac{ov_{os}(r_{i-1},r_i)}{|range(r_{i-1})|}\frac{ifun(r_i)}{fun(r_i)}
+\end{eqnarray*}
+
+Note that the structure of this rule implies a chain of variables from left to right: $x \rightarrow z_1 \rightarrow ... \rightarrow y$.
+If for any atom the bindings of the variables are different (e.g., $x \leftarrow z_1 \rightarrow ... \rightarrow y$),
+we could substitute the non-conforming atom $r_1(z_1,x)$ by the atom having the inverse relation, i.e., $r_1^{-1}(x,z_1)$, and in this way keep the order from left to right.
+
+Note also that between the input variable $x$ and the output $y$ there is only one single path.
+Different formulas could be derived if there are multiple paths.
+However, the true value of $ \widehat {Body}_{per\; x} $  calculated by taking into consideration all paths, will always be smaller or equal than its value if it is calculated by taking into consideration any single path.
+In this sense the resulting confidence will always be an overestimation of the real confidence.
+}
+
+% Consider the rule:
+% \[
+% \emph{livesIn}(x,z) \wedge \emph{diedIn}(y,z) \Rightarrow  \emph{hasChild}(x,y)
+% \]
+% This rule implies that all people that lived in a place are parents of all people who died in the same place.
+% Intuitively, we expect this rule to make many wrong predictions. Apart from that, the body size of such a rule can be huge
+% and therefore the query for the calculation of the confidence denominator can be extremely expensive.
+% \comment{Katja}{Add reference and relate to the section that introduces the standard algorithm.}
+%
+% In the following, we present a method to approximate the confidence of such a rule without actually executing the query.
+% If the approximated confidence is below the confidence threshold, then AMIE does not have to execute the query, but can directly prune out the rule.
+% %Otherwise, the rule is not evaluated, it will not be output, but in general should be considered for further refinement.
+%
+% %We present our approximation for rules with only variables, because rules with constants usually have queries which are much more selective and therefore their execution is fast.
+% Table~\ref{notation_appr} provides an overview of the notation that we are going to use for the analysis.
+% % describes all notation used in the analysis of this paragraph.
+%
+% \begin{table*}
+% \caption{\label{notation_appr}Notation used for approximated confidence}
+%  \begin{tabular}{l|l}
+% \textbf{Symbol}		  & \textbf{Description}  	\\
+% \hline
+%   $num_{v\; per \; u}$	&number of entities in variable $v$ produced \emph{per entity} in variable $u$	\\
+%   $|range(r)|$		&number of distinct entities in the range of relation $r$	\\
+%   $|domain(r)|$		&number of distinct entities in the domain of relation $r$	\\
+%   $1/fun(r)$		&average number of distinct entities in the range of relation $r$ \emph{per subject entity} (number of objects per subject)	\\
+%   $1/ifun(r)$		&average number of distinct entities in the domain of relation $r$ \emph{per object entity} (number of subjects per object)	\\
+%   $ov_{ij}(r_1,r2)$	&where $i,j \in \{s,o\}$ for $s$:subject and $o$: object. The entities in the overlap of $r_1, r_2$ at the corresponding positions\\
+%   $\widehat {Body}_{per\; x}$	&approximate expression for facts produced by the body \emph{per entity} of the input variable $x$.\\
+% \end{tabular}
+% \end{table*}
+%
+%
+% As a first step, consider the rule:
+% \[
+%  r_1(x,y)\Rightarrow r_h(x,y)
+% \]
+%
+%
+% and assume $x$ is the input variable.
+% We will try to derive first an expression for the average facts produced by the body per input entity  $\widehat {Body}_{per\; x}$ and then we will try to approximate confidence.
+% For this reason, we will start with the input variable $x$ we will try to find a path through the atoms in the body (in this case there is only 1 atom) until we reach the output variable $y$.
+% Assuming that all outgoing links across all entities within a relation are uniformly distributed, $\widehat {Body}_{per\; x}$ for our rule will be:
+%
+% \[
+%  \widehat {Body}_{per\; x} = num_{y \; per \; x}=\frac{1}{fun(r_1)}
+% \]
+%
+% where $ num_{y \; per \; x}$ is the number of distinct entities in variable $y$ per entity in variable $x$. In other words, for each input entity $x$ the body of the rule with produce on average $1/fun(r_1)$ facts.
+% Since in the path between $x$ and $y$ in the body of the rule there is only one relation and we know that a relation contains distinct facts, we are sure that all $y$s produced for a given $x$ are distinct.
+% If we multiply $\widehat {Body}_{per\; x}$ with the number of the expected distinct entities in the subject of $r_1$ ($|domain(r_1)|$) we get an approximation of the body size.
+% If we multiply it, instead, with the common entities in the subject of $r_h$ and $r_1$ we get an approximation of the denominator of PCA confidence.
+% Therefore, the formula for approximating PCA confidence will now take the form:
+%
+% \[
+% \widehat{Conf}_{PCA}=\frac{support}{ov_{ss}(r_h,r_1)\widehat {Body}_{per\; x}}
+% \]
+%
+% where by $ov_{ss}(r_h,r_1)$ we denote the distinct entities in the overlap between the subjects of $r_1$ and $r_h$.
+% Up to this point, our only assumption is that all outgoing links across all entities within a relation are uniformly distributed and in this case our approximation is exact.
+%
+% Assume now that we have 2 atoms in the body of the rule and the rule contains one intermediate variable:
+% \[ r_1(x,z) \wedge r_2(z,y)  \Rightarrow r_h(x,y) \]
+%
+% For this rule there is only one path from a single $x$ to its (possibly many) $y$s: through variable $z$. This path includes the following steps:
+% \begin{enumerate}
+%  \item For each entity $x$, $r_1$ will produce on average $1/fun(r_1)$ entities for variable $z$.
+%  \item Some or all of the entities in the $z$ variable of $r_1$ (of the step 1) will be able to get joined with the entities in the $z$ variable of $r_2$.
+%  \item For each entity $z$, $r_2$ will produce on average $1/fun(r_2)$ entities in the $y$ variable.
+%  \item Each of the entities in $y$, produced in step 3, belongs on average to $1/ifun(r_2)$ entities in the $z$ variable of $r_2$.
+% \end{enumerate}
+%
+% From steps 1 and 2 we can approximate the number of entities in variable $z$ per entity in variable $x$:
+%
+% \[
+%  num_{z \; per \; x}= \frac{ov_{os}(r_1,r_2)}{|range(r_1)|} \frac{1}{fun(r_1)}
+% \]
+%
+% where by $|range(r)|$ we denote the number of distinct entities in the range of $r$ and by $ov_{os}(r_1,r_2)$ we denote the distinct entities in the overlap between the objects of $r_1$ and the subjects of $r_2$.
+% The term $1/fun(r_1)$ corresponds to step  1. In order to approximate the join of step 2 we use the first ratio.
+% The assumption here is that the objects of $r_1$ ($z$s) succeed or fail (in the join with $r_2$) for each single subject of $r_1$ with the same proportion as it happens in the whole population of $r_1$'s subjects.
+%
+% From steps 3 and 4 we can approximate the number of entities in variable $y$ per entity in variable $z$:
+% \[
+%  num_{y \; per \; z}= \frac{1/fun(r_2)}{\min(1/ifun(r_2), num_{z \; per \; x})}
+% \]
+%
+% The term $1/fun(r_2)$ corresponds to step 3. Note that at the end of step 3, we already have for a single $x$ a bag of $y$s that correspond to it.
+% However, these are not necessary distinct $y$s, since $x$ and $y$s are connected through the variable $z$.
+% Consider, for example, the rule $hasChild(x,z) \wedge bornIn(z,y)\Rightarrow livesIn(x,y)$. If each parent has on average 3 children, this rule will produce on average 3 places of residence $y$ for each parent $x$.
+% However there is no guarantee that these places will all be different from each other.
+% If for a parent 2 or all of the children are born in the same city, then the rule will create less than 3 distinct places of residence $y$ for this parent.
+% In an even more extreme scenario,  the rule $hasDistrict(x,z) \wedge hasState(z,y) \Rightarrow hasState(x,y)$,
+% will produce for each city $x$ as many states $y$ as the districts of this city, but all of them will in reality be the same state.
+% The term $1/ifun(r_2)$ (step 4) helps us address exactly this issue: each object of $r_2$ ($y$) contributes in the final count with a weight ($ifun(r_2)$) expressing the extend up to which
+% it exclusively belongs to a subject of $r_2$ ($z$).
+% $1/ifun(r_2)$ is the number of subjects($z$) of $r_2$  to which a single object($y$) corresponds. Therefore a single object $y$ exclusively belongs to each of these subjects $z$ up to $ifun(r_2)$.
+% At this point we are making the overall pessimistic assumption that the entities in $1/ifun(r_2)$ and $num_{z \; per \; x}$ are overlapping and therefore all or some of the $z \in num_{z\; per \; x}$ will produce duplicate $y$s.
+% This means that we need to down-weight the $y$s by the overlap of  $1/ifun(r_2)$ and $num_x(z)$.
+% If the number of potential $z$s to which a $y$ corresponds ($1/ifun(r_2)$) is smaller than the $z$s produced by steps 1 and 2 ($num_{z\; per \; x}$), we weight each $y$ by $ifun(r_2)$, otherwise we
+% weight each $y$ by $1/num_{z\; per \; x}$.
+% Note that the assumption that $1/ifun(r_2)$ and $num_{z\; per \; x}$ are overlapping is pessimistic. This means that we underestimate $ num_{y \; per \; z}$.
+%
+%
+%
+% Therefore, $ \widehat {Body}_{per\; x} $ will now become:
+%
+% \[
+%  \widehat {Body}_{per\; x}  =  num_{z \; per \; x}num_{y \; per \; z}
+% \]
+%
+%
+% If we now want to calculate PCA confidence, we should multiply $  \widehat {Body}_{per\; x} $ with the common entities in $x$ between head and body.
+% If we make an independence assumption we can approximate this number with the common entities between $r_h$ and $r_1$ ($ov_{ss}(r_h,r_1)$).
+%
+%
+% Now let us assume that the rule takes the more general form:
+%
+% \[
+%  r_1(x_1,x_2)\wedge r_2(x_2,x_3) \wedge ... \wedge r_m(x_{m},x_{m+1}) \Rightarrow r_h(x_1,x_{m+1})
+% \]
+%
+%
+%
+%
+% Our approximated confidence will take the form:
+%
+% \[
+% \widehat{Conf}_{PCA}=\frac{support}{ov_{ss}(r_h,r_1)  \widehat {Body}_{per\; x} }
+% \]
+%  where
+%
+%
+% \begin{eqnarray*}
+%  \widehat {Body}_{per\; x}  	&=& num_{x_2\; per \; x_1}\;num_{x_3\; per \; x_2}\;...\;num_{x_{m+1}\; per \; x_{m}} \\
+% 		&=& num_{x_2\; per \; x_1}\;num_{x_{m+1}\; per \; x_{m}} \prod_{i=2}^{m-1} num_{x_{i+1}\; per \; x_i}
+% \end{eqnarray*}
+%
+% where in the second equation we have separated the counts that include the input and output variable from the counts that use only intermediate variables. Then:
+%
+%
+% \[
+% num_{x_2\; per \; x_1} =  \frac{ov_{os}(r_1,r_2)\; 1/fun(r_1)}{|range(r_1)|}
+% \]
+%
+% \[
+% num_{x_{m+1}\; per \; x_{m}} =  \frac{1/fun(r_m)}{ \min (1/ifun(r_m), num_{x_m\; per \; x_{m-1}})}
+% \]
+%
+%
+% \begin{eqnarray*}
+% & \forall i \in [2, m-1] \\
+% & num_{x_{i+1}\; per \; x_i}= \frac{ov_{os}(r_{i},r_{i+1})}{|range(r_{i})|} \frac{1/fun(r_i)}{\min (1/ifun(r_i), num_{x_i\; per \; x_{i-1}})}
+% \end{eqnarray*}
+%
+%
+% Note that the structure of this rule implies a chain of variables from left to right: $x \rightarrow z_1 \rightarrow ... \rightarrow y$.
+% If for any atom the bindings of the variables are different(e.g., $x \leftarrow z_1 \rightarrow ... \rightarrow y$),
+% we could substitute this relation by the inverse relation and in this way keep the order from left to right.
+%
+% Note also that between the input variable $x$ and the output $y$ there is only one single path.
+% Different formulas could be derived if there are multiple paths.
+% However, the true of $ \widehat {Body}_{per\; x} $, as calculated by taking into consideration all paths, will always be smaller or equal than if it is calculated by taking into consideration any single path.
+% In this sense the resulting confidence will always be an overestimation of the real confidence.
+%
+%
+
+% Regarding the above formulas, we should note that, assuming that all outgoing links across all entities within a relation are uniformly distributed,
+% the approximate confidence formula for rules of the form $r_1(x,y)\Rightarrow r_h(x,y)$  is exact.
+% For rules of the form $r_1(x,z) \wedge r_{1} ^{-1}(z,y)\Rightarrow r_h(x,y)$ (i.e., same relation repeated), the overlap terms are giving the exact values and, since the number of $y$s
+% is in general underestimated by our formulas, the approximate confidence formula is an upper bound for the real confidence. If the relations in the body are different, the overlap terms will be correct
+%  only if we can make an independence assumption.
+%
+% In real life, however, the overlap terms will over-estimate the number of entities in input and intermediate variables and since we are under-estimating the number of
+% entities in the output variable, it is not clear if in the end the formula will over- or under-estimate real confidence.
+% However, since our choice of handling the duplicates in step 4 usually largely underestimates body size, we expect that our approximation will usually result to an overestimate of the actual confidence.
+% This means that although an approximation, it will not result in a big loss of good rules.
+% Theoretically, one could even set a lower threshold for the approximation than for the actual confidence in order to further reduce the chances of pruning good rules.
+% On the other hand, calculating the approximation is cheap and it only requires some preprocessing for the computation of functionalities, distinct entities for each variable of each relation (e.g., $range(r_1)$)
+% and the corresponding overlap of entities for all pairs of variables of all possible relations (e.g., $ov_{os}(r_1\wedge r_2)$).
+% These two facts (fast computation and small rate of false pruning) make the usage of the approximated confidence an attractive solution.
+%
+% Note that, since our interest is in predicting an approximate confidence value for rules which include \emph{expensive} queries for calculating the confidence denominator,
+% we do not calculate the approximation when then queries are expected to be cheap, i.e. for rules with constants (high selectivity),  for rules with 1 atom in the body and
+% for rules without intermediate variables (high selectivity), e.g., $r_1(x,y) \wedge r_2(x,y) \Rightarrow r_h(x,y)$.
+% Overall, AMIE+ will check for each rule closed rule containing 3 variables (input, output and intermediate) the approximate confidence $\widehat{Conf}_{PCA}$ as described in this section.
+% If $\widehat{Conf}_{PCA}$ is larger than the confidence threshold, then the exact PCA confidence will be computed.
+% If it is lower than the confidence threshold, then the exact PCA confidence is not computed and the rule is not outputted.
+
+
+
+% Overall, we should point out that the above formulas are just approximations, since they heavily depend on independence and uniformity assumptions, which do not hold in general.
+% On the other hand, calculating the approximation is cheap and it only requires some preprocessing for the computation of functionalities, distinct entities for each variable of each relation (e.g., $range(r_1)$)
+% and the corresponding overlap of entities for all pairs of variables of all possible relations (e.g. $ov_{os}(r_1\wedge r_2)$).
+% Apart from that, our choice of handling the duplicates in step 4 usually underestimates body size, resulting usually (but not always) in overestimating the actual confidence.
+% This means that although an approximation, the formula will not result in a big loss of good rules.
+% Theoretically, one could even set a lower threshold for the approximation than for the actual confidence in order to further reduce the chances of pruning good rules.
+% Our experimental results in Section~\ref{blah} show that for a small preprocessing overhead and a small loss in the resulting rules, the approximated formula allows us to run in very large datasets.
+
+
+
+
+
+
+
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+% \comment{Fabian}{------- new -------\\}
+% We present our approximation for rules with only variables, because rules with constants usually have a much smaller support and do not need to be approximated.
+% \comment{Fabian}{Is that right?}. \comment{Katja}{That should be right. And being a heuristic, it is fine if it is only applied to cases that are heuristically the most costly ones.}
+%
+%
+% Consider the rule
+% \[
+%  r_1(x_1,y_1) \wedge r_2(x_2,y_2) \wedge ... \wedge r_n(x_n,y_n) \Rightarrow r_h(x_h,y_h)
+% \]
+% Since all atoms in a rule in AMIE are connected, and since all variables appear at least twice, we can re-label and re-arrange the atoms such that the rule becomes
+% \comment{Fabian}{Is that right?}\comment{Katja}{How about rules such as $r_1(x_0,x_1) \wedge r_2(x_1,x_2) \wedge r_3(x_2, x_3) \wedge r_4(x_1, x_4) \wedge r_5(x_4,x_5) \wedge r_6(x_3,x_5)$?}
+% \comment{Katja}{Some more explanation on the reordering and conversion of the variables could be useful.}
+%
+% \[
+%  r_1(x_0,x_1) \wedge r_2(x_1,x_2) \wedge ... \wedge r_n(x_{n-1},x_n) \Rightarrow r_h(x_0,x_n)
+% \]
+% where some variables may be identical and some relations may have been replaced by their inverses. To compute the PCA confidence, we have to calculate
+% \[
+% \#(x_0,x_n): r_1(x_0,x_1) \wedge ... \wedge r_n(x_{n-1},x_n) \wedge r_h(x_0,y)
+% \]
+% %which we re-arrange with $r_0=r_h^{-1}$ as
+% %\[
+% %\#(x_0,x_n): r_0(y,x_0) \wedge r_1(x_0,x_1) \wedge ... \wedge r_n(x_{n-1},x_n)
+% %\]
+% We want to compute, for every value of $x_0$, the number of possible $x_n$. Assume that we know how many distinct values of $x_0$ there are. Call this quantity $num(x_0)$. Then the average number of values for $x_1$ is
+% \[\frac{num(x_0)}{fun(r_1)}\]
+% These values will not be all distinct. Two different values for $x_0$ may give rise to the same value for $x_1$. Therefore, the average number of \emph{distinct} values for $x_1$ is
+% \[num(x_1) := \frac{num(x_0) \times ifun(r_1)}{fun(r_1)}\]
+% Now let us compute the number of distinct values for $x_2$. When we join $r_1$ with $r_2$, not all values for $x_1$ will remain. Hence, we define an overlap function
+% \[ov(r,s) := \# y: \exists x,z: r(x,y) \wedge s(y,z)\]
+% This function computes the size of the join of $r$ on the second variable with $s$ on the first variable. Then the average number of values for $x_1$ that remain throughout the join is
+% \[num(x_1) \times \frac{ov(r_1,r_2)}{|range(r_1)|}\]
+% With the same argumentation as before, the average number of distinct values for $x_2$ is
+% \[num(x_2) := num(x_1) \times \frac{ov(r_1,r_2) \times ifun(r_2)}{|range(r_1)| \times fun(r_2)}\]
+% If we iterate this procedure, we arrive at
+% \[num(x_n) = \frac{num(x_0) \times ifun(r_1)}{fun(r_1)} \prod_{i=2}^n \frac{ov(r_{i-1},r_i) \times ifun(r_i)}{|range(r_{i-1})| \times fun(r_i)}\]
+% Every value of $x_0$ will give rise, on average, to $num(x_n)$ distinct values for $x_n$. We know that $x_0$ results from a join of $r_h$ and $r_1$, and hence we set $num(x_0) := ov(r_h^{-1},r_1)$. This yields
+% \[\frac{ov(r_h^{-1},r_1) \times ifun(r_1)}{fun(r_1)} \prod_{i=2}^n \frac{ov(r_{i-1},r_i) \times ifun(r_i)}{|range(r_{i-1})| \times fun(r_i)}\]
+% This is the approximation that we use for the number of pairs $\#(x_0,x_n)$ in our query.
+% \comment{Fabian}{Is that exactly the formula that we want?
+% If so, we can merge this with Christina's explications below, which are more illustrative and also explain the underestimation.
+% My formula has one more $ifun(r_1)$ than Christina's. Which one is right?}
+%
+% \comment{Chris}{when you move from $x_0$ to $x_1$ through $r_1$ the only way to have duplicates is $r_1$ to have the same facts many times.
+% If very relation has distinct facts it cannot produce duplicate $x_1$s. For the next steps and since there are intermediate variables
+% (e.g.$x_1$ between $x_0$ and $x_2$) then indeed it is possible to have duplicates.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% As a first step, consider the rule:
+% \[
+%  r_1(x,y)\Rightarrow r_h(x,y)
+% \]
+%
+%
+% and assume $x$ is the input variable.
+% We will try to derive first an expression for the average facts per input entity produced by the body $BodyPerX_{appr}$ and then we will try to approximate confidence.
+% For this reason, we will start with the input variable $x$ we will try to find a path through the atoms in the body (in this case there is only 1 atom) until we reach the output variable $y$.
+% Assuming that all outgoing links across all entities within a relation are uniformly distributed, $BodyPerX_{appr}$ for our rule will be:
+%
+% \[
+%  BodyPerX_{appr} = \frac{1}{fun(r_1)}
+% \]
+%
+%
+% In other words, for each input entity $x$ the body of the rule with produce on average $1/fun(r_1)$ facts.
+% Since in the path between $x$ and $y$ in the body of the rule there is only one relation and we know that a relation contains distinct facts, we are sure that all $y$s produced for a given $x$ are distinct.
+% If we multiply $BodyPerX_{appr}$ with the number of the expected distinct $x$ in $r_1$ ($\#X(r_1)$) we get an approximation of the body size.
+% If we multiply it with the common entities $x$ between $r_h$ and $r_1$ we get an approximation of the denominator of PCA confidence.
+% Therefore, the formula for approximating PCA confidence will now take the form:
+%
+% \[
+%  PCA\; Conf_{approx}=\frac{support}{\#X(r_h\wedge r_1)BodyPerX_{appr}}
+% \]
+%
+% where by $\#X(r_h\wedge r_1)$ we denote the distinct entities for position $x$ in the overlap of $r_1$ and $r_h$.
+%
+% Up to this point, our only assumption is that all outgoing links across all entities within a relation are uniformly distributed and in this case our approximation is exact.
+
+% Assume now that we have 2 atoms in the body of the rule:
+% \[ r_1(x,z) \wedge r_2(z,y)  \Rightarrow r_h(x,y) \]
+%
+% The path in the body from a single $x$ to its (possibly many) $y$s include the following steps:
+% \begin{enumerate}
+%  \item For each entity $x$, $r_1$ will produce on average $1/fun(r_1)$ entities for variable $z$.
+%  \item Some or all of the entities in the $z$ variable of $r_1$ (of the step 1) will be able to get joined with the entities in the $z$ variable of $r_2$.
+%  \item For each entity $z$, $r_2$ will produce on average $1/fun(r_2)$ entities in the $y$ variable.
+%  \item Each of the entities in $y$, produced in step 3, belongs on average to $1/ifun(r_2)$ entities in the $z$ variable of $r_2$.
+% \end{enumerate}
+%
+%
+%
+%
+%
+% Therefore, $ BodyPerX_{appr}$ will now become:
+%
+% \[
+%  BodyPerX_{appr} =  \frac{\#Z(r_1\wedge r_2)}{\min(\#Z(r_1), \#Z(r_2))} \frac{ifun(r2)}{fun(r_1)fun(r_2)}
+% \]
+%
+% \comment{Chris}{the min might need to go away}
+%
+%
+% where by $\#Z(r)$ we denote the number of distinct entities for the $z$ variable of $r$ and by $\#Z(r_1\wedge r_2)$ we denote the distinct entities for position $z$ in the overlap of $r_1$ and $r_2$.
+% In the above formula, $fun(r_1)$ and $fun(r_2)$ correspond to the steps 1 and 3, respectively.
+% In order to approximate the join of step 2 we use the first ratio and, by doing so,
+%  we assume that the entities in the $z$ variable of $r_1$ for each entity $x$ succeed or fail in the join as it happens in the whole population of $x$s. \comment{Chris}{reformulate?}
+
+% \comment{Fabian}{The following is right, but is difficult to follow}
+% Note that at the end of step 3, we already have for a single $x$ a bag of $y$s that correspond to it. However, these are not necessary distinct $y$s, since $x$ and $y$s are connected through the variable $z$:
+% 1$x$ can correspond to many $z$ and some of them might produce the same or different $y$. To handle this issue we multiply by $ifun(r_2)$ (step 4) and in this way we take into consideration each $y$ only to the extend that
+% we are sure it uniquely belongs to a specific $z$. Assume for example that according to $r_2$ 1$z$ corresponds to 5 $y$ and each $y$ to 3$z$.
+% Each of the 5$y$ that correspond to a $z$ will uniquely belong to it only up to $1/3$ since there will be another 2$z$ that it corresponds to.
+% If it happens that all those 3$z$ are joined to the same $x$ of $r_1$ then indeed the $y$ should be counted only once (or 3 $x$ $1/3$). In all other cases, we underestimate the number of distinct $y$s produced for each $x$ making
+% $ BodyPerX_{appr}$ smaller than what it is in reality.
+%
+% If we now want to calculate PCA confidence, we should multiply $ BodyPerX_{appr}$ with the common entities in $x$ between head and body.
+% If we make an independence assumption we can approximate this number with the common entities between $r_h$ and $r_1$ ($\#X(r_h\wedge r_1)$).
+%
+% In other words, for the case that the rule takes the form (and without loss of generality):
+%
+% \[
+%  r_1(x,z_1)\wedge r_2(z_1,z_2) \wedge ... \wedge r_m(z_{m-1},y) \Rightarrow r_h(x,y)
+% \]
+%
+% Our approximated confidence will take the form:
+%
+% \[
+%  PCA\; Conf_{approx}=\frac{support}{\#X(r_h\wedge r_1)BodyPerX_{appr}}
+% \]
+%  where
+% \[
+%  BodyPerX_{appr} =  \frac{1}{fun(r_1)}\prod_{i=2}^m \frac{\#Z_{i-1}(r_{i-1}\wedge r_i)}{\min (\#Z_{i-1}(r_{i-1}), \#Z_{i-1}(r_{i}))} \frac{ifun(r_i)}{fun(r_i)}
+% \]
+%
+%
+%
+% Overall, we should point out that the above formulas are just approximations, since they heavily depend on independence and uniformity assumptions, which do not hold in general.
+% On the other hand, calculating the approximation is cheap and it only requires some preprocessing for the computation of functionalities, distinct entities for each variable of each relation (e.g. $\#Z(r_1)$)
+% and the corresponding overlap of entities for all pairs of variables of all possible relations (e.g. $\#Z(r_1\wedge r_2)$).
+% Apart from that, our choice of handling the duplicates in step 4 usually overpenalizes the estimated body size, resulting usually (but not always) in overestimating the actual confidence.
+% This means that although an approximation, the formula will not result in a big loss of good rules.
+% Theoretically, one could even set a lower threshold for the approximation than for the actual confidence in order to further reduce the chances of pruning good rules.
+% Our experimental results in Section~\ref{blah} show that for a small preprocessing overhead and a small loss in the resulting rules, the approximated formula allows us to run in very large datasets.
+
+%
+%
+% Step 4 implies that there might be duplicate entities in $y$ for a single $x$ (derived from different entities in the $z$ variable of $r_2$).
+% Consider for example the rule $hasDistrict(x,z) \wedge hasState(z,y)  \Rightarrow hasState(x,y)$. For a given city $x$, all districts $y$ correspond to the same state $y$.
+% For this reason, we include in our formula each produced $y$ to the extent it "exclusively`` belongs an entity in $z$ (term $ifun(r_2)$).
+% Note that this is a worst case scenario, because it assumes that all $z$ produced by step 2 will produce in step 3  sets of entities $y$ that overlap to the largest possible extent.  \comment{Fabian}{The ``worst case'' would have to be defined more clearly. You mean: It makes $BodyPerX_{appr}$ smaller than its real value, which makes the PCA approximation larger than its real value, right?}
+% Also note that the use of functionalities assumes an underlying uniform distribution between entities in the relations, which might not hold in practice.
+% \comment{Fabian}{Yes, it makes two assumptions: Independence of relations and uniformity of the number outgoing links across all entities within one relation. This should be discussed in detail}
+%
+% If we multiply $BodyPerX_{appr}$ with number of the expected distinct $x$ in $r_1$ ($\#X(r_1)$) we get an approximation of the body size.
+% If we multiply it with the common entities $x$ between $r_h$ and $r_1$ we get an approximation of the denominator of PCA confidence.
+% Therefore, the formula for approximating PCA confidence will now take the form:
+%
+% \[
+%  PCA\; Conf_{approx}=\frac{support}{\#X(r_h\wedge r_1)BodyPerX_{appr}}
+% \]
+%
+% \comment{Fabian}{Yes,this looks good}
+%
+% Overall, we should point out that the above formulas are just crude approximations, since they heavily depend on independence and uniformity assumptions, which do not hold in general.
+% On the other hand, calculating the approximation is cheap and it only requires some preprocessing for the computation of functionalities, distinct entities for each variable of each relation (e.g. $\#Z(r_1)$)
+% and the corresponding overlap of entities for all pairs of variables of all possible relations (e.g. $\#Z(r_1\wedge r_2)$).
+% Apart from that, our choice of handling step 4 usually overpenalizes the estimated body size, resulting usually (but not always) in overestimating the actual confidence.
+% This means that although a crude approximation, the formula will not result in a big loss of good rules.
+% Theoretically, one could even set a lower threshold for the approximation than for the actual confidence in order to further reduce the chances of pruning good rules.
+% Our experimental results in Section~\ref{blah} show that for a small preprocessing overhead and a small loss in the resulting rules, the approximated formula allows us to run in very large datasets.
+% %
+
+%  \comment{Fabian}{This discussion could go along the following lines:
+% Let's assume $r_1=r_2$. Then our approximation is a guaranteed lower bound.
+% Let's assume uniformity and independence. Then our approximation is exact.
+% Let's assume nothing. Then our approximation still generally underestimates, because blah. Our experiments show that this is indeed the case.
+%  No need to emphasize ``crude'' so often ;-) }
+%  \comment{Chris}{To Luis: shall we include also an algorithm to  show that we use the approximation only to prune but not to substitute the actual confidence value of the rule?}
+%\comment{Katja}{It would be nice to describe somewhere how exactly this is integrated into the overall algorithm. This could be possible without showing an extra algorithm.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Consider the rule \emph{livesIn}$(x,z) \wedge$ \emph{diedIn}$(y,z) \Rightarrow $ \emph{hasChild}$(x,y)$. This rule implies that all people that lived in a place are parents of all people who died in the same place.
+% Intuitively, this is a rule which is expected to be bad. Apart from that, the body size of such a rule can be huge and therefore the query for the calculation of the confidence denominator can be extremely expensive.
+%
+% In the following, we argue that, by paying some small preprocessing overhead, it is possible to calculate very fast a crude approximation of confidence.
+% If the approximated confidence is above the confidence threshold, then AMIE proceeds in evaluating the actual confidence measure.
+% Otherwise, the rule is not evaluated, it will not be output, but in general should be considered for further refinement.
+%
+%
+% For the rest of this discussion, and without loss of generality, assume that the rule follows the pattern:
+% \[ r_1(x,z) \wedge r_2(z,y)  \Rightarrow r_h(x,y) \]
+%
+% and that the head's input variable is $x$.
+%
+% \comment{Fabian}{We have to convince readers that this is really without loss of generality. Maybe it would be best to look directly at the general case \[r_1 \wedge ... \wedge r_n \Rightarrow r_h(x,y)\] Say that we take a path in the body that connects $x$ and $y$.
+%
+% Here is a proposal of how that could look:
+% Our goal is to estimate
+% \[\#(x_0,x_n): r_0(y',x_0) \wedge r_1(x_0,x_1) \wedge r_2(x_1,x_2) \wedge ... \wedge r_n(x_{n-1},x_n)\]
+% where $r_0=r_h^{-1}$. We proceed as follows: We compute the number of $x_0$, $numx_0$, as a simple query with a single variable. Then we estimate the number of distinct $x_1$ as \[numx_1 = \frac{numx_0}{\#x: r_1(x,y)} \times overlap(r_0,r_1) \times fun(r_1)^{-1}\]
+% Then we estimate number of distinct $x_2$ as \[numx_2 = \frac{numx_1}{\#x: r_2(x,y)} \times overlap(r_1,r_2) \times fun(r_2)^{-1}\] We continue until we arrive at $x_n$. This yields the number of distinct pairs (since we already multiplied with $numx_0$). Hmm, well, or in a similar direction...
+% }
+%
+% The body of the rule:
+% \begin{enumerate}
+%
+%  \item For each entity $x$ will produce on average $1/fun(r_1)$ entities for variable $z$.
+%  \item Some or all of the entities in the $z$ variable of $r_1$ will be able to get joined with the entities in the $z$ variable of $r_2$.
+%  \item For each entity $z$, $r_2$ will produce on average $1/fun(r_2)$ entities in the $y$ variable.
+%  \item Each of the entities in $y$, produced in step 3, belongs on average to $1/ifun(r_2)$ entities in the $z$ variable of $r_2$.
+%
+% \end{enumerate}
+%
+% If we want to get a crude approximation of how many distinct entities $y$ the body will produce for each entity $x$ (i.e. how many facts will be produced per input variable $x$), we could use the following formula:
+%
+% \[
+%  BodyPerX_{appr} =  \frac{\#Z(r_1\wedge r_2)}{\max(\#Z(r_1), \#Z(r_2))} \frac{ifun(r2)}{fun(r_1)fun(r_2)}
+% \]
+%
+%
+% where by $\#Z(r)$ we denote the number of distinct entities for the $z$ variable of $r$ and by $\#Z(r_1\wedge r_2)$ we denote the distinct entities for position $z$ in the overlap of $r_1$ and $r_2$.
+% In the above formula, the first ratio corresponds to an approximation of the join of step 2
+% \comment{Fabian}{I do not yet see this. Step 2 says: The number of z's. This is $\#Z(r_1\wedge r_2)$, no?}
+% , and $fun(r_1)$, $fun(r_2)$ correspond to the steps 1 and 3, respectively.
+% Step 4 implies that there might be duplicate entities in $y$ for a single $x$ (derived from different entities in the $z$ variable of $r_2$).
+% Consider for example the rule $hasDistrict(x,z) \wedge hasState(z,y)  \Rightarrow hasState(x,y)$. For a given city $x$, all districts $y$ correspond to the same state $y$.
+% For this reason, we include in our formula each produced $y$ to the extent it "exclusively`` belongs an entity in $z$ (term $ifun(r_2)$).
+% Note that this is a worst case scenario, because it assumes that all $z$ produced by step 2 will produce in step 3  sets of entities $y$ that overlap to the largest possible extent.  \comment{Fabian}{The ``worst case'' would have to be defined more clearly. You mean: It makes $BodyPerX_{appr}$ smaller than its real value, which makes the PCA approximation larger than its real value, right?}
+% Also note that the use of functionalities assumes an underlying uniform distribution between entities in the relations, which might not hold in practice.
+% \comment{Fabian}{Yes, it makes two assumptions: Independence of relations and uniformity of the number outgoing links across all entities within one relation. This should be discussed in detail}
+%
+% If we multiply $BodyPerX_{appr}$ with number of the expected distinct $x$ in $r_1$ ($\#X(r_1)$) we get an approximation of the body size.
+% If we multiply it with the common entities $x$ between $r_h$ and $r_1$ we get an approximation of the denominator of PCA confidence.
+% Therefore, the formula for approximating PCA confidence will now take the form:
+%
+% \[
+%  PCA\; Conf_{approx}=\frac{support}{\#X(r_h\wedge r_1)BodyPerX_{appr}}
+% \]
+%
+% \comment{Fabian}{Yes,this looks good}
+%
+% Overall, we should point out that the above formulas are just crude approximations, since they heavily depend on independence and uniformity assumptions, which do not hold in general.
+% On the other hand, calculating the approximation is cheap and it only requires some preprocessing for the computation of functionalities, distinct entities for each variable of each relation (e.g. $\#Z(r_1)$)
+% and the corresponding overlap of entities for all pairs of variables of all possible relations (e.g. $\#Z(r_1\wedge r_2)$).
+% Apart from that, our choice of handling step 4 usually overpenalizes the estimated body size, resulting usually (but not always) in overestimating the actual confidence.
+% This means that although a crude approximation, the formula will not result in a big loss of good rules.
+% Theoretically, one could even set a lower threshold for the approximation than for the actual confidence in order to further reduce the chances of pruning good rules.
+% Our experimental results in Section~\ref{blah} show that for a small preprocessing overhead and a small loss in the resulting rules, the approximated formula allows us to run in very large datasets.
+%
+% \comment{Fabian}{This discussion could go along the following lines: Let's assume $r_1=r_2$. Then our approximation is a guaranteed lower bound. Let's assume uniformity and independence. Then our approximation is exact. Let's assume nothing. Then our approximation still generally underestimates, because blah. Our experiments show that this is indeed the case.
+%
+% No need to emphasize ``crude'' so often ;-) }
+% \comment{Chris}{To Luis: shall we include also an algorithm to  show that we use the approximation only to prune but not to substitute the actual confidence value of the rule?}
+%
+%
+
+% Consider the rule \emph{livesIn}$(x,z) \wedge$ \emph{diedIn}$(y,z) \Rightarrow $ \emph{hasChild}$(x,y)$. This rule implies that all people that lived in a place are parents of all people who died in the same place.
+% Intuitively, this is a rule which is expected to be bad. Apart from that, the body size of such a rule can be huge and therefore the queries needed to be fired in order to calculate confidence and head coverage
+% can extremely expensive.  In the following, we argue that for the case that a rule follows the "evil`` pattern \comment {Luis}{??}, it is possible to calculate very fast a crude approximation of confidence.
+% If the approximated confidence is above some threshold, then AMIE proceeds in evaluating the actual confidence measure. Otherwise, the rule will not be output, but in general should be considered for further refinement.
+%
+% Going back to our example, assume that in the knowledge base we observed the following statistics:
+% a person has lived on average in 2.5 places ($fun(livesIn)=1/2.5$), in a place have died on average 2M people ($ifun(diedIn)=1/2M$) and each parent has on average 2.3 children ($fun(hasChild)=1/2.3$).
+% Intuitively, if all the locations of the $livesIn$ relation are included in the locations of the $diedIn$ relation, our example rule will produce for each person $x$ 2.5*2M=5M children.
+% On the other hand, the $hasChild$ relation in our observed data (knowledge base) implies that only 2.3 children per parent are expected.
+% This means that, according to the PCA assumption, at most (best case scenario) the 2.3 predicted facts per parent are correct and the rest 5M-2.3=4999997.7 are expected to be false, i.e., our approximated confidence will be:
+%
+% \[
+% conf_{approx}=\frac{fun(livesIn)*ifun(diedIn)}{fun(hasChild)}=\frac{2.3}{5M}
+% \]
+%
+% Of course, the above is only a crude approximation: only a subset of the places in $livesIn$ might overlap with places in $diedIn$, 2.3 correctly predicted facts per parent is only an optimistic scenario
+% and our approximation uses functionalities and inverse functionalities, which is just averages (uniformity assumption). However, this approximation can give the right intuition about the quality of the rules
+% and at the same time it does not require any actual queries to be fired. It uses only the functionalities and inverse functionalities of the relations, which are precomputed and can be retrieved in constant time.
+% Although in theory there is no guarantee that this heuristic will not prune out useful rules, our experimental results show that in practice this is not the case.
+%
+% Note also that the above pruning threshold on the approximated confidence can be different than the normal confidence threshold. During mining, we want AMIE to invest its time wisely.
+% Mining a rule with low confidence (e.g. 0.1) in little time (the rule does not follow the pattern \comment {Luis}{??}) is in general not a problem,
+% but usually one does not want to spend too much time in mining low confidence rules.
+% Therefore, depending on the size of the dataset and the application itself, one might decide to use a rather aggressive threshold for the approximated confidence (e.g. 0.5).
+

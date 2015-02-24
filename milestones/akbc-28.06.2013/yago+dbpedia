@@ -1,0 +1,4 @@
+?a  <hasGender>  <female>   => ?a  <imdb:gender>  <female>	0.017498476	0.342520319	0.119489926	0.993175057	17026	142489	?a
+?a  <hasGender>  <male>   => ?a  <imdb:gender>  <male>	0.029280606	0.57314718	0.036488077	0.996571988	28490	780803	?a
+?a  <imdb:gender>  <female>   => ?a  <hasGender>  <female>	0.017498476	0.018440537	0.917250296	0.993059201	17026	18562	?a
+?a  <imdb:gender>  <male>   => ?a  <hasGender>  <male>	0.029280606	0.030856977	0.914724202	0.995527291	28490	31146	?a
