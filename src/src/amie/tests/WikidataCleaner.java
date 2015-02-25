@@ -26,7 +26,7 @@ public class WikidataCleaner {
 			    //Replace the print statements with whatever you want
 				if (ns[1].toString().equals(labelProperty) && ns[2].toN3().endsWith("@en")) {
 					String cleanSubject = ns[0].toString();
-					String cleanObject = ns[2].toString().replaceAll("[^a-zA-Z]", "_");
+					String cleanObject = ns[2].toString().replaceAll("[^a-zA-Z0-9]", "_");
 					resultMap.put(cleanSubject, "<" + cleanObject + ">");
 				}
 			}

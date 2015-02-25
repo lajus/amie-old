@@ -61,7 +61,7 @@ public class AMIE {
 	/**
 	 * Head coverage threshold for refinements
 	 */
-	private double minPruningRatio;
+	private double minHeadCoverage;
 		
 	/**
 	 * Metric used to prune the mining tree
@@ -77,14 +77,14 @@ public class AMIE {
 	 * 
 	 * @param assistant
 	 * @param minInitialSupport
-	 * @param parallel
+	 * @param headCoverage
 	 * @param metric 
 	 * @param seeds
 	 */
-	public AMIE(MiningAssistant assistant, int minSupport, double minPruningRatio, Metric metric, int nThreads){
+	public AMIE(MiningAssistant assistant, int minInitialSupport, double headCoverage, Metric metric, int nThreads){
 		this.assistant = assistant;
-		this.minInitialSupport = minSupport;
-		this.minPruningRatio = minPruningRatio;
+		this.minInitialSupport = minInitialSupport;
+		this.minHeadCoverage = headCoverage;
 		this.pruningMetric = metric;
 		this.nThreads = nThreads;
 	}
@@ -296,9 +296,9 @@ public class AMIE {
 		private int getCountThreshold(Query query) {			
 			switch(pruningMetric){
 			case Support:
-				return (int)minPruningRatio;
+				return (int)minHeadCoverage;
 			case HeadCoverage:
-				return (int)Math.ceil((minPruningRatio * (double)assistant.getHeadCardinality(query)));
+				return (int)Math.ceil((minHeadCoverage * (double)assistant.getHeadCardinality(query)));
 			default:
 				return 0;
 			}
@@ -828,6 +828,18 @@ public class AMIE {
 				100, // Do not look at relations smaller than 100 facts 
 				0.01, // Head coverage 1%
 				Metric.HeadCoverage,
+				Runtime.getRuntime().availableProcessors());
+	}
+	
+	public static AMIE getLossyInstance(FactDatabase db, double minPCAConfidence, int minSupport) {
+		HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(db);
+		miningAssistant.setMinPcaConfidence(minPCAConfidence);
+		miningAssistant.setEnabledConfidenceUpperBounds(true);
+		miningAssistant.setEnabledFunctionalityHeuristic(true);
+		return new AMIE(miningAssistant, 
+				100, // Do not look at relations smaller than 100 facts 
+				0.01, // Head coverage 1%
+				Metric.Support,
 				Runtime.getRuntime().availableProcessors());
 	}
 }

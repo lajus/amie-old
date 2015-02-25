@@ -23,6 +23,14 @@ public class Prediction {
 	
 	private double naiveConfidence;
 	
+	public enum Metric {PCAConfidence, StdConfidence};
+	
+	public static Metric metric = Metric.PCAConfidence;
+	
+	public static void setConfidenceMetric(Metric m) {
+		metric = m;
+	}
+	 
 	public Prediction(ByteString[] triple) {
 		this.triple = triple;
 		hitInTarget = false;
@@ -68,7 +76,11 @@ public class Prediction {
 		if (naiveConfidence == Double.NEGATIVE_INFINITY) {
 			double product = 1.0;
 			for (Query rule : rules) {
-				product *= (1.0 - rule.getPcaConfidence());
+				if (Prediction.metric == Metric.PCAConfidence) {
+					product *= (1.0 - rule.getPcaConfidence());
+				} else {
+					product *= (1.0 - rule.getConfidence());					
+				}
 			}
 			naiveConfidence = 1.0 - product;
 		}
@@ -95,11 +107,36 @@ public class Prediction {
 	}
 	
 	public double getConfidence() {
-		return getJointRule().getPcaConfidence();
+		if (Prediction.metric == Metric.PCAConfidence)
+			return getJointRule().getPcaConfidence();
+		else
+			return getJointRule().getConfidence();
 	}
 	
 	public List<Query> getRules() {
 		return rules;
+	}
+	
+	public String toEvaluationString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(triple[0]);
+		builder.append("\t");		
+		builder.append(triple[1]);
+		builder.append("\t");		
+		builder.append(triple[2]);
+		builder.append("\t");	
+		builder.append(getNaiveConfidence());
+		builder.append("\t");
+		builder.append(getConfidence());
+		builder.append("\t");
+		
+		if (hitInTarget) {
+			builder.append("TargetSource\tTrue");
+		} else {
+			builder.append("ManualEvaluation\t");
+		}
+		
+		return builder.toString();
 	}
 	
 	public String toString() {

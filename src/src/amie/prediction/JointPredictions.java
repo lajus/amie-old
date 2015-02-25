@@ -28,10 +28,11 @@ public class JointPredictions {
 	 * @param queries
 	 * @param trainingDataset
 	 * @param targetDataset
+	 * @param notInTraining 
 	 * @return
 	 */
-	private static Map<Triple<ByteString, ByteString, ByteString>, List<Query>> findPredictions2Rules(List<Query> queries, 
-			FactDatabase trainingDataset, FactDatabase targetDataset) {
+	private static Map<Triple<ByteString, ByteString, ByteString>, List<Query>> findPredictionsForRules(List<Query> queries, 
+			FactDatabase trainingDataset, FactDatabase targetDataset, boolean notInTraining) {
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions = new HashMap<>();
 		HeadVariablesMiningAssistant assistant = new HeadVariablesMiningAssistant(trainingDataset);
 		PredictionsSampler predictor = new PredictionsSampler(trainingDataset);
@@ -43,7 +44,11 @@ public class JointPredictions {
 			
 			Object bindings = null;
 			try {
-				bindings = predictor.generateBodyBindings(q);
+				if (notInTraining) {
+					bindings = predictor.generatePredictions(q);
+				} else {
+					bindings = predictor.generateBodyBindings(q);
+				}
 			} catch (Exception e) {
 				continue;
 			}
@@ -93,10 +98,10 @@ public class JointPredictions {
 	 * @return
 	 */
 	public static List<Prediction> getPredictions(List<Query> queries, 
-			FactDatabase trainingDataset, FactDatabase targetDataset) {
+			FactDatabase trainingDataset, FactDatabase targetDataset, boolean notInTraining) {
 		List<Prediction> result = new ArrayList<>();
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions =
-				findPredictions2Rules(queries, trainingDataset, targetDataset);
+				findPredictionsForRules(queries, trainingDataset, targetDataset, notInTraining);
 		for (Triple<ByteString, ByteString, ByteString> t : predictions.keySet()) {
 			Prediction prediction = new Prediction(t);
 			prediction.getRules().addAll(predictions.get(t));
@@ -118,7 +123,7 @@ public class JointPredictions {
 	
 	public static void main(String[] args) throws IOException {
 		if(args.length < 3){
-			System.err.println("JointPredictions <inputfile> <trainingDb> <targetDb>");
+			System.err.println("JointPredictions <inputfile> <trainingDb> <targetDb> <not-in-training>");
 			System.exit(1);
 		}
 		
@@ -143,6 +148,7 @@ public class JointPredictions {
 		targetDataset.load(new File(args[2]));
 		
 		List<Query> queries = new ArrayList<>();
+		boolean notInTraining = Boolean.parseBoolean(args[3]);
 		
 		// Parse the rules
 		for(List<String> record: tsvFile) {
@@ -154,7 +160,7 @@ public class JointPredictions {
 		}
 		tsvFile.close();
 		
-		List<Prediction> predictions = getPredictions(queries, trainingDataset, targetDataset);
+		List<Prediction> predictions = getPredictions(queries, trainingDataset, targetDataset, notInTraining);
 		
 		for (Prediction prediction : predictions) {
 			predictionsHistogram.increase(prediction.getRules().size());

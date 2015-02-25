@@ -19,6 +19,8 @@ public class IterativeNaivePredictor {
 	
 	public static final double DefaultPCAConfidenceThreshold = 0.4;
 	
+	public static final int DefaultSupportThreshold = 100;
+	
 	public IterativeNaivePredictor(FactDatabase training) {
 		this.trainingDb = training;
 	}
@@ -34,7 +36,7 @@ public class IterativeNaivePredictor {
 	
 	public List<Prediction> predict(int numberIterations, boolean onlyHits, double confidenceThreshold) throws Exception {
 		List<Prediction> resultingPredictions = new ArrayList<>();
-		AMIE amieMiner = AMIE.getLossyVanillaSettingInstance(trainingDb, confidenceThreshold);		
+		AMIE amieMiner = AMIE.getLossyInstance(trainingDb, confidenceThreshold, DefaultSupportThreshold);		
 		HeadVariablesMiningAssistant miningAssistant = new HeadVariablesMiningAssistant(trainingDb);
 		if (onlyHits) {
 			System.out.println("Including only hits");
@@ -49,7 +51,7 @@ public class IterativeNaivePredictor {
 			for(Query rule: rules)
 				System.out.println(rule.getBasicRuleString());
 			// Get the predictions
-			List<Prediction> predictions = JointPredictions.getPredictions(rules, trainingDb, testingDb);
+			List<Prediction> predictions = JointPredictions.getPredictions(rules, trainingDb, testingDb, false);
 			System.out.println("Adding " + predictions.size() + " predictions");
 			int countAboveThreshold = 0;
 			for (Prediction prediction : predictions) {
@@ -89,7 +91,9 @@ public class IterativeNaivePredictor {
 		FactDatabase training = new FactDatabase();
 		FactDatabase testing = new FactDatabase();
 		training.load(new File(args[0]));
-		testing.load(new File(args[1]));
+		if (!args[1].equals("-")) {
+			testing.load(new File(args[1]));
+		}
 		IterativeNaivePredictor predictor = new IterativeNaivePredictor(training, testing);
 		
 		List<Prediction> predictions = null;
