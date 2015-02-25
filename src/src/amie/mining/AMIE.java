@@ -428,8 +428,8 @@ public class AMIE {
                 .create("minc");
 		
 		Option confidenceBoundsOp = OptionBuilder.withArgName("optim-confidence-bounds")
-							 	.withDescription("Enable the calculation of confidence upper bounds to prune rules.")
-							 	.create("optimcb");
+			 	.withDescription("Enable the calculation of confidence upper bounds to prune rules.")
+			 	.create("optimcb");
 		
 		Option funcHeuristicOp = OptionBuilder.withArgName("optim-func-heuristic")
 			 	.withDescription("Enable functionality heuristic to identify potential low confident rules for pruning.")
