@@ -1,0 +1,4 @@
+Loading yago2core.decoded.compressed.notypes.nolanguagecode.tsv  ........................................... done (8.84 s)
+     Loaded 947888 facts
+Loading yagoFacts.decoded.compressed.ttl  .................................(22.45 s to go).......... done (1 min, 19 s)
+     Loaded 4122426 facts

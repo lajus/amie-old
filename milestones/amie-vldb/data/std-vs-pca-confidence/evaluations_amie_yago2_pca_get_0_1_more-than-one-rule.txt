@@ -1,0 +1,185 @@
+Loading yago2core.decoded.compressed.notypes.nolanguagecode.tsv  ........................................... done (8.75 s)
+     Loaded 947888 facts
+Loading yagoFacts.decoded.compressed.ttl  .......................................(7.07 s to go).... done (1 min, 10 s)
+     Loaded 4122426 facts
+43718 predictions in total.
+Confidence [1.0, 1.1)
+5936 predictions
+<Ray_Gardner_(All_My_Children)>	<isMarriedTo>	<Opal_Cortlandt>	0.9515207903453038	0.9610778443113772	ManualEvaluation	Unknown
+<John_A._Roche>	<isPoliticianOf>	<Illinois>	0.9826434820951984	0.9642857142857143	ManualEvaluation	True
+<Margaret_of_Foix>	<isMarriedTo>	<Francis_II,_Duke_of_Brittany>	0.9515207903453038	0.9610778443113772	TargetSource	True
+<Tevele_Schiff>	<isPoliticianOf>	<United_Kingdom>	0.9116850364281711	1.0	ManualEvaluation	False
+<Johann_Flemer>	<isPoliticianOf>	<Netherlands>	0.9373860781319276	1.0	ManualEvaluation	False
+<Willem_van_der_Veer>	<isPoliticianOf>	<Netherlands>	0.9373860781319276	1.0	ManualEvaluation	False
+<Elwood_L._Thomas>	<isPoliticianOf>	<Missouri>	0.9116850364281711	1.0	ManualEvaluation	True
+<Bill_Pascrell>	<isPoliticianOf>	<New_Jersey>	0.9286335944299391	1.0	ManualEvaluation	True
+<Christopher_Chenery>	<isPoliticianOf>	<New_York>	0.97562893081761	0.9833333333333333	ManualEvaluation	False
+<John_Tarleton_(Royal_Navy_officer)>	<isPoliticianOf>	<United_Kingdom>	0.9116850364281711	1.0	ManualEvaluation	False
+<Augustus_Garrett>	<isPoliticianOf>	<Illinois>	0.9826434820951984	0.9642857142857143	ManualEvaluation	True
+<Ælfgifu_of_Northampton>	<isMarriedTo>	<Cnut_the_Great>	0.9515207903453038	0.9610778443113772	TargetSource	True
+<Bernie_Winters>	<isPoliticianOf>	<United_Kingdom>	0.9116850364281711	1.0	ManualEvaluation	False
+<Marcus_Nikkanen>	<isPoliticianOf>	<Finland>	0.9621836709509662	1.0	ManualEvaluation	False
+<Judy_Eason_McIntyre>	<isPoliticianOf>	<Oklahoma>	0.9286335944299391	1.0	ManualEvaluation	True
+<Prince_Augustus_Ferdinand_of_Prussia>	<isMarriedTo>	<Margravine_Elisabeth_Louise_of_Brandenburg-Schwedt>	0.9515207903453038	0.9610778443113772	TargetSource	True
+<Simcha_Bunim_Alter>	<isPoliticianOf>	<Israel>	0.9116850364281711	1.0	ManualEvaluation	True
+<António_Leite>	<isPoliticianOf>	<Portugal>	0.9116850364281711	1.0	ManualEvaluation	False
+<Gustav_Friedrich_Hetsch>	<isPoliticianOf>	<Denmark>	0.9116850364281711	1.0	ManualEvaluation	False
+<José_de_Alencar>	<isPoliticianOf>	<Brazil>	0.9373860781319276	1.0	ManualEvaluation	True
+Confidence [0.9, 1.0)
+2975 predictions
+<Farida_of_Egypt>	<hasChild>	<Fuad_II_of_Egypt>	0.8137707784738117	0.7665923034021194	ManualEvaluation	False
+<Simeon_Saxe-Coburg-Gotha>	<hasChild>	<Kyril,_Prince_of_Preslav>	0.8137707784738117	0.7665923034021194	ManualEvaluation	True
+<Vladimir_Hertza>	<isCitizenOf>	<Moldova>	0.8548926265173631	0.7457627118644068	ManualEvaluation	True
+<Annabella_(actress)>	<hasChild>	<Romina_Power>	0.8137707784738117	0.7665923034021194	ManualEvaluation	False
+<Filip_Prpic>	<isPoliticianOf>	<Sweden>	0.8813038130381304	0.9777777777777777	ManualEvaluation	False
+<Thomas_Toft>	<isPoliticianOf>	<Staffordshire>	0.8813038130381304	0.9777777777777777	ManualEvaluation	False
+<Robin_Morgan>	<isPoliticianOf>	<New_York>	0.8813038130381304	0.9777777777777777	ManualEvaluation	True
+<Louise_of_Sweden>	<hasChild>	<Prince_Gustav_of_Denmark>	0.8137707784738117	0.7665923034021194	ManualEvaluation	True
+<Michael_Sim>	<isPoliticianOf>	<Western_Australia>	0.8813038130381304	0.9777777777777777	ManualEvaluation	False
+<David_Doremus>	<isPoliticianOf>	<California>	0.8813038130381304	0.9777777777777777	ManualEvaluation	False
+<Marie_de_Bourbon,_Duchess_of_Montpensier>	<hasChild>	<Jean_Gaston,_Duke_of_Valois>	0.8137707784738117	0.7665923034021194	ManualEvaluation	False
+<Robert_Dudley,_1st_Earl_of_Leicester>	<hasChild>	<Dorothy_Percy,_Countess_of_Northumberland>	0.8137707784738117	0.7665923034021194	ManualEvaluation	False
+<Mary_of_Modena>	<hasChild>	<Edgar_Stuart,_Duke_of_Cambridge>	0.8137707784738117	0.7665923034021194	ManualEvaluation	False
+<Manuel_de_Brito_Camacho>	<isCitizenOf>	<Portugal>	0.8251760446583989	0.875	ManualEvaluation	True
+<Risto_Krle>	<isCitizenOf>	<Republic_of_Macedonia>	0.819029168295268	0.8173076923076923	ManualEvaluation	True
+<Vilma_Espín>	<hasChild>	<Mariela_Castro>	0.8137707784738117	0.7665923034021194	ManualEvaluation	True
+<Germaine_of_Foix>	<hasChild>	<Maria_of_Aragon,_Queen_of_Portugal>	0.8137707784738117	0.7665923034021194	ManualEvaluation	False
+<Zsa_Zsa_Gabor>	<hasChild>	<Barron_Hilton>	0.8137707784738117	0.7665923034021194	ManualEvaluation	False
+<Meresankh_IV>	<hasChild>	<Isesi-ankh>	0.8137707784738117	0.7665923034021194	TargetSource	True
+<Shangguan_Wan'er>	<hasChild>	<Li_Chongrun>	0.8137707784738117	0.7665923034021194	ManualEvaluation	False
+Confidence [0.8, 0.9)
+4203 predictions
+<Clifford_Scott_Green>	<isCitizenOf>	<Pennsylvania>	0.7791483443962111	0.7129186602870813	ManualEvaluation	False
+<Cornelia_Funke>	<directed>	<Inkheart_(film)>	0.7237247072098247	0.7494440326167532	ManualEvaluation	False
+<James_R._Keene>	<isCitizenOf>	<New_York>	0.7309571074877881	0.5714285714285714	ManualEvaluation	False
+<Kendall_Van_Dyk>	<isCitizenOf>	<Montana>	0.7791499272444967	0.9130434782608695	ManualEvaluation	False
+<Annie_Young_Frisbie>	<directed>	<Speak_(film)>	0.7237247072098247	0.7494440326167532	ManualEvaluation	False
+<Mary_Meader>	<isCitizenOf>	<Michigan>	0.7791483443962111	0.7129186602870813	ManualEvaluation	False
+<Pope_Gregory_II>	<isCitizenOf>	<Ciampino>	0.7791483443962111	0.7129186602870813	ManualEvaluation	False
+<Giorgio_Prosperi>	<isCitizenOf>	<Ciampino>	0.7791483443962111	0.7129186602870813	ManualEvaluation	False
+<Donogh_O'Malley>	<livesIn>	<Republic_of_Ireland>	0.7521066784911646	0.3333333333333333	ManualEvaluation	True
+<Joshua_Prawer>	<livesIn>	<Israel>	0.7072227680410738	0.5897435897435898	ManualEvaluation	True
+<Art_Behm>	<isCitizenOf>	<North_Dakota>	0.7791499272444967	0.9130434782608695	ManualEvaluation	False
+<Spencer_Levin>	<isCitizenOf>	<California>	0.7834530926527163	1.0	ManualEvaluation	False
+<Jim_Lee>	<directed>	<Gen¹³_(film)>	0.7237247072098247	0.7494440326167532	ManualEvaluation	False	
+<Marvin_Kent>	<isCitizenOf>	<Ohio>	0.7791483443962111	0.7129186602870813	ManualEvaluation	False
+<Hamer_H._Budge>	<isCitizenOf>	<Idaho>	0.7791499272444967	0.9130434782608695	ManualEvaluation	False
+<Thomas_Jefferson_Ramsdell>	<isCitizenOf>	<Michigan>	0.7791483443962111	0.7129186602870813	ManualEvaluation	False
+<Yuvan_Shankar_Raja>	<directed>	<Thottal_Poo_Malarum>	0.7237247072098247	0.7494440326167532	ManualEvaluation	False
+<Walter_H._Taylor>	<isCitizenOf>	<Virginia>	0.7791483443962111	0.7129186602870813	ManualEvaluation	False
+<Spencer_Bachus>	<isCitizenOf>	<Alabama>	0.7791499272444967	0.9130434782608695	ManualEvaluation	False
+<Hal_Roach>	<directed>	<Cradle_Robbers>	0.7237247072098247	0.7494440326167532	ManualEvaluation	False
+Confidence [0.7, 0.8)
+5512 predictions
+<Qian_Zhongshu>	<isCitizenOf>	<People's_Republic_of_China>	0.6063272340067811	0.8	ManualEvaluation	True
+<Dulcie_Gray>	<isCitizenOf>	<Malaysia>	0.6585955008283582	0.7929984779299848	ManualEvaluation	False
+<Eliseo_Castillo>	<isCitizenOf>	<Cuba>	0.6585955008283582	0.7929984779299848	ManualEvaluation	
+<Krafft_Arnold_Ehricke>	<isCitizenOf>	<Germany>	0.6585955008283582	0.7929984779299848	ManualEvaluation	
+<Kevin_Stadler>	<isCitizenOf>	<Arizona>	0.6710029900280217	0.7281553398058253	ManualEvaluation	
+<Frank_Deasy>	<isCitizenOf>	<Republic_of_Ireland>	0.6585955008283582	0.7929984779299848	ManualEvaluation	
+<Kotetsu_Boku>	<isCitizenOf>	<Shizuoka_Prefecture>	0.6585955008283582	0.7929984779299848	ManualEvaluation	
+<Roberts_Jekimovs>	<isCitizenOf>	<Latvia>	0.6585955008283582	0.7929984779299848	ManualEvaluation	
+<Hunter_Mahan>	<isCitizenOf>	<Texas>	0.6710029900280217	0.7281553398058253	ManualEvaluation	
+<Nikola_Gruevski>	<isCitizenOf>	<Republic_of_Macedonia>	0.6585955008283582	0.7929984779299848	ManualEvaluation	
+<Georg_Morgenstierne>	<isCitizenOf>	<Norway>	0.6585955008283582	0.7929984779299848	ManualEvaluation	
+<Jamie_Spence>	<isCitizenOf>	<Kent>	0.6710029900280217	0.7281553398058253	ManualEvaluation	
+<Cecily_Lefort>	<isCitizenOf>	<United_Kingdom>	0.6585955008283582	0.7929984779299848	ManualEvaluation	
+<Johan_Falkenberg>	<isCitizenOf>	<Norway>	0.6585955008283582	0.7929984779299848	ManualEvaluation	
+<Bracha_Peli>	<isCitizenOf>	<Ukraine>	0.6585955008283582	0.7929984779299848	ManualEvaluation	
+<Bill_Longmuir>	<isCitizenOf>	<Surrey>	0.6710029900280217	0.7281553398058253	ManualEvaluation	
+<Orly_Taitz>	<isCitizenOf>	<Moldova>	0.6585955008283582	0.7929984779299848	ManualEvaluation	
+<Aleksandrs_Ei~ivijs>	<isCitizenOf>	<Latvia>	0.6585955008283582	0.7929984779299848	ManualEvaluation	
+<Charles_Thomas_Kennedy>	<isCitizenOf>	<Scotland>	0.6585955008283582	0.7929984779299848	ManualEvaluation	
+<Adelaide_João>	<isCitizenOf>	<Portugal>	0.6585955008283582	0.7929984779299848	ManualEvaluation	
+Confidence [0.6, 0.7)
+12313 predictions
+<Dumitru_Ciuba_enco>	<diedIn>	<Chi_inu>	0.563374533404781	0.7692307692307693	ManualEvaluation	
+<Joana_Hadjithomas>	<produced>	<I_Can't_Go_Home>	0.5439171554761737	0.38558352402745993	ManualEvaluation	
+<Gerald_Mohr>	<isCitizenOf>	<Sweden>	0.5749693579472017	0.721868365180467	ManualEvaluation	
+<Thornwell_Jacobs>	<livesIn>	<Clinton,_South_Carolina>	0.5625682081835498	0.7397260273972602	ManualEvaluation	
+<Judith_Hagendorf>	<isCitizenOf>	<United_Kingdom>	0.588679172642136	0.8201438848920863	ManualEvaluation	
+<Andrew_Selous>	<livesIn>	<United_Kingdom>	0.5966180359677016	0.4675324675324675	ManualEvaluation	
+<Marco_Bellocchio>	<produced>	<Good_Morning,_Night>	0.5439171554761737	0.38558352402745993	ManualEvaluation	
+<Jacques_Becker>	<produced>	<The_Adventures_of_Arsène_Lupin>	0.5439171554761737	0.38558352402745993	ManualEvaluation	
+<Emma_Thompson>	<directed>	<Nanny_McPhee>	0.5771854009486518	0.6541737649063032	ManualEvaluation	
+<John_McDermott_(golfer)>	<livesIn>	<Philadelphia>	0.5625682081835498	0.7397260273972602	ManualEvaluation	
+<Muriel_Box>	<produced>	<Street_Corner_(1953_film)>	0.5439171554761737	0.38558352402745993	ManualEvaluation	
+<Annelise_Hovmand>	<produced>	<Krudt_og_klunker>	0.5439171554761737	0.38558352402745993	ManualEvaluation	
+<Isaac_Julien>	<produced>	<BaadAsssss_Cinema>	0.5439171554761737	0.38558352402745993	ManualEvaluation	
+<George_Lucas>	<produced>	<THX_1138>	0.5439171554761737	0.38558352402745993	ManualEvaluation	
+<Hans_Eysenck>	<isCitizenOf>	<United_Kingdom>	0.5749693579472017	0.721868365180467	ManualEvaluation	
+<Vishnuvardhan_(director)>	<produced>	<Billa_2_-_The_Chase_Continues>	0.5439171554761737	0.38558352402745993	ManualEvaluation	
+<Wiktor_Andersson>	<isCitizenOf>	<Sweden>	0.5749693579472017	0.721868365180467	ManualEvaluation	
+<Alicia_Markova>	<diedIn>	<London>	0.5232363851823141	0.632183908045977	ManualEvaluation	
+<Basilio_Martín_Patino>	<produced>	<Caudillo_(film)>	0.5439171554761737	0.38558352402745993	ManualEvaluation	
+<Jean_le_Rond_d'Alembert>	<diedIn>	<Paris>	0.5232363851823141	0.632183908045977	ManualEvaluation	
+Confidence [0.5, 0.6)
+6479 predictions
+<Pope_Zephyrinus>	<livesIn>	<Ciampino>	0.47967358186652176	0.5357142857142857	ManualEvaluation	
+<Dan_Curtis>	<created>	<The_Night_Strangler_(film)>	0.43060610808933064	0.5750853242320819	ManualEvaluation	
+<Roland_Topor>	<livesIn>	<geoent_Région_Île-de-France_3012874>	0.47967358186652176	0.5357142857142857	ManualEvaluation	
+<Joe_Sweeden>	<isLeaderOf>	<Pawhuska,_Oklahoma>	0.42998315553060074	0.6170212765957447	ManualEvaluation	
+<Paul_Mazursky>	<created>	<Moon_over_Parador>	0.43060610808933064	0.5750853242320819	ManualEvaluation	
+<Sailadhar_Baruah>	<livesIn>	<Northeast_India>	0.47967358186652176	0.5357142857142857	ManualEvaluation	
+<Harry_Turner_(American_football)>	<livesIn>	<Ohio>	0.47967358186652176	0.5357142857142857	ManualEvaluation	
+<Chapchai_Nirat>	<isCitizenOf>	<Thailand>	0.4970159183605406	0.7154471544715447	ManualEvaluation	
+<John_Ford>	<created>	<The_Blue_Eagle>	0.43060610808933064	0.5750853242320819	ManualEvaluation	
+<Steven_Spielberg>	<created>	<Amistad_(film)>	0.43060610808933064	0.5750853242320819	ManualEvaluation	
+<Paolo_Panelli>	<livesIn>	<Ciampino>	0.47967358186652176	0.5357142857142857	ManualEvaluation	
+<Amit_Thaker>	<isLeaderOf>	<Ahmedabad>	0.42998315553060074	0.6170212765957447	ManualEvaluation	
+<Dave_Hansen>	<diedIn>	<Green_Bay,_Wisconsin>	0.45038546449062156	0.7941176470588235	ManualEvaluation	
+<Alton_B._Parker>	<livesIn>	<New_York>	0.47967358186652176	0.5357142857142857	ManualEvaluation	
+<Jakob_Steiner>	<wasBornIn>	<Bern>	0.4334889877969669	0.41353383458646614	ManualEvaluation	
+<Saudi_Arabia>	<dealsWith>	<Netherlands>	0.43832092139596224	0.4166666666666667	ManualEvaluation	
+<Charley_Chase>	<produced>	<Fluttering_Hearts>	0.46896844623378653	0.44136460554371004	ManualEvaluation	
+<Gérard_de_Nerval>	<livesIn>	<geoent_Région_Île-de-France_3012874>	0.47967358186652176	0.5357142857142857	ManualEvaluation	
+<Regina_D._Thomas>	<isLeaderOf>	<Savannah,_Georgia>	0.42998315553060074	0.6170212765957447	ManualEvaluation	
+<Go_Seigen>	<isCitizenOf>	<Japan>	0.4970159183605406	0.7154471544715447	ManualEvaluation	
+Confidence [0.3999999999999999, 0.5)
+5739 predictions
+<Manuel_Fraga_Iribarne>	<wasBornIn>	<Madrid>	0.39389463990978724	0.41935483870967744	ManualEvaluation	
+<Stole_Jankovi>	<isCitizenOf>	<Socialist_Republic_of_Serbia>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Lalith_Athulathmudali>	<isCitizenOf>	<British_Ceylon>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Alberto_Ronchey>	<isCitizenOf>	<Roman_Empire>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Tadeusz_Fijewski>	<isCitizenOf>	<Congress_Poland>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Léon_Larive>	<isCitizenOf>	<West_Francia>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Guillermo_Prieto>	<isCitizenOf>	<Mexico>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Lillebil_Ibsen>	<isCitizenOf>	<Akershus_County_Municipality>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Vincent_Brome>	<isCitizenOf>	<British_America>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Percy_Marmont>	<isCitizenOf>	<British_America>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Richard_Wainwright_(SpanishAmerican_War_naval_officer)>	<isCitizenOf>	<United_States>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Pope_Lucius_I>	<isCitizenOf>	<Roman_Republic>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Melisende_of_Jerusalem>	<isCitizenOf>	<All-Palestine_Government>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Philip_Walton>	<isCitizenOf>	<Southern_Ireland>	0.36415334026881074	0.18705035971223022	ManualEvaluation	
+<Jeremy_Mansfield>	<livesIn>	<South_Africa>	0.30403482090826317	0.20191285866099895	ManualEvaluation	
+<Bruno_Ninaber_van_Eyben>	<livesIn>	<Amsterdam>	0.32947615169153144	0.14705882352941177	ManualEvaluation	
+<Egon_Aghta>	<isCitizenOf>	<Brandenburg-Prussia>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Krzysztof_Kamil_BaczyDski>	<isCitizenOf>	<Second_Polish_Republic>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Henri_Decoin>	<isCitizenOf>	<West_Francia>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+<Hong_Jin>	<isCitizenOf>	<Joseon_Dynasty>	0.3429645202979069	0.22821576763485477	ManualEvaluation	
+Confidence [0.29999999999999993, 0.3999999999999999)
+561 predictions
+<Austria>	<imports>	<wordnet_vehicle_104524313>	0.268794472777117	0.1902439024390244	ManualEvaluation	
+<Russia>	<imports>	<wordnet_fuel_114875077>	0.268794472777117	0.1902439024390244	ManualEvaluation	
+<Italy>	<imports>	<wordnet_consumer_goods_103093574>	0.268794472777117	0.1902439024390244	ManualEvaluation	
+<Cristina_Dinu>	<livesIn>	<Romania>	0.2889108814530784	0.29609929078014185	ManualEvaluation	
+<Mexico>	<imports>	<wordnet_plastic_114592610>	0.2297027780719404	0.5609756097560976	ManualEvaluation	
+<Belgium>	<imports>	<wordnet_machinery_103701640>	0.268794472777117	0.1902439024390244	ManualEvaluation	
+<Malaysia>	<imports>	<wordnet_fuel_114875077>	0.268794472777117	0.1902439024390244	ManualEvaluation	
+<Mexico>	<imports>	<wordnet_machinery_103701640>	0.268794472777117	0.1902439024390244	ManualEvaluation	
+<Misaki_Doi>	<livesIn>	<Chiba_Prefecture>	0.2889108814530784	0.29609929078014185	ManualEvaluation	
+<United_Arab_Emirates>	<imports>	<wordnet_fertilizer_114859344>	0.268794472777117	0.1902439024390244	ManualEvaluation	
+<Albert_Campion>	<livesIn>	<United_Kingdom>	0.2889108814530784	0.29609929078014185	ManualEvaluation	
+<Irvine_Welsh>	<livesIn>	<Republic_of_Ireland>	0.2889108814530784	0.29609929078014185	ManualEvaluation	
+<Corina_Casanova>	<livesIn>	<Switzerland>	0.27564243759177687	0.6666666666666666	ManualEvaluation	
+<Naoto_Hikosaka>	<livesIn>	<Aichi_Prefecture>	0.2889108814530784	0.29609929078014185	ManualEvaluation	
+<Masamitsu_Tsuchida>	<livesIn>	<Aichi_Prefecture>	0.2889108814530784	0.29609929078014185	ManualEvaluation	
+<Claudia_Hill>	<livesIn>	<Germany>	0.2889108814530784	0.29609929078014185	ManualEvaluation	
+<Madagascar>	<imports>	<wordnet_chemical_114806838>	0.268794472777117	0.1902439024390244	ManualEvaluation	
+<Alistair_Darling>	<livesIn>	<Scotland>	0.2889108814530784	0.29609929078014185	ManualEvaluation	
+<Montenegro>	<imports>	<wordnet_chemical_114806838>	0.268794472777117	0.1902439024390244	ManualEvaluation	
+<Russia>	<imports>	<wordnet_beverage_107881800>	0.268794472777117	0.1902439024390244	ManualEvaluation	
+Confidence [0.19999999999999996, 0.29999999999999993)
+0 predictions
+Confidence [0.09999999999999998, 0.19999999999999996)
+0 predictions

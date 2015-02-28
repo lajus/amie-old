@@ -21,7 +21,7 @@ import amie.query.Query;
 
 public class SamplePredictionsByScore {
 
-	public static final int sampleSize = 100;
+	public static final int sampleSize = 20;
 	
 	public static void main(String[] args) throws IOException {
 		if(args.length < 3){
@@ -35,29 +35,29 @@ public class SamplePredictionsByScore {
 		TSVFile tsvFile = new TSVFile(inputFile);
 		boolean random = Boolean.parseBoolean(args[3]);
 		boolean naive = Boolean.parseBoolean(args[4]);
-		List<Prediction> bucket_0_8_to_1_0 = new ArrayList<>();
-		List<Prediction> bucket_0_6_to_0_8 = new ArrayList<>();
-		List<Prediction> bucket_0_4_to_0_6 = new ArrayList<>();
-		List<Prediction> bucket_0_4 = new ArrayList<>();
+		List<List<Prediction>> buckets = initializeBuckets();
 	
 		// Load the data
 		trainingDataset.load(new File(args[1]));
 		targetDataset.load(new File(args[2]));
 		
 		List<Query> queries = new ArrayList<>();
-		
+		HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(trainingDataset);
 		// Parse the rules
 		for(List<String> record: tsvFile) {
 			Query q = AMIEreader.rule(record.get(0));
 			if(q == null) {
 				continue;
 			}
+			miningAssistant.computeCardinality(q);
+			miningAssistant.computeStandardConfidence(q);
+			miningAssistant.computePCAConfidence(q);
 			queries.add(q);			
 		}
 		tsvFile.close();
-		Prediction.setConfidenceMetric(Metric.StdConfidence);
+		Prediction.setConfidenceMetric(Metric.PCAConfidence);
 		List<Prediction> predictions = JointPredictions.getPredictions(queries, trainingDataset, targetDataset, true);
-		HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(trainingDataset);
+		
 		int predictionsConsidered = 0;
 		for (Prediction prediction : predictions) {
 			double naiveConfidence = prediction.getNaiveConfidence();
@@ -68,41 +68,41 @@ public class SamplePredictionsByScore {
 			Query combinedRule = prediction.getJointRule();
 			miningAssistant.computeCardinality(combinedRule);
 			miningAssistant.computePCAConfidence(combinedRule);
-			if (naiveConfidence >= 0.8) {
-				bucket_0_8_to_1_0.add(prediction);
-			} else if (naiveConfidence >= 0.6) {
-				bucket_0_6_to_0_8.add(prediction);
-			} else if (naiveConfidence >= 0.4) {
-				bucket_0_4_to_0_6.add(prediction);
-			} else {
-				bucket_0_4.add(prediction);
+			if (naiveConfidence < 0.0 || naiveConfidence > 1.0) {
+				System.err.println(prediction);
+				System.err.println(prediction.toEvaluationString());
+				System.exit(1);
 			}
+			int bucketId = Math.max(0, 9 - (int)(naiveConfidence * 10));
+			buckets.get(bucketId).add(prediction);
 		}
 		System.out.println(predictionsConsidered + " predictions in total.");
 		if (random) {
-			System.out.println("Confidence [0.8-1.0]");
-			printPredictions(samplePredictions(bucket_0_8_to_1_0));
-			System.out.println("Confidence [0.6-0.8]");
-			printPredictions(samplePredictions(bucket_0_6_to_0_8));
-			System.out.println("Confidence [0.4-0.6]");
-			printPredictions(samplePredictions(bucket_0_4_to_0_6));
-			System.out.println("Confidence [0-0.4]");
-			printPredictions(samplePredictions(bucket_0_4));
+			for (int i = 0; i < buckets.size(); ++i) {
+				double a = 1.0 - i * 0.1;
+				double b = 1.0 - (i - 1) * 0.1;
+				System.out.println("Confidence [" + a + ", " + b + ")");
+				System.out.println(buckets.get(i).size() + " predictions");
+				printPredictions(samplePredictions(buckets.get(i)));
+			}
 		} else {
-			System.out.println("Confidence [0.8-1.0]");
-			Collections.sort(bucket_0_8_to_1_0, naive ? new NaivePredictionsComparator() : new PredictionsComparator());
-			
-			printPredictions(bucket_0_8_to_1_0.subList(0, Math.min(sampleSize, bucket_0_8_to_1_0.size())));
-			System.out.println("Confidence [0.6-0.8]");
-			Collections.sort(bucket_0_6_to_0_8, naive ? new NaivePredictionsComparator() : new PredictionsComparator());
-			printPredictions(bucket_0_6_to_0_8.subList(0, Math.min(sampleSize, bucket_0_6_to_0_8.size())));
-			System.out.println("Confidence [0.4-0.6]");
-			Collections.sort(bucket_0_4_to_0_6, naive ? new NaivePredictionsComparator() : new PredictionsComparator());
-			printPredictions(bucket_0_4_to_0_6.subList(0, Math.min(sampleSize, bucket_0_4_to_0_6.size())));			
-			System.out.println("Confidence [0-0.4]");
-			Collections.sort(bucket_0_4, naive ? new NaivePredictionsComparator() : new PredictionsComparator());
-			printPredictions(bucket_0_4.subList(0, Math.min(sampleSize, bucket_0_4.size())));
+			for (int i = 0; i < buckets.size(); ++i) {
+				double a = 1.0 - i * 0.1;
+				double b = 1.0 - (i - 1) * 0.1;
+				System.out.println("Confidence [" + a + ", " + b + ")");
+				System.out.println(buckets.get(i).size() + " predictions");
+				printPredictions(buckets.get(i).subList(0, Math.min(sampleSize, buckets.get(i).size())));
+			}
 		}
+	}
+
+	private static List<List<Prediction>> initializeBuckets() {
+		List<List<Prediction>> buckets = new ArrayList<>(10);
+		for (int i = 0; i < 10; ++i) {
+			buckets.add(new ArrayList<Prediction>());
+		}
+		
+		return buckets;
 	}
 
 	private static List<Prediction> samplePredictions(
