@@ -109,7 +109,7 @@ public class IterativeNaivePredictor {
 		IntHashMap<Integer> hitsInTargetNotInSourceHistogram = new IntHashMap<>();
 		IntHashMap<Integer> predictionsHistogram = new IntHashMap<>();
 		for (Prediction prediction : predictions) {
-			System.out.println(prediction.getCompressedString());
+			System.out.println(prediction);
 			predictionsHistogram.increase(prediction.getRules().size());
 			
 			if (prediction.isHitInTarget()) {

@@ -90,7 +90,11 @@ public class AMIE {
 	}
 		
 	/**
-	 * The key method which returns a set of rules
+	 * The key method which returns a set of rules mined from the KB.
+	 * @param realTime If true, the rules are printed as they are discovered, otherwise they are 
+	 * printed at the end of the mining process.
+	 * @param seeds A collection of target head relations. If empty, the methods considers all
+	 * possible head relations in the KB.
 	 * @return
 	 * @throws Exception 
 	 */
@@ -145,6 +149,11 @@ public class AMIE {
         return result;
 	}
 
+	/**
+	 * It removes and prints rules from a shared list (a list accessed by multiple threads).
+	 * @author galarrag
+	 *
+	 */
 	private class RuleConsumer implements Runnable{
 
 		private List<Query> consumeList;
@@ -837,8 +846,8 @@ public class AMIE {
 		miningAssistant.setEnabledConfidenceUpperBounds(true);
 		miningAssistant.setEnabledFunctionalityHeuristic(true);
 		return new AMIE(miningAssistant, 
-				100, // Do not look at relations smaller than 100 facts 
-				0.01, // Head coverage 1%
+				minSupport, // Do not look at relations smaller than 100 facts 
+				minSupport, // Head coverage 1%
 				Metric.Support,
 				Runtime.getRuntime().availableProcessors());
 	}

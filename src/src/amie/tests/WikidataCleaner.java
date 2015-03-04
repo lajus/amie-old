@@ -27,7 +27,7 @@ public class WikidataCleaner {
 				if (ns[1].toString().equals(labelProperty) && ns[2].toN3().endsWith("@en")) {
 					String cleanSubject = ns[0].toString();
 					String cleanObject = ns[2].toString().replaceAll("[^a-zA-Z0-9]", "_");
-					resultMap.put(cleanSubject, "<" + cleanObject + ">");
+					resultMap.put(cleanSubject, "<" + cleanObject + "_" + cleanSubject.replace(wikidataPrefix, "") + ">");
 				}
 			}
 		}

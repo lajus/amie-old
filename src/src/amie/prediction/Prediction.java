@@ -150,7 +150,8 @@ public class Prediction {
 			builder.append("\tHit in training");
 		}
 		
-		builder.append("\t" + getJointRule().getPcaConfidence());
+		builder.append("\t" + getNaiveConfidence());
+		builder.append("\t" + getConfidence());
 		
 		for (Query q : rules) {
 			builder.append("\t" + q.getRuleString() + "[" + q.getPcaConfidence() + "]");

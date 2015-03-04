@@ -21,7 +21,7 @@ import javatools.datatypes.ByteString;
 public class SchemaUtilities {
 
 	public static ByteString getRelationDomain(FactDatabase source, ByteString relation){
-		List<ByteString[]> query = FactDatabase.triples(FactDatabase.triple(relation, "<rdfs:domain>", "?x"));
+		List<ByteString[]> query = FactDatabase.triples(FactDatabase.triple(relation, "rdfs:domain", "?x"));
 		Set<ByteString> domains = source.selectDistinct(ByteString.of("?x"), query);
 		if(!domains.isEmpty()){
 			return domains.iterator().next();
@@ -40,7 +40,7 @@ public class SchemaUtilities {
 	}
 	
 	public static ByteString getRelationRange(FactDatabase source, ByteString relation){
-		List<ByteString[]> query = FactDatabase.triples(FactDatabase.triple(relation, "<rdfs:range>", "?x"));
+		List<ByteString[]> query = FactDatabase.triples(FactDatabase.triple(relation, "rdfs:range", "?x"));
 		Set<ByteString> ranges = source.selectDistinct(ByteString.of("?x"), query);
 		if(!ranges.isEmpty()){
 			return ranges.iterator().next();

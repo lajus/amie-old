@@ -406,8 +406,12 @@ public class FactDatabase {
 
 	/** Returns the harmonic functionality, as defined in the PARIS paper */
 	public double functionality(ByteString relation) {
-		return ((double) predicate2subject2object.get(relation).size() / predicateSize
-				.get(relation));
+		if (relation.equals(EQUALSbs)) {
+			return 1.0;
+		} else {
+			return ((double) predicate2subject2object.get(relation).size() / predicateSize
+					.get(relation));
+		}
 	}
 
 	/** Returns the harmonic functionality, as defined in the PARIS paper */
@@ -419,8 +423,12 @@ public class FactDatabase {
 	 * Returns the harmonic inverse functionality, as defined in the PARIS paper
 	 */
 	public double inverseFunctionality(ByteString relation) {
-		return ((double) predicate2object2subject.get(relation).size() / predicateSize
-				.get(relation));
+		if (relation.equals(EQUALSbs)) {
+			return 1.0;
+		} else {
+			return ((double) predicate2object2subject.get(relation).size() / predicateSize
+					.get(relation));			
+		}
 	}
 
 	/**
@@ -629,8 +637,8 @@ public class FactDatabase {
 			throw new IllegalArgumentException(
 					"Cannot query with differentFrom: " + toString(triple));
 		if (triple[1].equals(EQUALSbs)) {
-			System.out
-					.println("   Calling 'resultsTwoVariables(equals(x,y))'. This is slow");
+/*			System.out
+					.println("   Calling 'resultsTwoVariables(equals(x,y))'. This is slow");*/
 			Map<ByteString, IntHashMap<ByteString>> result = new HashMap<>();
 			for (ByteString entity : subject2object2predicate.keySet()) {
 				IntHashMap<ByteString> innerResult = new IntHashMap<>();
