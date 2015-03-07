@@ -186,10 +186,189 @@ Otherwise, it calculates confidence as in Equation~\ref{eq:pcaConf} and returns 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Pruning by Approximation}
 \label{subsec:pruningbyapprox}
+
+The bound for the confidence that we derived in Section~\ref{upperBound} is applicable only when the same relation appears twice in the body.
+In the following, we show how to approximate confidence for rules of a more general form. 
+Our approximation formula is based on simple statistics, like the functionalities or the overlaps between domains and ranges of various relations. These quantities
+can be precomputed and can later be accessed in constant time. In addition, our approximation is designed such that it is more likely to overestimate confidence than to underestimate it.
+This is important, because we use it to prune rules, and we want to avoid pruning rules that have a higher confidence in reality.
+Our experiments (see Sec.~\ref{amiepm}) show that this technique can make AMIE run in the range of minutes instead of days with 4\% or less of false pruning.
+
+
+
+Since support is always calculated for rules $R$ of the form $\vec{B}(x,y)\Rightarrow r_h(x,y)$, our aim is to derive a conservative approximation for $dnm_{pca}$ (or $dnm_{std}$) denoted by
+$\widehat{dnm}_{pca}$. By plugging this expression into the confidence formula, we get
+\begin{equation} \label{eq:pcaApproxConf}
+  \widehat{conf}_{pca}(R):=\frac{supp(R)}{\widehat{dnm}_{pca}(R)}
+\end{equation}
+
+Let us re-examine Eq.~\ref{eq:denomPCA}:
+
+\[
+ dnm_{pca}(\vec{B} \Rightarrow r(x,y)) := {} \#(x,y): \exists z_1,...,z_m,y': \\ \quad \vec{B} \wedge r_h(x,y')
+\]
+
+If $\vec{B}$ has functionality $fun(\vec{B})$, it means that for each entity in variable $x$ (``domain'' of $\vec{B}$) the body will produce $1/fun(\vec{B})$ entities in $y$.
+I.e., the body produces $\#y_{per\; x} = 1/fun(\vec{B})$ facts per entity in its ``range'', on average. If we multiply, this number with the number of entities in $x$,
+we get an estimate of body size of the rule. However, for the case PCA confidence, the denominator is restricted also by the entities in the domain of the head relation.
+I.e., if we denote with $|dom(r)|$ the number of entities in the domain of relation $r$, our approximation will have the form:
+
+\begin{equation} \label{eq:pcaApproxConf_general}
+  \widehat{dnm}_{pca}(R):=|dom(\vec{B}) \wedge dom(r_h)|\cdot \#y_{per\; x}
+\end{equation}
+
+In the above formula, the critical quantities are the $dom(\vec{B})$ and the $\#y_{per\; x}$ and it is for these quantities that we would like to derive approximations.
+However, using a confidence approximation to potentially prune rules is more effective for rules for which the exact confidence calculation is potentially expensive. 
+For rules for which the exact confidence calculation is expected to be fast, the gain in runtime will be small and there is always some risk of false pruning.
+Therefore we only use the confidence approximation for ``expensive'' rules. 
+These rules typically have huge bodies ($(x,y)$ pairs) which flood the main memory. An example is the rule 
+\[
+ directed(x,z) \wedge hasActor(z,y) \Rightarrow married(x,y)
+\]
+
+This rule produces a huge body (it implies that a director is married to all actors that acted in his movies),
+however its confidence is very low. Such huge bodies can only result through the introduction of the existential variables $z_1,...,z_m$ in  Eq.~\ref{eq:denomPCA} ($z$ in the example rule).
+If a rule does not contain such existential variables, it can only further restrict the number of $(x,y)$ pairs produced by the body.
+For example the rule $livesIn(x,y)\wedge bornIn(x,y)\Rightarrow diedIn(x,y)$ will have a smaller or equal body than the rule $bornIn(x,y)\Rightarrow diedIn(x,y)$.
+
+In the following, we focus on rules for which the $x,y$ variables are connected through a chain of existential variables $z_1,..., z_{n-1}$. 
+These rules can be written in the form:
+Consider the following rule
+$$
+  r_1(x,z_1) \wedge r_2(z_1,z_2) \wedge ... \wedge r_n(z_{n-1},y) \Rightarrow r_h(x,y)
+$$
+
+Notice that in order to write a rule in this form we might need to replace some relations by their inverses
+(e.g., substitute $r_2(z_2,z_1)$ with $r_2^{-1}(z_1,z_2)$)
+or some atoms might need to be swapped.
+A rule's body might contain many existential variables which might  define  multiple paths from $x$ to $y$. 
+In the following, we will first explain how to compute the approximation for the case of a single path with one existential variable through a running example.
+Then we generalize to rules with many existential variables, forming a single path and, in the end, we discuss the case of multiples paths.
+
+
+\subsubsection{Approximate Confidence Denominator}
+
+Let us consider again the  low confidence rule
+\[
+ directed(x,z) \wedge hasActor(z,y) \Rightarrow married(x,y)
+\]
+which implies that a director is married to all actors that acted in his movies.
+We need to find out how many actors correspond to each director ($\#y_{per\;x}$) in the body of the rule.
+Therefore we take a walk through the path $x \rightarrow z \rightarrow y$, connecting a director to his potential actors. If $fun(r)$ and $ifun(r)$
+denote the functionality and inverse functionality of the relation $r$, respectively, then
+walking through this path involves the following steps:
+\begin{enumerate} \itemsep +0.3ex
+ \item For each director $x$, the relation $directed$ will produce on average $\frac{1}{fun(directed)}$ movies $z$.
+ \item Some or all of these movies will find join partners in the $z$ variable  of $hasActor$.
+ \item For each movie $z$, $hasActor$ will produce on average $\frac{1}{fun(hasActor)}$ actors $y$.
+ \item Each of these actors in $y$ acted on average in  $\frac{1}{ifun(hasActor)}$ movies of the $hasActor$ relation.
+\end{enumerate}
+
+
+
+After step 2, we can approximate the number of distinct movies that bind to the variable $z$ for each director in the variable $x$ as:
+$$
+\#z_{per \; x} := \frac{|rng(directed) \wedge dom(hasActor)|}{|rng(directed)| \times fun(directed)}
+$$
+Here, $|rng(directed)|$ is the number of distinct movies in the range of $directed$ and $|rng(directed) \wedge dom(hasActor)|$ 
+denotes the distinct movies in the overlap between the objects of $directed$ and the subjects of $hasActor$.
+The term $\frac{1}{fun(directed)}$ corresponds to step  1.
+The assumption in our join estimation is that the movies that exist in the overlap of $directed$  and $hasActor$ are uniformly distributed between the different directors in $directed$.
+
+For steps 3 and 4, we can approximate the number of actors in the variable $y$ for each movie in the variable $z$ as follows:
+$$
+\#y_{ per \; z} := \frac{ifun(hasActor)}{fun(hasActor)}
+$$
+The term $\frac{1}{fun(hasActor)}$ corresponds to step 3. At the end of step 3, we already have for a single director in $x$ a bag of actors in $y$ that correspond to it.
+However, these are not necessarily distinct actors, since $x$ and $y$ are connected through the variable $z$ (movies). Therefore, a duplicate elimination step is needed.
+To see why, assume that each director has directed on average 3 movies and that each movie has 5 actors. Then, the rule will produce on average 15 actors $y$ for each director $x$.
+However, there is no guarantee that these actors will all be different from each other.
+If the director trusts specific actors and collaborates repeatedly with them in some or all of his movies, there will be less than 15 distinct actors.
+
+
+
+The term $\frac{1}{ifun(hasActor)}$ achieves this duplicate elimination: each actor contributes in the final count with a weight $ifun(hasActor)$, 
+which expresses the extend to which this actor exclusively belongs to a movie.
+
+
+
+In the way we use the duplicate elimination, a single actor $y$ belongs to $\frac{1}{ifun(hasActor)}$ different movies $z$, which are chosen from \emph{all} the movies in  $hasActor$ 
+(e.g., 3 movies per actor).
+In reality, we want the number of different movies chosen from those that remain after step 2 ($\#z_{per \; x}$),
+i.e., the average number of movies by the same director that an actor acts in (e.g., 2 movies per actor, which is less than 3).
+In other words, in step 4, we employ a very pessimistic scenario, which causes $\#y_{per\;x}$ to be an underestimation, 
+and the overall confidence approximation to be an overestimation of the actual confidence.
+
+To summarize, we can estimate the number of actors $y$ that are supposed to be married with each director $x$ as:
+$$
+ \#y_{per\;x} :=  \#z_{per \; x} \times \#y_{ per \; z}
+$$
+
+
+\noindent To calculate $\widehat{dnm}_{pca}$ from Eq.~\ref{eq:pcaApproxConf_general}, we are now only missing the $dom(\vec{B})$. 
+Here we make the simplifying assumption that $dom(\vec{B}) = dom(directed)$ and we calculate the number of distinct directors in $directed$ that join with the head relation $married$, 
+i.e., $ov_{ss}(directed, married)$
+
+
+To summarize, the $ \widehat{dnm}_{pca}(R)$ for a rule $r_1(x,z)\wedge r_2(z,y) \Rightarrow r_h(x,y)$ can be approximated by:
+
+\[
+  \widehat{dnm}_{pca}(R) := \frac{ |dom(r_1) \wedge dom(r_h)| \cdot  |rng(r_1) \wedge dom(r_2)|\cdot ifun(r_2)  }{|rng(r_1)| \cdot fun(r_2) \cdot  fun(r_1)}
+\]
+
+
+For the more general case of rule that contains $n-1$ existential variables forming a single path from $x$ to $y$
+$$
+  r_1(x,z_1) \wedge r_2(z_1,z_2) \wedge ... \wedge r_n(z_{n-1},y) \Rightarrow r_h(x,y)
+$$
+
+we will have:
+
+\begin{eqnarray*}
+  \widehat{dnm}_{pca}(R) 	= \frac{|dom(r_1) \wedge dom(r_h)|}{fun(r_1)}  \times \\
+  \prod_{i=2}^{n}\frac{|rng(r_{i-1})\wedge dom(r_i))|}{|rng(r_{i-1})|}\frac{ifun(r_i)}{fun(r_i)}
+\end{eqnarray*}
+
+
+
+If there are $m$ paths connecting $x$ and $y$, we can compute, support and confidence denominator for each path separately.
+The quantity $\#y_{per\;x}$ and the support for the combination of all paths can be approximated by the minimum of the $\#y_{per\;x}$ and the support 
+respectively of the individual paths (in reality it will be smaller than the minimum). 
+
+
+\subsubsection{Discussion}
+
+\paragraph{Application} We precompute the functionalities,
+the inverse functionalities, and the overlaps between each pair of relations when the KB is loaded
+into the in-memory database. This results in longer loading times but pays off easily during rule mining. The size of the ranges of the relations is given by
+our indexes in constant time.
+After this preprocessing, the approximation of the confidence can be computed as a simple product of precomputed values without actually firing a single query.
+We apply the approximation only if the query has 3 atoms, contains no constants and each variable occurs exactly 2 times.
+If the approximated value is smaller than the threshold, we abandon the rule.
+Otherwise, we compute the exact PCA confidence and proceed as usual.
+
+\paragraph{Assumptions} Our approximation makes a series of assumptions.
+First, we make use of functionalities as average values. In other words, we assume that for any relation all objects are uniformly distributed among the subjects (which corresponds to a zero variance).
+In reality, this is not always the case. Additionally,
+the estimation of the expression $\#z_{per \; x}$ uses the term $\frac{|rng(r_1) \wedge dom(r_2)|}{|rng(r_1)|}$.
+This term assumes that the entities in the overlap are uniformly distributed among the entities in the range of $r_1$. 
+This also introduces some error that depends on the variance of the real distribution.
+Nevertheless, the duplicate elimination largely underestimates the count of $\#y_{per\;x}$, and therefore we expect our approximation to usually
+result in an overestimation of the actual confidence. This is indeed the case, as our experiments in Section~\ref{amiepm} will show.
+
+
+
+
+
+
+
+\ignore{
+\subsection{Pruning by Approximation}
+\label{subsec:pruningbyapprox}
 The bound for the confidence that we derived in Section~\ref{upperBound} is applicable only when the same relation appears twice in the body.
 In the following, we show how to approximate confidence for rules of a more general form. Our goal is to devise an approximation that is (1) fast to compute and (2) more likely to overestimate confidence than to underestimate it. This is because we will use the approximation to prune rules, and we want to avoid pruning rules that have a higher confidence in reality.
 % with low confidence, we require our method to meet two criteria: (a) it shall be fast to compute
-%and (b) it shall not prune confident rules. The first criterion meanthe formula rely on cheap queries or precomputed values, whereas the second suggests to be
+%and (b) it shall not prune confident rules. The first criterion mean the formula rely on cheap queries or precomputed values, whereas the second suggests to be
 %more tolerant to over-estimation than under-estimation of the confidence score.
 Since support is always calculated for rules, our aim is to derive a conservative approximation for $dnm_{pca}$ (or $dnm_{std}$) denoted by
 $\widehat{dnm}_{pca}$. By plugging this expression into the confidence formula, we get
@@ -389,7 +568,7 @@ result in an overestimation of the actual confidence. This is indeed the case, a
 % This means that, even though it is an approximation, it will not let AMIE drop many good rules.
 % Our approximation depends on assumptions that hardly hold in practice. However, it is fast to calculate exactly because of these simplifying assumptions.
 % The fast computation and small rate of false pruning make our approximated confidence an attractive solution.
-
+}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
