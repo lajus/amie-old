@@ -134,6 +134,12 @@ public class MiningAssistant{
 	protected boolean pcaOptimistic;
 	
 	/**
+	 * If true, the assistant will never add atoms of the form type(x, y), i.e., it will always bind 
+	 * the second argument to a type.
+	 */
+	protected boolean avoidUnboundTypeAtoms;
+	
+	/**
 	 * @param dataSource
 	 */
 	public MiningAssistant(FactDatabase dataSource) {
@@ -885,6 +891,14 @@ public class MiningAssistant{
 		return bodyTargetRelations;
 	}
 	
+	public boolean isAvoidUnboundTypeAtoms() {
+		return avoidUnboundTypeAtoms;
+	}
+
+	public void setAvoidUnboundTypeAtoms(boolean avoidUnboundTypeAtoms) {
+		this.avoidUnboundTypeAtoms = avoidUnboundTypeAtoms;
+	}
+
 	public void setTargetBodyRelations(
 			Collection<ByteString> bodyTargetRelations) {
 		this.bodyTargetRelations = bodyTargetRelations;

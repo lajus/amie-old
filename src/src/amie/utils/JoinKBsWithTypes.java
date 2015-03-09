@@ -1,17 +1,18 @@
-package amie.data;
+package amie.utils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
 
 import javatools.filehandlers.TSVFile;
 
-public class OutputTypes {
+public class JoinKBsWithTypes {
 
 	public static void main(String[] args) throws IOException {
 		Set<String> subjects = new HashSet<>();
@@ -26,7 +27,10 @@ public class OutputTypes {
 			}
 		}
 		
-		List<String> types = Files.readAllLines(Paths.get(args[1]), Charset.defaultCharset());
+		List<String> types = Collections.EMPTY_LIST;
+		if (!args[1].equals("-")) {
+			types = Files.readAllLines(Paths.get(args[1]), Charset.defaultCharset());
+		}
 		
 		// Load the YAGO types file
 		try(TSVFile typesFile = new TSVFile(new File(args[2]))) {
@@ -37,11 +41,17 @@ public class OutputTypes {
 				
 				String subject = fact.get(1).trim();
 				String object = fact.get(3).trim();
-				if (subjects.contains(subject) && types.contains(object)) {
-					System.out.println(subject + "\t" + fact.get(2).trim() + "\t" + object);
+				
+				if (!types.isEmpty()) {
+					if (subjects.contains(subject) && types.contains(object)) {
+						System.out.println(subject + "\t" + fact.get(2).trim() + "\t" + object);
+					}
+				} else {
+					if (subjects.contains(subject)) {
+						System.out.println(subject + "\t" + fact.get(2).trim() + "\t" + object);
+					}
 				}
 			}
 		}
 	}
-
 }

@@ -37,11 +37,12 @@ public class JointPredictions {
 		HeadVariablesMiningAssistant assistant = new HeadVariablesMiningAssistant(trainingDataset);
 		PredictionsSampler predictor = new PredictionsSampler(trainingDataset);
 		for (Query q : queries) {
+			System.out.println("Firing predictions for " + q.getBasicRuleString());
 			ByteString[] head = q.getHead();
 			q.setFunctionalVariable(q.getHead()[Query.findFunctionalVariable(q, trainingDataset)]);
 			assistant.computeCardinality(q);
 			assistant.computePCAConfidence(q);
-			
+			 
 			Object bindings = null;
 			try {
 				if (notInTraining) {

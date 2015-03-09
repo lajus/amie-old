@@ -23,8 +23,8 @@ public class SamplePredictionsByScore {
 	public static final int sampleSize = 20;
 	
 	public static void main(String[] args) throws IOException {
-		if(args.length < 3){
-			System.err.println("JointPredictions <rules> <trainingDb> <targetDb> <random> <naive>");
+		if(args.length < 5){
+			System.err.println("JointPredictions <rules> <trainingDb> <targetDb> <random> <naive> [allrules=false]");
 			System.exit(1);
 		}
 		
@@ -33,6 +33,13 @@ public class SamplePredictionsByScore {
 		FactDatabase targetDataset = new FactDatabase();		
 		TSVFile tsvFile = new TSVFile(inputFile);
 		boolean random = Boolean.parseBoolean(args[3]);
+		boolean allRules = false;
+		boolean naive = Boolean.parseBoolean(args[4]);
+		
+		if (args.length > 5) {
+			allRules = Boolean.parseBoolean(args[5]);
+		}
+		
 		List<List<Prediction>> buckets = initializeBuckets();
 	
 		// Load the data
@@ -57,28 +64,33 @@ public class SamplePredictionsByScore {
 		List<Prediction> predictions = JointPredictions.getPredictions(queries, trainingDataset, targetDataset, true);
 		
 		int predictionsConsidered = 0;
+		System.out.println(predictions.size() + " predictions");
 		for (Prediction prediction : predictions) {
 			double naiveConfidence = prediction.getNaiveConfidence();
-			if (prediction.getRules().size() == 1) {
+			if (!allRules && prediction.getRules().size() == 1) {
 				continue;
 			}
 			++predictionsConsidered;
-			Query combinedRule = prediction.getJointRule();
-			miningAssistant.computeCardinality(combinedRule);
-			miningAssistant.computePCAConfidence(combinedRule);
+			if (!naive) {
+				Query combinedRule = prediction.getJointRule();
+				miningAssistant.computeCardinality(combinedRule);
+				miningAssistant.computePCAConfidence(combinedRule);
+			}
+			
 			if (naiveConfidence < 0.0 || naiveConfidence > 1.0) {
-				System.err.println(prediction);
-				System.err.println(prediction.toEvaluationString());
+				System.err.println(prediction.toNaiveEvaluationString());
 				System.exit(1);
 			}
 			int bucketId = Math.max(0, 9 - (int)(naiveConfidence * 10));
 			buckets.get(bucketId).add(prediction);
 		}
-		System.out.println(predictionsConsidered + " predictions in total.");
+		if (predictionsConsidered != predictions.size()) {
+			System.out.println(predictionsConsidered + " considered for sampling.");
+		}
 		if (random) {
 			for (int i = 0; i < buckets.size(); ++i) {
 				double a = 1.0 - i * 0.1;
-				double b = 1.0 - (i - 1) * 0.1;
+				double b = 1.0 - (i + 1) * 0.1;
 				System.out.println("Confidence [" + a + ", " + b + ")");
 				System.out.println(buckets.get(i).size() + " predictions");
 				printPredictions(samplePredictions(buckets.get(i)));
@@ -86,7 +98,7 @@ public class SamplePredictionsByScore {
 		} else {
 			for (int i = 0; i < buckets.size(); ++i) {
 				double a = 1.0 - i * 0.1;
-				double b = 1.0 - (i - 1) * 0.1;
+				double b = 1.0 - (i + 1) * 0.1;
 				System.out.println("Confidence [" + a + ", " + b + ")");
 				System.out.println(buckets.get(i).size() + " predictions");
 				printPredictions(buckets.get(i).subList(0, Math.min(sampleSize, buckets.get(i).size())));
@@ -124,7 +136,7 @@ public class SamplePredictionsByScore {
 
 	private static void printPredictions(List<Prediction> list) {
 		for (Prediction prediction : list) {
-			System.out.println(prediction.toEvaluationString());
+			System.out.println(prediction.toNaiveEvaluationString());
 		}
 	}
 }

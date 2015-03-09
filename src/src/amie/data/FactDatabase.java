@@ -720,6 +720,16 @@ public class FactDatabase {
 				counter++;
 		return (counter);
 	}
+	
+	public static boolean containsVariables(List<ByteString[]> query) {
+		// TODO Auto-generated method stub
+		for (ByteString[] triple : query) {
+			if (numVariables(triple) > 0) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/** returns number of instances of this triple */
 	public long count(CharSequence... triple) {
@@ -1835,7 +1845,7 @@ public class FactDatabase {
 	}
 
 	/** Can instantiate a variable in a query with a value */
-	protected static class Instantiator implements Closeable {
+	public static class Instantiator implements Closeable {
 		List<ByteString[]> query;
 
 		int[] positions;
@@ -2139,12 +2149,20 @@ public class FactDatabase {
 		//d.load(new File("c:/fabian/data/yago3/checked.tsv"));
 		//D.p(d.selectDistinct(ByteString.of("?x"),triples(triple("?y",EQUALSstr,"?x"))));
 		
-		 d.load(new File(args[0])); 
-		  D.p(d.countPairs(
+		 d.load(new File("/home/galarrag/workspace/AMIE/Data/yago2/yago2core.10kseedsSample.decoded.compressed.notypes.linksto.tsv"),
+				 new File("/home/galarrag/workspace/AMIE/Data/yago2/yago2core.10kseedsSample.decoded.compressed.notypes.tsv")); 
+/*		  D.p(d.countPairs(
 				ByteString.of("?a"),
 				ByteString.of("?b"),
 				triples(triple("?a", "<wasBornIn>", "?b"),
 						triple("?a", "<livesIn>", "?b"),
-						triple("?a", "<diedIn>", "?b"))));
+						triple("?a", "<diedIn>", "?b"))));*/
+		  
+		  D.p(d.countPairs(
+					ByteString.of("?a"),
+					ByteString.of("?b"),
+					triples(triple("?b", "<linksTo>", "?b"),
+							triple("?a", "<exports>", "?x")
+							))); 
 	}
 }

@@ -19,9 +19,32 @@ public class Prediction {
 	// The rules that infer the prediction
 	private List<Query> rules;
 	
+	/**
+	 * The rule consisting of the intersection of all the rules
+	 * that make the prediction.
+	 */
 	private Query combinedRule;
 	
+	/**
+	 * 1 - (Conf(R1) * Conf(R2) ... Conf(Rn))
+	 * where Conf can be either the standard or the PCA confidence
+	 */
 	private double naiveConfidence;
+	
+	/**
+	 * Based on soft cardinality constraints, it is the probability that
+	 * the prediction meets a cardinality constraint. For instance, if this prediction
+	 * postulates a third child for a person, the cardinality score is the probability
+	 * that people has more than 2 children in the KB. 
+	 */
+	private double cardinalityScore;
+	
+	/**
+	 * If the predictions are drawn from an iterative process, this attribute stores
+	 * the number of the iteration in which this prediction was drawn for the first
+	 * time.
+	 */
+	private int iterationId;
 	
 	public enum Metric {PCAConfidence, StdConfidence};
 	
@@ -36,7 +59,9 @@ public class Prediction {
 		hitInTarget = false;
 		rules = new ArrayList<>();
 		naiveConfidence = Double.NEGATIVE_INFINITY;
+		cardinalityScore = 1.0;
 		combinedRule = null;
+		setIterationId(-1);
 	}
 	
 	public Prediction(Triple<ByteString, ByteString, ByteString> triple) {
@@ -44,11 +69,17 @@ public class Prediction {
 		hitInTarget = false;
 		rules = new ArrayList<>();
 		naiveConfidence = Double.NEGATIVE_INFINITY;
+		cardinalityScore = 1.0;
 		combinedRule = null;
+		setIterationId(-1);
 	}
 	
 	public ByteString[] getTriple() {
 		return triple;
+	}
+	
+	public Triple<ByteString, ByteString, ByteString> getTripleObj() {
+		return new Triple<ByteString, ByteString, ByteString>(triple[0], triple[1], triple[2]);
 	}
 	
 	public boolean isHitInTarget() {
@@ -87,6 +118,22 @@ public class Prediction {
 		return naiveConfidence;
 	}
 	
+	public double getCardinalityScore() {
+		return cardinalityScore;
+	}
+
+	public void setCardinalityScore(double cardinalityScore) {
+		this.cardinalityScore = cardinalityScore;
+	}
+	
+	public double getNaiveFullScore() {
+		return getNaiveConfidence() * getCardinalityScore();
+	}
+	
+	public double getFullScore() {
+		return getConfidence() * getCardinalityScore();
+	}
+
 	/**
 	 * Returns the combined rule constructed by merging the antecedents of 
 	 * the predicting rules and keeping the most specific head relation. The PCA
@@ -113,8 +160,36 @@ public class Prediction {
 			return getJointRule().getConfidence();
 	}
 	
+	public int getIterationId() {
+		return iterationId;
+	}
+
+	public void setIterationId(int iterationId) {
+		this.iterationId = iterationId;
+	}
+
 	public List<Query> getRules() {
 		return rules;
+	}
+	
+	public String toNaiveEvaluationString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(triple[0]);
+		builder.append("\t");		
+		builder.append(triple[1]);
+		builder.append("\t");		
+		builder.append(triple[2]);
+		builder.append("\t");	
+		builder.append(getNaiveConfidence());
+		builder.append("\t");
+		
+		if (hitInTarget) {
+			builder.append("TargetSource\tTrue");
+		} else {
+			builder.append("ManualEvaluation\t");
+		}
+		
+		return builder.toString();
 	}
 	
 	public String toEvaluationString() {
@@ -152,10 +227,16 @@ public class Prediction {
 		
 		builder.append("\t" + getNaiveConfidence());
 		builder.append("\t" + getConfidence());
+		builder.append("\t" + getNaiveFullScore());
+		builder.append("\t" + getFullScore());
 		
 		for (Query q : rules) {
-			builder.append("\t" + q.getRuleString() + "[" + q.getPcaConfidence() + "]");
+			builder.append("\t" + q.getRuleString() + "[" + q.getCardinality() + ", " + q.getPcaConfidence() + "]");
 		}
+		
+		Query combinedRule = getJointRule();
+		builder.append("\t" + combinedRule.getRuleString() + "[" + combinedRule.getCardinality() + ", " + combinedRule.getPcaConfidence() + "]");
+		
 		return builder.toString(); 
 	}
 

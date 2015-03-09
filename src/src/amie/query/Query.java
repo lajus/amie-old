@@ -27,7 +27,6 @@ import amie.data.FactDatabase;
  */
 public class Query{
 
-
 	/**
 	 * The triple patterns
 	 */
@@ -339,7 +338,7 @@ public class Query{
 		++highestVariable;
 		containsQuasiBindings = false;
 	}
-	
+
 	private void computeHeadKey() {
 		headKey = triples.get(0)[1].toString();
 		if(!FactDatabase.isVariable(triples.get(0)[2]))
@@ -809,10 +808,21 @@ public class Query{
 		return length;
 	}
 	
-	public int getLengthWithoutTypes(){
+	public int getLengthWithoutTypes(ByteString typeString){
 		int size = 0;
 		for(ByteString[] triple: triples){
-			if(!triple[1].equals(ByteString.of("rdf:type")) || FactDatabase.isVariable(triple[2]))
+			if(!triple[1].equals(typeString) || FactDatabase.isVariable(triple[2]))
+				++size;
+		}
+		
+		return size;
+	}
+	
+	public int getLengthWithoutTypesAndLinksTo(ByteString typeString, ByteString linksString){
+		int size = 0;
+		for(ByteString[] triple: triples){
+			if((!triple[1].equals(typeString) || FactDatabase.isVariable(triple[2])) 
+					&& !triple[1].equals(linksString))
 				++size;
 		}
 		
@@ -941,14 +951,14 @@ public class Query{
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append(getRuleString());
 		
-		strBuilder.append("\t" + df.format(support) );
-		strBuilder.append("\t" + df.format(headCoverage));
-		strBuilder.append("\t" + df.format(confidence));
-		strBuilder.append("\t" + df.format(pcaConfidence));
-		strBuilder.append("\t" + cardinality);		
-		strBuilder.append("\t" + bodySize);
-		strBuilder.append("\t" + bodyStarSize);
-		strBuilder.append("\t" + functionalVariable);
+		strBuilder.append("\t" + df.format(getSupport()) );
+		strBuilder.append("\t" + df.format(getHeadCoverage()));
+		strBuilder.append("\t" + df.format(getConfidence()));
+		strBuilder.append("\t" + df.format(getPcaConfidence()));
+		strBuilder.append("\t" + getCardinality());		
+		strBuilder.append("\t" + getBodySize());
+		strBuilder.append("\t" + getBodyStarSize());
+		strBuilder.append("\t" + getFunctionalVariable());
 		strBuilder.append("\t" + stdConfUpperBound);
 		strBuilder.append("\t" + pcaConfUpperBound);
 		strBuilder.append("\t" + pcaEstimation);
@@ -964,14 +974,14 @@ public class Query{
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append(getRuleString());
 		
-		strBuilder.append("\t" + df.format(support) );
-		strBuilder.append("\t" + df.format(headCoverage));
-		strBuilder.append("\t" + df.format(confidence));
-		strBuilder.append("\t" + df.format(pcaConfidence));
-		strBuilder.append("\t" + cardinality);		
-		strBuilder.append("\t" + bodySize);
-		strBuilder.append("\t" + bodyStarSize);
-		strBuilder.append("\t" + functionalVariable);
+		strBuilder.append("\t" + df.format(getSupport()) );
+		strBuilder.append("\t" + df.format(getHeadCoverage()));
+		strBuilder.append("\t" + df.format(getConfidence()));
+		strBuilder.append("\t" + df.format(getPcaConfidence()));
+		strBuilder.append("\t" + getCardinality());		
+		strBuilder.append("\t" + getBodySize());
+		strBuilder.append("\t" + getBodyStarSize());
+		strBuilder.append("\t" + getFunctionalVariable());
 
 		return strBuilder.toString();
 	}
@@ -1403,5 +1413,15 @@ public class Query{
 		}
 		
 		return nonHeadVars;
+	}
+
+	public boolean containsRelation(ByteString relation) {
+		for (ByteString[] triple : triples) {
+			if (triple[1].equals(relation)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

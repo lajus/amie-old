@@ -17,7 +17,7 @@ public class FullRelationSignatureMiningAssistant extends HeadVariablesMiningAss
 	
 	public void getDanglingEdges(Query query, int minCardinality, Collection<Query> output) {		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
-		ByteString rdfType = ByteString.of("<rdf:type>");
+		ByteString rdfType = ByteString.of("rdf:type");
 		
 		if(query.isEmpty()){
 			//Initial case

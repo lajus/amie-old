@@ -7,6 +7,7 @@ package amie.mining;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -39,6 +40,7 @@ import amie.mining.assistant.MiningAssistant;
 import amie.mining.assistant.RelationSignatureMiningAssistant;
 import amie.mining.assistant.SeedsCountMiningAssistant;
 import amie.mining.assistant.TypedMiningAssistant;
+import amie.mining.assistant.WikilinksHeadVariablesMiningAssistant;
 import amie.query.Query;
 
 
@@ -337,6 +339,7 @@ public class AMIE {
 		boolean silent = false;
 		boolean pcaOptimistic = false;
 		boolean enforceConstants = false;
+		boolean avoidUnboundTypeAtoms = true;
 		int nProcessors = Runtime.getRuntime().availableProcessors();
 		String bias = "headVars";
 		Metric metric = Metric.HeadCoverage;
@@ -456,6 +459,10 @@ public class AMIE {
 				.withDescription("Recursivity limit")
 				.hasArg()
 				.create("rl");
+		
+		Option avoidUnboundTypeAtomsOpt = OptionBuilder.withArgName("avoid-unbound-type-atoms")
+				.withDescription("Avoid unbound type atoms, e.g., type(x, y), i.e., bind always 'y' to a type")
+				.create("auta");
 						
 		options.addOption(stdConfidenceOpt);
 		options.addOption(supportOpt);
@@ -479,6 +486,7 @@ public class AMIE {
 		options.addOption(funcHeuristicOp);
 		options.addOption(optimisticApproxOp);
 		options.addOption(recursivityLimitOpt);
+		options.addOption(avoidUnboundTypeAtomsOpt);
 		
 		try {
 			cli = parser.parse(options, args);
@@ -616,6 +624,7 @@ public class AMIE {
 		}
 		
 		pcaOptimistic = cli.hasOption("optimistic");		
+		avoidUnboundTypeAtoms = cli.hasOption("auta");
 		String[] leftOverArgs = cli.getArgs();
 		
 		if (leftOverArgs.length < 1) {
@@ -722,6 +731,12 @@ public class AMIE {
 			mineAssistant = new FullRelationSignatureMiningAssistant(dataSource);
 			System.out.println("Rules of the form type(x, C) r(x, y) => type(y, C') or type(y, C) r(x, y) => type(x, C')");
 			break;
+		case "wikilinks":
+			mineAssistant = new WikilinksHeadVariablesMiningAssistant(dataSource);
+			headExcludedRelations = Arrays.asList(ByteString.of(WikilinksHeadVariablesMiningAssistant.wikiLinkProperty), ByteString.of("rdf:type"));
+			bodyExcludedRelations = Arrays.asList(ByteString.of(WikilinksHeadVariablesMiningAssistant.wikiLinkProperty), ByteString.of("rdf:type"));
+			System.out.println("Rules of the form .... linksTo(x, y) type(x, C) type(y, C') => r(x, y)");
+			break;
 		case "existential" :
 			mineAssistant = new ExistentialRulesHeadVariablesMiningAssistant(dataSource);
 			System.out.println("Reporting also existential rules. Counting on both head variables.");
@@ -764,6 +779,7 @@ public class AMIE {
 		mineAssistant.setSilent(silent);
 		mineAssistant.setPcaOptimistic(pcaOptimistic);
 		mineAssistant.setRecursivityLimit(recursivityLimit);
+		mineAssistant.setAvoidUnboundTypeAtoms(avoidUnboundTypeAtoms);
 		
 		AMIE miner = new AMIE(mineAssistant, minInitialSup, minMetricValue, metric, nThreads);
 		if(minStdConf > 0.0) {

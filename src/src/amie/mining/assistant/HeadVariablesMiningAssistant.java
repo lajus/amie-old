@@ -67,7 +67,7 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 
 	
 	/**
-	 * Returns all candidates obtained by binding two values
+	 * Returns all candidates obtained by adding a closing edge (an edge with two existing variables).
 	 * @param currentNode
 	 * @param minCardinality
 	 * @param omittedVariables
@@ -346,7 +346,11 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 							if (candidate.getLength() == maxDepth 
 									&& !candidate.isSafe()) {
 								continue;
-							}								
+							}
+							// If the assistant has been told to avoid atoms of the form type(x, y)
+							if (relation.equals(typeString) && avoidUnboundTypeAtoms) {
+								continue;
+							}
 							output.add(candidate);
 						}
 					}

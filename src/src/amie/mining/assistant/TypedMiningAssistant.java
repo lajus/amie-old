@@ -24,7 +24,6 @@ public class TypedMiningAssistant extends HeadVariablesMiningAssistant {
 	 */
 	public TypedMiningAssistant(FactDatabase dataSource) {
 		super(dataSource);
-		// TODO Auto-generated constructor stub
 	}
 		
 	/**
@@ -34,10 +33,11 @@ public class TypedMiningAssistant extends HeadVariablesMiningAssistant {
 	 * @return
 	 */
 	public void getDanglingEdges(Query query, int minCardinality, Collection<Query> output){		
-		super.getDanglingEdges(query, minCardinality, output);
-		if(query.isSafe()){
-			//Add the types when the query is long enough
+		if(query.getLength() == 1){
+			//Add the types at the beginning of the query.
 			getSpecializationCandidates(query, minCardinality, output);
+		} else {
+			super.getDanglingEdges(query, minCardinality, output);	
 		}
 	}
 		
@@ -96,7 +96,6 @@ public class TypedMiningAssistant extends HeadVariablesMiningAssistant {
 	}
 
 	protected boolean testLength(Query candidate){
-		return candidate.getLengthWithoutTypes() < maxDepth;
+		return candidate.getLengthWithoutTypes(typeString) < maxDepth;
 	}
-
 }
