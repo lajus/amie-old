@@ -349,7 +349,7 @@ public class FactDatabase {
 						synchronized (Announce.blanks) {
 							Announce.message("Starting " + file.getName());
 						}
-						load(file, (String) null, loadJoinTable);
+						load(file, (String) null, false);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -373,6 +373,12 @@ public class FactDatabase {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		
+		if (loadJoinTable) {
+			Announce.message("Building overlap tables");
+			buildOverlapTables();
+		}
+		
 		Announce.done("Loaded " + (size() - size) + " facts in "
 				+ NumberFormatter.formatMS(System.currentTimeMillis() - time)
 				+ " using "
@@ -2146,11 +2152,12 @@ public class FactDatabase {
 	public static void main(String[] args) throws Exception {
 		FactDatabase d = new FactDatabase();		
 
-		//d.load(new File("c:/fabian/data/yago3/checked.tsv"));
+		d.load(new File(args[0]));
+		d.load(new File(args[1]));		
 		//D.p(d.selectDistinct(ByteString.of("?x"),triples(triple("?y",EQUALSstr,"?x"))));
 		
-		 d.load(new File("/home/galarrag/workspace/AMIE/Data/yago2/yago2core.10kseedsSample.decoded.compressed.notypes.linksto.tsv"),
-				 new File("/home/galarrag/workspace/AMIE/Data/yago2/yago2core.10kseedsSample.decoded.compressed.notypes.tsv")); 
+		 //d.load(new File("/home/galarrag/workspace/AMIE/Data/yago2/yago2core.10kseedsSample.decoded.compressed.notypes.linksto.tsv"),
+		//		 new File("/home/galarrag/workspace/AMIE/Data/yago2/yago2core.10kseedsSample.decoded.compressed.notypes.tsv")); 
 /*		  D.p(d.countPairs(
 				ByteString.of("?a"),
 				ByteString.of("?b"),
@@ -2158,11 +2165,12 @@ public class FactDatabase {
 						triple("?a", "<livesIn>", "?b"),
 						triple("?a", "<diedIn>", "?b"))));*/
 		  
-		  D.p(d.countPairs(
-					ByteString.of("?a"),
-					ByteString.of("?b"),
-					triples(triple("?b", "<linksTo>", "?b"),
-							triple("?a", "<exports>", "?x")
-							))); 
+		  D.p(d.count(triple(ByteString.of("?a"), ByteString.of("<linksTo>"), ByteString.of("?b"))));
+		  D.p(d.selectDistinct(ByteString.of("?a"), ByteString.of("?b"),
+				  triples(
+						  triple(ByteString.of("?a"), ByteString.of("<linksTo>"), ByteString.of("?b")), 
+						  triple(ByteString.of("?a"), ByteString.of("?p"), ByteString.of("?b")),
+						  triple(ByteString.of("?p"), DIFFERENTFROMbs, ByteString.of("<linksTo>"))
+						  )));
 	}
 }

@@ -38,9 +38,8 @@ public class JoinKBsWithTypes {
 				if (fact.size() < 3) {
 					continue;
 				}
-				
-				String subject = fact.get(1).trim();
-				String object = fact.get(3).trim();
+				String subject = fact.get(0).trim();
+				String object = fact.get(2).trim();
 				
 				if (!types.isEmpty()) {
 					if (subjects.contains(subject) && types.contains(object)) {
@@ -48,7 +47,7 @@ public class JoinKBsWithTypes {
 					}
 				} else {
 					if (subjects.contains(subject)) {
-						System.out.println(subject + "\t" + fact.get(2).trim() + "\t" + object);
+						System.out.println(subject + "\t" + fact.get(1).trim() + "\t" + object);
 					}
 				}
 			}
