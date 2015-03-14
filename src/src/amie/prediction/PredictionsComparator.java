@@ -6,10 +6,31 @@ import javatools.datatypes.ByteString;
 
 public class PredictionsComparator implements Comparator<Prediction> {
 
+	public boolean naive;
+	
+	public PredictionsComparator() {
+		naive = false;
+	}
+	
+	/**
+	 * @param naive Use the naive independence score.
+	 */
+	public PredictionsComparator(boolean naive) {
+		this.naive = naive;
+	}
+	
 	@Override
 	public int compare(Prediction o1, Prediction o2) {
-		Double conf1 = o1.getConfidence();
-		Double conf2 = o2.getConfidence();
+		Double conf1 = null;
+		Double conf2 = null;
+
+		if (naive) {
+			conf1 = o1.getNaiveConfidence();
+			conf2 = o2.getNaiveConfidence();			
+		} else {
+			conf1 = o1.getConfidence();
+			conf2 = o2.getConfidence();			
+		}
 		
 		if (conf1.equals(conf2)) {
 			ByteString[] triple1 = o1.getTriple();

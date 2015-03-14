@@ -20,11 +20,11 @@ import amie.query.Query;
 
 public class SamplePredictionsByScore {
 
-	public static final int sampleSize = 20;
+	public static final int sampleSize = 100;
 	
 	public static void main(String[] args) throws IOException {
 		if(args.length < 5){
-			System.err.println("JointPredictions <rules> <trainingDb> <targetDb> <random> <naive> [allrules=false]");
+			System.err.println("SamplePredictionsyByScore <rules> <trainingDb> <targetDb> <random> <naive> [bindingsWithoutLinks=false] [allrules=false]");
 			System.exit(1);
 		}
 		
@@ -35,16 +35,23 @@ public class SamplePredictionsByScore {
 		boolean random = Boolean.parseBoolean(args[3]);
 		boolean allRules = false;
 		boolean naive = Boolean.parseBoolean(args[4]);
-		
+		boolean bindingsWithoutLinks = false;
+
 		if (args.length > 5) {
-			allRules = Boolean.parseBoolean(args[5]);
+			bindingsWithoutLinks = Boolean.parseBoolean(args[5]);
+		}
+		
+		if (args.length > 6) {
+			allRules = Boolean.parseBoolean(args[6]);
 		}
 		
 		List<List<Prediction>> buckets = initializeBuckets();
 	
 		// Load the data
 		trainingDataset.load(new File(args[1]));
-		targetDataset.load(new File(args[2]));
+		if (!args[2].equals("-")) {
+			targetDataset.load(new File(args[2]));
+		}
 		
 		List<Query> queries = new ArrayList<>();
 		HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(trainingDataset);
@@ -61,7 +68,12 @@ public class SamplePredictionsByScore {
 		}
 		tsvFile.close();
 		Prediction.setConfidenceMetric(Metric.PCAConfidence);
-		List<Prediction> predictions = JointPredictions.getPredictions(queries, trainingDataset, targetDataset, true);
+		List<Prediction> predictions = null;
+		System.out.println("BindingsWithoutLinks = " + bindingsWithoutLinks);
+		if (bindingsWithoutLinks)
+			predictions = JointPredictions.getPredictionsWithoutLinks(queries, trainingDataset, targetDataset, true);
+		else
+			predictions = JointPredictions.getPredictions(queries, trainingDataset, targetDataset, true);
 		
 		int predictionsConsidered = 0;
 		System.out.println(predictions.size() + " predictions");

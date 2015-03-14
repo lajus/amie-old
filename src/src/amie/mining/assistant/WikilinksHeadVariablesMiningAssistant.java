@@ -93,6 +93,9 @@ public class WikilinksHeadVariablesMiningAssistant extends HeadVariablesMiningAs
 					int cardinality = objectTypes.get(type);
 					if(cardinality >= minCardinality){
 						Query newCandidate = new Query(candidate, cardinality);
+						newCandidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(newCandidate.getHeadRelation()));
+						newCandidate.setSupport((double)cardinality / (double)source.size());
+						newCandidate.setParent(query);
 						newCandidate.getLastTriplePattern()[2] = type;
 						newCandidate.setParent(query);
 						output.add(newCandidate);

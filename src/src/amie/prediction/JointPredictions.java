@@ -31,13 +31,12 @@ public class JointPredictions {
 	 * @param notInTraining 
 	 * @return
 	 */
-	private static Map<Triple<ByteString, ByteString, ByteString>, List<Query>> findPredictionsForRules(List<Query> queries, 
+	static Map<Triple<ByteString, ByteString, ByteString>, List<Query>> findPredictionsForRules(List<Query> queries, 
 			FactDatabase trainingDataset, FactDatabase targetDataset, boolean notInTraining) {
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions = new HashMap<>();
 		HeadVariablesMiningAssistant assistant = new HeadVariablesMiningAssistant(trainingDataset);
 		PredictionsSampler predictor = new PredictionsSampler(trainingDataset);
 		for (Query q : queries) {
-			System.out.println("Firing predictions for " + q.getBasicRuleString());
 			ByteString[] head = q.getHead();
 			q.setFunctionalVariable(q.getHead()[Query.findFunctionalVariable(q, trainingDataset)]);
 			assistant.computeCardinality(q);
@@ -122,6 +121,50 @@ public class JointPredictions {
 		return result;
 	}
 	
+	/**
+	 * Returns the list of all the predictions made by the given rules on the training dataset.
+	 * It restricts the output to those paris of entities for which there is no link in the 
+	 * KB.
+	 * @param queries
+	 * @param trainingDataset
+	 * @param targetDataset
+	 * @param notInTraining
+	 * @return
+	 */
+	public static List<Prediction> getPredictionsWithoutLinks(List<Query> queries, 
+			FactDatabase trainingDataset, FactDatabase targetDataset, boolean notInTraining) {
+		List<Prediction> result = new ArrayList<>();
+		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions =
+				findPredictionsForRules(queries, trainingDataset, targetDataset, notInTraining);
+		for (Triple<ByteString, ByteString, ByteString> t : predictions.keySet()) {
+			Prediction prediction = new Prediction(t);
+			prediction.getRules().addAll(predictions.get(t));
+			ByteString triple[] = prediction.getTriple();
+			int eval = Evaluator.evaluate(triple, trainingDataset, targetDataset);
+			if(eval == 0) { 
+				prediction.setHitInTarget(true);
+			}
+			
+			if(trainingDataset.count(triple) > 0) {
+				prediction.setHitInTraining(true);
+			}
+			
+			List<ByteString[]> noLinkQuery = FactDatabase.triples(
+					FactDatabase.triple(t.first, ByteString.of("?p"), t.third),
+					FactDatabase.triple(ByteString.of("?p"), FactDatabase.DIFFERENTFROMbs, ByteString.of("<linksTo>"))
+					);
+			long nRelations = trainingDataset.countDistinct(ByteString.of("?p"), noLinkQuery);
+			System.out.println(FactDatabase.toString(noLinkQuery) + ": " + nRelations);
+			if (nRelations == 0) {
+				// Bingo
+				result.add(prediction);
+			}
+		}
+		
+		return result;
+	}
+
+
 	public static void main(String[] args) throws IOException {
 		if(args.length < 3){
 			System.err.println("JointPredictions <inputfile> <trainingDb> <targetDb> <not-in-training>");
@@ -162,6 +205,7 @@ public class JointPredictions {
 		tsvFile.close();
 		
 		List<Prediction> predictions = getPredictions(queries, trainingDataset, targetDataset, notInTraining);
+
 		
 		for (Prediction prediction : predictions) {
 			predictionsHistogram.increase(prediction.getRules().size());

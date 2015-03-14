@@ -12,6 +12,10 @@ public class JoinKBsWithWikilinks {
 
 	public static void main(String[] args) throws IOException {
 		Set<String> subjects = new HashSet<>();
+		boolean joinOnlyOnSubject = false;
+		if (args.length > 2) {
+			joinOnlyOnSubject = Boolean.parseBoolean(args[2]);
+		}
 		// Load the YAGO facts file
 		try(TSVFile factsFile = new TSVFile(new File(args[0]))) {
 			for (List<String> fact : factsFile) {
@@ -19,7 +23,9 @@ public class JoinKBsWithWikilinks {
 					continue;
 				}
 				subjects.add(fact.get(0));
-				subjects.add(fact.get(2).substring(0, fact.get(2).length() - 1));
+				if (!joinOnlyOnSubject) {
+					subjects.add(fact.get(2).substring(0, fact.get(2).length() - 1));
+				}
 			}
 		}
 		
@@ -32,8 +38,14 @@ public class JoinKBsWithWikilinks {
 				
 				String subject = fact.get(0).trim();
 				String object = fact.get(2).replaceFirst(" .", "");
-				if (subjects.contains(subject) && subjects.contains(object)) {
-					System.out.println(subject + "\t" + fact.get(1).trim() + "\t" + object);
+				if (joinOnlyOnSubject) {
+					if (subjects.contains(subject)) {
+						System.out.println(subject + "\t" + fact.get(1).trim() + "\t" + object);
+					}
+				} else {
+					if (subjects.contains(subject) && subjects.contains(object)) {
+						System.out.println(subject + "\t" + fact.get(1).trim() + "\t" + object);
+					}					
 				}
 			}
 		}
