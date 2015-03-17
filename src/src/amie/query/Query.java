@@ -1424,4 +1424,15 @@ public class Query{
 		
 		return false;
 	}
+	
+	public int containsRelationTimes(ByteString relation) {
+		int count = 0;
+		for (ByteString[] triple : triples) {
+			if (triple[1].equals(relation)) {
+				++count;
+			}
+		}
+		
+		return count;
+	}
 }

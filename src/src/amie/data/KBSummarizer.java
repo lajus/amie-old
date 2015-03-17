@@ -2,6 +2,9 @@ package amie.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import javatools.datatypes.ByteString;
 
 public class KBSummarizer {
@@ -29,7 +32,11 @@ public class KBSummarizer {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		FactDatabase db = new FactDatabase();
-		db.load(new File(args[0]));
+		List<File> files = new ArrayList<>(); 
+		for (String fileName : args) {
+			files.add(new File(fileName));
+		}
+		db.load(files);
 		summarize(db, true);
 	}
 }

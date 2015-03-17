@@ -3,7 +3,6 @@ package amie.prediction;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javatools.datatypes.ByteString;
@@ -65,7 +64,9 @@ public class WikiLinksStats {
 		db.load(files);
 
 		List<ByteString[]> noLinksquery = getNoLinksQuery(null, null);
-		System.out.println("Non semantified links " +  db.countPairs(subjectVar, objectVar, noLinksquery));
+		System.out.println("Semantified links " +  db.countPairs(subjectVar, objectVar, noLinksquery));
+		System.out.println("Total links " +  db.count(FactDatabase.triple(subjectVar, ByteString.of("<linksTo>") , objectVar)));
+		
 /*		
 		List<ByteString[]> noLinksqueryPersonPerson = getNoLinksQuery(ByteString.of("<dbo:Person>"), ByteString.of("<dbo:Person>"));
 		List<ByteString[]> linksqueryPersonPerson = getLinksQuery(ByteString.of("<dbo:Person>"), ByteString.of("<dbo:Person>"));

@@ -253,13 +253,22 @@ Let us consider again the  low confidence rule
  directed(x,z) \wedge hasActor(z,y) \Rightarrow married(x,y)
 \]
 which implies that a director is married to all actors that acted in his movies.
-We need to find out how many actors correspond to each director ($\#y_{per\;x}$) in the body of the rule.
-Therefore we take a walk through the path $x \rightarrow z \rightarrow y$, connecting a director to his potential actors. If $fun(r)$ and $ifun(r)$
+Recall that the calculation of $dnm_{pca}(R)$ is defined by the expression:
+\[
+\begin{array}{rl}
+dnm_{pca}(R) := &\#(x,y): \exists\; z, y': directed(x,z)  \\
+  &\wedge\; hasActor(z,y) \wedge isMarried(x,y') \label{eq:denomPCAExample}
+\end{array}
+\]
+That is, we need to find out how many actors $y$ correspond to each director $x$ in the body of the rule ($\#y_{per\;x}$), and then
+count of how many of those are married.
+%We need to find out how many actors correspond to each director ($\#y_{per\;x}$) in the body of the rule.
+Therefore we walk through the path $x \rightarrow z \rightarrow y$, connecting a director to his potential actors. If $fun(r)$ and $ifun(r)$
 denote the functionality and inverse functionality of the relation $r$, respectively, then
 walking through this path involves the following steps:
 \begin{enumerate} \itemsep +0.3ex
  \item For each director $x$, the relation $directed$ will produce on average $\frac{1}{fun(directed)}$ movies $z$.
- \item Some or all of these movies will find join partners in the $z$ variable  of $hasActor$.
+ \item Some or all of these movies $z$ will find join partners in the first argument of $hasActor$.
  \item For each movie $z$, $hasActor$ will produce on average $\frac{1}{fun(hasActor)}$ actors $y$.
  \item Each of these actors in $y$ acted on average in  $\frac{1}{ifun(hasActor)}$ movies of the $hasActor$ relation.
 \end{enumerate}
@@ -268,9 +277,9 @@ walking through this path involves the following steps:
 
 After step 2, we can approximate the number of distinct movies that bind to the variable $z$ for each director in the variable $x$ as:
 $$
-\#z_{per \; x} := \frac{|rng(directed) \wedge dom(hasActor)|}{|rng(directed)| \times fun(directed)}
+\#z_{per \; x} := \frac{|rng(directed) \cap dom(hasActor)|}{|rng(directed)| \times fun(directed)}
 $$
-Here, $|rng(directed)|$ is the number of distinct movies in the range of $directed$ and $|rng(directed) \wedge dom(hasActor)|$ 
+Here, $|rng(directed)|$ is the number of distinct movies in the range of $directed$ and $|rng(directed) \cap dom(hasActor)|$ 
 denotes the distinct movies in the overlap between the objects of $directed$ and the subjects of $hasActor$.
 The term $\frac{1}{fun(directed)}$ corresponds to step  1.
 The assumption in our join estimation is that the movies that exist in the overlap of $directed$  and $hasActor$ are uniformly distributed between the different directors in $directed$.
@@ -282,22 +291,31 @@ $$
 The term $\frac{1}{fun(hasActor)}$ corresponds to step 3. At the end of step 3, we already have for a single director in $x$ a bag of actors in $y$ that correspond to it.
 However, these are not necessarily distinct actors, since $x$ and $y$ are connected through the variable $z$ (movies). Therefore, a duplicate elimination step is needed.
 To see why, assume that each director has directed on average 3 movies and that each movie has 5 actors. Then, the rule will produce on average 15 actors $y$ for each director $x$.
-However, there is no guarantee that these actors will all be different from each other.
+However, there is no guarantee that these actors are distinct.
 If the director trusts specific actors and collaborates repeatedly with them in some or all of his movies, there will be less than 15 distinct actors.
 
 
 
-The term $\frac{1}{ifun(hasActor)}$ achieves this duplicate elimination: each actor contributes in the final count with a weight $ifun(hasActor)$, 
-which expresses the extend to which this actor exclusively belongs to a movie.
+% The term $\frac{1}{ifun(hasActor)}$ achieves this duplicate elimination: each actor contributes in the final count 
+% with a weight $ifun(hasActor)$, 
+% which expresses the extend to which this actor exclusively belongs to a movie.
+The term $ifun(hasActor)$ achieves this duplicate elimination: 
+since each actor participated in $\frac{1}{ifun(hasActor)}$ different movies, then the actor
+contributes in the final count with a weight that is inversely proportional to this number.
 
 
-
-In the way we use the duplicate elimination, a single actor $y$ belongs to $\frac{1}{ifun(hasActor)}$ different movies $z$, which are chosen from \emph{all} the movies in  $hasActor$ 
-(e.g., 3 movies per actor).
-In reality, we want the number of different movies chosen from those that remain after step 2 ($\#z_{per \; x}$),
-i.e., the average number of movies by the same director that an actor acts in (e.g., 2 movies per actor, which is less than 3).
-In other words, in step 4, we employ a very pessimistic scenario, which causes $\#y_{per\;x}$ to be an underestimation, 
-and the overall confidence approximation to be an overestimation of the actual confidence.
+From our way of performing duplicate elimination, a single actor $y$ belongs to $\frac{1}{ifun(hasActor)}$ different movies $z$, 
+which are chosen from \emph{all} the movies in the relation $hasActor$.
+%(e.g., 3 movies per actor).
+% In reality, we want the number of different movies chosen from those that remain after step 2 ($\#z_{per \; x}$),
+% i.e., the average number of movies by the same director that an actor acts in (e.g., 2 movies per actor, which is less than 3).
+% In other words, in step 4, we employ a very pessimistic scenario, which causes $\#y_{per\;x}$ to be an underestimation, 
+% and the overall confidence approximation to be an overestimation of the actual confidence.
+In reality, we want the number of different movies chosen from those that remain after step 2 ($num_{x_1\; per \; x_0}$), % that correspond to the same $x_2$,
+i.e., the average number of movies by the same director that an actor acts in. This number is obviously smaller, which
+implies that the factor $ifun(hasActor)$ is a pessimistic estimator. This makes 
+our approximation an underestimation of the real confidence denominator, 
+and the overall confidence approximation an overestimation of the actual confidence.
 
 To summarize, we can estimate the number of actors $y$ that are supposed to be married with each director $x$ as:
 $$
