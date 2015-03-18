@@ -17,15 +17,15 @@ Confidence [1.0, 0.9)
 <Haakon_VI_of_Norway>	<isMarriedTo>	<Margaret_I_of_Denmark>	0.9522638435839686	TargetSource	True
 <Roscoe_Born>	<isMarriedTo>	<Roberta_Weiss>	0.9195205479452054	TargetSource	True
 <Pamela_Des_Barres>	<isMarriedTo>	<Michael_Des_Barres>	0.9195205479452054	TargetSource	True
-<Lucas_de_Wael>	<isCitizenOf>	<Belgium>	0.9591417041750737	ManualEvaluation	
-<Britta_Brunius>	<isCitizenOf>	<Sweden>	0.970182381636633	ManualEvaluation	
-<William_II_of_the_Netherlands>	<isCitizenOf>	<Netherlands>	0.9511806383349183	ManualEvaluation	
+<Lucas_de_Wael>	<isCitizenOf>	<Belgium>	0.9591417041750737	ManualEvaluation	False
+<Britta_Brunius>	<isCitizenOf>	<Sweden>	0.970182381636633	ManualEvaluation	True	
+<William_II_of_the_Netherlands>	<isCitizenOf>	<Netherlands>	0.9511806383349183	ManualEvaluation	True
 <Carmen_Castillo>	<isMarriedTo>	<Xavier_Cugat>	0.9195205479452054	TargetSource	True
-<Wouter_Crabeth_II>	<isCitizenOf>	<Netherlands>	0.9798780573193032	ManualEvaluation	
+<Wouter_Crabeth_II>	<isCitizenOf>	<Netherlands>	0.9798780573193032	ManualEvaluation	False
 <Simone_Gbagbo>	<isMarriedTo>	<Laurent_Gbagbo>	0.9195205479452054	TargetSource	True
-<Ed_Viswanathan>	<isCitizenOf>	<Louisiana>	0.9609594975092051	ManualEvaluation	
-<Muqtada_al-Sadr>	<isCitizenOf>	<Iran>	0.9609594975092051	ManualEvaluation	
-<Karen_Paterson>	<isCitizenOf>	<Scotland>	0.9707860185443031	ManualEvaluation	
+<Ed_Viswanathan>	<isCitizenOf>	<Louisiana>	0.9609594975092051	ManualEvaluation	False	
+<Muqtada_al-Sadr>	<isCitizenOf>	<Iran>	0.9609594975092051	ManualEvaluation	False
+<Karen_Paterson>	<isCitizenOf>	<Scotland>	0.9707860185443031	ManualEvaluation	True
 <Gustavo_Alatriste>	<isMarriedTo>	<Ariadne_Welter>	0.9195205479452054	TargetSource	True
 <Angharad_Rees>	<isMarriedTo>	<Christopher_Cazenove>	0.9195205479452054	TargetSource	True
 <David_T._Beito>	<isMarriedTo>	<Linda_Royster_Beito>	0.9195205479452054	TargetSource	True
@@ -33,9 +33,10 @@ Confidence [1.0, 0.9)
 <Kenneth_Harlan>	<isMarriedTo>	<Emily_McLaughlin>	0.9195205479452054	TargetSource	True
 <Edith_Borella>	<isMarriedTo>	<Edward_Coxen>	0.9195205479452054	TargetSource	True
 <Alfred_Lennon>	<isMarriedTo>	<Julia_Lennon>	0.9522638435839686	TargetSource	True
-<Prince_Albert_of_Saxe-Altenburg>	<isMarriedTo>	<Princess_Marie_of_Prussia_(18551888)>	0.9195205479452054	ManualEvaluation	
-<Paul_Scherrer>	<isCitizenOf>	<Switzerland>	0.9502054628958182	ManualEvaluation	
+<Prince_Albert_of_Saxe-Altenburg>	<isMarriedTo>	<Princess_Marie_of_Prussia_(1855–1888)>	0.9195205479452054	ManualEvaluation	True
+<Paul_Scherrer>	<isCitizenOf>	<Switzerland>	0.9502054628958182	ManualEvaluation	True
 <Richard_Compton>	<isMarriedTo>	<Veronica_Cartwright>	0.9195205479452054	TargetSource	True
+====================================================================================================================== 
 <Max_Sandlin>	<isMarriedTo>	<Stephanie_Herseth_Sandlin>	0.9195205479452054	TargetSource	True
 <Renée_of_France>	<isMarriedTo>	<Ercole_II_d'Este,_Duke_of_Ferrara>	0.9195205479452054	TargetSource	True
 <Prince_Axel_of_Denmark>	<isCitizenOf>	<Denmark>	0.970182381636633	ManualEvaluation	
@@ -108,43 +109,44 @@ Confidence [1.0, 0.9)
 <Doug_Kane>	<isMarriedTo>	<Kathleen_Vinehout>	0.9195205479452054	TargetSource	True
 Confidence [0.9, 0.8)
 56586 predictions
-<K._A._C._Creswell>	<isCitizenOf>	<United_Kingdom>	0.8500265838961749	ManualEvaluation	
-<Mia_Hagman>	<isCitizenOf>	<Finland>	0.8500265838961749	ManualEvaluation	
-<Pinhel>	<hasOfficialLanguage>	<Portuguese_language>	0.847457627118644	ManualEvaluation	
-<Nemirintsy>	<hasOfficialLanguage>	<Ukrainian_language>	0.847457627118644	ManualEvaluation	
-<Huiva_(UTS)>	<hasOfficialLanguage>	<Ukrainian_language>	0.847457627118644	ManualEvaluation	
-<Angaur>	<hasOfficialLanguage>	<English_language>	0.847457627118644	ManualEvaluation	
-<Petrovice_(Bruntál_District)>	<hasOfficialLanguage>	<Polish_language>	0.847457627118644	ManualEvaluation	
-<Bore>	<hasOfficialLanguage>	<Romani_language>	0.847457627118644	ManualEvaluation	
-<StrachoHovice>	<hasOfficialLanguage>	<Minority_language>	0.847457627118644	ManualEvaluation	
-<KYepenice>	<hasOfficialLanguage>	<Czech_language>	0.847457627118644	ManualEvaluation	
-<Jarohnvice>	<hasOfficialLanguage>	<Minority_language>	0.847457627118644	ManualEvaluation	
-<Nevojice>	<hasOfficialLanguage>	<Czech_language>	0.847457627118644	ManualEvaluation	
-<Borek_(Pardubice_District)>	<hasOfficialLanguage>	<Polish_language>	0.847457627118644	ManualEvaluation	
-<Maria_Ludovika_of_Austria-Este>	<hasChild>	<Archduchess_Marie_Caroline_of_Austria>	0.8463669122533004	ManualEvaluation	
-<Moravskoslezský_Koov>	<hasOfficialLanguage>	<Czech_language>	0.847457627118644	ManualEvaluation	
-<Kofiau>	<hasOfficialLanguage>	<Indonesian_language>	0.847457627118644	ManualEvaluation	
-<Sulislav>	<hasOfficialLanguage>	<Polish_language>	0.847457627118644	ManualEvaluation	
-<V~>	<hasOfficialLanguage>	<Romani_language>	0.847457627118644	ManualEvaluation	
-<Gary_Frank>	<isCitizenOf>	<United_Kingdom>	0.8361344537815126	ManualEvaluation	
-<Gudja>	<hasOfficialLanguage>	<English_language>	0.847457627118644	ManualEvaluation	
-<Leabua_Jonathan>	<isCitizenOf>	<South_Africa>	0.8011806416230152	ManualEvaluation	
-<Nechvalín>	<hasOfficialLanguage>	<Romani_language>	0.847457627118644	ManualEvaluation	
-<Svojek>	<hasOfficialLanguage>	<Minority_language>	0.847457627118644	ManualEvaluation	
-<Paul_Citroen>	<isCitizenOf>	<Germany>	0.8361344537815126	ManualEvaluation	
-<VYesovice_(Hodonín_District)>	<hasOfficialLanguage>	<German_language>	0.847457627118644	ManualEvaluation	
-<Mlýnské_Struhadlo>	<hasOfficialLanguage>	<German_language>	0.847457627118644	ManualEvaluation	
-<Jimlín>	<hasOfficialLanguage>	<German_language>	0.847457627118644	ManualEvaluation	
-<Eschweiler,_Grevenmacher>	<hasOfficialLanguage>	<Luxembourgish_language>	0.847457627118644	ManualEvaluation	
-<Tuy_Hoa>	<hasOfficialLanguage>	<Vietnamese_language>	0.847457627118644	ManualEvaluation	
-<Selnik,_Macedonia>	<hasOfficialLanguage>	<Macedonian_language>	0.847457627118644	ManualEvaluation	
-<Glendo,_Wyoming>	<hasOfficialLanguage>	<English_language>	0.847457627118644	ManualEvaluation	
-<Santa_María_(volcano)>	<hasOfficialLanguage>	<Mayan_languages>	0.847457627118644	ManualEvaluation	
-<Gilberto_Kassab>	<isCitizenOf>	<Brazil>	0.8042059463379261	ManualEvaluation	
-<ZáhoYí_(Tábor_District)>	<hasOfficialLanguage>	<Czech_language>	0.847457627118644	ManualEvaluation	
-<Nítkovice>	<hasOfficialLanguage>	<Minority_language>	0.847457627118644	ManualEvaluation	
-<Byaiky>	<hasOfficialLanguage>	<Czech_language>	0.847457627118644	ManualEvaluation	
-<Dukovany>	<hasOfficialLanguage>	<German_language>	0.847457627118644	ManualEvaluation	
+<K._A._C._Creswell>	<isCitizenOf>	<United_Kingdom>	0.8500265838961749	ManualEvaluation	True
+<Mia_Hagman>	<isCitizenOf>	<Finland>	0.8500265838961749	ManualEvaluation	True
+<Pinhel>	<hasOfficialLanguage>	<Portuguese_language>	0.847457627118644	ManualEvaluation	True
+<Nemirintsy>	<hasOfficialLanguage>	<Ukrainian_language>	0.847457627118644	ManualEvaluation	True
+<Huiva_(UTS)>	<hasOfficialLanguage>	<Ukrainian_language>	0.847457627118644	ManualEvaluation	True
+<Angaur>	<hasOfficialLanguage>	<English_language>	0.847457627118644	ManualEvaluation	True
+<Petrovice_(Bruntál_District)>	<hasOfficialLanguage>	<Polish_language>	0.847457627118644	ManualEvaluation	False
+<Bore>	<hasOfficialLanguage>	<Romani_language>	0.847457627118644	ManualEvaluation	False
+<StrachoHovice>	<hasOfficialLanguage>	<Minority_language>	0.847457627118644	ManualEvaluation	False
+<KYepenice>	<hasOfficialLanguage>	<Czech_language>	0.847457627118644	ManualEvaluation	Unknown
+<Jarohněvice>	<hasOfficialLanguage>	<Minority_language>	0.847457627118644	ManualEvaluation	False	
+<Nevojice>	<hasOfficialLanguage>	<Czech_language>	0.847457627118644	ManualEvaluation	True
+<Borek_(Pardubice_District)>	<hasOfficialLanguage>	<Polish_language>	0.847457627118644	ManualEvaluation	False
+<Maria_Ludovika_of_Austria-Este>	<hasChild>	<Archduchess_Marie_Caroline_of_Austria>	0.8463669122533004	ManualEvaluation	False
+<Moravian-Silesian_Region>	<hasOfficialLanguage>	<Czech_language>	0.847457627118644	ManualEvaluation	True
+<Kofiau>	<hasOfficialLanguage>	<Indonesian_language>	0.847457627118644	ManualEvaluation	True
+<Sulislav>	<hasOfficialLanguage>	<Polish_language>	0.847457627118644	ManualEvaluation	False
+<V~>	<hasOfficialLanguage>	<Romani_language>	0.847457627118644	ManualEvaluation	Unknown
+<Gary_Frank>	<isCitizenOf>	<United_Kingdom>	0.8361344537815126	ManualEvaluation	True
+<Gudja>	<hasOfficialLanguage>	<English_language>	0.847457627118644	ManualEvaluation	True
+<Leabua_Jonathan>	<isCitizenOf>	<South_Africa>	0.8011806416230152	ManualEvaluation	False
+<Nechvalín>	<hasOfficialLanguage>	<Romani_language>	0.847457627118644	ManualEvaluation	False
+<Svojek>	<hasOfficialLanguage>	<Minority_language>	0.847457627118644	ManualEvaluation	False
+<Paul_Citroen>	<isCitizenOf>	<Germany>	0.8361344537815126	ManualEvaluation	True
+<VYesovice_(Hodonín_District)>	<hasOfficialLanguage>	<German_language>	0.847457627118644	ManualEvaluation	Unknown
+<Mlýnské_Struhadlo>	<hasOfficialLanguage>	<German_language>	0.847457627118644	ManualEvaluation	False
+<Jimlín>	<hasOfficialLanguage>	<German_language>	0.847457627118644	ManualEvaluation	False
+<Eschweiler,_Grevenmacher>	<hasOfficialLanguage>	<Luxembourgish_language>	0.847457627118644	ManualEvaluation	True
+<Tuy_Hoa>	<hasOfficialLanguage>	<Vietnamese_language>	0.847457627118644	ManualEvaluation	True
+<Selnik,_Macedonia>	<hasOfficialLanguage>	<Macedonian_language>	0.847457627118644	ManualEvaluation	True
+<Glendo,_Wyoming>	<hasOfficialLanguage>	<English_language>	0.847457627118644	ManualEvaluation	True
+<Santa_María_(volcano)>	<hasOfficialLanguage>	<Mayan_languages>	0.847457627118644	ManualEvaluation	False
+<Gilberto_Kassab>	<isCitizenOf>	<Brazil>	0.8042059463379261	ManualEvaluation	True
+<ZáhoYí_(Tábor_District)>	<hasOfficialLanguage>	<Czech_language>	0.847457627118644	ManualEvaluation	True
+<Nítkovice>	<hasOfficialLanguage>	<Minority_language>	0.847457627118644	ManualEvaluation	False
+<Byaiky>	<hasOfficialLanguage>	<Czech_language>	0.847457627118644	ManualEvaluation	Unknown	
+<Dukovany>	<hasOfficialLanguage>	<German_language>	0.847457627118644	ManualEvaluation	False
+===============================================================================================================
 <Suchá_Lhota>	<hasOfficialLanguage>	<Polish_language>	0.847457627118644	ManualEvaluation	
 <Vaeradice>	<hasOfficialLanguage>	<Czech_language>	0.847457627118644	ManualEvaluation	
 <Bohemian_Switzerland>	<hasOfficialLanguage>	<Romani_language>	0.847457627118644	ManualEvaluation	
@@ -210,37 +212,37 @@ Confidence [0.9, 0.8)
 <Palkovice>	<hasOfficialLanguage>	<German_language>	0.847457627118644	ManualEvaluation	
 Confidence [0.8, 0.7)
 3403 predictions
-<Suzi_Perry>	<isCitizenOf>	<France>	0.745679012345679	ManualEvaluation	
-<Olivier_Schoenfelder>	<isCitizenOf>	<France>	0.745679012345679	ManualEvaluation	
-<Paul_Farmer>	<isCitizenOf>	<Rwanda>	0.745679012345679	ManualEvaluation	
-<James_Langley_Dalton>	<isCitizenOf>	<South_Africa>	0.7506596306068601	ManualEvaluation	
-<Mark_Foster_(golfer)>	<isCitizenOf>	<England>	0.745679012345679	ManualEvaluation	
-<Maria_del_Carmen_Bousada_de_Lara>	<livesIn>	<Spain>	0.7259278850392312	ManualEvaluation	
-<Lorenzo_Villoresi>	<isCitizenOf>	<Italy>	0.745679012345679	ManualEvaluation	
-<Alberto_Conti>	<isCitizenOf>	<Italy>	0.745679012345679	ManualEvaluation	
-<Gustav_Alvermann>	<isCitizenOf>	<Ukraine>	0.7506596306068601	ManualEvaluation	
-<Grand_Duke_Nicholas_Mikhailovich_of_Russia>	<isCitizenOf>	<Russia>	0.7506596306068601	ManualEvaluation	
-<Hendrick_Berckman>	<livesIn>	<Netherlands>	0.7259278850392312	ManualEvaluation	
-<Basil_Rakoczi>	<livesIn>	<United_Kingdom>	0.7259278850392312	ManualEvaluation	
-<Oskar_von_Boddien>	<isCitizenOf>	<Ukraine>	0.7506596306068601	ManualEvaluation	
-<Kieran_Phelan>	<livesIn>	<Republic_of_Ireland>	0.7259278850392312	ManualEvaluation	
+<Suzi_Perry>	<isCitizenOf>	<France>	0.745679012345679	ManualEvaluation	False
+<Olivier_Schoenfelder>	<isCitizenOf>	<France>	0.745679012345679	ManualEvaluation	True
+<Paul_Farmer>	<isCitizenOf>	<Rwanda>	0.745679012345679	ManualEvaluation	False
+<James_Langley_Dalton>	<isCitizenOf>	<South_Africa>	0.7506596306068601	ManualEvaluation	False
+<Mark_Foster_(golfer)>	<isCitizenOf>	<England>	0.745679012345679	ManualEvaluation	True
+<Maria_del_Carmen_Bousada_de_Lara>	<livesIn>	<Spain>	0.7259278850392312	ManualEvaluation	True
+<Lorenzo_Villoresi>	<isCitizenOf>	<Italy>	0.745679012345679	ManualEvaluation	True
+<Alberto_Conti>	<isCitizenOf>	<Italy>	0.745679012345679	ManualEvaluation	True
+<Gustav_Alvermann>	<isCitizenOf>	<Ukraine>	0.7506596306068601	ManualEvaluation	True
+<Grand_Duke_Nicholas_Mikhailovich_of_Russia>	<isCitizenOf>	<Russia>	0.7506596306068601	ManualEvaluation	True
+<Hendrick_Berckman>	<livesIn>	<Netherlands>	0.7259278850392312	ManualEvaluation	True
+<Basil_Rakoczi>	<livesIn>	<United_Kingdom>	0.7259278850392312	ManualEvaluation	True
+<Oskar_von_Boddien>	<isCitizenOf>	<Ukraine>	0.7506596306068601	ManualEvaluation	False
+<Kieran_Phelan>	<livesIn>	<Republic_of_Ireland>	0.7259278850392312	ManualEvaluation	True
 <Eric_Milazar>	<isCitizenOf>	<Mauritius>	0.745679012345679	TargetSource	True
-<Charles_de_Bernard_de_Marigny>	<isCitizenOf>	<France>	0.7506596306068601	ManualEvaluation	
-<Michael_Nielsen>	<isCitizenOf>	<Canada>	0.745679012345679	ManualEvaluation	
-<Mykola_Ivanovych_Tseluiko>	<isCitizenOf>	<Ukraine>	0.7506596306068601	ManualEvaluation	
-<Ioannis_Liritzis>	<isCitizenOf>	<Greece>	0.745679012345679	ManualEvaluation	
-<Maggie_Renfro>	<isCitizenOf>	<Louisiana>	0.7506596306068601	ManualEvaluation	
-<Gerhard_Gran>	<livesIn>	<Norway>	0.77186977963716	ManualEvaluation	
-<Jon_Bounds>	<isCitizenOf>	<England>	0.745679012345679	ManualEvaluation	
-<David_Walker_(cricketer)>	<isCitizenOf>	<Norway>	0.7506596306068601	ManualEvaluation	
-<Enno_II,_Count_of_East_Frisia>	<isCitizenOf>	<Germany>	0.7506596306068601	ManualEvaluation	
-<Pylyp_Orlyk>	<isCitizenOf>	<Romania>	0.7506596306068601	ManualEvaluation	
-<Ivan_Shestakov>	<isCitizenOf>	<Ukraine>	0.7506596306068601	ManualEvaluation	
-<David_Rubinger>	<diedIn>	<Jerusalem>	0.7657657657657657	ManualEvaluation	
-<Gordon_Murray>	<isCitizenOf>	<England>	0.745679012345679	ManualEvaluation	
-<María_de_los_Ángeles_Alvariño_González>	<isCitizenOf>	<United_Kingdom>	0.745679012345679	ManualEvaluation	
-<Otto_Braun>	<isCitizenOf>	<Switzerland>	0.7506596306068601	ManualEvaluation	
-<Herbert_Gibbons>	<isCitizenOf>	<United_Kingdom>	0.7506596306068601	ManualEvaluation	
+<Charles_de_Bernard_de_Marigny>	<isCitizenOf>	<France>	0.7506596306068601	ManualEvaluation	True
+<Michael_Nielsen>	<isCitizenOf>	<Canada>	0.745679012345679	ManualEvaluation	False
+<Mykola_Ivanovych_Tseluiko>	<isCitizenOf>	<Ukraine>	0.7506596306068601	ManualEvaluation	False
+<Ioannis_Liritzis>	<isCitizenOf>	<Greece>	0.745679012345679	ManualEvaluation	True
+<Maggie_Renfro>	<isCitizenOf>	<Louisiana>	0.7506596306068601	ManualEvaluation	False
+<Gerhard_Gran>	<livesIn>	<Norway>	0.77186977963716	ManualEvaluation	True
+<Jon_Bounds>	<isCitizenOf>	<England>	0.745679012345679	ManualEvaluation	True
+<David_Walker_(cricketer)>	<isCitizenOf>	<Norway>	0.7506596306068601	ManualEvaluation	False
+<Enno_II,_Count_of_East_Frisia>	<isCitizenOf>	<Germany>	0.7506596306068601	ManualEvaluation	False
+<Pylyp_Orlyk>	<isCitizenOf>	<Romania>	0.7506596306068601	ManualEvaluation	False
+<Ivan_Shestakov>	<isCitizenOf>	<Ukraine>	0.7506596306068601	ManualEvaluation	False
+<David_Rubinger>	<diedIn>	<Jerusalem>	0.7657657657657657	ManualEvaluation	Unknown
+<Gordon_Murray>	<isCitizenOf>	<England>	0.745679012345679	ManualEvaluation	True
+<María_de_los_Ángeles_Alvariño_González>	<isCitizenOf>	<United_Kingdom>	0.745679012345679	ManualEvaluation	False
+<Otto_Braun>	<isCitizenOf>	<Switzerland>	0.7506596306068601	ManualEvaluation	False
+<Herbert_Gibbons>	<isCitizenOf>	<United_Kingdom>	0.7506596306068601	ManualEvaluation	True
 <Jonathan_Fryer>	<diedIn>	<London>	0.7657657657657657	ManualEvaluation	
 <Hideo_Otake>	<isCitizenOf>	<Japan>	0.745679012345679	ManualEvaluation	
 <Mustapha_Adamu_Animashaun>	<isCitizenOf>	<Nigeria>	0.7506596306068601	TargetSource	True
@@ -483,7 +485,7 @@ Confidence [0.6, 0.5)
 <Leopold_I,_Margrave_of_Austria>	<hasChild>	<Oleg_I_of_Chernigov>	0.5931275990369884	ManualEvaluation	
 <Gustave_Flaubert>	<livesIn>	<France>	0.5298245614035088	ManualEvaluation	
 <Jesús_Blasco>	<isCitizenOf>	<Spain>	0.5075187969924813	ManualEvaluation	
-<Aleksandar_Vui>	<livesIn>	<Serbia>	0.5298245614035088	ManualEvaluation	
+<Aleksandar_Vui>	<livesIn>	<Serbia>	0.5298245614035088	ManualEvaluation	
 <Albert_Capellani>	<livesIn>	<Paris>	0.5588088088088088	ManualEvaluation	
 <Graeme_Crosby>	<livesIn>	<New_Zealand>	0.5298245614035088	ManualEvaluation	
 <Nathaniel_Silsbee>	<livesIn>	<Salem,_Massachusetts>	0.5588088088088088	ManualEvaluation	
@@ -507,7 +509,8 @@ Confidence [0.6, 0.5)
 <Gopika>	<livesIn>	<India>	0.5298245614035088	ManualEvaluation	
 <Zsolt_Erdei>	<livesIn>	<Hungary>	0.5298245614035088	ManualEvaluation	
 <Abraham_Gottlob_Werner>	<livesIn>	<Germany>	0.5298245614035088	ManualEvaluation	
-<Ivan_Jakovi>	<livesIn>	<Croatia>	0.5298245614035088	ManualEvaluation	
+<Ivan_Jakov
+i>	<livesIn>	<Croatia>	0.5298245614035088	ManualEvaluation	
 <Henry_Christy>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	
 <Rendall_Munroe>	<livesIn>	<England>	0.5298245614035088	ManualEvaluation	
 <Ion_Heliade_Rdulescu>	<livesIn>	<Romania>	0.5147976656461984	ManualEvaluation	
