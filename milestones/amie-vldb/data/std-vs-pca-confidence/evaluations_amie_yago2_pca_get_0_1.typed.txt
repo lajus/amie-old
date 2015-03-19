@@ -243,6 +243,7 @@ Confidence [0.8, 0.7)
 <María_de_los_Ángeles_Alvariño_González>	<isCitizenOf>	<United_Kingdom>	0.745679012345679	ManualEvaluation	False
 <Otto_Braun>	<isCitizenOf>	<Switzerland>	0.7506596306068601	ManualEvaluation	False
 <Herbert_Gibbons>	<isCitizenOf>	<United_Kingdom>	0.7506596306068601	ManualEvaluation	True
+==================================================================================================================
 <Jonathan_Fryer>	<diedIn>	<London>	0.7657657657657657	ManualEvaluation	
 <Hideo_Otake>	<isCitizenOf>	<Japan>	0.745679012345679	ManualEvaluation	
 <Mustapha_Adamu_Animashaun>	<isCitizenOf>	<Nigeria>	0.7506596306068601	TargetSource	True
@@ -315,35 +316,36 @@ Confidence [0.8, 0.7)
 Confidence [0.7, 0.6)
 8585 predictions
 <KeMpkolani>	<hasChild>	<Kamehameha_III>	0.622404745608031	TargetSource	True
-<Pierre_Raymond>	<diedIn>	<Bogotá>	0.6119402985074627	ManualEvaluation	
-<Mika_Johnson>	<diedIn>	<New_York_City>	0.6119402985074627	ManualEvaluation	
-<Rebeka_Kim>	<diedIn>	<Vilnius>	0.6991785259747773	ManualEvaluation	
-<Arthur_G._Hansen>	<diedIn>	<Zionsville,_Indiana>	0.6119402985074627	ManualEvaluation	
-<Fred_Dubois>	<diedIn>	<Blackfoot,_Idaho>	0.6119402985074627	ManualEvaluation	
-<Marko_Liias>	<diedIn>	<Edmonds,_Washington>	0.6991785259747773	ManualEvaluation	
-<John_Gell_(Royal_Navy_officer)>	<diedIn>	<Crickhowell>	0.6119402985074627	ManualEvaluation	
-<Sybille_Bammer>	<diedIn>	<Linz>	0.6119402985074627	ManualEvaluation	
-<Jake_Siewert>	<diedIn>	<New_York_City>	0.6991785259747773	ManualEvaluation	
-<George_L._Engel>	<diedIn>	<Rochester,_New_York>	0.6119402985074627	ManualEvaluation	
-<Erik_R._Fleming>	<diedIn>	<Clinton,_Mississippi>	0.6119402985074627	ManualEvaluation	
-<John_Graham_(policy_analyst)>	<diedIn>	<Bloomington,_Indiana>	0.6119402985074627	ManualEvaluation	
-<John_Eder>	<diedIn>	<Portland,_Maine>	0.6119402985074627	ManualEvaluation	
-<Henry_Akinwande>	<livesIn>	<United_Kingdom>	0.6086386736878866	ManualEvaluation	
-<João_Botelho>	<livesIn>	<Portugal>	0.6086386736878866	ManualEvaluation	
-<Celso_Lafer>	<diedIn>	<São_Paulo>	0.6119402985074627	ManualEvaluation	
-<Marius_Copil>	<diedIn>	<Arad,_Romania>	0.6119402985074627	ManualEvaluation	
-<Anne_Sophie_Reventlow>	<hasChild>	<Christian_VI_of_Denmark>	0.622404745608031	ManualEvaluation	
-<Steven_V._Roberts>	<livesIn>	<Bethesda,_Maryland>	0.6475409836065574	ManualEvaluation	
-<Sam_Pitroda>	<diedIn>	<Delhi>	0.6119402985074627	ManualEvaluation	
-<Kevin_Dundon>	<livesIn>	<Republic_of_Ireland>	0.6086386736878866	ManualEvaluation	
-<Anne_of_Cleves>	<hasChild>	<Elizabeth_I_of_England>	0.622404745608031	ManualEvaluation	
-<Dominika_Pitkowska>	<diedIn>	<Aódz>	0.6119402985074627	ManualEvaluation	
-<Archibald_Hill>	<livesIn>	<United_Kingdom>	0.6086386736878866	ManualEvaluation	
-<Faisal_Karim_Kundi>	<diedIn>	<Islamabad>	0.6119402985074627	ManualEvaluation	
-<Massimo_Pacetti>	<diedIn>	<Montreal>	0.6119402985074627	ManualEvaluation	
-<Trond_Hegna>	<diedIn>	<Stavanger>	0.6119402985074627	ManualEvaluation	
-<Neil_deGrasse_Tyson>	<diedIn>	<New_York_City>	0.6119402985074627	ManualEvaluation	
-<Victoria_Borwick>	<livesIn>	<United_Kingdom>	0.6827261067231958	ManualEvaluation	
+<Pierre_Raymond>	<diedIn>	<Bogotá>	0.6119402985074627	ManualEvaluation	Unknown
+<Mika_Johnson>	<diedIn>	<New_York_City>	0.6119402985074627	ManualEvaluation	Unknown
+<Rebeka_Kim>	<diedIn>	<Vilnius>	0.6991785259747773	ManualEvaluation	Unknown
+<Arthur_G._Hansen>	<diedIn>	<Zionsville,_Indiana>	0.6119402985074627	ManualEvaluation	False	
+<Fred_Dubois>	<diedIn>	<Blackfoot,_Idaho>	0.6119402985074627	ManualEvaluation	False
+<Marko_Liias>	<diedIn>	<Edmonds,_Washington>	0.6991785259747773	ManualEvaluation	Unknown
+<John_Gell_(Royal_Navy_officer)>	<diedIn>	<Crickhowell>	0.6119402985074627	ManualEvaluation	True
+<Sybille_Bammer>	<diedIn>	<Linz>	0.6119402985074627	ManualEvaluation	Unknown
+<Jake_Siewert>	<diedIn>	<New_York_City>	0.6991785259747773	ManualEvaluation	Unknown
+<George_L._Engel>	<diedIn>	<Rochester,_New_York>	0.6119402985074627	ManualEvaluation	Unknown
+<Erik_R._Fleming>	<diedIn>	<Clinton,_Mississippi>	0.6119402985074627	ManualEvaluation	Unknown
+<John_Graham_(policy_analyst)>	<diedIn>	<Bloomington,_Indiana>	0.6119402985074627	ManualEvaluation	Unknown
+<John_Eder>	<diedIn>	<Portland,_Maine>	0.6119402985074627	ManualEvaluation	Unknown
+<Henry_Akinwande>	<livesIn>	<United_Kingdom>	0.6086386736878866	ManualEvaluation	True
+<João_Botelho>	<livesIn>	<Portugal>	0.6086386736878866	ManualEvaluation	True
+<Celso_Lafer>	<diedIn>	<São_Paulo>	0.6119402985074627	ManualEvaluation	Unknown
+<Marius_Copil>	<diedIn>	<Arad,_Romania>	0.6119402985074627	ManualEvaluation	Unknown
+<Anne_Sophie_Reventlow>	<hasChild>	<Christian_VI_of_Denmark>	0.622404745608031	ManualEvaluation	False
+<Steven_V._Roberts>	<livesIn>	<Bethesda,_Maryland>	0.6475409836065574	ManualEvaluation	True
+<Sam_Pitroda>	<diedIn>	<Delhi>	0.6119402985074627	ManualEvaluation	True
+<Kevin_Dundon>	<livesIn>	<Republic_of_Ireland>	0.6086386736878866	ManualEvaluation	True
+<Anne_of_Cleves>	<hasChild>	<Elizabeth_I_of_England>	0.622404745608031	ManualEvaluation	False
+<Dominika_Piątkowska>	<diedIn>	<Aódz>	0.6119402985074627	ManualEvaluation	Unknown
+<Archibald_Hill>	<livesIn>	<United_Kingdom>	0.6086386736878866	ManualEvaluation	True
+<Faisal_Karim_Kundi>	<diedIn>	<Islamabad>	0.6119402985074627	ManualEvaluation	True
+<Massimo_Pacetti>	<diedIn>	<Montreal>	0.6119402985074627	ManualEvaluation	Unknown
+<Trond_Hegna>	<diedIn>	<Stavanger>	0.6119402985074627	ManualEvaluation	False
+<Neil_deGrasse_Tyson>	<diedIn>	<New_York_City>	0.6119402985074627	ManualEvaluation	Unknown
+<Victoria_Borwick>	<livesIn>	<United_Kingdom>	0.6827261067231958	ManualEvaluation	Unknown
+==========================================================================================================
 <Elbert_N._Carvel>	<diedIn>	<Laurel,_Delaware>	0.6119402985074627	ManualEvaluation	
 <Serge_Poliakoff>	<isCitizenOf>	<France>	0.6073046774054613	ManualEvaluation	
 <Pooja_Bose>	<diedIn>	<Mumbai>	0.6119402985074627	ManualEvaluation	
@@ -416,22 +418,22 @@ Confidence [0.7, 0.6)
 <Chantelle_Fiddy>	<diedIn>	<London>	0.6119402985074627	ManualEvaluation	
 Confidence [0.6, 0.5)
 17343 predictions
-<Obed_Gómez>	<livesIn>	<Puerto_Rico>	0.5298245614035088	ManualEvaluation	
-<William_Cowper_(anatomist)>	<isCitizenOf>	<England>	0.5075187969924813	ManualEvaluation	
-<Tentamun_(20th_dynasty)>	<hasChild>	<Duathathor-Henuttawy>	0.5931275990369884	ManualEvaluation	
-<Jean_Baptiste_Joseph_Delambre>	<livesIn>	<Paris>	0.5248198343551684	ManualEvaluation	
-<Alfredo_de_Sá_Cardoso>	<livesIn>	<Lisbon>	0.5588088088088088	ManualEvaluation	
-<Princess_Ludovika_of_Bavaria>	<livesIn>	<Munich>	0.5588088088088088	ManualEvaluation	
-<Musa_Ibrahim>	<livesIn>	<Bangladesh>	0.5298245614035088	ManualEvaluation	
-<Walter_Hewett>	<livesIn>	<Washington,_D.C.>	0.5588088088088088	ManualEvaluation	
-<James_Cran>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	
-<Haseeb-ul-Hasan>	<livesIn>	<Pakistan>	0.5147976656461984	ManualEvaluation	
-<Eugen_Filotti>	<livesIn>	<Romania>	0.5147976656461984	ManualEvaluation	
-<Christine_Dowiyogo>	<hasChild>	<Valdon_Dowiyogo>	0.5931275990369884	ManualEvaluation	
-<Jack_Wall_(politician)>	<livesIn>	<Republic_of_Ireland>	0.5298245614035088	ManualEvaluation	
-<Lee_Wen>	<livesIn>	<Singapore>	0.5298245614035088	ManualEvaluation	
-<Harold_Hunter>	<livesIn>	<New_York_City>	0.5588088088088088	ManualEvaluation	
-<Gunnhildr_Sveinsdóttir>	<hasChild>	<Harald_III_of_Denmark>	0.5931275990369884	ManualEvaluation	
+<Obed_Gómez>	<livesIn>	<Puerto_Rico>	0.5298245614035088	ManualEvaluation	True
+<William_Cowper_(anatomist)>	<isCitizenOf>	<England>	0.5075187969924813	ManualEvaluation	True
+<Tentamun_(20th_dynasty)>	<hasChild>	<Duathathor-Henuttawy>	0.5931275990369884	ManualEvaluation	True
+<Jean_Baptiste_Joseph_Delambre>	<livesIn>	<Paris>	0.5248198343551684	ManualEvaluation	True
+<Alfredo_de_Sá_Cardoso>	<livesIn>	<Lisbon>	0.5588088088088088	ManualEvaluation	True
+<Princess_Ludovika_of_Bavaria>	<livesIn>	<Munich>	0.5588088088088088	ManualEvaluation	True
+<Musa_Ibrahim>	<livesIn>	<Bangladesh>	0.5298245614035088	ManualEvaluation	True
+<Walter_Hewett>	<livesIn>	<Washington,_D.C.>	0.5588088088088088	ManualEvaluation	True
+<James_Cran>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	True
+<Haseeb-ul-Hasan>	<livesIn>	<Pakistan>	0.5147976656461984	ManualEvaluation	True
+<Eugen_Filotti>	<livesIn>	<Romania>	0.5147976656461984	ManualEvaluation	True
+<Christine_Dowiyogo>	<hasChild>	<Valdon_Dowiyogo>	0.5931275990369884	ManualEvaluation	True
+<Jack_Wall_(politician)>	<livesIn>	<Republic_of_Ireland>	0.5298245614035088	ManualEvaluation	True
+<Lee_Wen>	<livesIn>	<Singapore>	0.5298245614035088	ManualEvaluation	True
+<Harold_Hunter>	<livesIn>	<New_York_City>	0.5588088088088088	ManualEvaluation	True
+<Gunnhildr_Sveinsdóttir>	<hasChild>	<Harald_III_of_Denmark>	0.5931275990369884	ManualEvaluation	False
 <Henri_Chantavoine>	<livesIn>	<France>	0.5298245614035088	ManualEvaluation	
 <Harold_Harding>	<livesIn>	<England>	0.5298245614035088	ManualEvaluation	
 <Maria_Leopoldine_of_Austria>	<hasChild>	<Archduchess_Maria_Anna_Josepha_of_Austria>	0.5931275990369884	ManualEvaluation	
@@ -509,8 +511,7 @@ Confidence [0.6, 0.5)
 <Gopika>	<livesIn>	<India>	0.5298245614035088	ManualEvaluation	
 <Zsolt_Erdei>	<livesIn>	<Hungary>	0.5298245614035088	ManualEvaluation	
 <Abraham_Gottlob_Werner>	<livesIn>	<Germany>	0.5298245614035088	ManualEvaluation	
-<Ivan_Jakov
-i>	<livesIn>	<Croatia>	0.5298245614035088	ManualEvaluation	
+<Ivan_Jakovi>	<livesIn>	<Croatia>	0.5298245614035088	ManualEvaluation	
 <Henry_Christy>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	
 <Rendall_Munroe>	<livesIn>	<England>	0.5298245614035088	ManualEvaluation	
 <Ion_Heliade_Rdulescu>	<livesIn>	<Romania>	0.5147976656461984	ManualEvaluation	
