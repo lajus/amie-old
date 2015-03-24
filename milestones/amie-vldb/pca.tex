@@ -3,14 +3,27 @@
 %\paragraph{PCA Assumption}
 \label{sec:experimentsPCA}
 
-%\comment{Chris}{Some rewritting}
+\comment{R3}{I would like to understand sooner that 4.3 is a discarded and useless digression and I would appreciate a deeper discussion of Section 4.4, 
+possibly with examples (note that 4.4 and 4.4.2 have the same title, which is not elegant)}
+
+\comment{Chris}{Removed PosOnly evaluation function, merged PCA assumption-PCA confidence. Discussed by example of table 1. Removed the FUN-property stuff}
+
+
 
 The support of a rule quantifies the number of known correct predictions of the rule. However, it does not measure the false predictions of the rule.
 We will now describe measures that judge the rule \emph{quality}.
-We first describe the challenges in defining such a measure in our setting %of our setting w.r.t. designing a good measure for judging the quality of a rule,
-and discuss existing measures: the standard confidence and the Positive-Only Learning score.
+We first describe the challenges in defining such a measure in our setting 
+and discuss the most common way to measure the rule quality which we refer to as standard confidence.
 Then, we introduce our own measure: the confidence under the assumption of partial completeness.
-We also discuss the practical applicability of this assumption.
+
+
+
+% The support of a rule quantifies the number of known correct predictions of the rule. However, it does not measure the false predictions of the rule.
+% We will now describe measures that judge the rule \emph{quality}.
+% We first describe the challenges in defining such a measure in our setting %of our setting w.r.t. designing a good measure for judging the quality of a rule,
+% and discuss existing measures: the standard confidence and the Positive-Only Learning score.
+% Then, we introduce our own measure: the confidence under the assumption of partial completeness.
+% We also discuss the practical applicability of this assumption.
 
 \subsection{Challenges}
 Let us consider a given Horn rule $\vec{B} \Rightarrow r(x,y)$. Let us look at all facts with relation $r$ (Figure \ref{fig:prediction}).
@@ -35,20 +48,25 @@ This, however, leads to the second challenge: Semantic KBs do not contain negati
 Thus, the area KBfalse is empty.
 This is the central challenge of our setting: to provide counterexamples for the rule mining.
 These can take the role of KBfalse so that we can estimate the areas NEWtrue and NEWfalse.
-There are several approaches to this problem:
-The standard confidence, the standard positive-only learning evaluation score of ILP, and the partial completeness assumption that we propose.
+We describe two approaches to this problem:
+Creating counterexamples according to the Closed World Assumption (CWA) that traditional association rule mining systems apply and according to the Partial Completeness Assumption (PCA) that we propose.
 We will now present these approaches in detail.
+% There are several approaches to this problem:
+% The standard confidence, the standard positive-only learning evaluation score of ILP, and the partial completeness assumption that we propose.
+% We will now present these approaches in detail.
 
 
-% \subsection{Existing Confidence Measures}
-% \comment{Katja}{Maybe add a small intro here}
-\subsection{Standard Confidence} \label{subsubsec:stdConf}
+
+\subsection{CWA and Standard Confidence} \label{subsubsec:stdConf}
 The standard confidence measure takes all facts that are not in the KB (i.e., NEWtrue and NEWfalse) as negative evidence.
 Thus, the standard confidence of a rule is the ratio of its predictions that are in the KB, i.e., the share of A (KBtrue) in the set of predictions:
 
-\[conf(\vec{B} \Rightarrow r(x,y)) := \frac{supp(\vec{B} \wedge r(x,y))}{\#(x,y): \exists z_1,...,z_m: \vec{B}}\]
-% Fabian: I rewrite to support, because we need this for the arguments in the improvement section
-% \#(x,y): \exists z_1,...,z_m:
+\[conf(\vec{B} \Rightarrow r(x,y)) := \frac{supp(\vec{B} \wedge r(x,y))}{\#(x,y): \exists z_1,...,z_m: \vec{B}}\]\\
+
+
+For example, for the toy KB of Table~\ref{tab:exampleKB} and the rule $R:livesIn(x,y)\Rightarrow wasBornIn(x,y)$,
+$conf(R)=1/3$, i.e., both (A,Y) and (B,Z) count as negative examples.
+
 Standard confidence is the measure traditionally used in association rule mining and market basket analysis, where the Closed World Assumption (CWA) is made:
 if there is no evidence in any of the transactions of the database that a user bought a specific product, then this user did not buy the product.
 Although natural for the market basket analysis scenario, standard confidence fails to distinguish between ``false'' and ``unknown'' facts,
@@ -57,6 +75,11 @@ we aim to maximize the number of true predictions that go beyond the current kno
 whereas market basket analysis usually tries to mine rules that can describe data that is already known.
 
 
+
+
+
+
+\ignore{
 \subsection{Positives-Only Learning}
 For cases where the KB does not contain negative examples, Muggleton has developed a \emph{positives-only evaluation score} for ILP \cite{Muggleton:1996:LPD:647996.742465,usir1753}.
 It takes random facts as negative evidence:
@@ -84,26 +107,17 @@ By creating negative examples just by considering random person-location pairs,
 we might not produce any case for which the rule will give a false prediction, % (person re-married with someone's mother),
 simply because such a negative example will have a relatively small probability to be generated.
 In section~\ref{sec:experiments}, we compare this measure to our method, which we introduce next.
+}
+
+
+\subsection{PCA and  PCA-Confidence}\label{subsubsec:pcaConf}
 
 
 
-\subsection{The PCA Confidence}
 In AMIE, we generate negative examples for a rule by the partial completeness assumption (PCA).
-%We will now introduce this assumption, first introduce the assumption of partial completeness, before defining the measure, and evaluating the assumption.
-
-\subsubsection{The Partial Completeness Assumption (PCA)}
-
 The Partial Completeness Assumption (PCA) is the assumption that if $r(x,y) \in$ \emph{KBtrue} for some $x,y$, then
 \[\forall y': r(x,y') \in \mbox{\emph{KBtrue}}\ \cup\ \mbox{\emph{NEWtrue}} \Rightarrow r(x,y') \in \mbox{\emph{KBtrue}}\]
 In other words, we assume that if we know one $y$ for a given $x$ and $r$, then we know all $y$ for that $x$ and $r$.
-
-This assumption is certainly true for functional relations $r$, such as \emph{birthdate} and \emph{capital}.
-Thanks to the FUN-property, the assumption is also true for inverse-functional relations, such as \emph{owns} and \emph{created}.
-The assumption is also true in the vast majority of cases for relations that are not functional but that have a high functionality.
-Even for other relations, the PCA is still reasonable for knowledge bases that have been extracted from a single source (such as DBpedia and YAGO), as we shall see in our qualitative analysis of the PCA in Section~\ref{pcaEvaluation}. The PCA has since been picked up by work on the Google Knowledge Vault under the name ``local completeness assumption'' \cite{knowledgevault}.
-
-\subsubsection{The PCA Confidence}\label{subsubsec:pcaConf}
-We propose to generate negative evidence by help of the PCA.
 Under the PCA, the denominator of the confidence will not be the size of the entire set of facts that the body of the rule produces,
 but the number of facts that we know to be true together with the facts that we assume to be false.
 
@@ -113,18 +127,27 @@ but the number of facts that we know to be true together with the facts that we 
 conf_{pca}(\vec{B} \Rightarrow r(x,y)) := \frac{supp(\vec{B} \wedge r(x,y))}{\#(x,y): \exists z_1,...,z_m,y': \vec{B} \wedge r(x,y')}
 \end{equation}
 \end{small}
-%
-% Fabian: rewrite to "support" in order to be compliant with what we write in the improvement section
-% \#(x,y): \exists z_1,...,z_m:
+
 This formula normalizes the support by the number of pairs $(x,y)$ for which there exists a $y'$ with $r(x,y')$,
 i.e., for which we assume that the KB knows all such $y'$.
-% \comment{Chris}{ @Fabian and Luis: Think about if you want to include the following one.}
-% \comment{Katja}{I suggest to remove it because we will have a detailed discussion in the experiments and do not need it already here.}
-% The PCA confidence can be seen as a process in which we first take a biased sample of the body (those facts containing entities for the $x$ variable that appear
-% also in the head) and then calculate the standard confidence over this sample.
-% The fact that our sample is biased implies that PCA confidence might not be a good estimator of the actual predictive power of the rule (precision).
-% However, our experiments show that overall PCA confidence identifies much more productive rules than the other measures
-% and it also correlates with precision better than the standard confidence.
+For the toy KB of Table~\ref{tab:exampleKB} and the rule $R: livesIn(x,y)\Rightarrow wasBornIn(x,y)$,
+$conf_{pca}(R)=1/2$. I.e., only (A,Y) counts as a negative example (since the entity A is already seen once in $wasBornIn$), but (B,Z) is not.
+
+Notice that Eq.~\ref{eq:pcaConf} fixes $x$ and $r$ and implies that rules will try to predict the possible $y$s. 
+AMIE always chooses to fix the most functional variable, since this is more intuitive; for example, 
+it is more probable that one will ask for the birthplace of a specific person than for all persons that were born in a specific city.
+Since we re-wrote all relations such that their functionality is larger than the inverse functionality in Sec.~\ref{subsec:functions},
+the most functional variable for our analysis will always be $x$.
+
+PCA is certainly true for functions, such as \emph{birthdate} and \emph{capital}.
+The assumption is also true in the vast majority of cases for relations that are not functions but that have a high functionality,
+as we shall see in our qualitative analysis of the PCA in Section~\ref{pcaEvaluation}. 
+The PCA has since been picked up by work on the Google Knowledge Vault under the name ``local completeness assumption'' \cite{knowledgevault}.
+
+
+
+
+
 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

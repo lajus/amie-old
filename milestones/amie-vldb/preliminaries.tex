@@ -2,7 +2,7 @@
 
 %\www{
 \subsection{RDF KBs}
-In this paper, we focus on RDF~\cite{rdf} knowledge bases. \comment{Chris}{Do we really need such sentences? Fabian: It may be useful to make the section self-contained. A reader who wants to re-check preliminaries and working hypotheses can then find them all together.} We follow here the introduction of the preliminaries from \cite{amie}.
+In this paper, we focus on RDF~\cite{rdf} knowledge bases. We follow here the introduction of the preliminaries from \cite{amie}.
 An RDF KB can be considered a set of facts, where each fact is a triple of the form $\langle x, r, y\rangle$ with $x$ denoting the subject, $r$ the relation (or predicate), and $y$ the object of the fact. %}
 There are several equivalent alternative representations of facts; in this paper we borrow the notation from Datalog and represent a fact as $r(x,y)$. For example, we write \emph{father(Elvis,Lisa)}.
 %In this paper, we deal with RDF knowledge bases \cite{rdf}. An RDF KB can be seen as a set of facts. Each fact is a triple of the form $\langle x, r, y\rangle$, where $x$ is the subject, $r$ is the relation (or predicate), and $y$ is the object of the fact. In this paper, we use a logical notation for facts, and write $r(x,y)$. A KB can contain, e.g., the fact \emph{fatherOf(ElvisPresley, LisaPresley)}.
@@ -17,15 +17,19 @@ denote the set of relations contained in $\mathcal{K}$ and $\mathcal{E}:=\pi_{su
 
 \subsection{Functions}
 \label{subsec:functions}
+\comment{R3}{The FUN-property of a KB is problematic, it assumes something about the major KBs are written which may be factually true (e.g. in YAGO or DBPEDIA) 
+      but should really be verified on case-by-case (e.g., what about biological KBs?) so I think it must be contextualized to the KBs under investigations and be presented as a 
+      factual observation which holds in that limited setting. }
+      
+\comment{Chris}{Removed the FUN-property. Rephrased corresponding part}      
+
 A \emph{function} is a relation $r$ that has at most one object for every subject, i.e.,
 \[
  \forall x: |\{y: r(x,y)\}| \leq 1
 \]
 
-Similarly, a relation is an \emph{inverse function} if each of its objects has at most one subject. %\comment{Fabian}{it was: ``(inverse 1:1 relation)''. This is wrong, because 1:1 is a bijection, right?}
+Similarly, a relation is an \emph{inverse function} if each of its objects has at most one subject. 
 Since RDF KBs are usually noisy, even relations that should be functions (such as \emph{has\-Birthdate}) may exhibit two objects for the same subject.
-%Apart from that there are also relations that have many objects for each subject and/or many subjects for each object (1:N, N:1, M:N relation), e.g.,  \emph{dealsWith}, \emph{actedIn}.
-% Fabian, this is true, but does not help explain why we use functionality, no?
 Vice versa, there are relations that are not functions in the strict sense, but that exhibit a similar behavior.
 For example, \emph{has\-Nationality} can give several nationalities to a person, but the vast majority of people only have one nationality.
 Therefore, we use the notion of \emph{functionality}~\cite{paris}. The functionality of a relation $r$ is a value between 0 and 1, which is 1 if $r$ is a function:
@@ -33,23 +37,25 @@ Therefore, we use the notion of \emph{functionality}~\cite{paris}. The functiona
 \[fun(r) := \frac{\#x: \exists y: r(x,y)}{\#(x,y): r(x,y)}\]
 %\[ifun(r) := \frac{\#y: \exists x: r(x,y)}{\#(x,y): r(x,y)}\]
 where  $\#x:X$ is an abbreviation for $|\{x: X \in \mathcal{K}\}|$.
-The inverse functionality is defined accordingly as $ifun(r):=fun(r^{-1})$.
-\comment{Katja}{Maybe spell it out and give an example of $r^{-1}$.}
+The inverse functionality is defined accordingly as $ifun(r):=fun(r^{-1})$, e.g., $ifun(actedIn):=fun(hasActor^{-1})$.
+
 
 Some relations have roughly the same degree of functionality and of inverse functionality. Bijections are an example.
-The vast majority of relations, however, has different degrees of functionality and of inverse functionality.
+The vast majority of relations, however, has different degrees of functionality and of inverse functionality, \comment{Chris}{at least for general-purpose web-extracted KBs, like YAGO, DBPEDIA and Freebase}.
 Manual inspection shows that in common KBs the functionality is usually higher than the inverse functionality.
-For example, a KB is more likely to specify \emph{has\-Nationality} than \emph{has\-Citizen}.
+For example, a KB is more likely to specify \emph{isCitizenOf} than \emph{has\-Citizen}.
 Intuitively, this allows us to consider a fact $r(x,y)$ as a fact about $x$.
 In the following, we will assume that for all relations $r$, $fun(r)\geq ifun(r)$.
 Whenever this is not the case, $r$ can be replaced by its inverse relation $r^{-1}$. Then, $fun(r^{-1})\geq ifun(r^{-1})$.
-We call the fact that the functionality is always at least as large as the inverse functionality the \emph{FUN-property} of a KB. %Fabian: This went missing, but it is helpful later on
-%We will occasionally call $x$ the \emph{input} of the relation and $y$ the \emph{output} of the relation.
+In the following, we assume that all relations have been substituted with their inverses if their inverse functionality is larger than their functionality.
+This will simplify the analysis without affecting the generality of our approach.
+% We call the fact that the functionality is always at least as large as the inverse functionality the \emph{FUN-property} of a KB. 
 
 
 
 \ignore{was before:
-In general in our mining process, we will assess the quality of a rule based on its ability to make correct predictions, i.e., to correctly predict one of the variables, given the relation in question and the other variable.
+In general in our mining process, we will assess the quality of a rule based on its ability to make correct predictions, 
+i.e., to correctly predict one of the variables, given the relation in question and the other variable.
 In other words, our rule evaluation process considers one of the variables as \emph{input variable} and the other one as \emph{output variable}.
 The most natural decision for the input variable is to choose the variable with the most functional behavior, i.e., the subject for functional and the object for the inverse functional relations.
 Manual inspection shows, however, that relations in semantic KBs tend to be more functional than inverse functional. Intuitively, this allows us to consider a fact $r(x,y)$ as a fact about $x$.
@@ -77,6 +83,13 @@ The formulas corresponding to the case that $y$ is input and $x$ is output can e
 
 %\comment{Katja}{I'd suggest to swap the order of 3.3 Language Bias and 3.4 Functions; discussing functions right after rules feels more naturally}
 \subsection{Rules}
+
+\comment{R3}{Rules are introduced with no limitations on their syntax but then, under the strange section heading "language biases", 
+      we discover that rules should be connected, closed, nonreflexive, and can be recursive (no example provided).       
+      There exists a better way of defining rule syntax \& constraints! Incidentally, using a closed rule as example of generic rule does not help the reader's intuition. }
+      
+\comment{Chris}{I merged the 2 sections and added examples}
+
 An \emph{atom} is a fact that can have variables at the subject and/or object position.
 A \emph{(Horn) rule} consists of a head and a body, where the head is a single atom and the body is a set of atoms.
 We denote a rule with head $r(x,y)$ and body $\{B_1,..., B_n\}$ by an implication
@@ -84,68 +97,97 @@ We denote a rule with head $r(x,y)$ and body $\{B_1,..., B_n\}$ by an implicatio
 \indented{
 $B_1 \wedge B_2 \wedge ... \wedge B_n \Rightarrow r(x,y)$
 }
-which we abbreviate as $\vec{B} \Rightarrow r(x,y)$. One example of such a rule is:
-% \indented{
-% \emph{hasChild}$(p,c)$ $\wedge$ \emph{citizenOf}$(p,s) \Rightarrow$ \emph{isCitizenOf}$(c,s)$}
-\[ hasChild(p,c) \wedge citizenOf(p,s) \Rightarrow citizenOf(c,s) \]
+which we abbreviate as $\vec{B} \Rightarrow r(x,y)$.
+
 An \emph{instantiation} of a rule is a copy of the rule, where all variables have been substituted by constants.
 A \emph{prediction} of a rule is the head atom of an instantiated rule if all body atoms of the instantiated rule appear in the KB.
 For example, the above rule can predict \emph{citizenOf(Lisa,USA)} if the KB knows a parent of Lisa (\emph{hasChild(Elvis,Lisa)}) who is American (\emph{citizenOf(Elvis,USA)}).
 
-
-\subsection{Language Bias}
-
-%\comment{chris}{reformulate. @Luis: check if ok}
-In order to restrict the size of the search space, ILP systems commonly use a language bias.
-% to restrict the search space, which can easily become huge otherwise.
+AMIE, like many other ILP systems, is not mining general Horn Clauses, but uses a language bias (restricts the form of the mined rules) 
+in order to restrict the size of the search space. 
 Language biases offer a trade-off between the expressive power of the mined rules and the speed of the mining process.
 As an example, rules with 3 atoms can capture more complicated correlations than rules with 2 atoms, but come with a larger search space and thus with a much slower performance.
 The less retrictive the language bias is,
-%\comment{Luis}{Aren't longer rules actually more specific?}\comment{chris}{rewritten. check again Fabian: I think it's good}
 the more expressive the rules can potentially be, the larger the search space grows, and the less tractable the search becomes.
-In the following, we describe AMIE's language bias.
 
-We say that two atoms in a rule are \emph{connected} if they share a variable or an entity.
+AMIE requires that the rules are \emph{connected} and \emph{closed}. We say that two atoms in a rule are \emph{connected} if they share a variable or an entity.
 A rule is \emph{connected} if every atom is connected transitively to every other atom of the rule.
-AMIE mines only connected rules, i.e., it avoids constructing rules that contain unrelated atoms (avoiding cross products).
-We also allow the user to specify a maximum number of atoms for the mined rules.
+By mining only connected rules, AMIE avoids constructing rules that contain unrelated atoms (avoiding cross products), e.g., $diedIn(x,y)\Rightarrow wasBornIn(w,z)$.
 A variable in a rule is \emph{closed} if it appears at least twice in the rule. A rule is \emph{closed} if all its variables are \emph{closed}.
 Closed rules do not predict merely the existence of a fact (e.g. $diedIn(x,y)\Rightarrow \exists z:wasBornIn(x,z)$),
-but also concrete arguments for it (e.g. $diedIn(x,y)\Rightarrow wasBornIn(x,y)$). AMIE mines only closed rules.
-\emph{Reflexive rules} contain atoms of the form $r(x, x)$. AMIE omits these, as they are typically of less interest in real world KBs.
-\emph{Recursive rules} are rules that contain the head relation in the body. Some ILP approaches exclude such rules, AMIE does not.
-% In the present work, we focus on closed Horn rules.
-% \comment{Fabian}{Do we need the following here?}\comment{chris}{Let's wait. If we do not need the notions of input and output variable we can remove it in the end}
-% \comment{Katja}{It seems like we never use the term input/output variable anywhere else in the paper. So, we should remove it.}
-% Each rule has an \emph{input} and an \emph{output} variable. These are the variables of the head predicate.
-% Our quality evaluation metrics (see Sec.~\ref{subsubsec:pcaConf}) will measure the ability of a rule to produce the correct entity for the output variable,
-% given the input argument.
-% Although the choice for the input and output variables can depend on the application,
-% the most natural decision is to assign the input to the variable with the most functional behavior, i.e., the subject according to the \emph{FUN-property}.
-%
+but also concrete arguments for it (e.g. $diedIn(x,y)\Rightarrow wasBornIn(x,y)$).
+AMIE omits also \emph{reflexive rules} of the form $r(x, x)$, as they are typically of less interest in real world KBs.
+AMIE, unlike some other ILP systems, allow for mining of \emph{recursive rules}. Recursive are rules that contain the head relation in the body, 
+e.g., $isMarriedTo(x,z) \wedge hasChild(z,y) \Rightarrow hasChild(x,y)$. 
+% We also allow the user to specify as an input parameter the maximum number of atoms for the mined rules.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% An \emph{atom} is a fact that can have variables at the subject and/or object position.
+% A \emph{(Horn) rule} consists of a head and a body, where the head is a single atom and the body is a set of atoms.
+% We denote a rule with head $r(x,y)$ and body $\{B_1,..., B_n\}$ by an implication
+% %An \emph{atom} is a fact that can have variables in place of the subject and/or the object. A \emph{(Horn) rule} consists of a head and a body, where the head is a single atom and the body is a set of atoms. We denote a rule with head $r(x,y)$ and body $\{B_1,..., B_n\}$ by an implication
+% \indented{
+% $B_1 \wedge B_2 \wedge ... \wedge B_n \Rightarrow r(x,y)$
+% }
+% which we abbreviate as $\vec{B} \Rightarrow r(x,y)$. One example of such a rule is:
+% % \indented{
+% % \emph{hasChild}$(p,c)$ $\wedge$ \emph{citizenOf}$(p,s) \Rightarrow$ \emph{isCitizenOf}$(c,s)$}
+% \[ hasChild(p,c) \wedge citizenOf(p,s) \Rightarrow citizenOf(c,s) \]
+% An \emph{instantiation} of a rule is a copy of the rule, where all variables have been substituted by constants.
+% A \emph{prediction} of a rule is the head atom of an instantiated rule if all body atoms of the instantiated rule appear in the KB.
+% For example, the above rule can predict \emph{citizenOf(Lisa,USA)} if the KB knows a parent of Lisa (\emph{hasChild(Elvis,Lisa)}) who is American (\emph{citizenOf(Elvis,USA)}).
+% 
+% 
+% \subsection{Language Bias}
+% 
+% %\comment{chris}{reformulate. @Luis: check if ok}
+% In order to restrict the size of the search space, ILP systems commonly use a language bias.
+% % to restrict the search space, which can easily become huge otherwise.
+% Language biases offer a trade-off between the expressive power of the mined rules and the speed of the mining process.
+% As an example, rules with 3 atoms can capture more complicated correlations than rules with 2 atoms, but come with a larger search space and thus with a much slower performance.
+% The less retrictive the language bias is,
+% %\comment{Luis}{Aren't longer rules actually more specific?}\comment{chris}{rewritten. check again Fabian: I think it's good}
+% the more expressive the rules can potentially be, the larger the search space grows, and the less tractable the search becomes.
+% In the following, we describe AMIE's language bias.
+% 
+% We say that two atoms in a rule are \emph{connected} if they share a variable or an entity.
+% A rule is \emph{connected} if every atom is connected transitively to every other atom of the rule.
+% AMIE mines only connected rules, i.e., it avoids constructing rules that contain unrelated atoms (avoiding cross products).
+% We also allow the user to specify a maximum number of atoms for the mined rules.
+% A variable in a rule is \emph{closed} if it appears at least twice in the rule. A rule is \emph{closed} if all its variables are \emph{closed}.
+% Closed rules do not predict merely the existence of a fact (e.g. $diedIn(x,y)\Rightarrow \exists z:wasBornIn(x,z)$),
+% but also concrete arguments for it (e.g. $diedIn(x,y)\Rightarrow wasBornIn(x,y)$). AMIE mines only closed rules.
+% \emph{Reflexive rules} contain atoms of the form $r(x, x)$. AMIE omits these, as they are typically of less interest in real world KBs.
+% \emph{Recursive rules} are rules that contain the head relation in the body. Some ILP approaches exclude such rules, AMIE does not.
+% % In the present work, we focus on closed Horn rules.
+% % \comment{Fabian}{Do we need the following here?}\comment{chris}{Let's wait. If we do not need the notions of input and output variable we can remove it in the end}
+% % \comment{Katja}{It seems like we never use the term input/output variable anywhere else in the paper. So, we should remove it.}
+% % Each rule has an \emph{input} and an \emph{output} variable. These are the variables of the head predicate.
+% % Our quality evaluation metrics (see Sec.~\ref{subsubsec:pcaConf}) will measure the ability of a rule to produce the correct entity for the output variable,
+% % given the input argument.
+% % Although the choice for the input and output variables can depend on the application,
+% % the most natural decision is to assign the input to the variable with the most functional behavior, i.e., the subject according to the \emph{FUN-property}.
+% %
 
 \subsection{Measures of Significance} \label{subsec:statSignificance}
 
-% \comment{Fabian}{Is ``statistical significance'' not misleading? It sounds rather like the P-test, Wilson interval, etc.. Can we say ``support''?}
-% \comment{Christina}{I think it is ok if we say measure of significance. Support and head coverage are both measures of significance.}
-% \comment{Katja}{``Measures of Significance'' without ``statistical'' sounds good to me and does sound too much like mathematical significance tests anymore.}
-% \comment{Luis}{It sounds fine to me too}
+\comment{R3}{The discussion on support and coverage is rather clear (but an example would not hurt).}
+\comment{Chris}{added example that I will also use in the confidence part}
+
+
 Normally, data mining systems define a notion of significance or \emph{support} for rules, which quantifies the amount of evidence for the rule in the data.
 If a rule applies only to a few instances, it is too risky to use it for any application such as data description or prediction. For this reason,
-data mining systems frequently report only rules above a given support threshold. %Furthermore, a good support metric should be monotonic.
-%For logical rules it means that adding constraints (i.e., atoms) to a rule should never increase the support.
+data mining systems frequently report only rules above a given support threshold. 
 In the following, we define this metric for AMIE's setting and introduce another notion of significance, the \emph{head coverage}.
-% \comment{Fabian}{I am not sure if the above paragraph is necessary...}
-% \comment{Christina}{I suggest to keep it. It would be too abrupt if we just throw the definitions without any intro.}
-% \comment{Katja}{I am also in favor of keeping at as it sets the context for the content of the section.}
-% \comment{Luis}{I have rephrased it but not 100\% sure about keeping this paragraph}
+
 
 \paragraph{Support} \label{support}In our context, the support of a rule quantifies the number of correct predictions in the existing data.
 \www{There are several ways to define the support: It can be the number of instantiations of a rule that appear in the KB.
-%This is what our analogy to association rule mining \cite{AgrImiSwa93} suggests (Section \ref{sec:preliminaries}). \comment{Katja}{Remove this sentence if the section about association rule mining is removed permanently.}
 This measure, however, is not monotonic if we add atoms to the body. Consider, for example, the rule
 \indented{
-  \emph{marriedTo(}$x,y) \Rightarrow$ \emph{marriedTo(}$y,x$)
+  \emph{R: livesIn(}$x,y) \Rightarrow$ \emph{wasBornIn(}$y,x$)
 }
 If we add \emph{hasGender($x$,male)} to the body, the number of instantiations that are in the KB decreases.
 If we add an atom with a fresh variable, e.g., \emph{hasFriend($x$,$z$)}, to the body, the number of instantiations increases for every friend of $x$.
@@ -157,6 +199,7 @@ This measure decreases monotonically if more body atoms are added and avoids equ
 With this in mind, we define the support of a rule as the number of distinct pairs of subjects and objects in the head of all instantiations that appear in the KB:
 \[supp(\vec{B} \Rightarrow r(x,y)) := \#(x,y): \exists z_1,...,z_m: \vec{B} \wedge r(x,y)\]
 where $z_1,...,z_m$ are the variables of the rule apart from $x$ and $y$. }
+Table~\ref{tab:exampleKB} shows a toy KB that contains only 2 relations and 5 facts. For this toy KB, rule R will have support 1 (because of (A,X)).
 Note that the support is defined even for rules that are not closed.
 
 \www{
@@ -167,11 +210,21 @@ In this case, however, relations that do not have many facts (either because of 
 i.e., we will not learn rules predicting such relations. Therefore, we propose to use the notion of \emph{head coverage}:
 \[hc(\vec{B} \Rightarrow r(x,y)) := \frac{supp(\vec{B} \Rightarrow r(x,y))}{size(r)}\]
 }
-with $size(r) := \#(x',y') : r(x',y')$ denoting the number of facts in relation $r$. Head coverage quantifies the ratio of the known true facts that are implied %(for the case of closed rules) %or can possibly be implied (for the case of not yet closed rules)
-% Fabian: I think that this description is sufficient. The more precise one risks confusing readers.
-by the rule.
-%Head coverage can be a measure of statistical significance for any measure used to evaluate the quality of a rule.
-%\comment{Fabian}{I am not sure about this. Could you explain? If it is not crucial here, I would omit it at this position.}
+with $size(r) := \#(x',y') : r(x',y')$ denoting the number of facts in relation $r$. Head coverage quantifies the ratio of the known true facts that are implied by the rule.
+For the toy example of Table~\ref{tab:exampleKB}, for example $hc(R)=1/2$.
+
+
+\begin{table}
+\centering
+ \begin{tabular}{c|c}
+  $wasBornIn$ & $livesIn$\\  \hline
+  (A,X)		& (A,X) \\
+  (C,W)		& (A,Y) \\
+		& (B,Z) \\
+ \end{tabular}
+\caption{Example contents of a KB. A,B,C: persons. X,Y,Z,W: cities.}\label{tab:exampleKB}
+\end{table}
+
 
 
 % \www{

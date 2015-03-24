@@ -690,7 +690,10 @@ Since all atoms in a rule in AMIE are connected, and since all variables appear 
 $$
   r_1(x_0,x_1) \wedge r_2(x_1,x_2) \wedge ... \wedge r_n(x_{n-1},x_n) \Rightarrow r_h(x_0,x_n)
 $$
-For this arrangement, some relations may have been replaced by their inverses, some atoms may have to be swapped, and some atoms may have to be omitted. There may be multiple paths from $x_0$ to $x_n$ for a given rule. However, since any path has at most as many atoms as the original rule, the support of the path rule will always be greater than the support of the original rule -- no matter which path we choose. This is an important property because we aim at overestimating confidence and strictly avoiding underestimations.
+For this arrangement, some relations may have been replaced by their inverses, some atoms may have to be swapped, and some atoms may have to be omitted. 
+There may be multiple paths from $x_0$ to $x_n$ for a given rule. 
+However, since any path has at most as many atoms as the original rule, the support of the path rule will always be greater than the support of the original rule -- no matter which path we choose. 
+This is an important property because we aim at overestimating confidence and strictly avoiding underestimations.
 %want to overestimate confidence.
 To compute the PCA confidence, we have to calculate
 $$
