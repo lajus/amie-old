@@ -1,3 +1,27 @@
+\comment{R3}{Authors start with an informal discussion of changes (6.1.1 and 6.1.2, but they describe "perfect rules"  
+without really saying that AMIE+ "stops adding perfect rules"  and without saying why such an obvious thing was not done in AMIE), 
+then they go at low-level (6.1.3 for discussing a caching approach by using a pseudo-code SPARQL-ish that is not properly defined), 
+then the go high-level to define confidence upper-bonds  (with no link from mathematics to implementation). 
+This is the "new part", but it misses a global introduction, a description of the rationale of additions bringing from AMIE to AMIE+, 
+and a description of AMIE's implementation, with its internal data structures and a link from theory to implementation that shows 
+how theoretical approximations are turned into clearly described, repeatable, working algorithms.}
+
+\comment{R1}{the main proposed heuristic (which contributes most to the  speed-up) is an ad-hoc approximation of the PCA confidence for a specific type of 3-atom rules, 
+being not trivial to generalize it to any kind of rule. (Indeed, experiments are limited to 3-atom rules).}
+
+\comment{R2}{1) The first optimization avoids evaluating non-closed rules in the last iteration. The article lacks experimental results to show the effect of this technique.
+2) The second optimization stops expanding a rule if it has a 100\% PCA confidence. I found this a bit confusing. 
+Since AMIE+ does not compute the PCA confidence during expanding rules, then the question is how AMIE+ identifies whether a rule has a 100\% PCA confidence or not and whether the PCA 
+confidence is actually computed. The article needs to clarify how and when this optimization can be applied.
+3) Using the third optimization technique to expand a rule, AMIE+ chooses the same frequent relations for new atoms as in the last iteration when the rule is built if the rule 
+is equivalent to its parent rule. The article uses an example to describe this technique, but lacks some formal definitions and discussions. 
+The article should have more details to give answers to several critical questions: a) How to determine whether a new query can be rewritten to an old one? 
+b) How the query rewriting is done? What rules are used in the query rewriting? c) Can this technique be applied to general rules? Or does AMIE+ only use this this technique 
+for those rules that have the exact form as the given example?
+4) The fourth optimization technique uses a confidence threshold to filter out generated closed rules that have a small confidence upper bound to avoid expensive computations for its actual confidence. This technique can only be used for rules with exactly two body atoms of the same predicate sharing one variable. This restriction limits the benefits gained from applying this technique. As shown in Table 7 in the experiments section, we can see that there is not a big improvement in execution time and only a small amount of rules may be removed.
+}
+
+
 Since the publication of the original AMIE framework~\cite{amie}, we have extended it with a series of improvements that allow the system to run over very large KBs.
 In the following, we will introduce and discuss these extensions and refer to the extended version of AMIE as AMIE+.
 As usual when tuning a system, there are two kinds of techniques  to improve the performance:

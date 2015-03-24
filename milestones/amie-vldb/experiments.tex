@@ -1,29 +1,39 @@
-% !TEX root = main.tex
-% \ \\[-1.0cm]
 
-% Goals and summary of results
-% In this section we report about
-% (i) usability and running time performance of AMIE in comparison to other state-of-the-art rule mining systems,
-% (ii) the benefits in running time of AMIE from using the optimizations of Sec.~\ref{sec:improvements},
-% (iii) the quality of rules produced when the PCA confidence is used as ranking metric in comparison to the standard confidence and the positives-only evaluation function (see Sec.~\ref{sec:pca}).
-We report our experimental results in three rounds of experiments. In the first round, we compare the original AMIE with
-other state-the-art rule mining systems, i.e., WARMR~\cite{DehToi99,DehToi00} and ALEPH$^{\ref{foot:aleph}}$, in terms of usability and runtime.
-In the second round, we compare AMIE with AMIE+ and show the performance boost introduced
+In~\cite{amie} AMIE was shown to be faster (up to 3x), more scalable and more user-friendly than other state-of-the-art systems (WARMR, ALEPH).
+PCA confidence was shown to rank more productive and more correct rules higher than other confidence metrics and to correlates better
+with the actual precision of each rule than the standard confidence.
+
+
+In this section, we compare AMIE with AMIE+ and show the performance boost introduced
 by the optimizations presented in Section~\ref{sec:improvements}.
-The third round concludes with an extensive empirical evaluation of the PCA.
+Apart from that, we conduct  an extensive empirical evaluation of the PCA.
 This includes an experiment to evaluate how often the PCA holds in a web-extracted KB (YAGO).
-In addition, we compare the suitability of the PCA confidence as ranking metric when the rules
-are used for the deduction of new facts. We compare the PCA confidence with the standard confidence and
-the positives-only evaluation function introduced by ALEPH.
-Our experimental results show that:
+In addition, we revisit the comparison of standard and pca confidence in terms of the quality of the produced facts and investigate the influence of type information in the quality of the rules.
+Our experimental results show that:\comment{Chris}{change those}
 \begin{itemize}
- \item AMIE is more user-friendly than state-of-the-art systems and is up to 3 orders of magnitude faster. Unlike its competitors, it scales to current KBs.
  \item The optimizations implemented in AMIE+ allow us to run on KBs with more than 1K relations and 10M facts, for which
 even AMIE took more than one day.
 \item The PCA confidence ranks more productive and more correct rules higher than other confidence metrics. In addition, the PCA confidence correlates better
 with the actual precision of each rule than the standard confidence.
-Predictions obtained with the PCA confidence are at least 10\% more often correct than those produced with the positives-only evaluation function.
 \end{itemize}
+% We report our experimental results in three rounds of experiments. In the first round, we compare the original AMIE with
+% other state-the-art rule mining systems, i.e., WARMR~\cite{DehToi99,DehToi00} and ALEPH$^{\ref{foot:aleph}}$, in terms of usability and runtime.
+% In the second round, we compare AMIE with AMIE+ and show the performance boost introduced
+% by the optimizations presented in Section~\ref{sec:improvements}.
+% The third round concludes with an extensive empirical evaluation of the PCA.
+% This includes an experiment to evaluate how often the PCA holds in a web-extracted KB (YAGO).
+% In addition, we compare the suitability of the PCA confidence as ranking metric when the rules
+% are used for the deduction of new facts. We compare the PCA confidence with the standard confidence and
+% the positives-only evaluation function introduced by ALEPH.
+% Our experimental results show that:
+% \begin{itemize}
+%  \item AMIE is more user-friendly than state-of-the-art systems and is up to 3 orders of magnitude faster. Unlike its competitors, it scales to current KBs.
+%  \item The optimizations implemented in AMIE+ allow us to run on KBs with more than 1K relations and 10M facts, for which
+% even AMIE took more than one day.
+% \item The PCA confidence ranks more productive and more correct rules higher than other confidence metrics. In addition, the PCA confidence correlates better
+% with the actual precision of each rule than the standard confidence.
+% Predictions obtained with the PCA confidence are at least 10\% more often correct than those produced with the positives-only evaluation function.
+% \end{itemize}
 
 
 \subsection{Experimental Setup}
@@ -62,10 +72,10 @@ ranks the resulting rules by decreasing PCA confidence. It also counts support o
 There is no need to deviate from this default configuration when a user runs AMIE.
 There are no parameters to tune.
 AMIE+ inherits this default behavior and extends it by
-the lossless optimizations introduced in Section~\ref{prunebound}. In its parameter-less variant, which we will use in the following, AMIE+ has no confidence threshold and thus does not prune on confidence.
-% Fabian: We use this only later. If an additional confidence threshold is given, AMIE+ can use it to prune the search space by bounds on the PCA confidence (see Section~\ref{upperBound}). We refer to this setting as \emph{AMIE+ with upper bounds}, and use a threshold of 0.1. In addition, AMIE+ can also be run with the lossy approximations enabled, a setting that we call \emph{AMIE+ with upper bounds and approximation}.
+the lossless optimizations introduced in Section~\ref{prunebound}. In its parameter-less variant, which we will use in the following, 
+AMIE+ has no confidence threshold and thus does not prune on confidence.
 
-
+\ignore{
 \paragraph{Metrics}
 We will compare AMIE in terms of quality, ease of use and runtime to two popular state-of-the-art systems:
 WARMR~\cite{DehToi99,DehToi00} and ALEPH$^{\ref{foot:aleph}}$.
@@ -83,9 +93,9 @@ variable of the relation (see Section~\ref{subsec:functions} about functions).
 % Note that AMIE+  produces exactly the same output as AMIE, whereas the output of AMIE++ might differ.
 
 %While the optimal length of rules can vary from one dataset to the other, we focus on rules up to 3 atoms for the selected datasets.
+}
 
 \paragraph{Language Bias}
-\comment{Chris}{I shortened this a lot. Please take a closer look. }
 AMIE and AMIE+ mine \emph{connected} and \emph{closed} Horn rules and allow recursiveness.
 Unless otherwise mentioned, we mine rules without constants (i.e., without the instantiation operator).
 Although we can mine rules of arbitrary length, enforcing a length restriction is common practice for rule-mining systems in order to keep the search tractable.
@@ -130,6 +140,8 @@ Therefore, we only mine rules with 3 atoms.
 }
 %\subsection{Usability and runtime performance comparison with state-of-the-art}
 \vspace{-0.5cm}
+
+\ignore{
 \subsection{Comparison with State-of-the-Art Systems}
 \noindent In this section, we compare AMIE to WARMR and ALEPH. For each system, we conduct three experiments: We first compare the usability of the competitor system to AMIE. Then, we compare their runtimes to AMIE and AMIE+.
 
@@ -192,16 +204,16 @@ To have reasonable runtimes, we allowed WARMR to find constants only for one pre
 Table \ref{warmrruntime} summarizes the runtime results for WARMR, AMIE, and AMIE+. We conclude that AMIE is better suited for large KBs than WARMR.
 This is because WARMR is an ILP algorithm written in a logic programming environment, which makes the evaluation of all candidate queries inefficient.\\
 
-\begin{table}
-\begin{tabular}{l|rr rr|}
-Constants & WARMR & AMIE & AMIE+\\
-\hline
- no & 18h & 7.91s & 5.24s \\
- yes & (48h) / (19.3h) & 1.68min  & 1.06min\\
-\end{tabular}
-\caption{Runtimes on YAGO2 sample}
-\label{warmrruntime}
-\end{table}
+% \begin{table}
+% \begin{tabular}{l|rr rr|}
+% Constants & WARMR & AMIE & AMIE+\\
+% \hline
+%  no & 18h & 7.91s & 5.24s \\
+%  yes & (48h) / (19.3h) & 1.68min  & 1.06min\\
+% \end{tabular}
+% \caption{Runtimes on YAGO2 sample}
+% \label{warmrruntime}
+% \end{table}
 
 
 \paragraph{Results} After filtering out non-connected rules, WARMR mined 41 closed rules. AMIE+, in contrast, mined 207 closed rules, which included the ones mined by WARMR.
@@ -225,45 +237,19 @@ In addition, the user has to specify a series of types and mode declarations (si
 In addition, the user needs to provide ALEPH with files containing the background knowledge and positive examples for the target predicate.
 In contrast, AMIE requires no such input. It will run on a KB without any prespecified choices of predicates.
 
-% \ffigure{Table}{alephrun0}{Runtimes ALEPH vs. AMIE/AMIE+}{
-% \footnotesize
+
+% \begin{table}
 % \begin{tabular}{l|ccc}
 % KB & ALEPH & AMIE & AMIE+\\
 % \hline
 % YAGO2 full & 4.96s to $>$ 1 day & 3.62min & 1.62min\\
 % YAGO2 Sample & 0.05s to $>$ 1 day & 7.91s & 2.27s \\
 % \end{tabular}
-% }
-
-\begin{table}
-\begin{tabular}{l|ccc}
-KB & ALEPH & AMIE & AMIE+\\
-\hline
-YAGO2 full & 4.96s to $>$ 1 day & 3.62min & 1.62min\\
-YAGO2 Sample & 0.05s to $>$ 1 day & 7.91s & 2.27s \\
-\end{tabular}
-\caption{Runtimes ALEPH vs. AMIE/AMIE+}
-\label{alephrun0}
-\end{table}
-
-\begin{table}[t]
- \begin{tabular}{l|r}
-Relations & Runtime\\
-\hline
-isPoliticianOf, hasCapital, hasCurrency & $<$ 5min\\
-dealsWith, hasOfficialLanguage, imports & $<$ 5min\\
-isInterested, hasMusicalRole & $<$19min\\
-hasAcademicAdvisor, hasChild& $>$ 1 day\\
-isMarriedTo, livesIn, worksAt, isLocatedIn& $>$ 1 day\\ %[-0.4cm]
-\end{tabular}
-\caption{Runtimes of ALEPH on YAGO2}
-\label{alephrun1}
-\end{table}
-
-
-% \ffigure{Table}{alephrun1}{Runtimes of ALEPH on YAGO2}{ % no constants
-% %\begin{flushleft}
-% \begin{tabular}{l|r}
+% \caption{Runtimes ALEPH vs. AMIE/AMIE+}
+% \label{alephrun0}
+% \end{table}
+% \begin{table}[t]
+%  \begin{tabular}{l|r}
 % Relations & Runtime\\
 % \hline
 % isPoliticianOf, hasCapital, hasCurrency & $<$ 5min\\
@@ -272,25 +258,10 @@ isMarriedTo, livesIn, worksAt, isLocatedIn& $>$ 1 day\\ %[-0.4cm]
 % hasAcademicAdvisor, hasChild& $>$ 1 day\\
 % isMarriedTo, livesIn, worksAt, isLocatedIn& $>$ 1 day\\ %[-0.4cm]
 % \end{tabular}
-% %\end{flushleft}
-% } %\ \\[-1cm]
-
-\begin{table}[t]
-\begin{tabular}{l|r}
-Relations & Runtime\\
-\hline
-diedIn, directed, hasAcademicAdvisor & $<$ 2min\\
-graduatedFrom, isPoliticianOf, playsFor & $<$ 2min\\
-wasBornIn, worksAt, isLeaderOf &  $<$ 2min\\
-exports, livesIn, isCitizenOf & $<$ 1.4h\\
-actedIn, produced, hasChild, isMarriedTo & $>$ 1 day\\ %[-0.4cm]
-\end{tabular}
-\caption{Runtimes of ALEPH on YAGO2 sample}
-\label{alephrun2}
-\end{table}
-
-% \ffigure{Table}{alephrun2}{Runtimes of ALEPH on YAGO2 sample}{
-% %\begin{flushleft}
+% \caption{Runtimes of ALEPH on YAGO2}
+% \label{alephrun1}
+% \end{table}
+% \begin{table}[t]
 % \begin{tabular}{l|r}
 % Relations & Runtime\\
 % \hline
@@ -300,8 +271,10 @@ actedIn, produced, hasChild, isMarriedTo & $>$ 1 day\\ %[-0.4cm]
 % exports, livesIn, isCitizenOf & $<$ 1.4h\\
 % actedIn, produced, hasChild, isMarriedTo & $>$ 1 day\\ %[-0.4cm]
 % \end{tabular}
-% %\end{flushleft}
-% }%\ \\[-1cm]
+% \caption{Runtimes of ALEPH on YAGO2 sample}
+% \label{alephrun2}
+% \end{table}
+
 
 
 \paragraph{Runtime}
@@ -319,7 +292,7 @@ Again, runtimes varied widely between relations (Table \ref{alephrun2}).
 Some relations ran in a few seconds, others did not terminate in a day.
 The runtimes with constants are similarly heterogeneous, with at least 7 relations not terminating in 1 day.
 We compare the quality of the mined rules of AMIE and ALEPH in Section~\ref{exp_std_vs_pca}.
-
+}%ignore
 
 % \subsubsection{AMIE vs. AMIE+ vs. AMIE++}
 \subsection{AMIE vs. AMIE+}\label{amiepm}
@@ -691,9 +664,6 @@ Note also that the PCA confidence is much closer to the actual precision value t
 Since the error of PCA confidence is much smaller than the error of the standard confidence for the best performing rules (in terms of the actual precision),
 our results also imply that such rules have higher chances of being discovered during the mining process if we use the PCA confidence as quality evaluation metric.
 
-\comment{Katja}{We will have to explain why the numbers here are so different from the WWW paper}
-\comment{Chris}{The evaluation is different (I think). We could point this out in the cover letter. My concern is more why we are converging in our errors with std conf.
-It means we screw up consistently whereas std confidence behaves very well at some point in the end.}
 
 \begin{table}
 \small
@@ -707,23 +677,24 @@ PCA Confidence 	& 0.28		&0.25		&0.28 \\
 \label{cor-new}
 \end{table}
 
-\begin{table}
-\begin{tabular}{l|rrr}
-	    & Top $n$ & Predictions & Precision \\
- \hline
- Positives-only & 7 & 2997 & 27\% \\
- PCA Confidence & 12 & 2629 & 62\% \\
- \hline
- Positives-only & 9 & 5031 & 26\% \\
- PCA Confidence & 22 & 4512& 46\% \\
- \hline
- Positives-only & 17 & 8457 & 30\% \\
- PCA Confidence & 23 & 13927  & 43\% \\
-\end{tabular}
-\caption{PCA confidence vs. positives-only score: aggregated precision of rules mined on YAGO2 sample.}
-\label{alephres}
-\end{table}
+% \begin{table}
+% \begin{tabular}{l|rrr}
+% 	    & Top $n$ & Predictions & Precision \\
+%  \hline
+%  Positives-only & 7 & 2997 & 27\% \\
+%  PCA Confidence & 12 & 2629 & 62\% \\
+%  \hline
+%  Positives-only & 9 & 5031 & 26\% \\
+%  PCA Confidence & 22 & 4512& 46\% \\
+%  \hline
+%  Positives-only & 17 & 8457 & 30\% \\
+%  PCA Confidence & 23 & 13927  & 43\% \\
+% \end{tabular}
+% \caption{PCA confidence vs. positives-only score: aggregated precision of rules mined on YAGO2 sample.}
+% \label{alephres}
+% \end{table}
 
+\ignore{
 \subsubsection{PCA Confidence vs. Positives-Only Score}
 We compared the output of ALEPH with the positives-only evaluation function to the output of AMIE using the PCA
 confidence on the sample of YAGO2 used for the runtime experiments.
@@ -739,83 +710,10 @@ We suspect that ALEPH's positives-only evaluation function manages to filter out
 ALEPH will mine, e.g., \emph{livesIn}$(A,C),$\emph{isLocatedIn}$(C,B) \Rightarrow$ \emph{isPoliticianOf}$(A,B)$.
 The problem is that ALEPH generates counterexamples by randomly using valid constants for variables $A$ and $B$.
 Hence, the probability of creating a random example in which $B$ is the place of residence of the specific person $A$ is very low.\\
-
-% \ignore{Fabian: This is obsolete, no? We already show that we can run on DBpedia.
-% 
-% \subsubsection{AMIE for Data Prediction}
-% As a simple proof of concept for the value of rules for facts prediction in KBs, we ran AMIE
-% on older versions of YAGO (YAGO2)\cite{yago2} and DBpedia (2.0)\cite{dbpedia}
-% and used to the rules to make predictions which we verified in newer versions of the KBs, YAGO2s and DBpedia 3.8.
-% We report in Table~\ref{dbp} the number of predicted facts that are in the newer version of the KB but not in the old one (hits).
-% A fact can be predicted by multiple rules, so we report the count with and without duplicates.
-% The results show that logical rules mined with the PCA confidence can be used to generate
-% a large number of plausible facts. Moreover, evidence from multiple rules can increase
-% the confidence we have on a fact. This suggests a potential for the development of more sophisticated models
-% to estimate the accuracy of our precisions and identify facts that are more likely true, either now or in the future.
-% We leave the exploration of this avenue as future work. \\
-% 
-% \ffigure{Table}{dbp}{AMIE for predicting facts on YAGO and DBpedia}{
-% \small
-% \begin{tabular}{l|c|cc|}
-% Old dataset & Rules & Total hits & Unique Hits \\
-% \hline
-% YAGO2 & 135   & 14K  & 12K \\
-% YAGO2 (const) & 19028   & 79K & 17K\\
-% DBpedia 2.0 & 117163  & 237536 & 149308\\
-% \end{tabular}
-% }
-% 
-% }
+}
 
 
-% \subsection{AMIE vs. AMIE+}
-% In this section we discuss the runtime improvements of AMIE+, which enable us to run on very large datasets.
-% AMIE+ extends the original system AMIE with two types of enhacements:
-%
-% \paragraph{Lossless optimizations} They include maximum rule length, use of perfect rules for pruning, query rewriting and caching and pruning by confidence
-% upper bounds. These improvements do not alter the completeness of AMIE, i.e., they do not prune the output, but still allow for faster mining.
-% AMIE+ enables them by default. Note that the pruning by confidence upper bounds is applicable only when a minimum confidence threshold is provided. Since AMIE+ does not impose
-% confidence thresholds by default, pruning by confidence upper bounds is disabled in the vanilla setting.
-% % \comment{Chris}{Why is confidence upper bound grouped as lossy optimization here? In the AMIE+ section it is under the lossless category. After all it
-% % is not an approximation.}
-%
-% \paragraph{Lossy optimizations} They include pruning by confidence approximations.
-% These improvements might alter the expected output of AMIE since they prune rules that are expected to be low confident and very expensive to mine.
-% They always require a minimum confidence threshold. For the type of rules discussed in Section~\ref{upperBound},
-% the confidence upper bounds let us know precisely if the
-% confidence of a rule will be below the confidence threshold, before calculating the actual confidence score. Our confidence
-% approximations, on the other hand,
-% provide a rough estimation of the confidence score which can be both an overestimation or underestimation of
-% the actual confidence score. Underestimation affects the completeness of AMIE+,
-% since some rules with high confidence score may be pruned. In any case, calculating the confidence upper bounds or estimating the confidence
-% is much cheaper than computing the actual confidence. All the experiments involving confidence upper bounds or the lossy heuristics use a confidence
-% threshold of 10\% PCA confidence.
-%
-%
-% Table~\ref{amievsplus} shows the runtmimes of AMIE and AMIE+ on our test KBs. For the latter, we display
-% the running time with different configurations: default AMIE+ (i.e., only lossless heuristics enabled, no confidence threshold), default AMIE+ with confidence
-% bounds and AMIE+ with all the optimizations. If the system runs more than one day without finishing, we interrupted it and reported the
-% output obtained until that point in time.
-% For AMIE we show the runtime reported in~\cite{amie}. For the default configuration of AMIE+,
-% we show the running time, the total number of rules
-% and the number of rules with PCA confidence equal or higher than 10\%. Note that for
-% all KBs except YAGO2, AMIE+ (only lossless heuristics enabled) could not finish in one day.
-% The situation is not much different when we only enable the PCA confidence bounds with threshold 10\%. For this setup,
-% we report the running time
-% and the number of rules pruned by this heuristic. When all the optimizations are enabled, we report runtime, number of rules output, number of rules
-% pruned by the heuristics and the pruning precision. The pruning precision is the ratio of rules for which the confidence approximation
-% introduced
-% in Section~\ref{subsec:pruningbyapprox} would not err in pruning good rules. We
-% calculate this ratio by counting the number of times the heuristic produces a higher value than the real confidence in the set of rules output
-% by AMIE+ (where the approximation is applicable) with the default setup within one day of running.
-% \comment{Chris}{Why count the times that we overestimated confidence? in this cases we will not prune. We should count the cases that we underestimated confidence
-% and pruned nice rules.} \comment{Luis}{Isn't it the complement of the value we provide? If we overestimate 95\% of the times, then 5\% of the cases we are pruning a rule that we should not have pruned.}
-% This means the value reported on Table~\ref{amievsplus}
-% was calculated on a
-% subset of all the rules and can be an approximation of the pruning precision. This fact is particularly obvious
-% for DBpedia 2.0 where AMIE+ with default settings found
-% only 12K rules over the 10\% threshold, whereas enabling all the heuristics produces 117K rules with PCA confidence greater or equals 10\%.
-% \comment{Chris}{Are these rules in total or rules above 10\%? If it is the first let's compare it with the rules in total of AMIE+}. \comment{Luis}{The second case! I have updated the text accordingly.}
+
 
 
 
