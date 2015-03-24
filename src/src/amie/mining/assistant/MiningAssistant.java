@@ -140,6 +140,24 @@ public class MiningAssistant{
 	protected boolean avoidUnboundTypeAtoms;
 	
 	/**
+	 * If false, the assistant will not exploit the maximum length restriction to improve
+	 * runtime. 
+	 */
+	protected boolean exploitMaxLengthOption;
+	
+	/**
+	 * Enable query rewriting to optimize runtime.
+	 */
+	protected boolean enableQueryRewriting;
+	
+	/**
+	 * Enable perfect rule pruning, i.e., do not further specialize rules with PCA confidence
+	 * 1.0.
+	 */
+	protected boolean enablePerfectRules;
+
+	
+	/**
 	 * @param dataSource
 	 */
 	public MiningAssistant(FactDatabase dataSource) {
@@ -162,6 +180,8 @@ public class MiningAssistant{
 		countAlwaysOnSubject = false;
 		silent = false;
 		pcaOptimistic = false;
+		exploitMaxLengthOption = true;
+		enableQueryRewriting = true;
 		buildRelationsDictionary();
 		
 	}	
@@ -269,7 +289,7 @@ public class MiningAssistant{
 	}
 
 	public boolean registerHeadRelation(Query query){		
-		return headCardinalities.put(query.getHeadRelation(), new Long(query.getCardinality())) == null;		
+		return headCardinalities.put(query.getHeadRelation(), new Long(query.getSupport())) == null;		
 	}
 	
 	public long getHeadCardinality(Query query){
@@ -291,6 +311,10 @@ public class MiningAssistant{
 		Set<ByteString> result = source.selectDistinct(lastPattern[0], subclassQuery.getTriples());
 		lastPattern[2] = tmpVar;
 		return result;
+	}
+	
+	protected boolean canAddInstantiatedAtom() {
+		return allowConstants || enforceConstants;
 	}
 	
 	
@@ -315,7 +339,7 @@ public class MiningAssistant{
 			candidate.setFunctionalVariable(countingVariable);
 			registerHeadRelation(candidate);			
 
-			if(allowConstants || enforceConstants) {
+			if(canAddInstantiatedAtom()) {
 				getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, output);
 			}
 			
@@ -360,7 +384,7 @@ public class MiningAssistant{
 					Query candidate = new Query(succedent, cardinality);
 					candidate.setFunctionalVariable(succedent[countVarPos]);
 					registerHeadRelation(candidate);					
-					if(allowConstants || enforceConstants) {
+					if(canAddInstantiatedAtom()) {
 						getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, output);
 					}
 					
@@ -375,16 +399,18 @@ public class MiningAssistant{
 			if(!testLength(query))
 				return;
 			
-			if(query.getLength() == maxDepth - 1){
-				if(!query.getOpenVariables().isEmpty() && !allowConstants){
-					return;
+			if (exploitMaxLengthOption) {
+				if(query.getLength() == maxDepth - 1){
+					if(!query.getOpenVariables().isEmpty() && !allowConstants){
+						return;
+					}
 				}
 			}
 			
 			List<ByteString> joinVariables = null;
 			
 			//Then do it for all values
-			if(query.isSafe()){
+			if(query.isClosed()){
 				joinVariables = query.getVariables();
 			}else{
 				joinVariables = query.getOpenVariables();
@@ -418,10 +444,10 @@ public class MiningAssistant{
 									continue;
 							}
 							
-							candidate.setHeadCoverage((double)candidate.getCardinality() / headCardinalities.get(candidate.getHeadRelation()));
-							candidate.setSupport((double)candidate.getCardinality() / (double)getTotalCount(candidate));
+							candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
+							candidate.setSupportRatio((double)candidate.getSupport() / (double)getTotalCount(candidate));
 							candidate.setParent(query);							
-							if(allowConstants || enforceConstants) {
+							if(canAddInstantiatedAtom()) {
 								getInstantiatedEdges(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minCardinality, output);
 							}
 							
@@ -491,7 +517,7 @@ public class MiningAssistant{
 		List<ByteString> allVariables = query.getVariables();
 		List<ByteString> openVariables = query.getOpenVariables();
 		
-		if(query.isSafe()){
+		if(query.isClosed()){
 			sourceVariables = query.getVariables();
 		}else{
 			sourceVariables = openVariables; 
@@ -531,7 +557,7 @@ public class MiningAssistant{
 								Query candidate = query.closeCircle(newEdge, cardinality);
 								if(!candidate.isRedundantRecursive()){
 									candidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate.getHeadRelation()));
-									candidate.setSupport((double)cardinality / (double)getTotalCount(candidate));
+									candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
 									candidate.setParent(query);
 									output.add(candidate);
 								}
@@ -648,7 +674,7 @@ public class MiningAssistant{
 						
 						double f4 = (1 / f1) * (overlap / nentities);
 						double ratio = overlapHead * f4 * (f3 / f2);
-						ratio = (double)candidate.getCardinality() / ratio;
+						ratio = (double)candidate.getSupport() / ratio;
 						candidate.setPcaEstimation(ratio);
 						candidate.setPcaEstimationOptimistic(source.x_functionality(targetPatternOutput[1], posCommonOutput) / headFunctionality);
 						if(ratio < minPcaConfidence) { 
@@ -665,6 +691,13 @@ public class MiningAssistant{
 		return true;
 	}
 
+	/**
+	 * It checks whether a rule satisfies the confidence thresholds and the
+	 * skyline heuristic: the strategy that avoids outputing rules that do not
+	 * improve the confidence w.r.t their parents.
+	 * @param candidate
+	 * @return
+	 */
 	public boolean testConfidenceThresholds(Query candidate) {
 		boolean addIt = true;
 		
@@ -672,13 +705,14 @@ public class MiningAssistant{
 			return false;
 		}
 		
-		if(candidate.getConfidence() >= minStdConfidence && candidate.getPcaConfidence() >= minPcaConfidence){
+		if(candidate.getStdConfidence() >= minStdConfidence 
+				&& candidate.getPcaConfidence() >= minPcaConfidence){
 			//Now check the confidence with respect to its ancestors
 			List<Query> ancestors = candidate.getAncestors();			
-			for(int i = ancestors.size() - 2; i >= 0; --i){
-				if(ancestors.get(i).isSafe() && 
-						(candidate.getConfidence() <= ancestors.get(i).getConfidence() 
-						|| candidate.getPcaConfidence() <= ancestors.get(i).getPcaConfidence())){
+			for(int i = 0; i < ancestors.size(); ++i){
+				// Skyline technique on PCA confidence
+				if (ancestors.get(i).isClosed() && 
+						candidate.getPcaConfidence() <= ancestors.get(i).getPcaConfidence()){
 					addIt = false;
 					break;
 				}
@@ -720,7 +754,7 @@ public class MiningAssistant{
 		}
 		
 		double denominator = source.countDistinct(projVariable, easyQuery);
-		return query.getCardinality() / denominator;
+		return query.getSupport() / denominator;
 	}
 
 	private double getConfidenceUpperBound(Query query) {
@@ -739,7 +773,7 @@ public class MiningAssistant{
 			denominator = source.countDistinct(ByteString.of("?y"), FactDatabase.triples(triple));
 		}
 		
-		return query.getCardinality() / denominator;
+		return query.getSupport() / denominator;
 	}
 
 	protected void getInstantiatedEdges(Query query, Query originalQuery, 
@@ -758,7 +792,7 @@ public class MiningAssistant{
 
 				if(candidate.getRedundantAtoms().isEmpty()){
 					candidate.setHeadCoverage((double)cardinality / headCardinalities.get(candidate.getHeadRelation()));
-					candidate.setSupport((double)cardinality / (double)getTotalCount(candidate));
+					candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
 					candidate.setParent(originalQuery);					
 					output.add(candidate);
 				}
@@ -780,9 +814,9 @@ public class MiningAssistant{
 		} else {
 			countVariable = rule.getFunctionalVariable();
 		}
-		rule.setCardinality(source.countDistinct(countVariable, rule.getTriples()));
-		rule.setSupport((double) rule.getCardinality() / source.size());
-		return rule.getCardinality();
+		rule.setSupport(source.countDistinct(countVariable, rule.getTriples()));
+		rule.setSupportRatio((double) rule.getSupport() / source.size());
+		return rule.getSupport();
 	}
 	
 	/**
@@ -817,7 +851,7 @@ public class MiningAssistant{
 			antecedent.add(existentialTriple);
 			try{
 				pcaDenominator = (double)source.countDistinct(rule.getFunctionalVariable(), antecedent);
-				pcaConfidence = (double)rule.getCardinality() / pcaDenominator;
+				pcaConfidence = (double)rule.getSupport() / pcaDenominator;
 				rule.setPcaConfidence(pcaConfidence);
 			}catch(UnsupportedOperationException e){
 				
@@ -835,20 +869,20 @@ public class MiningAssistant{
 		antecedent.addAll(candidate.getTriples().subList(1, candidate.getTriples().size()));
 				
 		if(antecedent.isEmpty()){
-			candidate.setConfidence(1.0);
+			candidate.setStdConfidence(1.0);
 		}else{
 			//Confidence
 			try{
 				denominator = (double) source.countDistinct(candidate.getFunctionalVariable(), antecedent);
-				confidence = (double)candidate.getCardinality() / denominator;
-				candidate.setConfidence(confidence);
+				confidence = (double)candidate.getSupport() / denominator;
+				candidate.setStdConfidence(confidence);
 				candidate.setBodySize((int)denominator);
 			}catch(UnsupportedOperationException e){
 				
 			}
 		}		
 		
-		return candidate.getConfidence();
+		return candidate.getStdConfidence();
 	}
 
 	public void setAllowConstants(boolean allowConstants) {
@@ -963,5 +997,29 @@ public class MiningAssistant{
 	 */
 	public void setSilent(boolean silent) {
 		this.silent = silent;
+	}
+
+	public boolean isExploitMaxLengthOption() {
+		return exploitMaxLengthOption;
+	}
+
+	public void setExploitMaxLengthOption(boolean exploitMaxLengthOption) {
+		this.exploitMaxLengthOption = exploitMaxLengthOption;
+	}
+
+	public boolean isEnableQueryRewriting() {
+		return enableQueryRewriting;
+	}
+
+	public void setEnableQueryRewriting(boolean enableQueryRewriting) {
+		this.enableQueryRewriting = enableQueryRewriting;
+	}
+
+	public boolean isEnablePerfectRules() {
+		return enablePerfectRules;
+	}
+
+	public void setEnablePerfectRules(boolean enablePerfectRules) {
+		this.enablePerfectRules = enablePerfectRules;
 	}
 }

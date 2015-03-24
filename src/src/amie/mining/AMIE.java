@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -19,6 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javatools.administrative.Announce;
 import javatools.datatypes.ByteString;
+import javatools.datatypes.MultiMap;
 import javatools.parsers.NumberFormatter;
 
 import org.apache.commons.cli.CommandLine;
@@ -30,6 +32,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
+import amie.data.EquivalenceChecker2;
 import amie.data.FactDatabase;
 import amie.mining.assistant.ExistentialRulesHeadVariablesMiningAssistant;
 import amie.mining.assistant.FullRelationSignatureMiningAssistant;
@@ -78,15 +81,16 @@ public class AMIE {
 	/**
 	 * 
 	 * @param assistant
-	 * @param minInitialSupport
-	 * @param headCoverage
-	 * @param metric 
-	 * @param seeds
+	 * @param minInitialSupport If head coverage is defined as pruning metric, it is the minimum size for 
+	 * a relation to be considered in the mining.
+	 * @param threshold The minimum support threshold: it can be either a head coverage ratio threshold or
+	 * an absolute number.
+	 * @param metric Head coverage or support.
 	 */
-	public AMIE(MiningAssistant assistant, int minInitialSupport, double headCoverage, Metric metric, int nThreads){
+	public AMIE(MiningAssistant assistant, int minInitialSupport, double threshold, Metric metric, int nThreads){
 		this.assistant = assistant;
 		this.minInitialSupport = minInitialSupport;
-		this.minHeadCoverage = headCoverage;
+		this.minHeadCoverage = threshold;
 		this.pruningMetric = metric;
 		this.nThreads = nThreads;
 	}
@@ -94,14 +98,15 @@ public class AMIE {
 	/**
 	 * The key method which returns a set of rules mined from the KB.
 	 * @param realTime If true, the rules are printed as they are discovered, otherwise they are 
-	 * printed at the end of the mining process.
+	 * just returned.
 	 * @param seeds A collection of target head relations. If empty, the methods considers all
 	 * possible head relations in the KB.
 	 * @return
 	 * @throws Exception 
 	 */
 	public List<Query> mine(boolean realTime, Collection<ByteString> seeds) throws Exception{
-		List<Query> result = new ArrayList<Query>();
+		List<Query> result = new ArrayList<>();
+		MultiMap<Integer, Query> indexedResult = new MultiMap<>();
 		RuleConsumer consumerObj = null;
 		Thread consumerThread = null;
 		Lock resultsLock = new ReentrantLock();
@@ -109,7 +114,7 @@ public class AMIE {
 	    AtomicInteger sharedCounter = new AtomicInteger(0);
 	    		
 	    Query rootQuery = new Query();
-		Collection<Query> seedsPool = new LinkedHashSet<Query>();		
+		Collection<Query> seedsPool = new LinkedHashSet<>();		
 				
 		if(seeds == null || seeds.isEmpty())
 			assistant.getDanglingEdges(rootQuery, minInitialSupport, seedsPool);
@@ -127,7 +132,7 @@ public class AMIE {
 			//Create as many threads as available cores
         	ArrayList<Thread> currentJobs = new ArrayList<Thread>();
         	for(int i = 0; i < nThreads; ++i){
-        		Thread job = new Thread(new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter));
+        		Thread job = new Thread(new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter, indexedResult));
         		currentJobs.add(job);
         	}
         	
@@ -139,7 +144,7 @@ public class AMIE {
         		job.join();
         	}
         }else{
-        	Thread job = new Thread(new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter));
+        	Thread job = new Thread(new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter, indexedResult));
         	job.run();
         }
 		
@@ -178,13 +183,19 @@ public class AMIE {
 		
 		@Override
 		public void run(){
+			Query.printRuleHeaders();
 			while(!finished){
 				consumeLock.lock();
 				try {
 					while(lastConsumedIndex == consumeList.size() - 1){
 						conditionVariable.await();
 						for(int i = lastConsumedIndex + 1; i < consumeList.size(); ++i){
-								System.out.println(consumeList.get(i).getFullRuleString());
+							System.out.println(consumeList.get(i).getFullRuleString());
+							/*System.out.println("Ancestors");
+							for (Query rule : consumeList.get(i).getAllAncestors()) {
+								System.out.print(rule + " (" + rule.getPcaConfidence() + "); ");
+							}
+							System.out.println("\n========");*/				
 						}
 						
 						lastConsumedIndex = consumeList.size() - 1;
@@ -212,6 +223,9 @@ public class AMIE {
 		
 		private List<Query> outputSet;
 		
+		// A version of the output set thought for search.
+		private MultiMap<Integer, Query> indexedOutputSet;
+		
 		private Collection<Query> queryPool;
 					
 		private Lock resultsLock;
@@ -223,12 +237,17 @@ public class AMIE {
 		private boolean idle;
 		
 								
-		public RDFMinerJob(Collection<Query> seedsPool, List<Query> outputSet, Lock resultsLock, Condition resultsCondition, AtomicInteger sharedCounter){
+		public RDFMinerJob(Collection<Query> seedsPool, 
+				List<Query> outputSet, Lock resultsLock, 
+				Condition resultsCondition, 
+				AtomicInteger sharedCounter,
+				MultiMap<Integer, Query> indexedOutputSet){
 			this.queryPool = seedsPool;
 			this.outputSet = outputSet;
 			this.resultsLock = resultsLock;
 			this.resultsCondition = resultsCondition;
 			this.sharedCounter = sharedCounter;
+			this.indexedOutputSet = indexedOutputSet;
 			this.idle = false;
 		}
 		
@@ -245,46 +264,70 @@ public class AMIE {
 	
 		@Override
 		public void run() {
-			while(true){				
-				Query currentQuery = null;
+			while(true) {				
+				Query currentRule = null;
 				
 				synchronized(queryPool){
-					currentQuery = pollQuery();
+					currentRule = pollQuery();
 				}
 				
-				if(currentQuery != null){
+				if(currentRule != null){
 					if(idle){
 						idle = false;
 						sharedCounter.decrementAndGet();
 					}
 					
-					// Check if the rule meets the language bias and confidence thresholds.
+					// Check if the rule meets the language bias and confidence thresholds and
+					// decide whether to output it.
 					boolean outputRule = false;
-					if (currentQuery.isSafe()){
-						boolean ruleSatisfiesConfBounds = assistant.calculateConfidenceBounds(currentQuery);
-						if (ruleSatisfiesConfBounds) {
-							assistant.calculateConfidenceMetrics(currentQuery);					
-							outputRule = assistant.testConfidenceThresholds(currentQuery);
+					if (currentRule.isClosed()){
+						boolean ruleSatisfiesConfidenceBounds = 
+								assistant.calculateConfidenceBounds(currentRule);
+						if (ruleSatisfiesConfidenceBounds) {
+							resultsLock.lock();
+							setAdditionalParents2(currentRule);
+							resultsLock.unlock();
+							// Calculate the metrics
+							assistant.calculateConfidenceMetrics(currentRule);					
+							// Check the confidence threshold and skyline technique.
+							outputRule = assistant.testConfidenceThresholds(currentRule);
 						} else {
 							outputRule = false;
 						}
 					}
 					
-					// Specialize the rule
-					if (!currentQuery.isSafe() || currentQuery.getPcaConfidence() < 1.0) {
-						int minCount = getCountThreshold(currentQuery);
+					// Check if we should further refine the rule
+					boolean furtherRefined = true;
+					if (assistant.isEnablePerfectRules()) {
+						furtherRefined = !currentRule.isPerfect();
+					}
+					
+					if (furtherRefined) {
+						int minCount = getCountThreshold(currentRule);
 						List<Query> temporalOutput = new ArrayList<Query>();
-						assistant.getCloseCircleEdges(currentQuery, minCount, temporalOutput);
-						assistant.getDanglingEdges(currentQuery, minCount, temporalOutput);
-						synchronized(queryPool){									
-							queryPool.addAll(temporalOutput);
+						assistant.getCloseCircleEdges(currentRule, minCount, temporalOutput);
+						assistant.getDanglingEdges(currentRule, minCount, temporalOutput);
+						synchronized(queryPool){
+							for (Query out : temporalOutput) {
+								queryPool.add(out);
+							}
 						}												
 					}
 					
 					// Output the rule
 					if (outputRule) {
 						resultsLock.lock();
-						outputSet.add(currentQuery);
+						Set<Query> outputQueries = indexedOutputSet.get(currentRule.alternativeParentHashCode());
+						if (outputQueries != null) {
+							if (!outputQueries.contains(currentRule)) {
+								outputSet.add(currentRule);
+								outputQueries.add(currentRule);								
+							}
+						} else {
+							outputSet.add(currentRule);
+							indexedOutputSet.put(currentRule.alternativeParentHashCode(), currentRule);
+						}
+
 						resultsCondition.signal();
 						resultsLock.unlock();
 					}					
@@ -299,6 +342,33 @@ public class AMIE {
 					}else{
 						if(sharedCounter.get() >= nThreads)
 							break;
+					}
+				}
+			}
+		}
+		
+		/**
+		 * It finds all potential parents of a rule in the output set of 
+		 * indexed rules.
+		 * @param currentQuery
+		 */
+		private void setAdditionalParents2(Query currentQuery) {
+			int parentHashCode = currentQuery.alternativeParentHashCode();
+			Set<Query> candidateParents = indexedOutputSet.get(parentHashCode);
+			if (candidateParents != null) {
+				List<ByteString[]> queryPattern = currentQuery.getRealTriples();
+				// No need to look for parents of rules of size 2
+				if (queryPattern.size() <= 2) {
+					return;
+				}
+				List<List<ByteString[]>> parentsOfSizeI = new ArrayList<>();
+				Query.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), queryPattern.get(0), queryPattern.size() - 2, parentsOfSizeI);
+				for (List<ByteString[]> parent : parentsOfSizeI) {
+					for (Query candidate : candidateParents) {
+						List<ByteString[]> candidateParentPattern = candidate.getRealTriples();
+						if (EquivalenceChecker2.equal(parent, candidateParentPattern)) {
+							currentQuery.setParent(candidate);
+						}
 					}
 				}
 			}
@@ -340,6 +410,11 @@ public class AMIE {
 		boolean pcaOptimistic = false;
 		boolean enforceConstants = false;
 		boolean avoidUnboundTypeAtoms = true;
+		// = Requested by the reviewers of AMIE+ ==
+		boolean exploitMaxLengthForRuntime = true;
+		boolean enableQueryRewriting = true;
+		boolean enablePerfectRulesPruning = true;
+		// ========================================
 		int nProcessors = Runtime.getRuntime().availableProcessors();
 		String bias = "headVars";
 		Metric metric = Metric.HeadCoverage;
@@ -463,6 +538,18 @@ public class AMIE {
 		Option avoidUnboundTypeAtomsOpt = OptionBuilder.withArgName("avoid-unbound-type-atoms")
 				.withDescription("Avoid unbound type atoms, e.g., type(x, y), i.e., bind always 'y' to a type")
 				.create("auta");
+		
+		Option doNotExploitMaxLengthOp = OptionBuilder.withArgName("do-not-exploit-max-length")
+				.withDescription("Do not exploit max length for speedup (requested by the reviewers of AMIE+). False by default.")
+				.create("deml");
+		
+		Option disableQueryRewriteOp = OptionBuilder.withArgName("disable-query-rewriting")
+				.withDescription("Disable query rewriting and caching.")
+				.create("dqrw");
+		
+		Option disablePerfectRulesOp = OptionBuilder.withArgName("disable-perfect-rules")
+				.withDescription("Disable perfect rules.")
+				.create("dpr");
 						
 		options.addOption(stdConfidenceOpt);
 		options.addOption(supportOpt);
@@ -487,6 +574,9 @@ public class AMIE {
 		options.addOption(optimisticApproxOp);
 		options.addOption(recursivityLimitOpt);
 		options.addOption(avoidUnboundTypeAtomsOpt);
+		options.addOption(doNotExploitMaxLengthOp);
+		options.addOption(disableQueryRewriteOp);
+		options.addOption(disablePerfectRulesOp);
 		
 		try {
 			cli = parser.parse(options, args);
@@ -625,6 +715,9 @@ public class AMIE {
 		
 		pcaOptimistic = cli.hasOption("optimistic");		
 		avoidUnboundTypeAtoms = cli.hasOption("auta");
+		exploitMaxLengthForRuntime = !cli.hasOption("deml");
+		enableQueryRewriting = !cli.hasOption("dqrw");
+		enablePerfectRulesPruning = !cli.hasOption("dpr");
 		String[] leftOverArgs = cli.getArgs();
 		
 		if (leftOverArgs.length < 1) {
@@ -780,6 +873,9 @@ public class AMIE {
 		mineAssistant.setPcaOptimistic(pcaOptimistic);
 		mineAssistant.setRecursivityLimit(recursivityLimit);
 		mineAssistant.setAvoidUnboundTypeAtoms(avoidUnboundTypeAtoms);
+		mineAssistant.setExploitMaxLengthOption(exploitMaxLengthForRuntime);
+		mineAssistant.setEnableQueryRewriting(enableQueryRewriting);
+		mineAssistant.setEnablePerfectRules(enablePerfectRulesPruning);
 		
 		AMIE miner = new AMIE(mineAssistant, minInitialSup, minMetricValue, metric, nThreads);
 		if(minStdConf > 0.0) {
@@ -802,6 +898,22 @@ public class AMIE {
 			System.out.println("Constants in the arguments of relations are disabled");
 		}
 		
+		if (exploitMaxLengthForRuntime && enableQueryRewriting && enablePerfectRulesPruning) {
+			System.out.println("Lossless heuristics enabled");
+		} else {			
+			if (!exploitMaxLengthForRuntime) {
+				System.out.println("Pruning by maximum rule length disabled");
+			}
+			
+			if (!enableQueryRewriting) {
+				System.out.println("Query rewriting and caching disabled");
+			}
+			
+			if (!enablePerfectRulesPruning) {
+				System.out.println("Perfect rules pruning disabled");
+			}
+		}
+		
 		Announce.doing("Starting the mining phase");		
 		
 		long time = System.currentTimeMillis();
@@ -814,7 +926,7 @@ public class AMIE {
 			for(Query rule: rules)
 				System.out.println(rule.getFullRuleString());
 		}
-		
+		System.out.println(rules.size() + " rules mined.");
 		Announce.done("Mining done in " + NumberFormatter.formatMS(System.currentTimeMillis() - time) + " seconds" );
 	}
 

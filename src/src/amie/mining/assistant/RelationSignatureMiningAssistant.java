@@ -20,7 +20,7 @@ public class RelationSignatureMiningAssistant extends HeadVariablesMiningAssista
 		boolean addIt = true;
 		boolean queryChanged = false;
 		
-		if(!candidate.isSafe()){
+		if(!candidate.isClosed()){
 			return false;
 		}
 		
@@ -51,11 +51,11 @@ public class RelationSignatureMiningAssistant extends HeadVariablesMiningAssista
 			recalculateSupport(candidate);
 		
 		calculateConfidenceMetrics(candidate);
-		if(candidate.getConfidence() >= minStdConfidence && candidate.getPcaConfidence() >= minPcaConfidence){
+		if(candidate.getStdConfidence() >= minStdConfidence && candidate.getPcaConfidence() >= minPcaConfidence){
 			//Now check the confidence with respect to its ancestors
 			List<Query> ancestors = candidate.getAncestors();			
 			for(int i = ancestors.size() - 2; i >= 0; --i){
-				if(ancestors.get(i).isSafe() && (candidate.getConfidence() <= ancestors.get(i).getConfidence() || candidate.getPcaConfidence() <= ancestors.get(i).getPcaConfidence())){
+				if(ancestors.get(i).isClosed() && (candidate.getStdConfidence() <= ancestors.get(i).getStdConfidence() || candidate.getPcaConfidence() <= ancestors.get(i).getPcaConfidence())){
 					addIt = false;
 					break;
 				}
@@ -69,8 +69,8 @@ public class RelationSignatureMiningAssistant extends HeadVariablesMiningAssista
 
 	private void recalculateSupport(Query candidate) {
 		long cardinality = source.countProjection(candidate.getHead(), candidate.getAntecedent());
-		candidate.setCardinality(cardinality);
-		candidate.setHeadCoverage((double)candidate.getCardinality() / headCardinalities.get(candidate.getHeadRelation()));
-		candidate.setSupport((double)candidate.getCardinality() / (double)source.size());
+		candidate.setSupport(cardinality);
+		candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
+		candidate.setSupportRatio((double)candidate.getSupport() / (double)source.size());
 	}
 }

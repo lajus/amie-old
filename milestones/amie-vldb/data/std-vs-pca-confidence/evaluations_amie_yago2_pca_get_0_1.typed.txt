@@ -434,21 +434,22 @@ Confidence [0.6, 0.5)
 <Lee_Wen>	<livesIn>	<Singapore>	0.5298245614035088	ManualEvaluation	True
 <Harold_Hunter>	<livesIn>	<New_York_City>	0.5588088088088088	ManualEvaluation	True
 <Gunnhildr_Sveinsdóttir>	<hasChild>	<Harald_III_of_Denmark>	0.5931275990369884	ManualEvaluation	False
-<Henri_Chantavoine>	<livesIn>	<France>	0.5298245614035088	ManualEvaluation	
-<Harold_Harding>	<livesIn>	<England>	0.5298245614035088	ManualEvaluation	
-<Maria_Leopoldine_of_Austria>	<hasChild>	<Archduchess_Maria_Anna_Josepha_of_Austria>	0.5931275990369884	ManualEvaluation	
-<Mariamne_(third_wife_of_Herod)>	<hasChild>	<Herod_Antipas>	0.5931275990369884	ManualEvaluation	
-<Matthias_Lechner>	<livesIn>	<Germany>	0.5298245614035088	ManualEvaluation	
-<George_Dawkes>	<livesIn>	<East_Midlands>	0.5147976656461984	ManualEvaluation	
-<Peter_Tennant>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	
-<William_Graham_(Scottish_politician)>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	
-<Arend_Heyting>	<diedIn>	<Amsterdam>	0.5320902297646484	ManualEvaluation	
-<Sara_Craven>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	
-<Michael_Shishman_of_Bulgaria>	<hasChild>	<Ivan_Stephen_of_Bulgaria>	0.5931275990369884	ManualEvaluation	
-<Pope_John_III>	<livesIn>	<Ciampino>	0.5147976656461984	ManualEvaluation	
-<Zeeshan_Anis_Siddiqui>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	
-<Richard_J._Evans>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	
-<Fritz_Leonhardt>	<livesIn>	<Germany>	0.5298245614035088	ManualEvaluation	
+<Henri_Chantavoine>	<livesIn>	<France>	0.5298245614035088	ManualEvaluation	True
+<Harold_Harding>	<livesIn>	<England>	0.5298245614035088	ManualEvaluation	True
+<Maria_Leopoldine_of_Austria>	<hasChild>	<Archduchess_Maria_Anna_Josepha_of_Austria>	0.5931275990369884	ManualEvaluation	False
+<Mariamne_(third_wife_of_Herod)>	<hasChild>	<Herod_Antipas>	0.5931275990369884	ManualEvaluation	True
+<Matthias_Lechner>	<livesIn>	<Germany>	0.5298245614035088	ManualEvaluation	True
+<George_Dawkes>	<livesIn>	<East_Midlands>	0.5147976656461984	ManualEvaluation	False
+<Peter_Tennant>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	True
+<William_Graham_(Scottish_politician)>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	True
+<Arend_Heyting>	<diedIn>	<Amsterdam>	0.5320902297646484	ManualEvaluation	False
+<Sara_Craven>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	True
+<Michael_Shishman_of_Bulgaria>	<hasChild>	<Ivan_Stephen_of_Bulgaria>	0.5931275990369884	ManualEvaluation	True
+<Pope_John_III>	<livesIn>	<Ciampino>	0.5147976656461984	ManualEvaluation	False
+<Zeeshan_Anis_Siddiqui>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	True
+<Richard_J._Evans>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	True
+<Fritz_Leonhardt>	<livesIn>	<Germany>	0.5298245614035088	ManualEvaluation	True
+================================================================================================================
 <Tomoyoshi_Koyama>	<livesIn>	<Japan>	0.5298245614035088	ManualEvaluation	
 <Kinoiki_Kekaulike>	<hasChild>	<Poomaikelani>	0.5931275990369884	TargetSource	True
 <Joanne_Jackson_(swimmer)>	<livesIn>	<United_Kingdom>	0.5298245614035088	ManualEvaluation	
@@ -520,36 +521,37 @@ Confidence [0.6, 0.5)
 <StanisBaw_Ostrowski>	<livesIn>	<Poland>	0.5298245614035088	ManualEvaluation	
 Confidence [0.5, 0.3999999999999999)
 34432 predictions
-<Prince_Leopold,_Count_of_Syracuse>	<livesIn>	<Pisa>	0.4305555555555556	ManualEvaluation	
-<Charles_Grandison_Finney>	<livesIn>	<Oberlin,_Ohio>	0.4305555555555556	ManualEvaluation	
-<Jean_Boudet>	<livesIn>	<eské_Budjovice>	0.4305555555555556	ManualEvaluation	
-<Tevele_Schiff>	<livesIn>	<London>	0.4305555555555556	ManualEvaluation	
-<Doc_Blanchard>	<livesIn>	<Bulverde,_Texas>	0.4305555555555556	ManualEvaluation	
-<Prince_Ferdinand_Philippe,_Duke_of_Orléans>	<isMarriedTo>	<Prince_Ferdinand_Philippe,_Duke_of_Orléans>	0.40685286495824935	ManualEvaluation	
-<Ruby_Goldstein>	<livesIn>	<Miami_Beach,_Florida>	0.4305555555555556	ManualEvaluation	
-<Christopher_Greenup>	<livesIn>	<Kentucky>	0.4170854271356783	ManualEvaluation	
-<William_Ouseley>	<isMarriedTo>	<William_Ouseley>	0.40685286495824935	ManualEvaluation	
-<Pope_Celestine_II>	<livesIn>	<Rome>	0.4305555555555556	ManualEvaluation	
-<Gilbert_Moses>	<livesIn>	<New_York_City>	0.4305555555555556	ManualEvaluation	
-<George_Frederick_Bensell>	<livesIn>	<Philadelphia>	0.4305555555555556	ManualEvaluation	
-<Rosemary_Sutcliff>	<livesIn>	<Chichester>	0.4305555555555556	ManualEvaluation	
+<Prince_Leopold,_Count_of_Syracuse>	<livesIn>	<Pisa>	0.4305555555555556	ManualEvaluation	Unknown
+<Charles_Grandison_Finney>	<livesIn>	<Oberlin,_Ohio>	0.4305555555555556	ManualEvaluation	True
+<Jean_Boudet>	<livesIn>	<Moravské_Budějovice>	0.4305555555555556	ManualEvaluation	Unknown
+<Tevele_Schiff>	<livesIn>	<London>	0.4305555555555556	ManualEvaluation	True
+<Doc_Blanchard>	<livesIn>	<Bulverde,_Texas>	0.4305555555555556	ManualEvaluation	True
+<Prince_Ferdinand_Philippe,_Duke_of_Orléans>	<isMarriedTo>	<Prince_Ferdinand_Philippe,_Duke_of_Orléans>	0.40685286495824935	ManualEvaluation	False
+<Ruby_Goldstein>	<livesIn>	<Miami_Beach,_Florida>	0.4305555555555556	ManualEvaluation	True
+<Christopher_Greenup>	<livesIn>	<Kentucky>	0.4170854271356783	ManualEvaluation	True
+<William_Ouseley>	<isMarriedTo>	<William_Ouseley>	0.40685286495824935	ManualEvaluation	False
+<Pope_Celestine_II>	<livesIn>	<Rome>	0.4305555555555556	ManualEvaluation	True
+<Gilbert_Moses>	<livesIn>	<New_York_City>	0.4305555555555556	ManualEvaluation	True
+<George_Frederick_Bensell>	<livesIn>	<Philadelphia>	0.4305555555555556	ManualEvaluation	True
+<Rosemary_Sutcliff>	<livesIn>	<Chichester>	0.4305555555555556	ManualEvaluation	Unknown
 <Michael_Flanders>	<isMarriedTo>	<Claudia_Cockburn>	0.40685286495824935	TargetSource	True
-<Lucjan_{eligowski>	<livesIn>	<London>	0.4305555555555556	ManualEvaluation	
-<Leo_Klier>	<livesIn>	<Illinois>	0.4170854271356783	ManualEvaluation	
-<Margot_Grahame>	<livesIn>	<United_Kingdom>	0.4170854271356783	ManualEvaluation	
-<William_Randolph_Hearst>	<isMarriedTo>	<Rosemary_Davies>	0.40685286495824935	ManualEvaluation	
-<Daniel_Phineas_Woodbury>	<livesIn>	<Key_West,_Florida>	0.4305555555555556	ManualEvaluation	
-<Trebonianus_Gallus>	<livesIn>	<Terni>	0.4305555555555556	ManualEvaluation	
-<Eberhard_Wolfram>	<livesIn>	<Hamburg>	0.4305555555555556	ManualEvaluation	
-<Emperor_Shenzong_of_Song>	<isMarriedTo>	<Emperor_Shenzong_of_Song>	0.40685286495824935	ManualEvaluation	
-<Pinchas_Menachem_Alter>	<livesIn>	<Israel>	0.4170854271356783	ManualEvaluation	
-<Enid_Bennett>	<livesIn>	<Malibu,_California>	0.4305555555555556	ManualEvaluation	
-<Columbus_Delano>	<livesIn>	<Mount_Vernon,_Ohio>	0.4305555555555556	ManualEvaluation	
-<Mineichi_Koga>	<livesIn>	<Davao_City>	0.4305555555555556	ManualEvaluation	
-<Fred_Ascani>	<livesIn>	<Virginia>	0.4170854271356783	ManualEvaluation	
-<Alistair_Cooke>	<isMarriedTo>	<Alistair_Cooke>	0.40685286495824935	ManualEvaluation	
-<Rudolf_Stöger-Steiner_von_Steinstätten>	<livesIn>	<Graz>	0.4305555555555556	ManualEvaluation	
-<Amber_Moore>	<isMarriedTo>	<Amber_Moore>	0.40685286495824935	ManualEvaluation	
+<Lucjan_Żeligowski>	<livesIn>	<London>	0.4305555555555556	ManualEvaluation	False
+<Leo_Klier>	<livesIn>	<Illinois>	0.4170854271356783	ManualEvaluation	Unknown
+<Margot_Grahame>	<livesIn>	<United_Kingdom>	0.4170854271356783	ManualEvaluation	True
+<William_Randolph_Hearst>	<isMarriedTo>	<Rosemary_Davies>	0.40685286495824935	ManualEvaluation	False
+<Daniel_Phineas_Woodbury>	<livesIn>	<Key_West,_Florida>	0.4305555555555556	ManualEvaluation	Unknown
+<Trebonianus_Gallus>	<livesIn>	<Terni>	0.4305555555555556	ManualEvaluation	False
+<Eberhard_Wolfram>	<livesIn>	<Hamburg>	0.4305555555555556	ManualEvaluation	True
+<Emperor_Shenzong_of_Song>	<isMarriedTo>	<Emperor_Shenzong_of_Song>	0.40685286495824935	ManualEvaluation	False
+<Pinchas_Menachem_Alter>	<livesIn>	<Israel>	0.4170854271356783	ManualEvaluation	Unknown
+<Enid_Bennett>	<livesIn>	<Malibu,_California>	0.4305555555555556	ManualEvaluation	True
+<Columbus_Delano>	<livesIn>	<Mount_Vernon,_Ohio>	0.4305555555555556	ManualEvaluation	True
+<Mineichi_Koga>	<livesIn>	<Davao_City>	0.4305555555555556	ManualEvaluation	False
+<Fred_Ascani>	<livesIn>	<Virginia>	0.4170854271356783	ManualEvaluation	True
+<Alistair_Cooke>	<isMarriedTo>	<Alistair_Cooke>	0.40685286495824935	ManualEvaluation	False
+<Rudolf_Stöger-Steiner_von_Steinstätten>	<livesIn>	<Graz>	0.4305555555555556	ManualEvaluation	True
+<Amber_Moore>	<isMarriedTo>	<Amber_Moore>	0.40685286495824935	ManualEvaluation	False
+================================================================================================================
 <Jeanne_Carpenter>	<livesIn>	<Ventura_County,_California>	0.4170854271356783	ManualEvaluation	
 <Victor_Benjamin_Neuburg>	<livesIn>	<London>	0.4305555555555556	ManualEvaluation	
 <Paul_Cavanagh>	<livesIn>	<United_Kingdom>	0.4170854271356783	ManualEvaluation	

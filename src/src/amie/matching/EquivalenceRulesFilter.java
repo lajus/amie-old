@@ -50,7 +50,7 @@ public class EquivalenceRulesFilter {
 				
 				numerator = source.countPairs(var1, var2, candidate.getTriples());
 				denominator = source.countPairs(var1, var2, antecedent);
-				candidate.setCardinality((int)numerator);
+				candidate.setSupport((int)numerator);
 				candidate.setBodySize((int)denominator);
 				antecedent.add(existentialTriple);
 				improvedDenominator = source.countPairs(var1, var2, antecedent);
@@ -61,7 +61,7 @@ public class EquivalenceRulesFilter {
 				denominator = source.countDistinct(var, antecedent);
 				antecedent.add(existentialTriple);
 				improvedDenominator = source.countDistinct(var, antecedent);				
-				candidate.setCardinality((int)numerator);
+				candidate.setSupport((int)numerator);
 				candidate.setBodySize((int)denominator);
 				candidate.setBodyStarSize((int)improvedDenominator);
 			}
@@ -151,8 +151,8 @@ public class EquivalenceRulesFilter {
 					calculateMetrics(source, rules.get(j));
 					intersection = calculateIntersection(source, rules.get(i));
 					union = calculateUnion(source, rules.get(i));
-					double pcaConf1 = (double)rules.get(i).getCardinality() / (double)rules.get(i).getBodyStarSize();
-					double pcaConf2 = (double)rules.get(j).getCardinality() / (double)rules.get(j).getBodyStarSize();
+					double pcaConf1 = (double)rules.get(i).getSupport() / (double)rules.get(i).getBodyStarSize();
+					double pcaConf2 = (double)rules.get(j).getSupport() / (double)rules.get(j).getBodyStarSize();
 					System.out.println(FactDatabase.toString(rules.get(i).getHead()) + " <=> " + FactDatabase.toString(rules.get(i).getBody().get(0)) + "\t" + intersection  + "\t" + union + "\t" + pcaConf1 + "\t" + pcaConf2);
 					//System.out.println(FactDatabase.toString(rules.get(i).getHead()) + " <=> " + FactDatabase.toString(rules.get(i).getBody().get(0)));					
 					break;

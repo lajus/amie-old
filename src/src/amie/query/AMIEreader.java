@@ -63,7 +63,7 @@ public class AMIEreader {
 	    			variables.add(triple[2]);
 	    	}
 	      
-	    	query.setCardinality(0);
+	    	query.setSupport(0);
 	    	query.setTriples(triples);
 	    	query.setFunctionalVariable(query.getHead()[0]);
 	    	result.add(query);

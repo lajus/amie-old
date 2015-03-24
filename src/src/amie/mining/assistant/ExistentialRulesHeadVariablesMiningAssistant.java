@@ -30,7 +30,7 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 		int freeVarPos, countVarPos;
 				
 		if(antecedent.isEmpty()){
-			candidate.setConfidence(1.0);
+			candidate.setStdConfidence(1.0);
 			candidate.setPcaConfidence(1.0);
 		}else{
 			//Confidence
@@ -43,15 +43,15 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 				} else {					
 					denominator = (double)source.countDistinct(candidate.getFunctionalVariable(), antecedent);
 				}				
-				confidence = (double)candidate.getCardinality() / denominator;
-				candidate.setConfidence(confidence);
+				confidence = (double)candidate.getSupport() / denominator;
+				candidate.setStdConfidence(confidence);
 				candidate.setBodySize((long)denominator);
 			}catch(UnsupportedOperationException e){
 				
 			}
 			
 			// In this case, still report the PCA.
-			if (candidate.isSafe()) {				
+			if (candidate.isClosed()) {				
 				countVarPos = candidate.getFunctionalVariablePosition();
 				if(FactDatabase.numVariables(existentialTriple) == 1){
 					freeVarPos = FactDatabase.firstVariablePos(existentialTriple) == 0 ? 2 : 0;
@@ -84,7 +84,7 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 							improvedDenominator = (double)source.countDistinct(candidate.getFunctionalVariable(), antecedent);
 						}
 						
-						improvedConfidence = (double)candidate.getCardinality() / improvedDenominator;					
+						improvedConfidence = (double)candidate.getSupport() / improvedDenominator;					
 					}
 					
 					candidate.setPcaConfidence(improvedConfidence);	
@@ -109,13 +109,13 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 		
 		calculateConfidenceMetrics(candidate);
 		
-		if (candidate.getConfidence() >= minStdConfidence && candidate.getPcaConfidence() >= minPcaConfidence) {
+		if (candidate.getStdConfidence() >= minStdConfidence && candidate.getPcaConfidence() >= minPcaConfidence) {
 			//Now check the confidence with respect to its ancestors
 			List<Query> ancestors = candidate.getAncestors();			
 			for (int i = ancestors.size() - 2; i >= 0; --i) {
-				if (ancestors.get(i).isSafe() 
+				if (ancestors.get(i).isClosed() 
 						&& 
-						(candidate.getConfidence() <= ancestors.get(i).getConfidence() || candidate.getPcaConfidence() <= ancestors.get(i).getPcaConfidence())) {
+						(candidate.getStdConfidence() <= ancestors.get(i).getStdConfidence() || candidate.getPcaConfidence() <= ancestors.get(i).getPcaConfidence())) {
 					addIt = false;
 					break;
 				}

@@ -24,7 +24,7 @@ public class GainCalculator {
 				/*if (rule.containsRelationTimes(typeStr) < 2 || !rule.containsRelation(ByteString.of("<linksTo>"))) {
 					continue;
 				}*/
-				rule.setCardinality(Long.parseLong(line.get(5)));
+				rule.setSupport(Long.parseLong(line.get(5)));
 				rule.setPcaConfidence(Double.parseDouble(line.get(4)));
 				rules.add(rule);
 			}
@@ -50,13 +50,13 @@ public class GainCalculator {
 					// Bingo. I found the general version
 					++matched;
 					double deltaConf = rule.getPcaConfidence() - generalRule.getPcaConfidence();
-					gain2 += rule.getCardinality() * deltaConf;
-					totalSupport += rule.getCardinality(); 
+					gain2 += rule.getSupport() * deltaConf;
+					totalSupport += rule.getSupport(); 
 					confidenceGain += deltaConf;
 					if (deltaConf > maxConfDelta) {
 						maxConfDelta = deltaConf;
 					}
-					double deltaSupp = rule.getCardinality() - generalRule.getCardinality();					
+					double deltaSupp = rule.getSupport() - generalRule.getSupport();					
 					if (deltaSupp > 0) {
 						System.out.println("Error");
 						System.out.println(generalRule);

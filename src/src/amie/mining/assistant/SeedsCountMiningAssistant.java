@@ -49,7 +49,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 				Query candidate = query.unify(danglingPosition, constant, cardinality);
 				if(candidate.getRedundantAtoms().isEmpty()){
 					candidate.setHeadCoverage((double)cardinality / headCardinalities.get(candidate.getHeadRelation()));
-					candidate.setSupport((double)cardinality / (double)getTotalCount(candidate));
+					candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
 					candidate.setParent(originalQuery);					
 					output.add(candidate);
 				}
@@ -78,7 +78,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 		List<ByteString> targetVariables = null;		
 		List<ByteString> openVariables = query.getOpenVariables();
 		
-		if(query.isSafe()){
+		if(query.isClosed()){
 			sourceVariables = allVariables;
 			targetVariables = allVariables;
 		}else{
@@ -127,7 +127,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 								Query candidate = query.closeCircle(newEdge, cardinality);
 								if(!candidate.isRedundantRecursive()){
 									candidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate.getHeadRelation()));
-									candidate.setSupport((double)cardinality / (double)getTotalCount(candidate));
+									candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
 									candidate.setParent(query);
 									output.add(candidate);
 								}
@@ -172,7 +172,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 				int countVarPos = countAlwaysOnSubject? 0 : findCountingVariable(newEdge);
 				query.setFunctionalVariable(newEdge[countVarPos]);
 				int cardinality = seedsCardinality(query);
-				query.setCardinality(cardinality);
+				query.setSupport(cardinality);
 				if(cardinality >= minCardinality){
 					ByteString[] succedent = newEdge.clone();					
 					Query candidate = new Query(succedent, cardinality);
@@ -201,7 +201,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 			List<ByteString> joinVariables = null;
 			
 			//Then do it for all values
-			if(query.isSafe()){
+			if(query.isClosed()){
 				joinVariables = query.getVariables();
 			}else{
 				joinVariables = query.getOpenVariables();
@@ -237,8 +237,8 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 									continue;
 							}
 							
-							candidate.setHeadCoverage((double)candidate.getCardinality() / headCardinalities.get(candidate.getHeadRelation()));
-							candidate.setSupport((double)candidate.getCardinality() / (double)getTotalCount(candidate));
+							candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
+							candidate.setSupportRatio((double)candidate.getSupport() / (double)getTotalCount(candidate));
 							candidate.setParent(query);							
 							if(allowConstants){
 								getInstantiatedEdges(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minCardinality, output);
@@ -280,14 +280,14 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 		existentialTriple[freeVarPos] = ByteString.of("?x");
 				
 		if(antecedent.isEmpty()){
-			candidate.setConfidence(1.0);
+			candidate.setStdConfidence(1.0);
 			candidate.setPcaConfidence(1.0);
 		}else{
 			//Confidence
 			try{
 				denominator = (double)source.countDistinct(candidate.getFunctionalVariable(), antecedent);
-				stdConfidence = (double)candidate.getCardinality() / denominator;
-				candidate.setConfidence(stdConfidence);
+				stdConfidence = (double)candidate.getSupport() / denominator;
+				candidate.setStdConfidence(stdConfidence);
 				candidate.setBodySize((int)denominator);
 			}catch(UnsupportedOperationException e){
 				
@@ -297,7 +297,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 			antecedent.add(existentialTriple);
 			try{
 				improvedDenominator = (double)source.countDistinct(candidate.getFunctionalVariable(), antecedent);
-				pcaConfidence = (double)candidate.getCardinality() / improvedDenominator;
+				pcaConfidence = (double)candidate.getSupport() / improvedDenominator;
 				candidate.setPcaConfidence(pcaConfidence);
 			}catch(UnsupportedOperationException e){
 				

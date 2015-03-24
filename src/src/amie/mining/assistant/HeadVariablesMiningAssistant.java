@@ -22,7 +22,7 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 	
 	public HeadVariablesMiningAssistant(FactDatabase dataSource) {
 		super(dataSource);
-		hardQueries = Collections.synchronizedMap(new HashMap<Pair<ByteString, Boolean>, Long>());
+		this.hardQueries = Collections.synchronizedMap(new HashMap<Pair<ByteString, Boolean>, Long>());
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -42,22 +42,22 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 		for(ByteString relation: relations){
 			newEdge[1] = relation;
 			
-			int countVarPos = countAlwaysOnSubject? 0 : findCountingVariable(newEdge);
+			int countVarPos = this.countAlwaysOnSubject? 0 : findCountingVariable(newEdge);
 			ByteString countingVariable = newEdge[countVarPos];
 			List<ByteString[]> emptyList = Collections.emptyList();
-			long cardinality = source.countProjection(query.getHead(), emptyList);
+			long cardinality = this.source.countProjection(query.getHead(), emptyList);
 			
 			ByteString[] succedent = newEdge.clone();
 			Query candidate = new Query(succedent, cardinality);
 			candidate.setFunctionalVariable(countingVariable);
 			registerHeadRelation(candidate);
 			ArrayList<Query> tmpOutput = new ArrayList<>();
-			if(allowConstants || enforceConstants) {
+			if(canAddInstantiatedAtom()) {
 				getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, tmpOutput);			
 				output.addAll(tmpOutput);
 			}
 			
-			if (!enforceConstants) {
+			if (!this.enforceConstants) {
 				output.add(candidate);
 			}
 		}
@@ -74,7 +74,7 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 	 * @return
 	 */
 	public void getCloseCircleEdges(Query query, int minCardinality, Collection<Query> output) {
-		if (enforceConstants) {
+		if (this.enforceConstants) {
 			return;
 		}
 		
@@ -95,13 +95,19 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 			return;
 		}
 		
-		if(query.isSafe()){
+		if(query.isClosed()){
 			sourceVariables = allVariables;
 			targetVariables = allVariables;
 		}else{
 			sourceVariables = openVariables; 
 			if(sourceVariables.size() > 1){
-				//Give preference to the non-closed variables
+				if (this.exploitMaxLengthOption) {
+					//Give preference to the non-closed variables
+					if (sourceVariables.size() > 2 
+							&& query.getLength() == this.maxDepth - 1) {
+						return;
+					}
+				}
 				targetVariables = sourceVariables;
 			}else{
 				targetVariables = allVariables;
@@ -129,7 +135,7 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 						
 						query.getTriples().add(newEdge);
 						IntHashMap<ByteString> promisingRelations = null;
-						if (this.enabledFunctionalityHeuristic) {
+						if (this.enabledFunctionalityHeuristic && this.enableQueryRewriting) {
 							Query rewrittenQuery = rewriteProjectionQuery(query, nPatterns, closeCirclePosition);
 							if(rewrittenQuery == null){
 								long t1 = System.currentTimeMillis();
@@ -145,35 +151,39 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 									System.out.println("countProjectionBindings on rewritten query var=" + newEdge[1] + " "  + rewrittenQuery + " has taken " + (t2 - t1) + " ms");						
 							}
 						} else {
-							promisingRelations = source.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[1]);
+							promisingRelations = this.source.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[1]);
 						}
 						query.getTriples().remove(nPatterns);
-						
-						for(ByteString relation: promisingRelations){
-							// Language bias test
-							if (query.cardinalityForRelation(relation) >= recursivityLimit) {
-								continue;
-							}
-							
-							if (bodyExcludedRelations != null && bodyExcludedRelations.contains(relation)) {
-								continue;
-							}
-							
-							if (bodyTargetRelations != null && !bodyTargetRelations.contains(relation)) {
-								continue;
-							}
-							
-							//Here we still have to make a redundancy check
+						List<ByteString> listOfPromisingRelations = promisingRelations.decreasingKeys();
+						for(ByteString relation: listOfPromisingRelations){
 							int cardinality = promisingRelations.get(relation);
+							if (cardinality < minCardinality) {
+								break;
+							}
+							
+							// Language bias test
+							if (query.cardinalityForRelation(relation) >= this.recursivityLimit) {
+								continue;
+							}
+							
+							if (this.bodyExcludedRelations != null 
+									&& this.bodyExcludedRelations.contains(relation)) {
+								continue;
+							}
+							
+							if (this.bodyTargetRelations != null 
+									&& !this.bodyTargetRelations.contains(relation)) {
+								continue;
+							}
+							
+							//Here we still have to make a redundancy check							
 							newEdge[1] = relation;
-							if (cardinality >= minCardinality) {
-								Query candidate = query.closeCircle(newEdge, cardinality);
-								if(!candidate.isRedundantRecursive()){
-									candidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate.getHeadRelation()));
-									candidate.setSupport((double)cardinality / (double)source.size());
-									candidate.setParent(query);
-									output.add(candidate);
-								}
+							Query candidate = query.closeCircle(newEdge, cardinality);
+							if(!candidate.isRedundantRecursive()){
+								candidate.setHeadCoverage((double)cardinality / (double)this.headCardinalities.get(candidate.getHeadRelation()));
+								candidate.setSupportRatio((double)cardinality / (double)this.source.size());
+								candidate.setParent(query);
+								output.add(candidate);
 							}
 						}
 					}
@@ -198,14 +208,15 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 			//Initial case
 			query.getTriples().add(newEdge);
 			List<ByteString[]> emptyList = Collections.emptyList();
-			IntHashMap<ByteString> relations = source.countProjectionBindings(query.getHead(), emptyList, newEdge[1]);
+			IntHashMap<ByteString> relations = this.source.countProjectionBindings(query.getHead(), emptyList, newEdge[1]);
 			for(ByteString relation: relations){
 				// Language bias test
-				if (query.cardinalityForRelation(relation) >= recursivityLimit) {
+				if (query.cardinalityForRelation(relation) >= this.recursivityLimit) {
 					continue;
 				}
 				
-				if(headExcludedRelations != null && headExcludedRelations.contains(relation)) {
+				if (this.headExcludedRelations != null 
+						&& this.headExcludedRelations.contains(relation)) {
 					continue;
 				}
 				
@@ -213,15 +224,18 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 				if(cardinality >= minCardinality){
 					ByteString[] succedent = newEdge.clone();
 					succedent[1] = relation;
-					int countVarPos = countAlwaysOnSubject? 0 : findCountingVariable(succedent);
+					int countVarPos = this.countAlwaysOnSubject? 0 : findCountingVariable(succedent);
 					Query candidate = new Query(succedent, cardinality);
 					candidate.setFunctionalVariable(succedent[countVarPos]);
 					registerHeadRelation(candidate);
-					if(allowConstants || enforceConstants){
-						getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, output);
+					if(canAddInstantiatedAtom()){
+						getInstantiatedEdges(candidate, null, 
+								candidate.getLastTriplePattern(), 
+								countVarPos == 0 ? 2 : 0, 
+										minCardinality, output);
 					}
 					
-					if (!enforceConstants) {
+					if (!this.enforceConstants) {
 						output.add(candidate);
 					}
 				}
@@ -232,10 +246,13 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 				return;
 						
 			//General case
-			if(query.getLength() == maxDepth - 1) {
-				if(!query.getOpenVariables().isEmpty() 
-						&& !allowConstants && !enforceConstants) {
-					return;
+			if(query.getLength() == this.maxDepth - 1) {
+				if (this.exploitMaxLengthOption) {
+					if(!query.getOpenVariables().isEmpty() 
+							&& !this.allowConstants 
+							&& !this.enforceConstants) {
+						return;
+					}
 				}
 			}
 			
@@ -243,11 +260,19 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 		}
 	}
 	
+	/**
+	 * It adds to the output all the rules resulting from adding dangling atom instantiation of "edge"
+	 * to the query.
+	 * @param query
+	 * @param edge
+	 * @param minCardinality Minimum support threshold.
+	 * @param output
+	 */
 	protected void addDanglingEdge(Query query, ByteString[] edge, int minCardinality, Collection<Query> output) {
 		List<ByteString> joinVariables = null;
 		
 		//Then do it for all values
-		if(query.isSafe()) {				
+		if(query.isClosed()) {				
 			joinVariables = query.getVariables();
 		} else {
 			joinVariables = query.getOpenVariables();
@@ -262,18 +287,21 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 				newEdge[joinPosition] = joinVariable;
 				query.getTriples().add(newEdge);
 				IntHashMap<ByteString> promisingRelations = null;
-
-				Query rewrittenQuery = rewriteProjectionQuery(query, nPatterns, joinPosition == 0 ? 0 : 2);
+				Query rewrittenQuery = null;
+				if (this.enableQueryRewriting) {
+					rewrittenQuery = rewriteProjectionQuery(query, nPatterns, joinPosition == 0 ? 0 : 2);	
+				}
+				
 				if(rewrittenQuery == null){
 					long t1 = System.currentTimeMillis();
-					promisingRelations = source.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[1]);
+					promisingRelations = this.source.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[1]);
 					long t2 = System.currentTimeMillis();
 					if((t2 - t1) > 20000 && !silent) {
 						System.out.println("countProjectionBindings var=" + newEdge[1] + " "  + query + " has taken " + (t2 - t1) + " ms");
 					}
 				}else{
 					long t1 = System.currentTimeMillis();
-					promisingRelations = source.countProjectionBindings(rewrittenQuery.getHead(), rewrittenQuery.getAntecedent(), newEdge[1]);
+					promisingRelations = this.source.countProjectionBindings(rewrittenQuery.getHead(), rewrittenQuery.getAntecedent(), newEdge[1]);
 					long t2 = System.currentTimeMillis();
 					if((t2 - t1) > 20000 && !silent)
 					System.out.println("countProjectionBindings on rewritten query var=" + newEdge[1] + " "  + rewrittenQuery + " has taken " + (t2 - t1) + " ms");						
@@ -282,7 +310,16 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 				query.getTriples().remove(nPatterns);					
 				int danglingPosition = (joinPosition == 0 ? 2 : 0);
 				boolean boundHead = !FactDatabase.isVariable(query.getTriples().get(0)[danglingPosition]);
-				for(ByteString relation: promisingRelations){
+				List<ByteString> listOfPromisingRelations = promisingRelations.decreasingKeys();				
+				// The relations are sorted by support, therefore we can stop once we have reached
+				// the minimum support.
+				for(ByteString relation: listOfPromisingRelations){
+					int cardinality = promisingRelations.get(relation);
+					
+					if (cardinality < minCardinality) {
+						break;
+					}			
+					
 					// Language bias test
 					if (query.cardinalityForRelation(relation) >= recursivityLimit) {
 						continue;
@@ -298,97 +335,117 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 						continue;
 					}
 					
-					//Here we still have to make a redundancy check						
-					int cardinality = promisingRelations.get(relation);
-					if(cardinality >= minCardinality){
-						newEdge[1] = relation;
-						//Before adding the edge, verify whether it leads to the hard case
-						if(containsHardCase(query, newEdge))
+					newEdge[1] = relation;
+					//Before adding the edge, verify whether it leads to the hard case
+					if(containsHardCase(query, newEdge))
+						continue;
+					
+					Query candidate = query.addEdge(newEdge, cardinality, newEdge[joinPosition], newEdge[danglingPosition]);
+					List<ByteString[]> recursiveAtoms = candidate.getRedundantAtoms();
+					if(!recursiveAtoms.isEmpty()){
+						if(canAddInstantiatedAtom()){
+							for(ByteString[] triple: recursiveAtoms){										
+								if(!FactDatabase.isVariable(triple[danglingPosition])){
+									candidate.getTriples().add(
+											FactDatabase.triple(newEdge[danglingPosition], 
+											FactDatabase.DIFFERENTFROMbs, 
+											triple[danglingPosition]));
+								}
+							}
+							long finalCardinality;
+							if(boundHead){
+								//Single variable in head
+								finalCardinality = this.source.countDistinct(candidate.getFunctionalVariable(), candidate.getTriples());
+							}else{
+								//Still pending
+								finalCardinality = this.source.countProjection(candidate.getHead(), candidate.getAntecedent());
+							}
+							
+							if(finalCardinality < minCardinality)
+								continue;
+							
+							candidate.setSupport(finalCardinality);
+						}
+					}
+					
+					candidate.setHeadCoverage((double)candidate.getSupport() / this.headCardinalities.get(candidate.getHeadRelation()));
+					candidate.setSupportRatio((double)candidate.getSupport() / (double)this.source.size());
+					candidate.setParent(query);		
+					if(canAddInstantiatedAtom()) {
+						getInstantiatedEdges(candidate, candidate, nPatterns, danglingPosition, minCardinality, output);
+					}
+					
+					if (!this.enforceConstants) {
+						// If this rule will not be refined anyway.
+						if (candidate.getLength() == this.maxDepth 
+								&& !candidate.isClosed()) {
 							continue;
-						
-						Query candidate = query.addEdge(newEdge, cardinality, newEdge[joinPosition], newEdge[danglingPosition]);
-						List<ByteString[]> recursiveAtoms = candidate.getRedundantAtoms();
-						if(!recursiveAtoms.isEmpty()){
-							if(allowConstants || enforceConstants){
-								for(ByteString[] triple: recursiveAtoms){										
-									if(!FactDatabase.isVariable(triple[danglingPosition])){
-										candidate.getTriples().add(
-												FactDatabase.triple(newEdge[danglingPosition], 
-												FactDatabase.DIFFERENTFROMbs, 
-												triple[danglingPosition]));
-									}
-								}
-								long finalCardinality;
-								if(boundHead){
-									//Single variable in head
-									finalCardinality = source.countDistinct(candidate.getFunctionalVariable(), candidate.getTriples());
-								}else{
-									//Still pending
-									finalCardinality = source.countProjection(candidate.getHead(), candidate.getAntecedent());
-								}
-								
-								if(finalCardinality < minCardinality)
-									continue;
-								
-								candidate.setCardinality(finalCardinality);
-							}
 						}
-						
-						candidate.setHeadCoverage((double)candidate.getCardinality() / headCardinalities.get(candidate.getHeadRelation()));
-						candidate.setSupport((double)candidate.getCardinality() / (double)source.size());
-						candidate.setParent(query);		
-						if(allowConstants || enforceConstants) {
-							getInstantiatedEdges(candidate, candidate, nPatterns, danglingPosition, minCardinality, output);
+						// If the assistant has been told to avoid atoms of the form type(x, y)
+						if (relation.equals(this.typeString) 
+								&& this.avoidUnboundTypeAtoms) {
+							continue;
 						}
-						
-						if (!enforceConstants) {
-							// If this rule will not be refined anyway.
-							if (candidate.getLength() == maxDepth 
-									&& !candidate.isSafe()) {
-								continue;
-							}
-							// If the assistant has been told to avoid atoms of the form type(x, y)
-							if (relation.equals(typeString) && avoidUnboundTypeAtoms) {
-								continue;
-							}
-							output.add(candidate);
-						}
+						output.add(candidate);
 					}
 				}
 			}
 		}
 	}
 
+	/**
+	 * It determines whether the rule contains an expensive query patterns of the forms
+	 * #(x, y) : r(z, x) r(z, y) or #(x, y) : r(y, z) r(x, z). Such query patterns will be approximated
+	 * by AMIE.
+	 * 
+	 * @param query
+	 * @param newEdge
+	 * @return
+	 */
 	protected boolean containsHardCase(Query query, ByteString[] newEdge) {
 		// TODO Auto-generated method stub
-		int[] hardnessInfo = source.identifyHardQueryTypeI(query.getTriples());
+		int[] hardnessInfo = this.source.identifyHardQueryTypeI(query.getTriples());
 		if(hardnessInfo == null) return false;
 		ByteString[] hardAtom1 = query.getTriples().get(hardnessInfo[2]);
 		ByteString[] hardAtom2 = query.getTriples().get(hardnessInfo[3]);
 		List<ByteString[]> subquery = new ArrayList<ByteString[]>(2);
 		subquery.add(newEdge);
 		subquery.add(hardAtom1);
-		if(source.identifyHardQueryTypeI(subquery) != null) return true;
+		if (this.source.identifyHardQueryTypeI(subquery) != null) return true;
 		subquery.set(1, hardAtom2);
-		if(source.identifyHardQueryTypeI(subquery) != null) return true;		
+		if (this.source.identifyHardQueryTypeI(subquery) != null) return true;		
 		return false;
 	}
 
+	/**
+	 * Application of the "Add instantiated atom" operator. It takes a rule of the form
+	 * r(x, w) ^ ..... => rh(x, y), where r(x, w) is recently added atom and adds to the
+	 * output all the derived rules where "w" is bound to a constant that keeps the whole
+	 * pattern above the minCardinality threshold.
+	 * @param query
+	 * @param originalQuery
+	 * @param bindingTriplePos
+	 * @param danglingPosition
+	 * @param minCardinality
+	 * @param output
+	 */
 	protected void getInstantiatedEdges(Query query, Query originalQuery, int bindingTriplePos, int danglingPosition, int minCardinality, Collection<Query> output) {
 		ByteString[] danglingEdge = query.getTriples().get(bindingTriplePos);
 		Query rewrittenQuery = null;
-		rewrittenQuery = rewriteProjectionQuery(query, bindingTriplePos, danglingPosition == 0 ? 2 : 0);
+		if (this.enableQueryRewriting) {
+			rewrittenQuery = rewriteProjectionQuery(query, bindingTriplePos, danglingPosition == 0 ? 2 : 0);
+		}
 		
 		IntHashMap<ByteString> constants = null;
 		if(rewrittenQuery != null){
 			long t1 = System.currentTimeMillis();		
-			constants = source.countProjectionBindings(rewrittenQuery.getHead(), rewrittenQuery.getAntecedent(), danglingEdge[danglingPosition]);
+			constants = this.source.countProjectionBindings(rewrittenQuery.getHead(), rewrittenQuery.getAntecedent(), danglingEdge[danglingPosition]);
 			long t2 = System.currentTimeMillis();
 			if((t2 - t1) > 20000 && !silent)
 				System.out.println("countProjectionBindings var=" + danglingEdge[danglingPosition] + " in " + query + " (rewritten to " + rewrittenQuery + ") has taken " + (t2 - t1) + " ms");						
 		}else{
 			long t1 = System.currentTimeMillis();		
-			constants = source.countProjectionBindings(query.getHead(), query.getAntecedent(), danglingEdge[danglingPosition]);
+			constants = this.source.countProjectionBindings(query.getHead(), query.getAntecedent(), danglingEdge[danglingPosition]);
 			long t2 = System.currentTimeMillis();
 			if((t2 - t1) > 20000 && !silent)
 				System.out.println("countProjectionBindings var=" + danglingEdge[danglingPosition] + " in " + query + " has taken " + (t2 - t1) + " ms");			
@@ -404,13 +461,13 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 				
 				Query candidate = query.unify(bindingTriplePos, danglingPosition, constant, cardinality);				
 				//If the new edge does not contribute with anything
-				long cardLastEdge = source.countDistinct(targetEdge[joinPosition], candidate.getTriples());
+				long cardLastEdge = this.source.countDistinct(targetEdge[joinPosition], candidate.getTriples());
 				if(cardLastEdge < 2)
 					continue;
 				
 				if(candidate.getRedundantAtoms().isEmpty()){
 					candidate.setHeadCoverage((double)cardinality / headCardinalities.get(candidate.getHeadRelation()));
-					candidate.setSupport((double)cardinality / (double)source.size());
+					candidate.setSupportRatio((double)cardinality / (double)source.size());
 					candidate.setParent(originalQuery);
 					output.add(candidate);
 				}
@@ -418,8 +475,20 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 		}
 	}
 	
+	/**
+	 * It identifies redundant patterns in queries and rewrites them accordingly 
+	 * so that they become less expensive to evaluate. This function targets exclusively queries
+	 * of the form: 
+	 * r(x, z) r(x, w) => r'(x, y)
+	 * where the newly added atom r(x, z) does not really make the query more selective and it is
+	 * therefore redundant.
+	 * @param query
+	 * @param bindingTriplePos
+	 * @param bindingVarPos
+	 * @return
+	 */
 	protected Query rewriteProjectionQuery(Query query, int bindingTriplePos, int bindingVarPos) {
-		int hardnessInfo[] = source.identifyHardQueryTypeI(query.getTriples());
+		int hardnessInfo[] = this.source.identifyHardQueryTypeI(query.getTriples());
 		ByteString[] targetTriple = query.getTriples().get(bindingTriplePos);
 		int nonFreshVarPos = bindingVarPos;
 		ByteString[] toRemove = null;
@@ -469,10 +538,10 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 
 	protected long computeAntecedentCount(ByteString var1, ByteString var2, Query query){
 		long t1 = System.currentTimeMillis();		
-		long result = source.countPairs(var1, var2, query.getAntecedent());
+		long result = this.source.countPairs(var1, var2, query.getAntecedent());
 		long t2 = System.currentTimeMillis();	
 		query.setPcaConfidenceRunningTime(t2 - t1);
-		if((t2 - t1) > 20000 && !silent)
+		if((t2 - t1) > 20000 && !this.silent)
 			System.out.println("countPairs vars " + var1 + ", " + var2 + " in " + FactDatabase.toString(query.getAntecedent()) + " has taken " + (t2 - t1) + " ms");		
 		
 		return result;
@@ -481,10 +550,10 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 	protected long computePCAAntecedentCount(ByteString var1, ByteString var2, Query query, List<ByteString[]> antecedent, ByteString[] existentialTriple, int nonExistentialPosition) {		
 		antecedent.add(existentialTriple);
 		long t1 = System.currentTimeMillis();
-		long result = source.countPairs(var1, var2, antecedent);
+		long result = this.source.countPairs(var1, var2, antecedent);
 		long t2 = System.currentTimeMillis();
 		query.setConfidenceRunningTime(t2 - t1);
-		if((t2 - t1) > 20000 && !silent)
+		if((t2 - t1) > 20000 && !this.silent)
 			System.out.println("countPairs vars " + var1 + ", " + var2 + " in " + FactDatabase.toString(antecedent) + " has taken " + (t2 - t1) + " ms");		
 		
 		return result;		
@@ -492,23 +561,23 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 
 	public long computeCardinality(Query rule) {
 		if (rule.isEmpty()) {
-			rule.setCardinality(0l);
+			rule.setSupport(0l);
 			rule.setHeadCoverage(0.0);
-			rule.setSupport(0.0);
+			rule.setSupportRatio(0.0);
 		} else {
 			ByteString[] head = rule.getHead();
 			if (FactDatabase.numVariables(head) == 2) {
-				rule.setCardinality(source.countPairs(head[0], head[2], rule.getTriples()));
+				rule.setSupport(this.source.countPairs(head[0], head[2], rule.getTriples()));
 			} else {
-				rule.setCardinality(source.countDistinct(rule.getFunctionalVariable(), rule.getTriples()));
+				rule.setSupport(this.source.countDistinct(rule.getFunctionalVariable(), rule.getTriples()));
 			}
-			rule.setSupport((double) rule.getCardinality() / source.size());
-			Long relationSize = headCardinalities.get(head[1].toString());
+			rule.setSupportRatio((double) rule.getSupport() / this.source.size());
+			Long relationSize = this.headCardinalities.get(head[1].toString());
 			if (relationSize != null) {
-				rule.setHeadCoverage(rule.getCardinality() / relationSize.doubleValue());
+				rule.setHeadCoverage(rule.getSupport() / relationSize.doubleValue());
 			}
 		}
-		return rule.getCardinality();
+		return rule.getSupport();
 	}
 	
 	@Override
@@ -543,11 +612,11 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 			antecedent.add(existentialTriple);
 			try{
 				if (noOfHeadVars == 1) {
-					pcaDenominator = (double)source.countDistinct(rule.getFunctionalVariable(), antecedent);
+					pcaDenominator = (double)this.source.countDistinct(rule.getFunctionalVariable(), antecedent);
 				} else {
-					pcaDenominator = (double)source.countPairs(succedent[0], succedent[2], antecedent);					
+					pcaDenominator = (double)this.source.countPairs(succedent[0], succedent[2], antecedent);					
 				}
-				pcaConfidence = (double)rule.getCardinality() / pcaDenominator;
+				pcaConfidence = (double)rule.getSupport() / pcaDenominator;
 				rule.setPcaConfidence(pcaConfidence);
 				rule.setBodyStarSize((long)pcaDenominator);
 			}catch(UnsupportedOperationException e){
@@ -561,7 +630,7 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 	@Override
 	public double computeStandardConfidence(Query candidate) {
 		if (candidate.isEmpty()) {
-			return candidate.getConfidence();
+			return candidate.getStdConfidence();
 		}
 		// TODO Auto-generated method stub
 		List<ByteString[]> antecedent = new ArrayList<ByteString[]>();
@@ -571,7 +640,7 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 		ByteString[] head = candidate.getHead();
 		
 		if(antecedent.isEmpty()){
-			candidate.setConfidence(1.0);
+			candidate.setStdConfidence(1.0);
 		}else{
 			//Confidence
 			try{
@@ -581,19 +650,20 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 					var2 = head[FactDatabase.secondVariablePos(head)];
 					denominator = (double)computeAntecedentCount(var1, var2, candidate);
 				} else {					
-					denominator = (double)source.countDistinct(candidate.getFunctionalVariable(), antecedent);
+					denominator = (double)this.source.countDistinct(candidate.getFunctionalVariable(), antecedent);
 				}				
-				confidence = (double)candidate.getCardinality() / denominator;
-				candidate.setConfidence(confidence);
+				confidence = (double)candidate.getSupport() / denominator;
+				candidate.setStdConfidence(confidence);
 				candidate.setBodySize((long)denominator);
 			}catch(UnsupportedOperationException e){
 				
 			}
 		}
 		
-		return candidate.getConfidence();
+		return candidate.getStdConfidence();
 	}
-
+	
+	@Override
 	public void calculateConfidenceMetrics(Query candidate) {
 		computeStandardConfidence(candidate);
 		computePCAConfidence(candidate);

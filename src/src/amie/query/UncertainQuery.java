@@ -54,11 +54,11 @@ public class UncertainQuery extends Query {
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append(getRuleString());
 		
-		strBuilder.append("\t" + df.format(getSupport()) );
+		strBuilder.append("\t" + df.format(getSupportRatio()) );
 		strBuilder.append("\t" + df.format(getHeadCoverage()));
-		strBuilder.append("\t" + df.format(getConfidence()));
+		strBuilder.append("\t" + df.format(getStdConfidence()));
 		strBuilder.append("\t" + df.format(getPcaConfidence()));
-		strBuilder.append("\t" + getCardinality());		
+		strBuilder.append("\t" + getSupport());		
 		strBuilder.append("\t" + getBodySize());
 		strBuilder.append("\t" + getBodyStarSize());
 		strBuilder.append("\t" + getFunctionalVariable());
@@ -71,9 +71,9 @@ public class UncertainQuery extends Query {
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append(getRuleString());
 		
-		strBuilder.append("\t" + df.format(getSupport()) );
+		strBuilder.append("\t" + df.format(getSupportRatio()) );
 		strBuilder.append("\t" + df.format(getHeadCoverage()));
-		strBuilder.append("\t" + df.format(getConfidence()));
+		strBuilder.append("\t" + df.format(getStdConfidence()));
 		strBuilder.append("\t" + df.format(getPcaConfidence()));
 		strBuilder.append("\t" + df.format(getUncertainCardinality()));		
 		strBuilder.append("\t" + df.format(getUncertainBodySize()));

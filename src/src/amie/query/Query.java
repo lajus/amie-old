@@ -30,18 +30,7 @@ public class Query{
 	/**
 	 * The triple patterns
 	 */
-	List<ByteString[]> triples;
-	
-	/**
-	 * List of variables that require to be bound
-	 */
-	List<ByteString> openVariables;
-	
-	/**
-	 * List of all variables occurring in the query
-	 */
-	List<ByteString> variables;
-	
+	List<ByteString[]> triples;	
 
 	/**
 	 * Support w.r.t some set of entities from a relation
@@ -51,12 +40,12 @@ public class Query{
 	/**
 	 * Support w.r.t the set of all subjects in the database
 	 */
-	double support;
+	double supportRatio;
 	
 	/**
 	 * Standard definition of confidence
 	 */
-	double confidence;
+	double stdConfidence;
 	
 	/**
 	 * Improved definition of confidence which includes an existential version of the head
@@ -67,7 +56,7 @@ public class Query{
 	/**
 	 * Absolute number of bindings for the projection variable of the query
 	 */
-	long cardinality;
+	long support;
 	
 	/**
 	 * In AMIE the cardinality may change when the rule is enhanced with "special" atoms
@@ -76,7 +65,7 @@ public class Query{
 	 * computed cardinality of the query. Unlike the real cardinality, this values remains
 	 * constant since the creation of the object.
 	 */
-	long hashCardinality;
+	long hashSupport;
 	
 	/**
 	 * String unique key for the head of the query
@@ -86,7 +75,7 @@ public class Query{
 	/**
 	 * Parent query
 	 */
-	private Query parent;
+	private Query parent;	
 	
 	/**
 	 * The variable used for counting
@@ -169,6 +158,12 @@ public class Query{
 	 * the rule).
 	 */
 	private boolean containsQuasiBindings;
+	
+	/**
+	 * List of parents: queries that are equivalent to the current query except 
+	 * by one body atom.
+	 */
+	private List<Query> ancestors;
 
 	public static ByteString[] triple(ByteString sub, ByteString pred, ByteString obj){
 		ByteString[] newTriple = new ByteString[3];
@@ -206,17 +201,15 @@ public class Query{
 	}
 	
 	public Query(){
-		triples = new ArrayList<ByteString[]>();
+		triples = new ArrayList<>();
 		headKey = null;
-		cardinality = -1;
-		hashCardinality = 0;
-		confidence = -2.0;
+		support = -1;
+		hashSupport = 0;
+		stdConfidence = -2.0;
 		pcaConfidence = -2.0;
 		parent = null;
 		functionalVariable = null; 
 		bodySize = -1;
-		openVariables = new ArrayList<ByteString>();
-		variables = new ArrayList<ByteString>();
 		highestVariable = 'a';
 		stdConfUpperBound = 0.0;
 		pcaConfUpperBound = 0.0;
@@ -224,29 +217,22 @@ public class Query{
 		pcaEstimationOptimistic = 0.0;
 		belowMinimumSupport = false;
 		containsQuasiBindings = false;
+		ancestors = new ArrayList<>();
 	}
 			
 
 	public Query(ByteString[] pattern, long cardinality){
-		triples = new ArrayList<ByteString[]>();
-		variables = new ArrayList<ByteString>();
-		openVariables = new ArrayList<ByteString>();
-		confidence = -2.0;
+		triples = new ArrayList<>();
+		stdConfidence = -2.0;
 		pcaConfidence = -2.0;
-		this.cardinality = cardinality;
-		hashCardinality = cardinality;
+		support = cardinality;
+		hashSupport = cardinality;
 		parent = null;
 		triples.add(pattern);
 		functionalVariable = pattern[0];
 		functionalVariablePosition = 0;
 		bodySize = 0;
 		computeHeadKey();
-		for(int i = 0; i < pattern.length; ++i){
-			if(FactDatabase.isVariable(pattern[i])){
-				openVariables.add(pattern[i]);
-				variables.add(pattern[i]);
-			}
-		}
 		highestVariable = (char) (pattern[2].charAt(1) + 1);
 		stdConfUpperBound = 0.0;
 		pcaConfUpperBound = 0.0;
@@ -254,22 +240,19 @@ public class Query{
 		pcaEstimationOptimistic = 0.0;	
 		belowMinimumSupport = false;
 		containsQuasiBindings = false;
+		ancestors = new ArrayList<>();
 	}
 	
 	public Query(Query otherQuery, int cardinality){
-		triples = new ArrayList<ByteString[]>();
+		triples = new ArrayList<>();
 		for(ByteString[] sequence: otherQuery.triples){
 			triples.add(sequence.clone());
 		}
-		variables = new ArrayList<ByteString>();
-		variables.addAll(otherQuery.variables);
-		openVariables = new ArrayList<ByteString>();
-		openVariables.addAll(otherQuery.openVariables);
-		this.cardinality = cardinality;
-		hashCardinality = cardinality;
+		this.support = cardinality;
+		this.hashSupport = cardinality;
 		this.setFunctionalVariable(otherQuery.getFunctionalVariable());
 		computeHeadKey();
-		confidence = -2.0;
+		stdConfidence = -2.0;
 		pcaConfidence = -2.0;
 		parent = null;
 		bodySize = -1;
@@ -279,6 +262,7 @@ public class Query{
 		pcaEstimation = 0.0;
 		pcaEstimationOptimistic = 0.0;
 		containsQuasiBindings = false;
+		ancestors = new ArrayList<>();
 	}
 	
 	public Query(ByteString[] head, List<ByteString[]> body) {
@@ -317,17 +301,10 @@ public class Query{
 			}			
 		}
 		
-		variables = new ArrayList<>(varsHistogram.decreasingKeys());
-		openVariables = new ArrayList<>();
-		for (ByteString var : varsHistogram) {
-			if (varsHistogram.get(var) < 2) {
-				openVariables.add(var);
-			}
-		}
 		computeHeadKey();
 		functionalVariablePosition = 0;
 		functionalVariable = triples.get(0)[functionalVariablePosition];
-		confidence = -2.0;
+		stdConfidence = -2.0;
 		pcaConfidence = -2.0;
 		parent = null;
 		bodySize = -1;
@@ -337,8 +314,13 @@ public class Query{
 		pcaEstimationOptimistic = 0.0;
 		++highestVariable;
 		containsQuasiBindings = false;
+		ancestors = new ArrayList<>();
 	}
 
+	/**
+	 * Calculate a simple hash key based on the constant arguments of the
+	 * head variables.
+	 */
 	private void computeHeadKey() {
 		headKey = triples.get(0)[1].toString();
 		if(!FactDatabase.isVariable(triples.get(0)[2]))
@@ -351,6 +333,17 @@ public class Query{
 		return triples;
 	}
 	
+	public List<ByteString[]> getRealTriples() {
+		List<ByteString[]> resultList = new ArrayList<>();
+		for (ByteString[] triple : triples) {
+			if (!triple[1].equals(FactDatabase.DIFFERENTFROMbs)) {
+				resultList.add(triple);
+			}
+		}
+		
+		return resultList;
+	}
+		
 	public ByteString[] getHead(){
 		return triples.get(0);
 	}
@@ -367,8 +360,12 @@ public class Query{
 		return triples.subList(1, triples.size());
 	}
 	
+	/**
+	 * Returns a list with copies of the triples of the rule.
+	 * @return
+	 */
 	public List<ByteString[]> getAntecedentClone() {
-		List<ByteString[]> cloneList = new ArrayList<>();
+		List<ByteString[]> cloneList = new ArrayList<>();		
 		for (ByteString[] triple : getAntecedent()) {
 			cloneList.add(triple.clone());
 		}
@@ -381,17 +378,18 @@ public class Query{
 	}
 	
 	/**
-	 * @param variables the variables to set
-	 */
-	public void setVariables(List<ByteString> variables) {
-		this.variables = variables;
-	}
-	
-	/**
 	 * @return the mustBindVariables
 	 */
 	public List<ByteString> getOpenVariables() {
-		return openVariables;
+		IntHashMap<ByteString> histogram = variablesHistogram();
+		List<ByteString> variables = new ArrayList<ByteString>();
+		for (ByteString var : histogram) {
+			if (histogram.get(var) < 2) {
+				variables.add(var);
+			}
+		}
+		
+		return variables;
 	}
 
 	public double getHeadCoverage() {
@@ -405,39 +403,52 @@ public class Query{
 	/**
 	 * @return the support
 	 */
-	public double getSupport() {
-		return support;
+	public double getSupportRatio() {
+		return supportRatio;
 	}
 
 	/**
 	 * @param support the support to set
 	 */
-	public void setSupport(double support) {
-		this.support = support;
+	public void setSupportRatio(double support) {
+		this.supportRatio = support;
 	}
 
 	/**
 	 * @return the headBodyCount
 	 */
-	public long getCardinality() {
-		return cardinality;
+	public long getSupport() {
+		return support;
 	}
 	
+	/**
+	 * The cardinality number used to hash the rule.
+	 * @return
+	 */
 	public long getHashCardinality() {
-		return hashCardinality;
+		return hashSupport;
 	}
 
 	/**
 	 * @param headBodyCount the headBodyCount to set
 	 */
-	public void setCardinality(long cardinality) {
-		this.cardinality = cardinality;
+	public void setSupport(long cardinality) {
+		this.support = cardinality;
 	}
 
+	/**
+	 * The support of the body of the rule. If the rule has the 
+	 * form B => r(x, y) then the body size is support(B).
+	 * @return
+	 */
 	public long getBodySize() {
 		return bodySize;
 	}
 
+	/**
+	 * 
+	 * @param bodySize
+	 */
 	public void setBodySize(long bodySize) {
 		this.bodySize = bodySize;
 	}
@@ -445,8 +456,8 @@ public class Query{
 	/**
 	 * @return the confidence
 	 */
-	public double getConfidence() {
-		return confidence;
+	public double getStdConfidence() {
+		return stdConfidence;
 	}
 
 	/**
@@ -466,8 +477,8 @@ public class Query{
 	/**
 	 * @param confidence the confidence to set
 	 */
-	public void setConfidence(double confidence) {
-		this.confidence = confidence;
+	public void setStdConfidence(double confidence) {
+		this.stdConfidence = confidence;
 	}
 
 	/**
@@ -508,6 +519,10 @@ public class Query{
 		this.pcaEstimationOptimistic = pcaEstimationOptimistic;
 	}
 
+	/**
+	 * Returns the last triple pattern added to this rule.
+	 * @return
+	 */
 	public ByteString[] getLastTriplePattern(){
 		if (triples.isEmpty()) {
 			return null;
@@ -517,7 +532,7 @@ public class Query{
 	}
 	
 	/**
-	 * Return the last triple pattern which is not the DIFFERENT constraint.
+	 * Return the last triple pattern which is not the a pseudo-atom.
 	 * @return
 	 */
 	public ByteString[] getLastRealTriplePattern() {
@@ -676,6 +691,13 @@ public class Query{
 		return false;
 	}
 	
+	/**
+	 * It returns a list with all the redundant atoms contained in the first list, i.e., 
+	 * atoms whose removal does not affect the results of the query defined in the second list. 
+	 * @param test
+	 * @param query
+	 * @return
+	 */
 	public static List<ByteString[]> redundantAtoms(ByteString[] test, List<ByteString[]> query){
 		List<ByteString[]> redundantAtoms = new ArrayList<ByteString[]>();
 		for(ByteString[] pattern: query){
@@ -704,7 +726,10 @@ public class Query{
 		return false;
 	}
 
-	
+	/**
+	 * Simple string representation of the rule. Check the methods getRuleString, getFullRuleString
+	 * and getBasicRuleString.
+	 */
 	public String toString(){
 		StringBuilder stringBuilder = new StringBuilder();
 		for(ByteString[] pattern: triples){
@@ -724,11 +749,27 @@ public class Query{
 	 * @return List<ByteString>
 	 */
 	public List<ByteString> getVariables(){
+		List<ByteString> variables = new ArrayList<ByteString>();
+		for (ByteString[] triple : triples) {
+			if (FactDatabase.isVariable(triple[0])) {
+				if (!variables.contains(triple[0])) {
+					variables.add(triple[0]);
+				}
+			}
+			
+			if (FactDatabase.isVariable(triple[2])) {
+				if (!variables.contains(triple[2])) {
+					variables.add(triple[2]);
+				}
+			}
+		}
+		
 		return variables;
 	}
 
 	/**
-	 * Determines if a pattern contains repeated components, which are considered hard to satisfy (i.e., ?x somePredicate ?x)
+	 * Determines if a pattern contains repeated components, which are considered hard to satisfy 
+	 * (i.e., ?x somePredicate ?x)
 	 * @return boolean
 	 */
 	public boolean containsRepeatedVariablesInLastPattern() {
@@ -737,6 +778,11 @@ public class Query{
 		return triple[0].equals(triple[1]) || triple[0].equals(triple[2]) || triple[1].equals(triple[2]);
 	}
 
+	/**
+	 * Returns true if the rule contains redudant recursive atoms, i.e., atoms with a relation that
+	 * occurs more than once AND that do not have any effect on the query result.
+	 * @return
+	 */
 	public boolean isRedundantRecursive() {
 		List<ByteString[]> redundantAtoms = getRedundantAtoms();
 		ByteString[] lastPattern = getLastTriplePattern();
@@ -749,16 +795,21 @@ public class Query{
 		return false;
  	}
 
+	/**
+	 * @return boolean True if the rule has atoms.
+	 */
 	public boolean isEmpty() {
 		// TODO Auto-generated method stub
 		return triples.isEmpty();
 	}
 	
-	public boolean isSafe() {
-		if (triples.isEmpty()) {
-			return false;
-		}
-		
+	/**
+	 * Returns a histogram with the number of different atoms variables 
+	 * occur in. It discard pseudo-atoms containing the keywords DIFFERENTFROM
+	 * and EQUALS.
+	 * @return
+	 */
+	private IntHashMap<ByteString> variablesHistogram() {
 		IntHashMap<ByteString> varsHistogram = new IntHashMap<>();
 		for (ByteString triple[] : triples) {
 			if (triple[1].equals(FactDatabase.DIFFERENTFROMbs))
@@ -767,10 +818,27 @@ public class Query{
 			if (FactDatabase.isVariable(triple[0])) {
 				varsHistogram.increase(triple[0]);	
 			}
-			if (FactDatabase.isVariable(triple[2])) {
-				varsHistogram.increase(triple[2]);	
+			// Do not count twice if a variable occurs twice in the atom, e.g., r(x, x)
+			if (!triple[0].equals(triple[2])) {
+				if (FactDatabase.isVariable(triple[2])) {
+					varsHistogram.increase(triple[2]);	
+				}
 			}
 		}
+		
+		return varsHistogram;
+	}
+	
+	/**
+	 * @return boolean True if the rule is closed, i.e., each variable in
+	 * the rule occurs at least in two atoms.
+	 */
+	public boolean isClosed() {
+		if (triples.isEmpty()) {
+			return false;
+		}
+		
+		IntHashMap<ByteString> varsHistogram = variablesHistogram();
 		
 		for (ByteString variable : varsHistogram) {
 			if (varsHistogram.get(variable) < 2) {
@@ -781,6 +849,18 @@ public class Query{
 		return true;
 	}
 	
+	/**
+	 * @return boolean. True if the rule has PCA confidence 1.0
+	 */
+	public boolean isPerfect() {
+		return pcaConfidence == 1.0;
+	}
+	
+	/**
+	 * Return a key for the rule based on the constant arguments
+	 * of the head atom. It can be used as a hash key.
+	 * @return
+	 */
 	public String getHeadKey(){		
 		if(headKey == null){
 			computeHeadKey();
@@ -789,14 +869,27 @@ public class Query{
 		return headKey;
 	}
 	
+	/**
+	 * Returns the rule's head relation.
+	 * @return
+	 */
 	public String getHeadRelation() {
 		return triples.get(0)[1].toString();
 	}
 	
+	/**
+	 * Returns the number of atoms of the rule.
+	 * @return
+	 */
 	public int getLength(){
 		return triples.size();
 	}
 	
+	/**
+	 * Returns the number of atoms of the rule that are not pseudo-atoms
+	 * Pseudo-atoms contain the Database keywords "DIFFERENTFROM" and "EQUALS"
+	 * @return
+	 */
 	public int getRealLength() {
 		int length = 0;
 		for (ByteString[] triple : triples) {
@@ -807,17 +900,29 @@ public class Query{
 		
 		return length;
 	}
-	
+	/**
+	 * Returns the number of atoms of the rule that are not type constraints
+	 * of the form rdf:type(?x, C) where C is a class, i.e., Person.
+	 * @param typeString
+	 * @return
+	 */
 	public int getLengthWithoutTypes(ByteString typeString){
 		int size = 0;
 		for(ByteString[] triple: triples){
-			if(!triple[1].equals(typeString) || FactDatabase.isVariable(triple[2]))
+			if(!triple[1].equals(typeString) 
+					|| FactDatabase.isVariable(triple[2]))
 				++size;
 		}
 		
 		return size;
 	}
 	
+	/**
+	 * Returns the number of atoms of the rule that are neither type constraints
+	 * of the form rdf:type(?x, C) or linksTo atoms.
+	 * @param typeString
+	 * @return
+	 */
 	public int getLengthWithoutTypesAndLinksTo(ByteString typeString, ByteString linksString){
 		int size = 0;
 		for(ByteString[] triple: triples){
@@ -829,22 +934,31 @@ public class Query{
 		return size;
 	}
 
-
-	public Query getParent() {
-		return parent;
-	}
-
+	/**
+	 * Sets the rule's parent rule.
+	 * @param parent
+	 */
 	public void setParent(Query parent) {
-		this.parent = parent;
+		if (parent != null) {
+			ancestors.add(parent);
+		}
 	}
 
-	public Query addEdge(ByteString[] newEdge, int cardinality, ByteString joinedVariable, ByteString danglingVariable) {
+	/**
+	 * Returns a new rule that contains all the atoms of the current rule plus
+	 * the atom provided as argument.
+	 * @param newEdge The new atom.
+	 * @param cardinality The support of the new rule.
+	 * @param joinedVariable The position of the common variable w.r.t to the rule in the new atom, 
+	 * i.e., 0 if the new atoms joins on the subject or 2 if it joins on the object. 
+	 * @param danglingVariable The position of the fresh variable in the new atom.
+	 * @return
+	 */
+	public Query addEdge(ByteString[] newEdge, 
+			int cardinality, ByteString joinedVariable, ByteString danglingVariable) {
 		Query newQuery = new Query(this, cardinality);
 		ByteString[] copyNewEdge = newEdge.clone();
 		newQuery.triples.add(copyNewEdge);
-		newQuery.openVariables.remove(joinedVariable);
-		newQuery.openVariables.add(danglingVariable);
-		newQuery.variables.add(danglingVariable);		
 		return newQuery;		
 	}
 	
@@ -859,13 +973,19 @@ public class Query{
 		Query newQuery = new Query(this, cardinality);
 		ByteString[] copyNewEdge = newEdge.clone();
 		newQuery.triples.add(copyNewEdge);
-		
-		for(ByteString variable: copyNewEdge){
-			if(FactDatabase.isVariable(variable)){
-				newQuery.openVariables.remove(variable);
-			}
-		}
 		return newQuery;
+	}
+	
+	/**
+	 * The alternative hash code for the parents of the rule. The alternative hash code
+	 * if a small variante of the hashCode method that disregards the support of the rule.
+	 * @return
+	 */
+	public int alternativeParentHashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((getHeadKey() == null) ? 0 : getHeadKey().hashCode());
+		return result;
 	}
 	
 	/* (non-Javadoc)
@@ -875,7 +995,8 @@ public class Query{
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (int)cardinality;
+		result = prime * result + (int)hashSupport;
+		result = prime * result + (int)getRealLength();
 		result = prime * result + ((headKey == null) ? 0 : headKey.hashCode());
 		return result;
 	}
@@ -892,14 +1013,14 @@ public class Query{
 		if (getClass() != obj.getClass())
 			return false;
 		Query other = (Query) obj;
-		if (headKey == null) {
-			if (other.headKey != null) {
+		if (getHeadKey() == null) {
+			if (other.getHeadKey() != null) {
 				return false;
 			}
-		} else if (!headKey.equals(other.headKey)) {
+		} else if (!getHeadKey().equals(other.getHeadKey())) {
 			return false;
 		}
-		if (cardinality != other.cardinality) {
+		if (support != other.support) {
 			return false;
 		}
 		
@@ -951,11 +1072,11 @@ public class Query{
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append(getRuleString());
 		
-		strBuilder.append("\t" + df.format(getSupport()) );
+		strBuilder.append("\t" + df.format(getSupportRatio()) );
 		strBuilder.append("\t" + df.format(getHeadCoverage()));
-		strBuilder.append("\t" + df.format(getConfidence()));
+		strBuilder.append("\t" + df.format(getStdConfidence()));
 		strBuilder.append("\t" + df.format(getPcaConfidence()));
-		strBuilder.append("\t" + getCardinality());		
+		strBuilder.append("\t" + getSupport());		
 		strBuilder.append("\t" + getBodySize());
 		strBuilder.append("\t" + getBodyStarSize());
 		strBuilder.append("\t" + getFunctionalVariable());
@@ -974,11 +1095,11 @@ public class Query{
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append(getRuleString());
 		
-		strBuilder.append("\t" + df.format(getSupport()) );
+		strBuilder.append("\t" + df.format(getSupportRatio()) );
 		strBuilder.append("\t" + df.format(getHeadCoverage()));
-		strBuilder.append("\t" + df.format(getConfidence()));
+		strBuilder.append("\t" + df.format(getStdConfidence()));
 		strBuilder.append("\t" + df.format(getPcaConfidence()));
-		strBuilder.append("\t" + getCardinality());		
+		strBuilder.append("\t" + getSupport());		
 		strBuilder.append("\t" + getBodySize());
 		strBuilder.append("\t" + getBodyStarSize());
 		strBuilder.append("\t" + getFunctionalVariable());
@@ -1010,8 +1131,6 @@ public class Query{
 	public Query unify(int danglingPosition, ByteString constant, int cardinality) {
 		Query newQuery = new Query(this, cardinality);
 		ByteString[] lastNewPattern = newQuery.getLastTriplePattern();
-		newQuery.openVariables.remove(lastNewPattern[danglingPosition]);
-		newQuery.variables.remove(lastNewPattern[danglingPosition]);
 		lastNewPattern[danglingPosition] = constant;
 		newQuery.computeHeadKey();
 		return newQuery;
@@ -1020,8 +1139,6 @@ public class Query{
 	public Query unify(int triplePos, int danglingPosition, ByteString constant, int cardinality) {
 		Query newQuery = new Query(this, cardinality);
 		ByteString[] targetEdge = newQuery.getTriples().get(triplePos);
-		newQuery.openVariables.remove(targetEdge[danglingPosition]);
-		newQuery.variables.remove(targetEdge[danglingPosition]);
 		targetEdge[danglingPosition] = constant;
 		newQuery.cleanInequalityConstraints();		
 		return newQuery;
@@ -1030,6 +1147,7 @@ public class Query{
 
 	private void cleanInequalityConstraints() {
 		List<ByteString[]> toRemove = new ArrayList<ByteString[]>();
+		List<ByteString> variables = getVariables();
 		for(ByteString[] triple: triples){
 			if(triple[1].equals(FactDatabase.DIFFERENTFROMbs)){
 				int varPos = FactDatabase.firstVariablePos(triple);
@@ -1044,15 +1162,29 @@ public class Query{
 	}
 
 	public List<Query> getAncestors(){
-		List<Query> ancestors = new ArrayList<Query>();
-		Query current = this.parent;
-		
-		while(current != null){
-			ancestors.add(current);
-			current = current.parent;
-		}
-		
 		return ancestors;
+	}
+	
+	private void gatherAncestors(Query q, Set<Query> output) {		
+		if (q.ancestors == null 
+				|| q.ancestors.isEmpty()) {
+			return;
+		} else {
+			// Let's do depth search
+			for (Query ancestor : q.ancestors) {
+				output.add(ancestor);
+				gatherAncestors(ancestor, output);
+			}
+		}
+	}
+	
+	public List<Query> getAllAncestors(){
+		Set<Query> output = new LinkedHashSet<>();
+		for (Query ancestor : ancestors) {
+			output.add(ancestor);
+			gatherAncestors(ancestor, output);
+		}
+		return new ArrayList<>(output);
 	}
 
 	public void setBodyMinusHeadSize(int size) {
@@ -1073,7 +1205,7 @@ public class Query{
 	}
 
 	public boolean metricsCalculated() {
-		return confidence != -2.0 && pcaConfidence != -2.0;
+		return stdConfidence != -2.0 && pcaConfidence != -2.0;
 	}
 
 	public boolean isBelowMinimumSupport() {
@@ -1176,7 +1308,7 @@ public class Query{
 	 * @return
 	 */
 	public boolean containsLevel2RedundantSubgraphs() {
-		if(!isSafe() || triples.size() < 4 || triples.size() % 2 == 1) {
+		if(!isClosed() || triples.size() < 4 || triples.size() % 2 == 1) {
 			return false;
 		}
 		
@@ -1195,7 +1327,7 @@ public class Query{
 	}
 
 	public boolean containsDisallowedDiamond(){
-		if(!isSafe() || triples.size() < 4 || triples.size() % 2 == 1) 
+		if(!isClosed() || triples.size() < 4 || triples.size() % 2 == 1) 
 			return false;		
 		
 		// Calculate the relation count
@@ -1316,8 +1448,8 @@ public class Query{
 	 * @return true if the rule has better confidence that its parent rules.
 	 */
 	public boolean hasConfidenceGain() {
-		if (isSafe()){
-			if (parent != null && parent.isSafe()) {
+		if (isClosed()){
+			if (parent != null && parent.isClosed()) {
 				return getPcaConfidence() > parent.getPcaConfidence();
 			} else {
 				return true;
@@ -1431,8 +1563,56 @@ public class Query{
 			if (triple[1].equals(relation)) {
 				++count;
 			}
-		}
-		
+		}	
 		return count;
+	}
+	
+	/**
+	 * Given the antecedent and the succedent of a rule as sets of atoms, it
+	 * returns the combinations of atoms of size 'i' that are "parents" of the current
+	 * rule, i.e., subsets of atoms of the original rule.
+	 * @param queryPattern
+	 * @param i
+	 */
+	public static void getParentsOfSize(List<ByteString[]> antecedent, 
+			ByteString[] head,
+			int windowSize, List<List<ByteString[]>> parentsOfSizeI) {
+		int fixedSubsetSize = windowSize - 1;
+		if (antecedent.size() < windowSize) {
+			return;
+		}
+		List<ByteString[]> fixedPrefix = antecedent.subList(0, fixedSubsetSize);
+		for (int i = fixedSubsetSize; i < antecedent.size(); ++i) {
+			List<ByteString[]> combination = new ArrayList<>();
+			// Add the head atom.
+			combination.add(head);
+			combination.addAll(fixedPrefix);
+			combination.add(antecedent.get(i));
+			parentsOfSizeI.add(combination);
+		}
+		if (windowSize > 1) {
+			getParentsOfSize(antecedent.subList(1, antecedent.size()), head, windowSize, parentsOfSizeI);
+		}
+	}
+	
+	public static void main(String args[]) {
+		List<ByteString[]> query = FactDatabase.triples(
+				FactDatabase.triple("?a", "<soc_sec_id>", "?l"),
+				FactDatabase.triple("?b", "<soc_sec_id>", "?l"),
+				FactDatabase.triple("?a", "<surname>", "?f"), 
+				FactDatabase.triple("?b", "<surname>", "?f")
+				);
+		
+		List<List<ByteString[]>> result = new ArrayList<List<ByteString[]>>();
+
+		for (int i = 1; i <= 3; ++i) {
+			System.out.println("i = " + i);
+			getParentsOfSize(query, FactDatabase.triple("?a", "equals", "?b"), i, result);
+			for (List<ByteString[]> parent : result) {
+				System.out.print(FactDatabase.toString(parent) + ", ");
+			}
+			System.out.println();
+			result.clear();
+		}
 	}
 }

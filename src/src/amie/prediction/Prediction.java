@@ -110,7 +110,7 @@ public class Prediction {
 				if (Prediction.metric == Metric.PCAConfidence) {
 					product *= (1.0 - rule.getPcaConfidence());
 				} else {
-					product *= (1.0 - rule.getConfidence());					
+					product *= (1.0 - rule.getStdConfidence());					
 				}
 			}
 			naiveConfidence = 1.0 - product;
@@ -157,7 +157,7 @@ public class Prediction {
 		if (Prediction.metric == Metric.PCAConfidence)
 			return getJointRule().getPcaConfidence();
 		else
-			return getJointRule().getConfidence();
+			return getJointRule().getStdConfidence();
 	}
 	
 	public int getIterationId() {
@@ -231,11 +231,11 @@ public class Prediction {
 		builder.append("\t" + getFullScore());
 		
 		for (Query q : rules) {
-			builder.append("\t" + q.getRuleString() + "[" + q.getCardinality() + ", " + q.getPcaConfidence() + "]");
+			builder.append("\t" + q.getRuleString() + "[" + q.getSupport() + ", " + q.getPcaConfidence() + "]");
 		}
 		
 		Query combinedRule = getJointRule();
-		builder.append("\t" + combinedRule.getRuleString() + "[" + combinedRule.getCardinality() + ", " + combinedRule.getPcaConfidence() + "]");
+		builder.append("\t" + combinedRule.getRuleString() + "[" + combinedRule.getSupport() + ", " + combinedRule.getPcaConfidence() + "]");
 		
 		return builder.toString(); 
 	}

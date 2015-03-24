@@ -202,6 +202,15 @@ public class TestEquivalenceChecker2 extends TestCase {
 				FactDatabase.triple("?f", "<influences>", "?j"));
 		Pair<List<ByteString[]>, List<ByteString[]>> p31 = new Pair<>(q311, q312);
 		cases.add(p31);
+		
+		List<ByteString[]> q321 = FactDatabase.triples(FactDatabase.triple("?a","<isPoliticianOf>","?b"), 
+				FactDatabase.triple("?a","<livesIn>","?f"), 
+				FactDatabase.triple("?f", "<isLocatedIn>", "?b"));
+		List<ByteString[]> q322 = FactDatabase.triples(FactDatabase.triple("?a","<isPoliticianOf>","?b"), 
+				FactDatabase.triple("?e","<isLocatedIn>","?b"), 
+				FactDatabase.triple("?a", "<livesIn>", "?e"));
+		Pair<List<ByteString[]>, List<ByteString[]>> p32 = new Pair<>(q321, q322);
+		cases.add(p32);
 	}
 	
 	public void test0(){
@@ -327,10 +336,10 @@ public class TestEquivalenceChecker2 extends TestCase {
 		Query fq1 = new Query();
 		fq1.getTriples().addAll(q1);
 		Query fq2 = new Query();
-		fq1.setCardinality(84);
+		fq1.setSupport(84);
 		fq1.getHeadKey();
 		fq2.getTriples().addAll(q2);
-		fq2.setCardinality(84);
+		fq2.setSupport(84);
 		fq2.getHeadKey();
 		pool.add(fq1);
 		assertTrue(fq2.equals(fq1));
@@ -345,6 +354,10 @@ public class TestEquivalenceChecker2 extends TestCase {
 	
 	public void test31(){
 		assertFalse(EquivalenceChecker2.equal(cases.get(30).first, cases.get(30).second));
+	}
+	
+	public void test32(){
+		assertFalse(EquivalenceChecker2.equal(cases.get(31).first, cases.get(31).second));
 	}
 
 	protected void tearDown() throws Exception {

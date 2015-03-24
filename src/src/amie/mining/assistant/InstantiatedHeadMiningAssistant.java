@@ -100,8 +100,8 @@ public class InstantiatedHeadMiningAssistant extends HeadVariablesMiningAssistan
 			double denominator = 0.0;
 			double confidence = 0.0;
 			denominator = (double) source.countDistinct(candidate.getFunctionalVariable(), antecedent);
-			confidence = candidate.getCardinality() / denominator;
-			candidate.setConfidence(confidence);
+			confidence = candidate.getSupport() / denominator;
+			candidate.setStdConfidence(confidence);
 			candidate.setBodySize((int)denominator);
 		} else {
 			super.calculateConfidenceMetrics(candidate);

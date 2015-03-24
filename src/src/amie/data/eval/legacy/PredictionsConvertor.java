@@ -54,7 +54,7 @@ public class PredictionsConvertor {
 				 //It is a new rule
 				 Query newQuery = new Query();
 				 newQuery.getTriples().addAll(triples);
-				 newQuery.setCardinality(randomGenerator.nextInt(Integer.MAX_VALUE));
+				 newQuery.setSupport(randomGenerator.nextInt(Integer.MAX_VALUE));
 				 //Parse the key variable
 				 int position = line.indexOf("Key variable: ", 0);
 				 String keyVariable = line.substring(position + 14).replace("\t", "");

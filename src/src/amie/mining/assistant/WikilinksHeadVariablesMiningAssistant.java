@@ -49,7 +49,7 @@ public class WikilinksHeadVariablesMiningAssistant extends HeadVariablesMiningAs
 			query.getTriples().remove(0);
 		}else{
 			super.getDanglingEdges(query, minCardinality, output);
-			if(query.isSafe() && !query.containsRelation(ByteString.of(wikiLinkProperty)) && !query.containsRelation(typeString)){
+			if(query.isClosed() && !query.containsRelation(ByteString.of(wikiLinkProperty)) && !query.containsRelation(typeString)){
 				//Add the types when the query is long enough
 				getSpecializationCandidates(query, minCardinality, output);
 			}
@@ -94,7 +94,7 @@ public class WikilinksHeadVariablesMiningAssistant extends HeadVariablesMiningAs
 					if(cardinality >= minCardinality){
 						Query newCandidate = new Query(candidate, cardinality);
 						newCandidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(newCandidate.getHeadRelation()));
-						newCandidate.setSupport((double)cardinality / (double)source.size());
+						newCandidate.setSupportRatio((double)cardinality / (double)source.size());
 						newCandidate.setParent(query);
 						newCandidate.getLastTriplePattern()[2] = type;
 						newCandidate.setParent(query);
@@ -137,7 +137,7 @@ public class WikilinksHeadVariablesMiningAssistant extends HeadVariablesMiningAs
 			if (cardinality >= minCardinality) {
 				Query candidate1 = query.closeCircle(newEdge, (int)cardinality);
 				candidate1.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate1.getHeadRelation()));
-				candidate1.setSupport((double)cardinality / (double)source.size());
+				candidate1.setSupportRatio((double)cardinality / (double)source.size());
 				candidate1.setParent(query);			
 				output.add(candidate1);	
 			}
@@ -149,7 +149,7 @@ public class WikilinksHeadVariablesMiningAssistant extends HeadVariablesMiningAs
 			if (cardinality >= minCardinality) {
 				Query candidate2 = query.closeCircle(newEdge, (int)cardinality);
 				candidate2.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate2.getHeadRelation()));
-				candidate2.setSupport((double)cardinality / (double)source.size());
+				candidate2.setSupportRatio((double)cardinality / (double)source.size());
 				candidate2.setParent(query);			
 				output.add(candidate2);	
 			}
