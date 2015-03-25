@@ -209,7 +209,14 @@ and objects in the head of all instantiations that appear in the KB:
 where $z_1,...,z_m$ are the variables of the rule apart from $x$ and $y$.
 Table~\ref{tab:exampleKB} shows an example KB that contains only 2 relations and 5 facts. For this KB, 
 our example rule $R$ has support 1, because of the facts $livesIn(Adam,Paris)$ and $wasBornIn(Adam,Paris)$.
-Note that the support is defined even for rules that are not closed.
+Note that the support is defined even for rules that are not yet closed. This allows for early pruning of unpromising candidate rules.
+To see why, consider for example the rule $R_2: hasChild(x,z) \wedge livesIn(z,y)\Rightarrow livesIn(x,y)$ which dictates that people live at the same place as their children.
+Assume that this rule was constructed by the intermediate non-closed rule $R_1:hasChild(x,z) \Rightarrow livesIn(x,y)$  by adding the atom $livesIn(z,y)$.
+$R_1$ restricts the support to those facts in $livesIn$ which involve persons that have children. 
+In a parallel universe in which it is not common for people to have children, $R_1$ will be pruned for having low support and, therefore, $R_2$ and all other rules that can be 
+created from $R_1$ will never get constructed.
+
+
 
 \www{
 \paragraph{Head Coverage}

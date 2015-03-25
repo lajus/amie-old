@@ -248,6 +248,8 @@ We would be very grateful for any pointer to work comparable to AMIE that we mis
       This technique can only be used for rules with exactly two body atoms of the same predicate sharing one variable. 
       This restriction limits the benefits gained from applying this technique. 
       As shown in Table 7 in the experiments section, we can see that there is not a big improvement in execution time and only a small amount of rules may be removed.\\  }
+
+      
       
       \item \textit{R2: The experiments should give a breakdown of the execution time of AMIE+ on the two rule mining steps and show the performance improvement on the respective step for each optimization technique.\\  }
       
@@ -291,6 +293,9 @@ We would be very grateful for any pointer to work comparable to AMIE that we mis
       Since the FUN-property created confusion, we completely removed it and re-phrased the corresponding parts. 
       
       \item \textit{R2: The three operators used in the rule mining can actually be reduced to a single and simpler operator: add a new atom with a shared variable with the current rule. \\  }
+      It is true that all three operators require that 1 of the variables of the new atom is shared with a variable of the rule. However, the add-dangling-atom operator requires that
+      the second variable does not re-appear anywhere in the rule, the add-closing-atom requires also the second variable to be shared and the add-instantiated-atom binds the variable to a specific constant.
+      
       
       \item \textit{R2: The rdf:type relationship in a KB can be used to derive the type for each argument of a predicate. 
       The information should be used, if it was not used, in the mode setting of Aleph to facilitate the learning.\\  }
@@ -336,20 +341,18 @@ We would be very grateful for any pointer to work comparable to AMIE that we mis
       in spite of the fact that now AMIE+ is present and it is superior to AMIE. \\  }
       We re-wrote the experiments section such that we can focus more on the performance of AMIE+. Detailed runtime comparisons with other systems (WARMR and Aleph)
       were removed, and the reader is pointed to the original AMIE paper for more details.
-
-      
-
-
       
       \item \textit{R3: Rules are introduced with no limitations on their syntax but then, under the strange section heading "language biases", 
       we discover that rules should be connected, closed, nonreflexive, and can be recursive (no example provided).       
       There exists a better way of defining rule syntax \& constraints! Incidentally, using a closed rule as example of generic rule does not help the reader's intuition. \\  }
+      We re-wrote these paragraphs and included more examples for the different kinds of rules.
 
       \item \textit{R3: The discussion on support and coverage is rather clear (but an example would not hurt).\\  }
-      
+      We added the example of  Table~\ref{tab:exampleKB}.
       
       \item \textit{R3: I would like to understand sooner that 4.3 is a discarded and useless digression and I would appreciate a deeper discussion of Section 4.4, possibly with examples.\\  }
-      
+      We removed the discussion of positives-only evaluation function since in the AMIE paper we have already shown that pca confidence outperforms it. In Sec.~\ref{subsubsec:pcaConf}
+      we now include the example of Table~\ref{tab:exampleKB}.
       
    
   \end{itemize}

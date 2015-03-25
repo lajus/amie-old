@@ -39,7 +39,7 @@ with the actual precision of each rule than the standard confidence.
 \subsection{Experimental Setup}
 
 \paragraph{Hardware}
-All experiments are run on a server with 48GB of RAM and 8 CPUs (Intel Xeon at 2.4GHz). All rules and all experimental results are available at \url{http://www.mpi-inf.mpg.de/departments/ontologies/projects/amie/}.
+All experiments are run on a server with 48GB of RAM and 8 CPUs (Intel Xeon at 2.4GHz). All rules and all experimental results are available at \comment{Chris}{did this change?} \url{http://www.mpi-inf.mpg.de/departments/ontologies/projects/amie/}.
 
 \paragraph{Datasets} We run our experiments on different KBs.
 In all cases, we removed the \emph{rdf:type} relationship because it inflates the size of the KBs.
@@ -584,7 +584,7 @@ For example, if a person has a birth date, then both the CWA and PCA would not a
 This encourages us to use the PCA for the definition of our confidence. In the following, we will show that this definition of confidence produces
  more predictive and more accurate rules than the standard confidence, which is based on the CWA.
 
-\subsubsection{Standard Confidence vs. PCA Confidence }
+\subsubsection{Standard Confidence vs. PCA Confidence }\label{sec:exp_quality}
 \label{subsubsec:std_vs_pca}
 In the following, we compare the standard confidence measure to the PCA confidence measure as a ranking metric for rules.
 The comparison is based on the number and precision of predictions of the most confident rules according to each metric.
