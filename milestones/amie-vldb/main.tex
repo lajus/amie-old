@@ -168,11 +168,16 @@ hallo\=\+\kill
   \begin{itemize}
   
     \item \textit{R1: my main concern with this paper is the very poor precision of the predicted statements produced by the mined rules (35\%-45\%)\\  }
-    The original AMIE paper presents PCA assumption as a better alternative to the default CWA of traditional rule mining systems. In order to support this claim,
-    we divised an overly simple experiment: We used no type signature information for relations and used simple deduction for producing facts. 
-    This experiment was good enough to compare CWA and PCA, but it was not meant to show the end performance in terms of quality that one could get from such a system.
-    In real applications one would take advantage of the type information and also use an advanced inference method (e.g. MLNs) to boost the confidence of facts produced by multiple rules,
-    attach probabilities to facts and prune low-probability facts. In Sec.~\ref{}, we include an experiment in which AMIE uses type information (but still does simple deduction of facts)
+    The original AMIE paper presents the PCA assumption as a better alternative to the CWA used in traditional rule mining systems. In order to support this claim,
+    we devised an overly simple experiment: We directly use the rules to draw predictions without any further verification
+    step and evaluated their precision.
+%     This experiment was good enough to compare the CWA and the PCA, but it was not meant to show the end performance 
+%     in terms of quality that one could get from such a system.
+    Such experimental setup was designed to compare the CWA and the PCA, rather than introducing a new rule-based
+    inference approach. In real applications one would take advantage of the type information and use 
+    a more principled inference method (e.g. MLNs) to quantify the confidence of facts produced by multiple rules, 
+    attach probabilities to predictions and prune low-probability facts. In Sec.~\ref{subsubsec:std_vs_pca}, we include 
+    an experiment in which AMIE makes uses of the type information (but still does simple deduction of facts)
     and the precision curve already moves significantly higher. 
     
   
@@ -180,7 +185,7 @@ hallo\=\+\kill
    the PCA confidence for a specific type of 3-atom rules, being not trivial to generalize it to any kind of rule. 
    (Indeed, experiments are limited to 3-atom rules)\\
    R2: the rules that this technique can be applied to are still a bit limited. \\   }
-   In Sec.~\ref{} we introduce a formula for the confidence approximation for longer rules
+   In Sec.~\ref{subsec:pruningbyapprox} we introduce a formula for the confidence approximation for longer rules
    
    \item \textit{R2: when the article introduces the notation of |rng(directed)|, it says it "is the number of distinct directors in the range of directed". I strongly suspect there is a typo here. \\  }
    True. Corrected.
@@ -385,10 +390,10 @@ We would be very grateful for any pointer to work comparable to AMIE that we mis
 \begin{abstract}
 Recent advances in information extraction have led to huge knowledge bases (KBs), which capture knowledge in a ma\-chine-readable format.
 Inductive Logic Programming (ILP) can be used to mine logical rules from these KBs, such as ``If two persons are married, then they (usually) live in the same city''.
-While ILP is a mature field, mining logical rules from KBs is difficult, because KBs implement the open world assumption.
+While ILP is a mature field, mining logical rules from KBs is difficult, because KBs make an open world assumption.
 This means that absent information cannot be taken as counterexamples.
 AMIE~\cite{amie} shows how rules can be mined effectively from KBs even in the absence of counterexamples.
-In this paper, we show how this mining process can be optimized to support even on large-scale KBs with more than 12M statements -- in a matter of hours instead of days.
+In this paper, we show how this mining process can be optimized to support even large-scale KBs with more than 12M statements -- in a matter of hours instead of days.
 Extensive experiments show how our new approach, AMIE+, extends to areas of mining that were previously beyond reach.
 \keywords{Rule Mining \and Inductive Logic Programming \and ILP \and Knowledge Bases}
 \end{abstract}

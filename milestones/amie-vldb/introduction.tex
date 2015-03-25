@@ -14,7 +14,7 @@ In recent years, however, the KBs have become so large that they can themselves 
 It is possible to find \emph{rules} in the KBs that describe common correlations in the data. For example, we can mine the rule
 \indented{
 \emph{livesIn}$(h,p)$ $\wedge$ \emph{marriedTo}$(h,w) \Rightarrow$ \emph{livesIn}$(w,p)$}
-This rule captures the fact that very often, the spouse of a person lives in the same place as the person.
+This rule captures the fact that, very often, the spouse of a person lives in the same place as the person.
 Finding such rules can serve four purposes: First, by applying such rules on the data, new facts can be derived that make the KB more complete.
 For example, if we know where Barack Obama lives, and if we know that Michelle Obama is his wife, then we can deduce (with high probability) where Michelle Obama lives.
 Second, such rules can identify potential errors in the knowledge base. If, for instance, the KB contains the statement that Michelle Obama lives in a completely different place, then maybe this statement is wrong.
@@ -54,14 +54,16 @@ Mining rules from a data set is the central task of Inductive Logic Programming 
 \www{
 ILP approaches induce logical rules
 from ground facts. Yet, classical ILP systems cannot be applied to semantic KBs for two reasons: First, they usually require negative statements as counterexamples.
-Semantic KBs, however, usually do not contain negative statements. The semantics of RDF are too weak to deduce negative evidence from the facts in a KB\footnote{RDF has only positive rules and no disjointness constraints or similar concepts.}. Because of the OWA, absent statements cannot serve as counter-evidence either.
+Semantic KBs, however, usually do not contain negative statements. The semantics of RDFs are too weak to deduce negative evidence 
+from the facts in a KB\footnote{RDFs has only positive rules and no disjointness constraints or similar concepts.}. Because of the OWA, absent statements cannot serve as counter-evidence either.
 Second, today's ILP systems are slow and cannot handle the huge amount of data that KBs provide.
 In our experiments, we ran state-of-the-art approaches on YAGO2 for a couple of days without obtaining any results.
 }
 
 
 With the AMIE project \cite{amie}, we have shown how to mine logical rules from KBs despite the absence of explicit counter-evidence.
-A new metric allows AMIE to ``guess'' counterexamples for rules, and thus predict their quality even under the open world assumption.
+A new metric, namely the confidence under the Partial Completeness Assumption (PCA), 
+allows AMIE to ``guess'' counterexamples for rules, and thus estimate their quality even under the open world assumption.
 We have shown that our approach outperforms other rule mining systems %that can also work without explicit counterexamples
 % ~\comment{Luis: }{I am not convinced about this assertion, because
 % at the end, all systems need a notion of counterexamples. Even ALEPH that claims to learn only from positive data, uses random facts as counter-evidence}
@@ -88,7 +90,7 @@ thus giving a more complete picture of rule mining on large-scale knowledge base
 
 \noindent More precisely, our contributions are as follows:
 \begin{itemize}[noitemsep,nolistsep,leftmargin=0.4cm,midpenalty=0,label=$\bullet$]
-\item A comprehensive investigation of the AMIE approach, together with an evaluation of its central assumption.
+\item A comprehensive investigation of the AMIE approach, together with an evaluation of the PCA, its central assumption.
 \item A suite of optimization steps that allow a much more efficient exploration of the rules' search space.
 \item Extensive experiments that show the competitiveness of our approach.
 \end{itemize}
@@ -101,8 +103,9 @@ The rest of this paper is structured as follows: Section~\ref{sec:relatedWork} d
 In Section~\ref{sec:pca}, we introduce the partial completeness assumption (PCA) and, based on it, the PCA confidence measure.
 %We also investigate the applicability of the PCA in practice.
 \comment{Katja}{PCA is not mentioned or motivated above. Maybe add 1-2 more sentences in the main part of the introduction so that the reader gets a better idea.}
+\comment{Luis}{I have added it. Check it please.}
 Section~\ref{sec:alg} recaptures the AMIE approach from \cite{amie}.
-Section~\ref{sec:improvements} is the main part of the paper: It presents the pruning strategies that multiply the performance of AMIE.
+Section~\ref{sec:improvements} is the main part of the paper: It presents the pruning strategies that optimize the performance of AMIE.
 Section~\ref{sec:experiments} presents our experiments before Section~\ref{sec:conclusion} concludes.
 
 

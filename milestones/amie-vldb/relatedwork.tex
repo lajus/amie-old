@@ -19,7 +19,7 @@ Our approach is inspired by this work and also makes use of a language bias~\cit
 Sherlock \cite{SchEtzWel10} is an unsupervised ILP method to learn first-order Horn clauses from a set of extracted facts for a given target relation. 
 It uses probabilistic graphical models (PGMs) to infer new facts. 
 It tackles the noise of the extracted  facts by extensive filtering in a preprocessing step and by penalizing longer rules in the inference part. 
-For mining the rules, Sherlock uses 2 heuristics: statistical significance and statistical relevance.
+For mining the rules, Sherlock uses two heuristics: statistical significance and statistical relevance. \comment{Luis}{To protect us from the reviewers, we should argue why Sherlock is not applicable to our setting.}
 % (an alternative way to express Occam's razor).
 %}
 QuickFOIL~\cite{quickfoil} is a standard ILP system based on a generic top-down greedy algorithm and implemented 
@@ -38,7 +38,7 @@ ALEPH\footnote{\label{foot:aleph}\url{http://www.cs.ox.ac.uk/activities/machlear
 It employs a variety of evaluation functions for the rules as well as a variety of search strategies. 
 These approaches are not tailored to deal with large KBs under the Open World Assumption. 
 We compare our system to WARMR and ALEPH, which are the only ones available for download. 
-Our experiments do not only show that these systems mine less sensible rules than our approach, but also that it takes them much longer to do so. 
+Our experiments do not only show that these systems mine less sensible rules than our approach, but also that they take more time to do so. 
 %}
 
 \www{
@@ -90,11 +90,14 @@ Some approaches use rule mining for ontology merging and alignment~\cite{McgFikR
 The AROMA system~\cite{DavGuiBri07}, for instance, uses association rules on extracted terms to find subsumption relations between classes and properties of different ontologies. 
 Again, these systems do not mine the kind of rules we are interested in.
 In~\cite{Abedjan:2012:ROW:2396761.2398467} association rules and frequency analysis are used to identify and classify common misusage patterns for relations in DBpedia.}
-In the same fashion,~\cite{Ziawasch2013a} applies association rules to find synonym predicates in DBpedia. The matched synonyms are then used
-for predicate expansion in the spirit of data integration, a vital task for manually built KBs or for cases when the data is produced by
+In the same fashion,~\cite{Ziawasch2013a} applies association rules to find synonym predicates in DBpedia. The matched synonyms 
+are then used for predicate expansion in the spirit of data integration. 
+This is a vital task in manually populated KBs where the users may not use canonical names for relations, 
+or for cases when the data is produced by
 independent providers. In contrast to our work, these approaches do not mine logical rules, but association rules on the co-occurrence of values.
 \www{
 Since RDF data can be seen as a graph, mining frequent subtrees~\cite{ChiMunNij04,KurKar01} is another related field of research. 
 However, as the URIs of resources in knowledge bases are unique, these techniques are limited to mining frequent combinations of classes.
+
 Several approaches, such as Markov Logic \cite {markovlogic} or URDF \cite{urdf} use Horn rules to perform reasoning. These approaches can be consumers of the rules we mine with AMIE.
 }

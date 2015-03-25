@@ -37,12 +37,14 @@ Therefore, we use the notion of \emph{functionality}~\cite{paris}. The functiona
 \[fun(r) := \frac{\#x: \exists y: r(x,y)}{\#(x,y): r(x,y)}\]
 %\[ifun(r) := \frac{\#y: \exists x: r(x,y)}{\#(x,y): r(x,y)}\]
 where  $\#x:X$ is an abbreviation for $|\{x: X \in \mathcal{K}\}|$.
-The inverse functionality is defined accordingly as $ifun(r):=fun(r^{-1})$, e.g., $ifun(actedIn):=fun(hasActor^{-1})$.
+The inverse functionality is defined accordingly as $ifun(r):=fun(r^{-1})$, where $r^{-1}$ denotes
+the inverse relation of $r$, that is, the relation defined by swapping the arguments of $r$, e.g.,
+$actedIn^{-1} = hasActor$, therefore $ifun(actedIn):= fun(hasActor)$.
 
 
 Some relations have roughly the same degree of functionality and of inverse functionality. Bijections are an example.
-The vast majority of relations, however, has different degrees of functionality and of inverse functionality, \comment{Chris}{at least for general-purpose web-extracted KBs, like YAGO, DBPEDIA and Freebase}.
-Manual inspection shows that in common KBs the functionality is usually higher than the inverse functionality.
+For most relations, however, $fun$ and $ifun$ are different, \comment{Chris}{at least for general-purpose web-extracted KBs, like YAGO, DBPEDIA and Freebase}.
+Manual inspection shows that in web-extracted common sense KBs (e.g., YAGO, DBpedia) the functionality is usually higher than the inverse functionality.
 For example, a KB is more likely to specify \emph{isCitizenOf} than \emph{has\-Citizen}.
 Intuitively, this allows us to consider a fact $r(x,y)$ as a fact about $x$.
 In the following, we will assume that for all relations $r$, $fun(r)\geq ifun(r)$.
@@ -101,16 +103,17 @@ which we abbreviate as $\vec{B} \Rightarrow r(x,y)$.
 
 An \emph{instantiation} of a rule is a copy of the rule, where all variables have been substituted by constants.
 A \emph{prediction} of a rule is the head atom of an instantiated rule if all body atoms of the instantiated rule appear in the KB.
-For example, the above rule can predict \emph{citizenOf(Lisa,USA)} if the KB knows a parent of Lisa (\emph{hasChild(Elvis,Lisa)}) who is American (\emph{citizenOf(Elvis,USA)}).
+For example, the above rule can predict \emph{citizenOf(Lisa,USA)} if the KB knows a parent of Lisa, e.g.,
+\emph{hasChild(Elvis,Lisa)}, who is American, e.g.,\emph{citizenOf(Elvis,USA)}.
 
-AMIE, like many other ILP systems, is not mining general Horn Clauses, but uses a language bias (restricts the form of the mined rules) 
+AMIE, like other ILP systems, does not mine general Horn Clauses, but uses a language bias (constraints to the form of the mined rules) 
 in order to restrict the size of the search space. 
 Language biases offer a trade-off between the expressive power of the mined rules and the speed of the mining process.
 As an example, rules with 3 atoms can capture more complicated correlations than rules with 2 atoms, but come with a larger search space and thus with a much slower performance.
 The less retrictive the language bias is,
 the more expressive the rules can potentially be, the larger the search space grows, and the less tractable the search becomes.
 
-AMIE requires that the rules are \emph{connected} and \emph{closed}. We say that two atoms in a rule are \emph{connected} if they share a variable or an entity.
+AMIE's language bias requires rules to be \emph{connected} and \emph{closed}. We say that two atoms in a rule are \emph{connected} if they share a variable or an entity.
 A rule is \emph{connected} if every atom is connected transitively to every other atom of the rule.
 By mining only connected rules, AMIE avoids constructing rules that contain unrelated atoms (avoiding cross products), e.g., $diedIn(x,y)\Rightarrow wasBornIn(w,z)$.
 A variable in a rule is \emph{closed} if it appears at least twice in the rule. A rule is \emph{closed} if all its variables are \emph{closed}.
@@ -118,7 +121,7 @@ Closed rules do not predict merely the existence of a fact (e.g. $diedIn(x,y)\Ri
 but also concrete arguments for it (e.g. $diedIn(x,y)\Rightarrow wasBornIn(x,y)$).
 AMIE omits also \emph{reflexive rules} of the form $r(x, x)$, as they are typically of less interest in real world KBs.
 AMIE, unlike some other ILP systems, allow for mining of \emph{recursive rules}. Recursive are rules that contain the head relation in the body, 
-e.g., $isMarriedTo(x,z) \wedge hasChild(z,y) \Rightarrow hasChild(x,y)$. 
+e.g., $isMarriedTo(x,z)\; \wedge hasChild(z,y)\; \Rightarrow\; hasChild(x,y)$. 
 % We also allow the user to specify as an input parameter the maximum number of atoms for the mined rules.
 
 
@@ -178,51 +181,60 @@ e.g., $isMarriedTo(x,z) \wedge hasChild(z,y) \Rightarrow hasChild(x,y)$.
 
 
 Normally, data mining systems define a notion of significance or \emph{support} for rules, which quantifies the amount of evidence for the rule in the data.
-If a rule applies only to a few instances, it is too risky to use it for any application such as data description or prediction. For this reason,
+If a rule applies only to a few instances, it is too risky to use it to draw conclusions. For this reason,
 data mining systems frequently report only rules above a given support threshold. 
 In the following, we define this metric for AMIE's setting and introduce another notion of significance, the \emph{head coverage}.
 
 
 \paragraph{Support} \label{support}In our context, the support of a rule quantifies the number of correct predictions in the existing data.
-\www{There are several ways to define the support: It can be the number of instantiations of a rule that appear in the KB.
+One desired property for support is \emph{monotonicity}, that is, the addition of more atoms and constraints to the rule should 
+always decrease its support. As we will show in Section~\ref{subsec:algorithm}, such property is crucial for pruning.
+There are several ways to define the support: it can be the number of instantiations of a rule that appear in the KB.
 This measure, however, is not monotonic if we add atoms to the body. Consider, for example, the rule
 \indented{
-  \emph{R: livesIn(}$x,y) \Rightarrow$ \emph{wasBornIn(}$y,x$)
-}
-If we add \emph{hasGender($x$,male)} to the body, the number of instantiations that are in the KB decreases.
-If we add an atom with a fresh variable, e.g., \emph{hasFriend($x$,$z$)}, to the body, the number of instantiations increases for every friend of $x$.
-This is true even if we add another atom with $z$ to obtain a closed rule.\
+  \emph{R:} \emph{livesIn}$(x,y) \Rightarrow$ \emph{wasBornIn}$(x,y)$
+} 
+If we add the atom \emph{hasGender}$(x,\;male)$ to the body, the number of instantiations $x$, $y$ in the KB decreases.
+In contrast, if we add an atom with a fresh variable, e.g., \emph{hasFriend}$(x,z)$, to the body, 
+the number of instantiations $x$, $y$, $z$ increases for every friend of $x$. This is true even 
+if we add another atom with $z$ to obtain a closed rule.
 Alternatively, we can count the number of facts in one particular body atom.
-This definition, however, depends on the choice of the body atom, so that the same rule can have different support values.
+Under this definition, however, 
+the same rule can have different support values depending on the selected body atom.
 We can also count the number of facts of the head atom.
 This measure decreases monotonically if more body atoms are added and avoids equivalent rules with different support values.
-With this in mind, we define the support of a rule as the number of distinct pairs of subjects and objects in the head of all instantiations that appear in the KB:
+With this in mind, we define the support of a rule as the number of distinct pairs of subjects 
+and objects in the head of all instantiations that appear in the KB:
 \[supp(\vec{B} \Rightarrow r(x,y)) := \#(x,y): \exists z_1,...,z_m: \vec{B} \wedge r(x,y)\]
-where $z_1,...,z_m$ are the variables of the rule apart from $x$ and $y$. }
-Table~\ref{tab:exampleKB} shows a toy KB that contains only 2 relations and 5 facts. For this toy KB, rule R will have support 1 (because of (A,X)).
+where $z_1,...,z_m$ are the variables of the rule apart from $x$ and $y$.
+Table~\ref{tab:exampleKB} shows an example KB that contains only 2 relations and 5 facts. For this KB, 
+our example rule $R$ has support 1, because of the facts $livesIn(Adam,Paris)$ and $wasBornIn(Adam,Paris)$.
 Note that the support is defined even for rules that are not closed.
 
 \www{
 \paragraph{Head Coverage}
-Support is an absolute number. This means that a user defining thresholds on support has to know the absolute size of the KB to give meaningful values.
-To avoid this, we propose a proportional version of support. A naive way would be to use the absolute number of support, as defined in the previous paragraph, over the size of the KB.
-In this case, however, relations that do not have many facts (either because of the incompleteness of the KB or because of their nature) will not be considered in the head of the rules,
-i.e., we will not learn rules predicting such relations. Therefore, we propose to use the notion of \emph{head coverage}:
+Support is an absolute number. This means that a user defining thresholds on support has to know the absolute size of the KB 
+to give meaningful values. Moreover, if the support threshold is higher than the size of some relation, this relation will
+be disregarded as head relation for rule mining.
+To avoid this, we propose a proportional version of support. A naive way would be to use the absolute number of support 
+(as defined in the previous paragraph) over the size of the KB.
+This definition, however, does not solve the problem for small relations. 
+Therefore, we propose to use the notion of \emph{head coverage}:
 \[hc(\vec{B} \Rightarrow r(x,y)) := \frac{supp(\vec{B} \Rightarrow r(x,y))}{size(r)}\]
 }
 with $size(r) := \#(x',y') : r(x',y')$ denoting the number of facts in relation $r$. Head coverage quantifies the ratio of the known true facts that are implied by the rule.
-For the toy example of Table~\ref{tab:exampleKB}, for example $hc(R)=1/2$.
+For the example presented in Table~\ref{tab:exampleKB}, $hc(R)=1/2$.
 
 
 \begin{table}
 \centering
  \begin{tabular}{c|c}
-  $wasBornIn$ & $livesIn$\\  \hline
-  (A,X)		& (A,X) \\
-  (C,W)		& (A,Y) \\
-		& (B,Z) \\
+  $livesIn$ & $wasBornIn$\\  \hline
+  (Adam, Paris)		& (Adam, Paris) \\
+  (Adam, Rom)		& (Carl, Rom) \\
+  (Bob, Zurich)		&  \\
  \end{tabular}
-\caption{Example contents of a KB. A,B,C: persons. X,Y,Z,W: cities.}\label{tab:exampleKB}
+\caption{An example KB containing two relations between people and cities.}\label{tab:exampleKB}
 \end{table}
 
 
