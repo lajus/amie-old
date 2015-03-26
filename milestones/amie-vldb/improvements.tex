@@ -40,7 +40,7 @@ rule size limits. They allow for avoiding the execution of unnecessary queries f
 %\comment{Chris}{ok, I rewrote that have a look if you like it more} \comment{Luis}{Christina, let me know if you are ok with my rewrite}
 
 \subsubsection{Maximum Rule Length}
-
+\ignore{
 The maximum rule length $n$ is an input parameter for our system. AMIE stops exploring the search space as soon as all rules with a length of at most $n$ have been produced.
 In the experiments,
 we used $n=3$ though AMIE can mine longer rules. As we show later in the experimental section,
@@ -49,16 +49,41 @@ rules with more than 3 atoms are less interesting because they often capture tri
 For AMIE+, we improved this pruning strategy as follows.
 % makes use of the maximum rule length to prune the search space even further.
 During the mining process, AMIE creates connected rules by applying all possible mining operators (line 9 in Algorithm~\ref{rm}) on previously created rules.
+% Given a rule and a maximum length, if there is no chance to close the rule with $n$ atoms, AMIE will stop refining the rule.
 This means that for a not-yet-closed rule of length $n-1$, AMIE applies, among others, the add-dangling-atom operator ($\mathcal{O}_D$). This results in a non-closed rule,
 which will still not be output. Since the rule has the maximum length $n$, it will not be further refined.
 Hence, the application of the operator $\mathcal{O}_D$ to open rules of size $n-1$ is useless.
 For this reason, AMIE+ refines open rules of length $n-1$ only by means of the add-closing-atom-operator ($\mathcal{O}_C$).
+}
+
+The maximum rule length $n$ is an input parameter for our system. AMIE stops exploring the search space as soon as all rules with a length of at most $n$ have been produced.
+In the experiments,
+we used $n=3$ though AMIE can mine longer rules. As we show later in the experimental section,
+rules with more than 3 atoms are less interesting because they often capture trivial relationships. Besides, their support tends to be very low.
+
+For AMIE+, we improved this pruning strategy as follows.
+During the mining process, AMIE creates connected rules by applying all possible mining operators (line 9 in Algorithm~\ref{rm}) on previously created rules.
+Given a maximum rule length $n$ and a non-closed Horn rule of length $n-1$, AMIE
+will refine it only if it is possible to close it before exceeding the length constraint.
+It follows that for a not-yet-closed rule of length $n-1$, AMIE will not apply 
+the add-dangling-atom operator $\mathcal{O}_D$, because this results in a non-closed rule,
+which will be neither output nor refined. In the same spirit, if the same rule contains more than
+two non-closed variables (see Section~\ref{subsec:rules}), AMIE will skip the application of 
+the add-closing atom operator $\mathcal{O}_C$. This happens because an application of the operator 
+$\mathcal{O}_C$ can close at most two variables with one atom. 
+This rationale is also applicable to the add-instantiated operator $\mathcal{O}_E$:
+rules with more than one non-closed variable are not refined with instantiated operators, 
+because the application of this operator can close at most one variable with an atom.
+% Since the rule has the maximum length $n$, it will not be further refined.
+% Hence, the application of the operator $\mathcal{O}_D$ to open rules of size $n-1$ is useless.
+% For this reason, AMIE+ refines open rules of length $n-1$ only by means of the add-closing-atom-operator ($\mathcal{O}_C$).
 
 \subsubsection{Perfect rules}
 By definition, a rule cannot achieve a PCA confidence that is higher than 100\%. Thus, once a rule has achieved 100\% PCA confidence, we can stop adding new atoms. This is because the confidence cannot increase and the support can only decrease. Hence, any refinement is futile. We call rules with 100\% PCA confidence \emph{perfect rules}.
 %A rule is perfect if it has 100\% PCA confidence. Since PCA confidence is not monotonic, the refinements of a perfect rule may not be perfect. This situation leads to a sub-optimal scenario where we obtain longer, more complex and less confident rules, having already a simpler and perfect hypothesis. For this reason, AMIE+ stops specializing perfect rules, i.e., once a rule is identified as perfect, it is not enqueued for further refinement.
 
-\subsubsection{Query Rewriting and Caching}
+%\subsubsection{Query Rewriting and Caching}
+\subsubsection{Query Rewriting}
 
 \comment{R2}{
 3) Using the third optimization technique to expand a rule, AMIE+ chooses the same frequent relations for new atoms as in the last iteration when the rule is built if the rule 
@@ -71,12 +96,28 @@ for those rules that have the exact form as the given example?
 \comment{Chris}{I rewrote the whole thing. I do not have any sql queries now. I also skip the notion or re-writing (perhaps we can remove it from the title). I only use re-writing in the
  example to explain the point. Check if what I day is actually correct and what AMIE is doing.}
 
-Recall from Sec.~\ref{support} that support is defined also for intermediate rules that not  yet closed, i.e., they contain fresh variables. 
-In other words, whenever we apply an add-dangling-atom operator support is defined and can possibly change by the addition of the new atom (see the example in Sec.~\ref{support}).
-However, there is one case in which the addition of a dangling-atom cannot change the support of the parent rule $R_p$ and therefore AMIE can skip the support computation and carry over to the child $R_c$
-the support of the parent rule. This happens when the atom added (i) contains a relation that already exists in the parent rule and 
-(ii) its shared variable is shared with the identical relation already existing in the parent rule. For example, consider the rule $R_c:citizenOf(z,y)\wedge livesIn(x,y)\Rightarrow citizenOf(x,y)$ that
-extends the rule $R_p:livesIn(x,y)\Rightarrow citizenOf(x,y)$. The introduction of the atom $citizenOf(z,y)$ cannot possibly restrict further the support of $R_p$. 
+Recall from Sec.~\ref{support} that support is defined also for intermediate rules that are not yet closed. 
+In other words, whenever we apply an add-dangling-atom operator to a rule $R_p$ (the parent rule) to produce
+a new rule $R_c$ (the child rule), the support of $R_c$ will be likely smaller than the support of $R_p$ (see the example in Sec.~\ref{support}).
+However, there is one case in which the addition of a dangling atom cannot reduce the support. 
+This happens when the new atom is a less restrictive version of an existing atom in the rule.
+% (i) contains a relation that already exists in the parent rule and 
+% (ii) its shared variable is shared with the identical relation already existing in the rule. 
+For example, imagine the application of the operator $\mathcal{O}_D$ to the rule $R_p:livesIn(x,y)\Rightarrow citizenOf(x,y)$
+produces a new rule $R_c: citizenOf(z,y)\wedge livesIn(x,y)\Rightarrow citizenOf(x,y)$. The addition 
+of the dangling atom $citizenOf(z,y)$ cannot further restrict the support of $R_p$ because
+the new atom is a less restrictive version of the atom $citizenOf(x,y)$. This means that $z$ will always 
+bind to the same values as $x$. This implies that $R_c$ can be rewritten as 
+\[
+R_c: citizenOf(x,y)\wedge livesIn(x,y)\Rightarrow citizenOf(x,y)
+\]
+\[
+R_c: livesIn(x,y)\Rightarrow citizenOf(x,y)
+\]
+
+\noindent which is the same expression as $R_p$, the parent rule. Thus both $R_p$ and $R_c$ have the same support.
+
+\ignore{
 To see why, consider the support of $R_p$:
 \[ supp(R_c) = \#(x,y): \exists z:  citizenOf(z,y)\wedge livesIn(x,y)\wedge citizenOf(x,y) \]
 Support counts only the pairs $(x,y)$, and is independend of $z$.  
@@ -90,10 +131,12 @@ In this case, we have
 \]
 
 which is the same as $supp(R_p)$.
-
-The fact that the addition of an atom that is almost identical (same relation, same shared variable)  to an already existing atom of the rule does not change the support of the rule 
-can also be exploited for speeding up the projection queries. 
-Recall that projection queries are used in AMIE to determine the new atoms that can be added to a rule in order to construct new rules without violating the support threshold.
+}
+% The fact that the addition of an atom that is almost identical (same relation, same shared variable)  to an already existing atom of the rule does not change the support of the rule 
+% can also be exploited for speeding up the projection queries. 
+The fact that the child rule can be rewritten into to the parent rule can be exploited to speed up projection queries.
+Recall that projection queries are used in AMIE to determine the new atoms that 
+can be added to a rule in order to construct new rules without violating the support threshold.
 Intuitively, since the support of $R_c$ and $R_p$ is the same, all atoms that are good candidates (will not result in rules with support below threshold) for extending $R_p$ 
 will also be good candidates for extending $R_c$.  Therefore, if we  cache the candidates of $R_p$ we can re-use them when extending $R_c$.
 
