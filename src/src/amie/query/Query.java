@@ -18,6 +18,7 @@ import java.util.TreeSet;
 
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
+import javatools.datatypes.MultiMap;
 import amie.data.EquivalenceChecker2;
 import amie.data.FactDatabase;
 
@@ -1626,5 +1627,107 @@ public class Query{
 			System.out.println();
 			result.clear();
 		}
+	}
+
+	/**
+	 * It determines whether the rule contains a single path that connects the head variables
+	 * in the body.
+	 * For example, the rule:
+	 * - worksAt(x, w), locatedInCity(w, z), locatedInCountry(z, y) =>  livesIn(x, y)
+	 * meets such criteria because there is a single path of variables that connects the head variables
+	 * in the body: x -> w -> z -> y. 
+	 * 
+	 * @return
+	 */
+	public boolean containsSinglePath() {
+		if (getHeadVariables().size() < 2) {
+			// We are not interested in rules with a constant in the head.
+			return false;
+		}
+		IntHashMap<ByteString> histogram = variablesHistogram();
+		for (ByteString variable : getHeadVariables()) {
+			if (histogram.get(variable) != 2) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
+	/**
+	 * Returns an array with the variables that occur in the body but not in the head.
+	 * @return
+	 */
+	private Set<ByteString> getBodyVariables() {
+		List<ByteString> headVariables = getHeadVariables();
+		Set<ByteString> result = new LinkedHashSet<>();
+		for (ByteString[] triple : getBody()) {
+			if (FactDatabase.isVariable(triple[2]) 
+					&& !headVariables.contains(triple[2])) {
+				result.add(triple[2]);
+			}
+			
+			if (FactDatabase.isVariable(triple[2]) 
+					&& !headVariables.contains(triple[2])) {
+				result.add(triple[2]);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the head variables of the rule.
+	 * @return
+	 */
+	private List<ByteString> getHeadVariables() {
+		List<ByteString> headVariables = new ArrayList<>();
+		ByteString[] head = getHead();
+		if (FactDatabase.isVariable(head[0])) {
+			headVariables.add(head[0]);
+		}
+		if (FactDatabase.isVariable(head[2])) {
+			headVariables.add(head[2]);
+		}
+		return headVariables;
+	}
+
+	/**
+	 * Given a rule that contains a single variables path for the head variables in the body 
+	 * (the method containsSinglePath returns true), it returns the atoms sorted so that 
+	 * the path can be reproduced.
+	 * @return
+	 */
+	public List<ByteString[]> getCanonicalPath() {
+		// First check the most functional variable
+		ByteString funcVar = getFunctionalVariable();
+		ByteString nonFuncVar = getNonFunctionalVariable();
+		List<ByteString[]> body = getBody();
+		MultiMap<ByteString, ByteString[]> variableToAtom = new MultiMap<>();
+		List<ByteString[]> path = new ArrayList<>();
+		// Build a multimap, variable -> {atoms where the variable occurs}
+		for (ByteString[] bodyAtom : body) {
+			if (FactDatabase.isVariable(bodyAtom[0])) {
+				variableToAtom.put(bodyAtom[0], bodyAtom);
+			}
+			
+			if (FactDatabase.isVariable(bodyAtom[2])) {
+				variableToAtom.put(bodyAtom[2], bodyAtom);
+			}
+		}
+		
+		// The head variables must have only one atom
+		List<ByteString[]> firstAtomList = variableToAtom.getAsList(funcVar);
+		path.add(firstAtomList.get(0).clone());
+		// Iterate while we have not seen the other head variables
+		while (true) {
+			ByteString[] lastAtom = firstAtomList.get(firstAtomList.size() - 1);
+			if (lastAtom[0].equals(nonFuncVar) 
+					|| lastAtom[2].equals(nonFuncVar)) {				
+				break;
+			}
+				
+		}
+		
+		return path;
 	}
 }

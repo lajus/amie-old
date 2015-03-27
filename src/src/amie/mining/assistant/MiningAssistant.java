@@ -582,113 +582,164 @@ public class MiningAssistant{
 	}
 	
 	/**
-	 * It computes the confidence upper bounds for the rule sent as argument.
+	 * It computes the confidence upper bounds and approximations for the rule sent as argument.
 	 * @param candidate
-	 * @return
+	 * @return True If neither the confidence bounds nor the approximations are aplicable or if they
+	 * did not find enough evidence to discard the rule.
 	 */
-	public boolean calculateConfidenceBounds(Query candidate) {
-		int[] hardQueryInfo = null;
-		
+	public boolean calculateConfidenceBoundsAndApproximations(Query candidate) {		
 		if(enabledConfidenceUpperBounds){
-			hardQueryInfo = source.identifyHardQueryTypeI(candidate.getAntecedent());
-			if(hardQueryInfo != null){
-				double pcaConfUpperBound = getPcaConfidenceUpperBound(candidate);			
-				if(pcaConfUpperBound < minPcaConfidence){
-					if (!silent) {
-						System.err.println("Query " + candidate + " discarded by PCA confidence upper bound " + pcaConfUpperBound);			
-					}
-					return false;
-				}
-				
-				double stdConfUpperBound = getConfidenceUpperBound(candidate);			
-				
-				if(stdConfUpperBound < minStdConfidence){
-					if (!silent) {
-						System.err.println("Query " + candidate + " discarded by standard confidence upper bound " + stdConfUpperBound);
-					}
-					return false;
-				}
-	
-				candidate.setConfidenceUpperBound(stdConfUpperBound);
-				candidate.setPcaConfidenceUpperBound(pcaConfUpperBound);
+			if (!calculateConfidenceBounds(candidate)) {
+				return false;
 			}
 		}
 
 		if (enabledFunctionalityHeuristic) {
-			double headFunctionality = source.x_functionality(candidate.getHead()[1], candidate.getFunctionalVariablePosition());
-			
 			if(candidate.getRealLength() == 3) {
-				hardQueryInfo = source.identifyHardQueryTypeIII(candidate.getAntecedent());
-				if(hardQueryInfo != null){
-					ByteString[] targetPatternOutput = null;
-					ByteString[] targetPatternInput = null; //Atom with the projection variable
-					ByteString[] p1, p2;
-					p1 = candidate.getAntecedent().get(hardQueryInfo[2]);
-					p2 = candidate.getAntecedent().get(hardQueryInfo[3]);
-					int posCommonInput = hardQueryInfo[0];
-					int posCommonOutput = hardQueryInfo[1];					
-					if (FactDatabase.varpos(candidate.getFunctionalVariable(), p1) == -1) {
-						targetPatternOutput = p1;
-						targetPatternInput = p2;
-						posCommonInput = hardQueryInfo[0];
-						posCommonOutput = hardQueryInfo[1];
-					} else if (FactDatabase.varpos(candidate.getFunctionalVariable(), p2) == -1) {
-						targetPatternOutput = p2;
-						targetPatternInput = p1;
-						posCommonInput = hardQueryInfo[1];
-						posCommonOutput = hardQueryInfo[0];							
+				return calculateConfidenceApproximationFor3Atoms(candidate);
+			} else {
+				return calculateConfidenceApproximationForGeneralCase(candidate);
+			}
+				
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * It computes the confidence bounds for rules
+	 * @param candidate
+	 * @return boolean True if the confidence bounds are not applicable or they cannot
+	 * find enough evidence to discard the rule.
+	 */
+	private boolean calculateConfidenceBounds(Query candidate) {
+		int[] hardQueryInfo = null;
+		hardQueryInfo = source.identifyHardQueryTypeI(candidate.getAntecedent());
+		if(hardQueryInfo != null){
+			double pcaConfUpperBound = getPcaConfidenceUpperBound(candidate);			
+			if(pcaConfUpperBound < minPcaConfidence){
+				if (!silent) {
+					System.err.println("Query " + candidate + " discarded by PCA confidence upper bound " + pcaConfUpperBound);			
+				}
+				return false;
+			}
+			
+			double stdConfUpperBound = getConfidenceUpperBound(candidate);			
+			
+			if(stdConfUpperBound < minStdConfidence){
+				if (!silent) {
+					System.err.println("Query " + candidate + " discarded by standard confidence upper bound " + stdConfUpperBound);
+				}
+				return false;
+			}
+
+			candidate.setConfidenceUpperBound(stdConfUpperBound);
+			candidate.setPcaConfidenceUpperBound(pcaConfUpperBound);
+		}
+		
+		return true;
+	}
+
+	/**
+	 * Given a rule with more than 3 atoms and a single path connecting the head variables, 
+	 * it computes a confidence approximation.
+	 * @param candidate
+	 * @return boolean True if the approximation is not applicable or produces a value above the confidence thresholds, i.e.,
+	 * there is not enough evidence to drop the rule.
+	 */
+	private boolean calculateConfidenceApproximationForGeneralCase(
+			Query candidate) {
+		// First identify whether the rule is a single path rule
+		if (!candidate.containsSinglePath()) {
+			// The approximation is not applicable.
+			return true;
+		}
+		
+		// If the approximation is applicable, let's reorder the atoms in the canonical way
+		List<ByteString[]> path = candidate.getCanonicalPath();
+		
+		return true;
+	}
+
+	/**
+	 * Calculate the confidence approximation of the query for the case when 
+	 * the rule has exactly 3 atoms.
+	 * @param candidate
+	 * @return boolean True if the approximation is not applicable or produces a value above the confidence thresholds, i.e.,
+	 * there is not enough evidence to drop the rule.
+	 */
+	private boolean calculateConfidenceApproximationFor3Atoms(Query candidate) {
+		int[] hardQueryInfo = null;
+		double headFunctionality = source.x_functionality(candidate.getHead()[1], candidate.getFunctionalVariablePosition());		
+		hardQueryInfo = source.identifyHardQueryTypeIII(candidate.getAntecedent());
+		if(hardQueryInfo != null){
+			ByteString[] targetPatternOutput = null;
+			ByteString[] targetPatternInput = null; //Atom with the projection variable
+			ByteString[] p1, p2;
+			p1 = candidate.getAntecedent().get(hardQueryInfo[2]);
+			p2 = candidate.getAntecedent().get(hardQueryInfo[3]);
+			int posCommonInput = hardQueryInfo[0];
+			int posCommonOutput = hardQueryInfo[1];					
+			if (FactDatabase.varpos(candidate.getFunctionalVariable(), p1) == -1) {
+				targetPatternOutput = p1;
+				targetPatternInput = p2;
+				posCommonInput = hardQueryInfo[0];
+				posCommonOutput = hardQueryInfo[1];
+			} else if (FactDatabase.varpos(candidate.getFunctionalVariable(), p2) == -1) {
+				targetPatternOutput = p2;
+				targetPatternInput = p1;
+				posCommonInput = hardQueryInfo[1];
+				posCommonOutput = hardQueryInfo[0];							
+			}
+			
+			//Many to many case
+			if (targetPatternOutput != null) {						
+				double f1 = source.x_functionality(targetPatternInput[1], posCommonInput == 0 ? 2 : 0);
+				double f2 = source.x_functionality(targetPatternOutput[1], posCommonOutput);
+				double f3 = source.x_functionality(targetPatternOutput[1], posCommonOutput == 0 ? 2 : 0); //Duplicate elimination term
+				double nentities = source.relationColumnSize(targetPatternInput[1], posCommonInput);
+				double overlap;
+				if(posCommonInput == posCommonOutput)
+					overlap = source.overlap(targetPatternInput[1], targetPatternOutput[1], posCommonInput + posCommonOutput);
+				else if(posCommonInput < posCommonOutput)
+					overlap = source.overlap(targetPatternInput[1], targetPatternOutput[1], posCommonOutput);
+				else
+					overlap = source.overlap(targetPatternOutput[1], targetPatternInput[1], posCommonInput);
+				
+				double overlapHead;
+				int posInput = posCommonInput == 0 ? 2 : 0;
+				if (pcaOptimistic) {
+					//Run the body query on a single variable
+					List<ByteString[]> existentialAntecedent = new ArrayList<ByteString[]>(candidate.getAntecedent());
+					ByteString[] newHead = candidate.getHead().clone();
+					newHead[candidate.getNonFunctionalVariablePosition()] = ByteString.of("?s");
+					existentialAntecedent.add(newHead);
+					overlapHead = source.countDistinct(candidate.getFunctionalVariable(), existentialAntecedent);							
+				} else {
+					if(posInput == candidate.getFunctionalVariablePosition()){
+						overlapHead = source.overlap(targetPatternInput[1], candidate.getHead()[1], posInput + candidate.getFunctionalVariablePosition());
+					}else if(posInput < candidate.getFunctionalVariablePosition()){
+						overlapHead = source.overlap(targetPatternInput[1], candidate.getHead()[1], candidate.getFunctionalVariablePosition());							
+					}else{
+						overlapHead = source.overlap(candidate.getHead()[1], targetPatternInput[1], posInput);							
 					}
-					
-					//Many to many case
-					if (targetPatternOutput != null) {						
-						double f1 = source.x_functionality(targetPatternInput[1], posCommonInput == 0 ? 2 : 0);
-						double f2 = source.x_functionality(targetPatternOutput[1], posCommonOutput);
-						double f3 = source.x_functionality(targetPatternOutput[1], posCommonOutput == 0 ? 2 : 0); //Duplicate elimination term
-						double nentities = source.relationColumnSize(targetPatternInput[1], posCommonInput);
-						double overlap;
-						if(posCommonInput == posCommonOutput)
-							overlap = source.overlap(targetPatternInput[1], targetPatternOutput[1], posCommonInput + posCommonOutput);
-						else if(posCommonInput < posCommonOutput)
-							overlap = source.overlap(targetPatternInput[1], targetPatternOutput[1], posCommonOutput);
-						else
-							overlap = source.overlap(targetPatternOutput[1], targetPatternInput[1], posCommonInput);
-						
-						double overlapHead;
-						int posInput = posCommonInput == 0 ? 2 : 0;
-						if (pcaOptimistic) {
-							//Run the body query on a single variable
-							List<ByteString[]> existentialAntecedent = new ArrayList<ByteString[]>(candidate.getAntecedent());
-							ByteString[] newHead = candidate.getHead().clone();
-							newHead[candidate.getNonFunctionalVariablePosition()] = ByteString.of("?s");
-							existentialAntecedent.add(newHead);
-							overlapHead = source.countDistinct(candidate.getFunctionalVariable(), existentialAntecedent);							
-						} else {
-							if(posInput == candidate.getFunctionalVariablePosition()){
-								overlapHead = source.overlap(targetPatternInput[1], candidate.getHead()[1], posInput + candidate.getFunctionalVariablePosition());
-							}else if(posInput < candidate.getFunctionalVariablePosition()){
-								overlapHead = source.overlap(targetPatternInput[1], candidate.getHead()[1], candidate.getFunctionalVariablePosition());							
-							}else{
-								overlapHead = source.overlap(candidate.getHead()[1], targetPatternInput[1], posInput);							
-							}
-						}
-						
-						double f4 = (1 / f1) * (overlap / nentities);
-						double ratio = overlapHead * f4 * (f3 / f2);
-						ratio = (double)candidate.getSupport() / ratio;
-						candidate.setPcaEstimation(ratio);
-						candidate.setPcaEstimationOptimistic(source.x_functionality(targetPatternOutput[1], posCommonOutput) / headFunctionality);
-						if(ratio < minPcaConfidence) { 
-							if (!silent) {
-								System.err.println("Query " + candidate + " discarded by functionality heuristic with ratio " + ratio);
-							}							
-							return false;
-						}
-					}
+				}
+				
+				double f4 = (1 / f1) * (overlap / nentities);
+				double ratio = overlapHead * f4 * (f3 / f2);
+				ratio = (double)candidate.getSupport() / ratio;
+				candidate.setPcaEstimation(ratio);
+				candidate.setPcaEstimationOptimistic(source.x_functionality(targetPatternOutput[1], posCommonOutput) / headFunctionality);
+				if(ratio < minPcaConfidence) { 
+					if (!silent) {
+						System.err.println("Query " + candidate + " discarded by functionality heuristic with ratio " + ratio);
+					}							
+					return false;
 				}
 			}
 		}
 		
-		return true;
+		return false;
 	}
 
 	/**

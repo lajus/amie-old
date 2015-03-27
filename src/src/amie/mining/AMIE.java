@@ -336,7 +336,7 @@ public class AMIE {
 					if (currentRule.isClosed()){
 						long timeStamp1 = System.currentTimeMillis();
 						boolean ruleSatisfiesConfidenceBounds = 
-								assistant.calculateConfidenceBounds(currentRule);
+								assistant.calculateConfidenceBoundsAndApproximations(currentRule);
 						if (ruleSatisfiesConfidenceBounds) {
 							resultsLock.lock();
 							setAdditionalParents2(currentRule);
