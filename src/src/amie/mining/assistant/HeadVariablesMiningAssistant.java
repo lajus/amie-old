@@ -102,9 +102,9 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 			sourceVariables = openVariables; 
 			if(sourceVariables.size() > 1){
 				if (this.exploitMaxLengthOption) {
-					//Give preference to the non-closed variables
+					// Pruning by maximum length for the \mathcal{O}_C operator.
 					if (sourceVariables.size() > 2 
-							&& query.getLength() == this.maxDepth - 1) {
+							&& query.getRealLength() == this.maxDepth - 1) {
 						return;
 					}
 				}
@@ -245,8 +245,8 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 			if(!testLength(query))
 				return;
 						
-			//General case
-			if(query.getLength() == this.maxDepth - 1) {
+			// Pruning by maximum length for the \mathcal{O}_D operator.
+			if(query.getRealLength() == this.maxDepth - 1) {
 				if (this.exploitMaxLengthOption) {
 					if(!query.getOpenVariables().isEmpty() 
 							&& !this.allowConstants 
@@ -270,12 +270,13 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 	 */
 	protected void addDanglingEdge(Query query, ByteString[] edge, int minCardinality, Collection<Query> output) {
 		List<ByteString> joinVariables = null;
+		List<ByteString> openVariables = query.getOpenVariables();
 		
 		//Then do it for all values
 		if(query.isClosed()) {				
 			joinVariables = query.getVariables();
 		} else {
-			joinVariables = query.getOpenVariables();
+			joinVariables = openVariables;
 		}
 		
 		int nPatterns = query.getLength();
@@ -371,13 +372,21 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 					candidate.setHeadCoverage((double)candidate.getSupport() / this.headCardinalities.get(candidate.getHeadRelation()));
 					candidate.setSupportRatio((double)candidate.getSupport() / (double)this.source.size());
 					candidate.setParent(query);		
-					if(canAddInstantiatedAtom()) {
-						getInstantiatedEdges(candidate, candidate, nPatterns, danglingPosition, minCardinality, output);
+					if (canAddInstantiatedAtom()) {
+						// Pruning by maximum length for the \mathcal{O}_E operator.
+						if (this.exploitMaxLengthOption) {
+							if (query.getRealLength() < this.maxDepth - 1 
+									|| openVariables.size() < 2) {
+								getInstantiatedEdges(candidate, candidate, nPatterns, danglingPosition, minCardinality, output);	
+							}
+						} else {
+							getInstantiatedEdges(candidate, candidate, nPatterns, danglingPosition, minCardinality, output);							
+						}
 					}
 					
 					if (!this.enforceConstants) {
 						// If this rule will not be refined anyway.
-						if (candidate.getLength() == this.maxDepth 
+						if (candidate.getRealLength() == this.maxDepth 
 								&& !candidate.isClosed()) {
 							continue;
 						}

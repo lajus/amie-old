@@ -33,7 +33,7 @@ public class TypedMiningAssistant extends HeadVariablesMiningAssistant {
 	 * @return
 	 */
 	public void getDanglingEdges(Query query, int minCardinality, Collection<Query> output){		
-		if(query.getLength() == 1){
+		if(query.getRealLength() == 1){
 			//Add the types at the beginning of the query.
 			getSpecializationCandidates(query, minCardinality, output);
 		} else {

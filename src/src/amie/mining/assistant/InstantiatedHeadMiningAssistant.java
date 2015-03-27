@@ -77,7 +77,7 @@ public class InstantiatedHeadMiningAssistant extends HeadVariablesMiningAssistan
 			
 			// Enforce this only for n > 2
 			if (maxDepth > 2) {
-				if(query.getLength() == maxDepth - 1) {
+				if(query.getRealLength() == maxDepth - 1) {
 					if(!query.getOpenVariables().isEmpty() && (!allowConstants && !enforceConstants)) {
 						return;
 					}

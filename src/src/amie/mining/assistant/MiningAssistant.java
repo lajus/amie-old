@@ -400,7 +400,7 @@ public class MiningAssistant{
 				return;
 			
 			if (exploitMaxLengthOption) {
-				if(query.getLength() == maxDepth - 1){
+				if(query.getRealLength() == maxDepth - 1){
 					if(!query.getOpenVariables().isEmpty() && !allowConstants){
 						return;
 					}
@@ -578,7 +578,7 @@ public class MiningAssistant{
 	 * @return
 	 */
 	protected boolean testLength(Query candidate){
-		return candidate.getLength() < maxDepth;
+		return candidate.getRealLength() < maxDepth;
 	}
 	
 	/**
@@ -617,7 +617,7 @@ public class MiningAssistant{
 		if (enabledFunctionalityHeuristic) {
 			double headFunctionality = source.x_functionality(candidate.getHead()[1], candidate.getFunctionalVariablePosition());
 			
-			if(candidate.getLength() == 3) {
+			if(candidate.getRealLength() == 3) {
 				hardQueryInfo = source.identifyHardQueryTypeIII(candidate.getAntecedent());
 				if(hardQueryInfo != null){
 					ByteString[] targetPatternOutput = null;

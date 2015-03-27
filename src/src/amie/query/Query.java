@@ -805,7 +805,7 @@ public class Query{
 	
 	/**
 	 * Returns a histogram with the number of different atoms variables 
-	 * occur in. It discard pseudo-atoms containing the keywords DIFFERENTFROM
+	 * occur in. It discards pseudo-atoms containing the keywords DIFFERENTFROM
 	 * and EQUALS.
 	 * @return
 	 */
@@ -1048,6 +1048,9 @@ public class Query{
 		sortedBody.addAll(getAntecedent());						
 		StringBuilder strBuilder = new StringBuilder();
 		for(ByteString[] pattern: sortedBody){
+			if (pattern[1].equals(FactDatabase.DIFFERENTFROMbs)) {
+				continue;
+			}
 			strBuilder.append(pattern[0]);
 			strBuilder.append("  ");
 			strBuilder.append(pattern[1]);
@@ -1136,6 +1139,15 @@ public class Query{
 		return newQuery;
 	}
 	
+	/**
+	 * Return a new query where the variable at position danglingPosition in triple at position triplePos 
+	 * is bound to constant.
+	 * @param triplePos
+	 * @param danglingPosition
+	 * @param constant
+	 * @param cardinality
+	 * @return
+	 */
 	public Query unify(int triplePos, int danglingPosition, ByteString constant, int cardinality) {
 		Query newQuery = new Query(this, cardinality);
 		ByteString[] targetEdge = newQuery.getTriples().get(triplePos);
@@ -1146,14 +1158,14 @@ public class Query{
 
 
 	private void cleanInequalityConstraints() {
-		List<ByteString[]> toRemove = new ArrayList<ByteString[]>();
-		List<ByteString> variables = getVariables();
+		List<ByteString[]> toRemove = new ArrayList<>();
+		IntHashMap<ByteString> varHistogram = variablesHistogram();
 		for(ByteString[] triple: triples){
 			if(triple[1].equals(FactDatabase.DIFFERENTFROMbs)){
 				int varPos = FactDatabase.firstVariablePos(triple);
-				if(!variables.contains(triple[varPos])){
-					//Remove the triple
-					toRemove.add(triple);
+				// Check if the variable became orphan
+				if (!varHistogram.containsKey(triple[varPos])) {
+					toRemove.add(triple);					
 				}
 			}
 		}

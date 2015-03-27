@@ -77,6 +77,21 @@ public class AMIE {
 	 * Preferred number of threads
 	 */
 	private int nThreads;
+	
+	/**
+	 *  Time spent in applying the operators. 
+	 **/
+	private long specializationTime;
+			
+	/** 
+	 * Time spent in calculating confidence scores. 
+	 **/
+	private long scoringTime;
+			
+	/** 
+	 * Time spent in duplication elimination 
+	 **/
+	private long queueingAndDuplicateElimination;
 		
 	/**
 	 * 
@@ -93,7 +108,23 @@ public class AMIE {
 		this.minHeadCoverage = threshold;
 		this.pruningMetric = metric;
 		this.nThreads = nThreads;
+		this.specializationTime = 0l;
+		this.scoringTime = 0l;
+		this.queueingAndDuplicateElimination = 0l;
 	}
+	
+	public long getSpecializationTime() {
+		return specializationTime;
+	}
+
+	public long getScoringTime() {
+		return scoringTime;
+	}
+
+	public long getQueueingAndDuplicateElimination() {
+		return queueingAndDuplicateElimination;
+	}
+
 		
 	/**
 	 * The key method which returns a set of rules mined from the KB.
@@ -127,25 +158,38 @@ public class AMIE {
 			consumerThread.start();
 		}		
 		
-        if(nThreads > 1){
+        if(nThreads > 1) {
             System.out.println("Using " + nThreads + " threads");
 			//Create as many threads as available cores
-        	ArrayList<Thread> currentJobs = new ArrayList<Thread>();
+        	ArrayList<Thread> currentJobs = new ArrayList<>();
+        	ArrayList<RDFMinerJob> jobObjects = new ArrayList<>();
         	for(int i = 0; i < nThreads; ++i){
-        		Thread job = new Thread(new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter, indexedResult));
+        		RDFMinerJob jobObject = new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter, indexedResult);
+        		Thread job = new Thread(jobObject);
         		currentJobs.add(job);
+        		jobObjects.add(jobObject);
         	}
         	
-        	for(Thread job: currentJobs){
+        	for(Thread job: currentJobs) {
         		job.start();
         	}
         	
-        	for(Thread job: currentJobs){
+        	for(Thread job: currentJobs) {
         		job.join();
         	}
+        	
+        	for (RDFMinerJob jobObject : jobObjects) {
+        		this.specializationTime += jobObject.getSpecializationTime();
+        		this.scoringTime += jobObject.getScoringTime();
+        		this.queueingAndDuplicateElimination += jobObject.getQueueingAndDuplicateElimination();
+        	}
         }else{
-        	Thread job = new Thread(new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter, indexedResult));
+        	RDFMinerJob jobObject = new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter, indexedResult);
+        	Thread job = new Thread(jobObject);
         	job.run();
+    		this.specializationTime += jobObject.getSpecializationTime();
+    		this.scoringTime += jobObject.getScoringTime();
+    		this.queueingAndDuplicateElimination += jobObject.getQueueingAndDuplicateElimination();
         }
 		
         if(realTime){
@@ -190,12 +234,7 @@ public class AMIE {
 					while(lastConsumedIndex == consumeList.size() - 1){
 						conditionVariable.await();
 						for(int i = lastConsumedIndex + 1; i < consumeList.size(); ++i){
-							System.out.println(consumeList.get(i).getFullRuleString());
-							/*System.out.println("Ancestors");
-							for (Query rule : consumeList.get(i).getAllAncestors()) {
-								System.out.print(rule + " (" + rule.getPcaConfidence() + "); ");
-							}
-							System.out.println("\n========");*/				
+							System.out.println(consumeList.get(i).getFullRuleString());		
 						}
 						
 						lastConsumedIndex = consumeList.size() - 1;
@@ -236,6 +275,15 @@ public class AMIE {
 		
 		private boolean idle;
 		
+		// Time spent in applying the operators.
+		private long specializationTime;
+		
+		// Time spent in calculating confidence scores.
+		private long scoringTime;
+		
+		// Time spent in duplication elimination
+		private long queueingAndDuplicateElimination;
+		
 								
 		public RDFMinerJob(Collection<Query> seedsPool, 
 				List<Query> outputSet, Lock resultsLock, 
@@ -249,16 +297,21 @@ public class AMIE {
 			this.sharedCounter = sharedCounter;
 			this.indexedOutputSet = indexedOutputSet;
 			this.idle = false;
+			this.specializationTime = 0l;
+			this.scoringTime = 0l;
+			this.queueingAndDuplicateElimination = 0l;
 		}
 		
 		private Query pollQuery(){
+			long timeStamp1 = System.currentTimeMillis();
 			Query nextQuery = null;
 			if(!queryPool.isEmpty()){
 				Iterator<Query> iterator = queryPool.iterator();
 				nextQuery = iterator.next();
 				iterator.remove();
 			}
-			
+			long timeStamp2 = System.currentTimeMillis();
+			this.queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
 			return nextQuery;
 		}
 	
@@ -281,6 +334,7 @@ public class AMIE {
 					// decide whether to output it.
 					boolean outputRule = false;
 					if (currentRule.isClosed()){
+						long timeStamp1 = System.currentTimeMillis();
 						boolean ruleSatisfiesConfidenceBounds = 
 								assistant.calculateConfidenceBounds(currentRule);
 						if (ruleSatisfiesConfidenceBounds) {
@@ -294,6 +348,8 @@ public class AMIE {
 						} else {
 							outputRule = false;
 						}
+						long timeStamp2 = System.currentTimeMillis();
+						this.scoringTime += (timeStamp2 - timeStamp1);
 					}
 					
 					// Check if we should further refine the rule
@@ -303,20 +359,25 @@ public class AMIE {
 					}
 					
 					if (furtherRefined) {
+						long timeStamp1 = System.currentTimeMillis();
 						int minCount = getCountThreshold(currentRule);
 						List<Query> temporalOutput = new ArrayList<Query>();
 						assistant.getCloseCircleEdges(currentRule, minCount, temporalOutput);
 						assistant.getDanglingEdges(currentRule, minCount, temporalOutput);
+						long timeStamp2 = System.currentTimeMillis();
+						this.specializationTime += (timeStamp2 - timeStamp1);
 						synchronized(queryPool){
-							for (Query out : temporalOutput) {
-								queryPool.add(out);
-							}
-						}												
+							timeStamp1 = System.currentTimeMillis();
+							queryPool.addAll(temporalOutput);
+							timeStamp2 = System.currentTimeMillis();
+							this.queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
+						}
 					}
 					
 					// Output the rule
 					if (outputRule) {
 						resultsLock.lock();
+						long timeStamp1 = System.currentTimeMillis();
 						Set<Query> outputQueries = indexedOutputSet.get(currentRule.alternativeParentHashCode());
 						if (outputQueries != null) {
 							if (!outputQueries.contains(currentRule)) {
@@ -327,7 +388,8 @@ public class AMIE {
 							outputSet.add(currentRule);
 							indexedOutputSet.put(currentRule.alternativeParentHashCode(), currentRule);
 						}
-
+						long timeStamp2 = System.currentTimeMillis();
+						this.queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
 						resultsCondition.signal();
 						resultsLock.unlock();
 					}					
@@ -384,6 +446,19 @@ public class AMIE {
 				return 0;
 			}
 		}
+
+		public long getSpecializationTime() {
+			return specializationTime;
+		}
+
+		public long getScoringTime() {
+			return scoringTime;
+		}
+
+
+		public long getQueueingAndDuplicateElimination() {
+			return queueingAndDuplicateElimination;
+		}
 	}
 	
 	public static void run(String[] args) throws Exception {
@@ -414,6 +489,7 @@ public class AMIE {
 		boolean exploitMaxLengthForRuntime = true;
 		boolean enableQueryRewriting = true;
 		boolean enablePerfectRulesPruning = true;
+		long sourcesLoadingTime = 0l;
 		// ========================================
 		int nProcessors = Runtime.getRuntime().availableProcessors();
 		String bias = "headVars";
@@ -738,7 +814,10 @@ public class AMIE {
 		}
 				
 		FactDatabase dataSource = new FactDatabase();
+		long timeStamp1 = System.currentTimeMillis();
 		dataSource.load(dataFiles, cli.hasOption("optimfh"));
+		long timeStamp2 = System.currentTimeMillis();
+		sourcesLoadingTime = timeStamp2 - timeStamp1;
 		
 		if (!targetFiles.isEmpty()) {
 			targetSource = new FactDatabase();
@@ -926,8 +1005,13 @@ public class AMIE {
 			for(Query rule: rules)
 				System.out.println(rule.getFullRuleString());
 		}
+		System.out.println("Specialization time: " + (miner.getSpecializationTime() / 1000.0) + "s");
+		System.out.println("Scoring time: " + (miner.getScoringTime() / 1000.0) + "s");
+		System.out.println("Queueing and duplicate elimination: " + (miner.getQueueingAndDuplicateElimination() / 1000.0) + "s");
 		System.out.println(rules.size() + " rules mined.");
-		Announce.done("Mining done in " + NumberFormatter.formatMS(System.currentTimeMillis() - time) + " seconds" );
+		long miningTime = System.currentTimeMillis() - time;
+		System.out.println("Mining done in " + NumberFormatter.formatMS(miningTime));
+		Announce.done("Total time " + NumberFormatter.formatMS(miningTime + sourcesLoadingTime));
 	}
 
 	/**
