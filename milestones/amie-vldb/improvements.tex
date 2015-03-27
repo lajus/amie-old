@@ -65,7 +65,7 @@ For AMIE+, we improved this pruning strategy as follows.
 During the mining process, AMIE creates connected rules by applying all possible mining operators (line 9 in Algorithm~\ref{rm}) on previously created rules.
 Given a maximum rule length $n$ and a non-closed Horn rule of length $n-1$, AMIE
 will refine it only if it is possible to close it before exceeding the length constraint.
-It follows that for a not-yet-closed rule of length $n-1$, AMIE will not apply 
+This means that for a not-yet-closed rule of length $n-1$, AMIE will not apply 
 the add-dangling-atom operator $\mathcal{O}_D$, because this results in a non-closed rule,
 which will be neither output nor refined. In the same spirit, if the same rule contains more than
 two non-closed variables (see Section~\ref{subsec:rules}), AMIE will skip the application of 
@@ -96,18 +96,18 @@ for those rules that have the exact form as the given example?
 \comment{Chris}{I rewrote the whole thing. I do not have any sql queries now. I also skip the notion or re-writing (perhaps we can remove it from the title). I only use re-writing in the
  example to explain the point. Check if what I day is actually correct and what AMIE is doing.}
 
-Recall from Sec.~\ref{support} that support is defined also for intermediate rules that are not yet closed. 
+Recall from Sec.~\ref{support} that support is defined also for intermediate rules, i.e., rules that are not yet closed. 
 In other words, whenever we apply an add-dangling-atom operator to a rule $R_p$ (the parent rule) to produce
 a new rule $R_c$ (the child rule), the support of $R_c$ will be likely smaller than the support of $R_p$ (see the example in Sec.~\ref{support}).
 However, there is one case in which the addition of a dangling atom cannot reduce the support. 
 This happens when the new atom is a less restrictive version of an existing atom in the rule.
 % (i) contains a relation that already exists in the parent rule and 
 % (ii) its shared variable is shared with the identical relation already existing in the rule. 
-For example, imagine the application of the operator $\mathcal{O}_D$ to the rule $R_p:livesIn(x,y)\Rightarrow citizenOf(x,y)$
-produces a new rule $R_c: citizenOf(z,y)\wedge livesIn(x,y)\Rightarrow citizenOf(x,y)$. The addition 
-of the dangling atom $citizenOf(z,y)$ cannot further restrict the support of $R_p$ because
+For example, imagine we specialize the rule $R_p:livesIn(x,y)\Rightarrow citizenOf(x,y)$
+using the operator $\mathcal{O}_D$. One of such specializations is $R_c: citizenOf(z,y)\wedge livesIn(x,y)\Rightarrow citizenOf(x,y)$. 
+The addition of the dangling atom $\textit{citizenOf}(z,y)$ cannot further restrict the support of $R_p$ because
 the new atom is a less restrictive version of the atom $citizenOf(x,y)$. This means that $z$ will always 
-bind to the same values as $x$. This implies that $R_c$ can be rewritten as 
+bind to the same values as $x$. From this observation, it follows that $R_c$ can be rewritten as 
 \[
 R_c: citizenOf(x,y)\wedge livesIn(x,y)\Rightarrow citizenOf(x,y)
 \]
@@ -115,30 +115,45 @@ R_c: citizenOf(x,y)\wedge livesIn(x,y)\Rightarrow citizenOf(x,y)
 R_c: livesIn(x,y)\Rightarrow citizenOf(x,y)
 \]
 
-\noindent which is the same expression as $R_p$, the parent rule. Thus both $R_p$ and $R_c$ have the same support.
+\noindent which is the same expression as the parent rule $R_p$. Thus both $R_p$ and $R_c$ have the same support.
 
-\ignore{
-To see why, consider the support of $R_p$:
-\[ supp(R_c) = \#(x,y): \exists z:  citizenOf(z,y)\wedge livesIn(x,y)\wedge citizenOf(x,y) \]
-Support counts only the pairs $(x,y)$, and is independend of $z$.  
-$z$ is free and can take any value, but in the most restrictive (for the support) scenario will be bound to $x$. 
-In this case, we have 
-\[
- supp(R_c) = \#(x,y):  citizenOf(x,y)\wedge livesIn(x,y)\wedge citizenOf(x,y)
-\]
-\[
- supp(R_c) = \#(x,y):   livesIn(x,y)\wedge citizenOf(x,y)
-\]
-
-which is the same as $supp(R_p)$.
-}
+% \ignore{
+% To see why, consider the support of $R_p$:
+% \[ supp(R_c) = \#(x,y): \exists z:  citizenOf(z,y)\wedge livesIn(x,y)\wedge citizenOf(x,y) \]
+% Support counts only the pairs $(x,y)$, and is independend of $z$.  
+% $z$ is free and can take any value, but in the most restrictive (for the support) scenario will be bound to $x$. 
+% In this case, we have 
+% \[
+%  supp(R_c) = \#(x,y):  citizenOf(x,y)\wedge livesIn(x,y)\wedge citizenOf(x,y)
+% \]
+% \[
+%  supp(R_c) = \#(x,y):   livesIn(x,y)\wedge citizenOf(x,y)
+% \]
+% 
+% which is the same as $supp(R_p)$.
+% }
 % The fact that the addition of an atom that is almost identical (same relation, same shared variable)  to an already existing atom of the rule does not change the support of the rule 
 % can also be exploited for speeding up the projection queries. 
-The fact that the child rule can be rewritten into to the parent rule can be exploited to speed up projection queries.
-Recall that projection queries are used in AMIE to determine the new atoms that 
-can be added to a rule in order to construct new rules without violating the support threshold.
-Intuitively, since the support of $R_c$ and $R_p$ is the same, all atoms that are good candidates (will not result in rules with support below threshold) for extending $R_p$ 
-will also be good candidates for extending $R_c$.  Therefore, if we  cache the candidates of $R_p$ we can re-use them when extending $R_c$.
+The fact that the child rule can be rewritten into to the parent rule can be leveraged to speed up projection queries.
+Recall from Section~\ref{subsec:algorithm} that projection queries are used in AMIE to determine the
+relations for new atoms. Assume AMIE refines the rule $R_c$ with a dangling atom
+joining on variable $y$. This implies to construct the following expressions:
+\[
+?r(w,y) \wedge \textit{citizenOf}(z,y)\wedge \textit{livesIn}(x,y)\Rightarrow \textit{citizenOf}(x,y)
+\]
+\[
+?r(y,w) \wedge \textit{citizenOf}(z,y)\wedge \textit{livesIn}(x,y)\Rightarrow \textit{citizenOf}(x,y)
+\]
+\noindent and find the bindings of $r$ that keep their support above the given threshold.
+Since the atom $citizenOf(z,y)$ is redundant, we can rewrite the query and omit it.
+This reduces the number of atoms of the query and therefore its running time.
+On the other hand, this technique cannot be applied when the new atoms involve the variable $z$. This happens
+because the new atoms impose extra constraints on $z$ which break the redundancy, e.g., 
+there is not guarantee anymore that $z$ always binds to the same values as $x$. For this reason, AMIE only 
+drops redundant atoms for queries where the specialization does not involve the variable in the redundant atom.
+
+% Intuitively, since the support of $R_c$ and $R_p$ is the same, all atoms that are good candidates (will not result in rules with support below threshold) for extending $R_p$ 
+% will also be good candidates for extending $R_c$.  Therefore, if we  cache the candidates of $R_p$ we can re-use them when extending $R_c$.
 
 
 
@@ -176,7 +191,7 @@ Therefore, AMIE+ caches the results of previous queries. Whenever a new query ca
 being not trivial to generalize it to any kind of rule. (Indeed, experiments are limited to 3-atom rules).}
 
 
-Most rule mining applications have no use for rules with low confidences. For example, predictions based on rules with 1\% confidence are not useful in practice.
+Most rule mining applications have no use for rules with low confidence. For example, predictions based on rules with 1\% confidence are not useful in practice.
 Based on this observation, AMIE+ accepts a minimum confidence threshold for both the PCA and the standard confidence. However,
 due to the non-monotonic behavior of the confidence metrics, Algorithm~\ref{rm} does not use these thresholds for pruning.
 Hence, in AMIE, pruning based on confidence thresholds is applied only directly before the rules are output. Consequently, only the output is influenced, not the runtime.
@@ -194,21 +209,21 @@ Our experiments (see Sec.~\ref{amiepm}) show that this technique can make AMIE r
 
 By the time AMIE has to calculate the confidence of a rule, the system already knows the support of the rule.
 Recall that confidence and PCA confidence (see Sections~\ref{subsubsec:stdConf} and \ref{subsubsec:pcaConf}) are defined as:
-\[conf(\vec{B} \Rightarrow r(x,y)) := \frac{supp(\vec{B} \wedge r(x,y))}{\#(x,y): \exists z_1,...,z_m: \vec{B}}\]
+\[conf(\vec{B} \Rightarrow r_h(x,y)) := \frac{supp(\vec{B} \Rightarrow r_h(x,y))}{\#(x,y): \exists z_1,...,z_m: \vec{B}}\]
 and
 \begin{multline*}
-conf_{pca}(\vec{B} \Rightarrow r(x,y)) :=\\
-\frac{supp(\vec{B} \wedge r(x,y))}{\#(x,y): \exists z_1,...,z_m,y': \vec{B} \wedge r(x,y')}
+conf_{pca}(\vec{B} \Rightarrow r_h(x,y)) :=\\
+\frac{supp(\vec{B} \Rightarrow r_h(x,y))}{\#(x,y): \exists z_1,...,z_m,y': \vec{B} \wedge r_h(x,y')}
 \end{multline*}
 \noindent Given that support is known, the remaining step is to fire the queries for the denominators of the confidence expressions
 (see Sections~\ref{subsubsec:stdConf} and \ref{subsubsec:pcaConf}), denoted as $dnm_{std}$ and $dnm_{pca}$:
 \begin{equation} \label{eq:denomStandardConf}
- dnm_{std}(\vec{B} \Rightarrow r(x,y)):= \#(x,y): \exists z_1,...,z_m: \vec{B}
+ dnm_{std}(\vec{B} \Rightarrow r_h(x,y)):= \#(x,y): \exists z_1,...,z_m: \vec{B}
 \end{equation}
 and
 \begin{equation} \label{eq:denomPCA}
 \begin{array}{rl}
-dnm_{pca}(\vec{B} \Rightarrow r(x,y)) := {}& \#(x,y): \exists z_1,...,z_m,y': \\ &\quad \vec{B} \wedge r(x,y')
+dnm_{pca}(\vec{B} \Rightarrow r_h(x,y)) := {}& \#(x,y): \exists z_1,...,z_m,y': \\ &\quad \vec{B} \wedge r_h(x,y')
 \end{array}
 \end{equation}
 
@@ -223,22 +238,30 @@ $\widehat{dnm}_{pca}$. By plugging this expression into the confidence formula, 
 Let us re-examine Eq.~\ref{eq:denomPCA}:
 \[
 \begin{array}{rl}
- dnm_{pca}(\vec{B}(x,y) \Rightarrow r(x,y)) := {} \#(x,y): \exists z_1,...,z_m,y': \\ \quad \vec{B}(x, y) \wedge r_h(x,y')
+ dnm_{pca}(\vec{B}(x,y) \Rightarrow r_h(x,y)) := {} \#(x,y): \exists z_1,...,z_m,y': \\ \quad \vec{B}(x, y) \wedge r_h(x,y')
 \end{array}
 \]
 Here we resort to an abstraction that treats the body of the rule $\vec{B}(x, y)$ as a relation on the head variables. 
-If $\vec{B}$ has functionality $fun(\vec{B})$, it means that for each entity in variable $x$ (``domain'' of $\vec{B}$) the body will produce $1/fun(\vec{B})$ entities in $y$,
-i.e., the body produces $\#y_{per\; x} = 1/fun(\vec{B})$ facts per entity in its ``range'', on average. If we multiply this number
-by the number of entities that bind to $x$, we obtain an estimate for the body size of the rule. 
+% If $\vec{B}$ has functionality $fun(\vec{B})$, it means that for each entity in variable $x$ (``domain'' of $\vec{B}$) the body will produce $1/fun(\vec{B})$ entities in $y$,
+% i.e., the body produces $\#y_{per\; x} = 1/fun(\vec{B})$ facts per entity in its ``range'', on average. If we multiply this number
+% by the number of entities that bind to $x$, we obtain an estimate for the body size of the rule. 
+If $\vec{B}$ has functionality $fun(\vec{B})$, it means that, on average, each entity in variable $x$ 
+relates to $\#y_{per\; x} = 1/fun(\vec{B})$ bindings in $y$. If denote the domain and range of a relation $r$ as
+$dom(r)$ and $rng(r)$ respectively, the expression $\#y_{per\; x} \times |dom(\vec{B})|$ gives us 
+an estimate for the body size of the rule. 
 However, for the PCA confidence, the denominator is restricted also by the entities in the domain of the head relation.
-If we denote with $|dom(r)|$ the number of entities in the domain of relation $r$, our approximation has the form:
+This consideration leads us to the expression:
+% If we denote with $|dom(r)|$ the number of entities in the domain of relation $r$, our approximation has the form:
 \begin{equation} \label{eq:pcaApproxConf_general}
   \widehat{dnm}_{pca}(R):=|dom(\vec{B}) \cap dom(r_h)|\cdot \#y_{per\; x}
 \end{equation}
 
-Notice that we are trying to approximate the number of entities produced in the place of the less functional variable $y$ for each entity in the place of the most functional variable $x$.
-In the following we will show how to approximate the quantities $\#y_{per\; x}$ and $dom(\vec{B})$.
-
+% Notice that we are trying to approximate the number of entities produced in the place of the less functional variable $y$ for each entity in the place of the most functional variable $x$.
+%In the following we will show how to approximate the quantities $\#y_{per\; x}$ and $dom(\vec{B})$.
+In the following, we discuss how to calculate the terms of this expression in an efficient way. Additionally, we show 
+how this approximation can help AMIE spot low confident rules for which the confidence
+calculation is very expensive. As our experimental results show, this reduces runtime significantly 
+as it avoids investing resources in expensive rules that will not be anyway output.
 
 \subsubsection{Expensive Rules}\label{sec:expensive_rules}
 
@@ -250,11 +273,13 @@ higher runtimes and memory usage. An example is the rule
 \[
  directed(x,z) \wedge hasActor(z,y) \Rightarrow married(x,y)
 \]
-This rule concludes that a director is married to all the actors that acted in his movies. Its
-confidence is low because the number of bindings in the body is very large. 
+This rule concludes that a director is married to all the actors that acted in his movies. In YAGO, for instance,
+this rule has low confidence and a large number of bindings in the body.
+%confidence is low because the number of bindings in the body is very large. 
 This phenomenon mainly occurs in expressions that contain existentially quantified variables in Eq.~\ref{eq:denomPCA}, 
-$z$ in this example. This happens because such variables introduce many intermediate results. In our example
-rule, a director is related to many movies. In contrast, if a rule does not contain additional variables, 
+because such variables introduce many intermediate results. In our example
+rule, a director $x$ is related to many movies $z$ (the intermediate variable) that have different actors . 
+In contrast, if a rule does not contain additional variables, 
 e.g., $livesIn(x,y)\wedge bornIn(x,y)\Rightarrow diedIn(x,y)$, the query associated to it becomes very selective.
 
 We therefore focus on rules for which the $x,y$ variables are connected through a single 
@@ -263,7 +288,7 @@ $$
   r_1(x,z_1) \wedge r_2(z_1,z_2) \wedge ... \wedge r_n(z_{n-1},y) \Rightarrow r_h(x,y)
 $$
 
-Notice that in order to write a rule in this form we may need to replace some relations by their inverses
+Notice that in order to write a rule in this canonical form we may need to replace some relations by their inverses
 (e.g., substitute $r_2(z_2,z_1)$ with $r_2^{-1}(z_1,z_2)$)
 and change the order of the atoms.
 In the following, we first explain how to compute the approximation for the case of a single 
@@ -274,8 +299,9 @@ in the end, we discuss the case of multiples paths.
 \subsubsection{Approximating Confidence Denominator} \label{sec:appr}
 In the following, we denote the domain and range of $r$ with $dom(r)$ and $rng(r)$, respectively.
 In addition, we use the shortcut notation $ov_{dr}(r_1,r_2)$, $ov_{rd}(r_1,r_2)$, $ov_{dd}(r_1,r_2)$, $ov_{rr}(r_1,r_2)$
-for the overlaps in the entities in the domains and ranges (all combinations) between two relations.
-Let us, now consider again the rule
+for the size of the overlap sets between the domains and ranges 
+of pairs of relations, e.g., $ov_{dr}(r_1,r_2) := |dom(r_1) \cap rng(r_2)|$.
+Let us now consider again the rule
 \[
  directed(x,z) \wedge hasActor(z,y) \Rightarrow married(x,y)
 \]
@@ -339,7 +365,7 @@ which are chosen from \emph{all} the movies in the relation $hasActor$.
 % i.e., the average number of movies by the same director that an actor acts in (e.g., 2 movies per actor, which is less than 3).
 % In other words, in step 4, we employ a very pessimistic scenario, which causes $\#y_{per\;x}$ to be an underestimation, 
 % and the overall confidence approximation to be an overestimation of the actual confidence.
-In reality, we want the number of different movies chosen from those that remain after step 2 ($num_{x_1\; per \; x_0}$), % that correspond to the same $x_2$,
+In reality, we want the number of different movies chosen from those that remain after step 2, % that correspond to the same $x_2$,
 i.e., the average number of movies by the same director that an actor acts in. This number is obviously smaller, which
 implies that the factor $ifun(hasActor)$ is a pessimistic estimator. This makes 
 our approximation an underestimation of the real confidence denominator, 
@@ -352,7 +378,8 @@ $$
 \noindent To calculate $\widehat{dnm}_{pca}$ from Equation.~\ref{eq:pcaApproxConf_general}, we are now only missing 
 the expression $|dom(\vec{B})\;\cap\;dom(isMarried)|$. 
 Here we make the simplifying assumption that $dom(\vec{B}) = dom(directed)$, so that the expression
-becomes the size of the join between the relations $directed$ and $married$, on the subject argument ($ov_{dd}(directed,married)$).
+becomes the size of the join between the relations $directed$ and $married$, on the subject argument, 
+that is $ov_{dd}(directed,married)$.
 
 To summarize, the $ \widehat{dnm}_{pca}(R)$ for a rule $r_1(x,z)\wedge r_2(z,y) \Rightarrow r_h(x,y)$ can be approximated by:
 \[
@@ -623,7 +650,7 @@ which are chosen from \emph{all} the movies in the relation $hasActor$.
 % i.e., the average number of movies by the same director that an actor acts in (e.g., 2 movies per actor, which is less than 3).
 % In other words, in step 4, we employ a very pessimistic scenario, which causes $\#y_{per\;x}$ to be an underestimation, 
 % and the overall confidence approximation to be an overestimation of the actual confidence.
-In reality, we want the number of different movies chosen from those that remain after step 2 ($num_{x_1\; per \; x_0}$), % that correspond to the same $x_2$,
+In reality, we want the number of different movies chosen from those that remain after step 2, % that correspond to the same $x_2$,
 i.e., the average number of movies by the same director that an actor acts in. This number is obviously smaller, which
 implies that the factor $ifun(hasActor)$ is a pessimistic estimator. This makes 
 our approximation an underestimation of the real confidence denominator, 
@@ -684,11 +711,11 @@ result in an overestimation of the actual confidence. This is indeed the case, a
 
 
 \subsubsection{Confidence Upper Bounds}
-In special cases of rules, AMIE+ is be able to derive lower bounds for the confidence denominator ($dnm_{pca}$, $dnm_{std}$) instead of using the approximation described in Sec.~\ref{sec:appr}.
+In some particular cases, AMIE+ is be able to derive lower bounds for the confidence denominator ($dnm_{pca}$, $dnm_{std}$) instead of using the approximation described in Sec.~\ref{sec:appr}.
 Consider a rule of the form:
 $$ r(x,z) \wedge r(y,z) \Rightarrow r_h(x,y) $$
 
-the confidence denominator takes the expression:
+\noindent Here, the confidence denominator is expressed by the formula:
 $$
 dnm_{std} := \#(x,y): \exists z: r(x,z) \wedge r(y,z)
 $$
@@ -696,8 +723,11 @@ Since both atoms contain the same relation, we know that all the entities of $z$
 will join with the second atom. Furthermore,
 we know that the join will result in \emph{at least} one $y$-value for each binding of $x$, i.e., the case where $y=x$. This allows us to rewrite
 the expression as
+\[
+dnm_{std} \ge \#(x,x): \exists z:  r(x,z) \wedge r(x,z)
+\]
 \begin{equation}
-dnm_{std} \ge \#(x,x): \exists z:  r(x,z) \wedge r(x,z) = \#x: \exists z:  r(x,z)  \label{eq:stdBoundDenom}
+dnm_{std} \ge \#x: \exists z:  r(x,z)  \label{eq:stdBoundDenom}
 \end{equation}
 This expression can be calculated in constant time with the indexes of our in-memory database (see Section~\ref{subsec:implementation} for more details on the in-memory database).
 Similar analysis can be used also for rules of the form $r(z,x) \wedge r(z,y) \Rightarrow r_h(x,y) $.

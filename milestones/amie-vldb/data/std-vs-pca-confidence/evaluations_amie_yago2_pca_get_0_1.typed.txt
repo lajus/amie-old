@@ -624,36 +624,37 @@ Confidence [0.5, 0.3999999999999999)
 <Jens_Jacob_Asmussen_Worsaae>	<wasBornIn>	<Copenhagen>	0.44037687969319483	ManualEvaluation	
 Confidence [0.3999999999999999, 0.29999999999999993)
 15590 predictions
-<Jerzy_Zborowski>	<isCitizenOf>	<Second_Polish_Republic>	0.3892255583363302	ManualEvaluation	
-<Sue_Dickenson>	<livesIn>	<Montana>	0.34058218189503076	ManualEvaluation	
-<Szmul_Zygielbojm>	<diedIn>	<Warsaw>	0.39639639639639634	ManualEvaluation	
-<Jenny_Kelly>	<livesIn>	<Dublin>	0.3534793263738085	ManualEvaluation	
-<Charles_Babbage>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	
-<Fred_Keeley>	<livesIn>	<California>	0.34058218189503076	ManualEvaluation	
-<Abel-Dominique_Boyé>	<diedIn>	<Paris>	0.39639639639639634	ManualEvaluation	
+<Jerzy_Zborowski>	<isCitizenOf>	<Second_Polish_Republic>	0.3892255583363302	ManualEvaluation	True
+<Sue_Dickenson>	<livesIn>	<Montana>	0.34058218189503076	ManualEvaluation	True
+<Szmul_Zygielbojm>	<diedIn>	<Warsaw>	0.39639639639639634	ManualEvaluation	False
+<Jenny_Kelly>	<livesIn>	<Dublin>	0.3534793263738085	ManualEvaluation	True
+<Charles_Babbage>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	True
+<Fred_Keeley>	<livesIn>	<California>	0.34058218189503076	ManualEvaluation	True
+<Abel-Dominique_Boyé>	<diedIn>	<Paris>	0.39639639639639634	ManualEvaluation	False
 <André_Masson>	<diedIn>	<Paris>	0.39639639639639634	TargetSource	True
-<Anja_Hajduk>	<diedIn>	<Berlin>	0.39639639639639634	ManualEvaluation	
-<S._Ramaseshan>	<diedIn>	<New_Delhi>	0.39639639639639634	ManualEvaluation	
-<Georg_Friedrich_Kersting>	<diedIn>	<Berlin>	0.39639639639639634	ManualEvaluation	
-<Nikolai_Ladovsky>	<diedIn>	<Saint_Petersburg>	0.39639639639639634	ManualEvaluation	
-<Tom_McNally,_Baron_McNally>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	
-<Jonathan_Hornblower>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	
+<Anja_Hajduk>	<diedIn>	<Berlin>	0.39639639639639634	ManualEvaluation	Unknown
+<S._Ramaseshan>	<diedIn>	<New_Delhi>	0.39639639639639634	ManualEvaluation	False
+<Georg_Friedrich_Kersting>	<diedIn>	<Berlin>	0.39639639639639634	ManualEvaluation	Unknown
+<Nikolai_Ladovsky>	<diedIn>	<Saint_Petersburg>	0.39639639639639634	ManualEvaluation	False
+<Tom_McNally,_Baron_McNally>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	Unknown
+<Jonathan_Hornblower>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	False
 <Alexandre_Cabanel>	<diedIn>	<Paris>	0.39639639639639634	TargetSource	True
-<Francisco_Domene>	<diedIn>	<Madrid>	0.39639639639639634	ManualEvaluation	
-<Dan_Gillerman>	<diedIn>	<Jerusalem>	0.39639639639639634	ManualEvaluation	
-<Stewart_Jackson>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	
-<Marrack_Goulding>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	
-<Ramanath_Tagore>	<isCitizenOf>	<West_Bengal>	0.3892255583363302	ManualEvaluation	
-<Uday_Sahay>	<diedIn>	<New_Delhi>	0.39639639639639634	ManualEvaluation	
-<Tatyana_Golikova>	<diedIn>	<Moscow>	0.39639639639639634	ManualEvaluation	
-<Kaspars_LiepiFa>	<diedIn>	<Riga>	0.39639639639639634	ManualEvaluation	
-<Allison_Pineau>	<diedIn>	<Paris>	0.39639639639639634	ManualEvaluation	
-<Knut_Wicksell>	<livesIn>	<Stockholm>	0.3534793263738085	ManualEvaluation	
-<Dave_Boy_Green>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	
-<Shrikrishna_Raut>	<diedIn>	<New_Delhi>	0.39639639639639634	ManualEvaluation	
-<Marc_Feinstein>	<livesIn>	<South_Dakota>	0.34058218189503076	ManualEvaluation	
-<Kim_Philby>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	
-<Rita_Levi-Montalcini>	<diedIn>	<Rome>	0.39639639639639634	ManualEvaluation	
+<Francisco_Domene>	<diedIn>	<Madrid>	0.39639639639639634	ManualEvaluation	Unknown
+<Dan_Gillerman>	<diedIn>	<Jerusalem>	0.39639639639639634	ManualEvaluation	Unknown
+<Stewart_Jackson>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	Unknown
+<Marrack_Goulding>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	Unknown
+<Ramanath_Tagore>	<isCitizenOf>	<West_Bengal>	0.3892255583363302	ManualEvaluation	False
+============================================================================================================
+<Uday_Sahay>	<diedIn>	<New_Delhi>	0.39639639639639634	ManualEvaluation	Unknown
+<Tatyana_Golikova>	<diedIn>	<Moscow>	0.39639639639639634	ManualEvaluation	Unknown
+<Kaspars_LiepiFa>	<diedIn>	<Riga>	0.39639639639639634	ManualEvaluation	Unknown
+<Allison_Pineau>	<diedIn>	<Paris>	0.39639639639639634	ManualEvaluation	Unknown
+<Knut_Wicksell>	<livesIn>	<Stockholm>	0.3534793263738085	ManualEvaluation	False
+<Dave_Boy_Green>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	Unknown
+<Shrikrishna_Raut>	<diedIn>	<New_Delhi>	0.39639639639639634	ManualEvaluation	Unknown
+<Marc_Feinstein>	<livesIn>	<South_Dakota>	0.34058218189503076	ManualEvaluation	Unknown
+<Kim_Philby>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	False
+<Rita_Levi-Montalcini>	<diedIn>	<Rome>	0.39639639639639634	ManualEvaluation	True
 <Herberto_Hélder>	<diedIn>	<Lisbon>	0.39639639639639634	ManualEvaluation	
 <Massimo_Franciosa>	<isCitizenOf>	<Papal_States>	0.3892255583363302	ManualEvaluation	
 <Doris_Fisher,_Baroness_Fisher_of_Rednal>	<diedIn>	<London>	0.39639639639639634	ManualEvaluation	
@@ -726,37 +727,38 @@ Confidence [0.3999999999999999, 0.29999999999999993)
 <Kevin_David_Petersen>	<livesIn>	<Wisconsin>	0.34058218189503076	ManualEvaluation	
 Confidence [0.29999999999999993, 0.19999999999999996)
 204582 predictions
-<Douglas_R._Campbell>	<livesIn>	<Calgary>	0.22522522522522526	ManualEvaluation	
-<Torquato_Tasso>	<isCitizenOf>	<Italy>	0.20261865793780687	ManualEvaluation	
-<Tarik_O'Regan>	<wasBornIn>	<London>	0.27953890489913547	ManualEvaluation	
-<Constantin_Daniel_Stahi>	<wasBornIn>	<Bucharest>	0.27953890489913547	ManualEvaluation	
-<Kirk_Watson>	<livesIn>	<Camp_Mabry>	0.20778564206268957	ManualEvaluation	
-<Jim_Fitzpatrick_(actor)>	<livesIn>	<Omaha,_Nebraska>	0.22522522522522526	ManualEvaluation	
-<Junichi_Suwabe>	<livesIn>	<Tokyo>	0.22522522522522526	ManualEvaluation	
-<TakijirM_Lnishi>	<diedIn>	<Tamba,_HyMgo>	0.22480620155038755	ManualEvaluation	
-<Alan_T._Baker>	<diedIn>	<Santa_Ana,_California>	0.22480620155038755	ManualEvaluation	
-<John_Houseman>	<livesIn>	<Bucharest>	0.22522522522522526	ManualEvaluation	
-<Joseph_Sydney_Yorke>	<isCitizenOf>	<Kingdom_of_Essex>	0.23402466367713004	ManualEvaluation	
-<Sandro_Tomaa>	<livesIn>	<Zagreb>	0.22522522522522526	ManualEvaluation	
-<Harry_A._Sieben>	<wasBornIn>	<Hastings,_Minnesota>	0.280241935483871	ManualEvaluation	
-<Co_Hoedeman>	<diedIn>	<Amsterdam>	0.22480620155038755	ManualEvaluation	
-<Dario_Argento>	<produced>	<The_Cat_o'_Nine_Tails>	0.2648203061840747	ManualEvaluation	
-<Omar_Abdel_Aziz>	<wasBornIn>	<Cairo>	0.280241935483871	ManualEvaluation	
-<Arthur_C._Clarke>	<isCitizenOf>	<Dutch_period_in_Ceylon>	0.20261865793780687	ManualEvaluation	
-<Pope_Nicholas_III>	<wasBornIn>	<Viterbo>	0.22324310901415445	ManualEvaluation	
-<Veniero_Colasanti>	<isCitizenOf>	<Papal_States>	0.23402466367713004	ManualEvaluation	
-<Taylor_Nichols>	<diedIn>	<Louisville,_Kentucky>	0.22480620155038755	ManualEvaluation	
-<Gustav_Schübler>	<diedIn>	<Heilbronn>	0.22480620155038755	ManualEvaluation	
+<Douglas_R._Campbell>	<livesIn>	<Calgary>	0.22522522522522526	ManualEvaluation	True
+<Torquato_Tasso>	<isCitizenOf>	<Italy>	0.20261865793780687	ManualEvaluation	False
+<Tarik_O'Regan>	<wasBornIn>	<London>	0.27953890489913547	ManualEvaluation	True
+<Constantin_Daniel_Stahi>	<wasBornIn>	<Bucharest>	0.27953890489913547	ManualEvaluation	False
+<Kirk_Watson>	<livesIn>	<Camp_Mabry>	0.20778564206268957	ManualEvaluation	False
+<Jim_Fitzpatrick_(actor)>	<livesIn>	<Omaha,_Nebraska>	0.22522522522522526	ManualEvaluation	True
+<Junichi_Suwabe>	<livesIn>	<Tokyo>	0.22522522522522526	ManualEvaluation	True
+<TakijirM_Lnishi>	<diedIn>	<Tamba,_HyMgo>	0.22480620155038755	ManualEvaluation	Unknown
+<Alan_T._Baker>	<diedIn>	<Santa_Ana,_California>	0.22480620155038755	ManualEvaluation	Unknown
+<John_Houseman>	<livesIn>	<Bucharest>	0.22522522522522526	ManualEvaluation	True
+<Joseph_Sydney_Yorke>	<isCitizenOf>	<Kingdom_of_Essex>	0.23402466367713004	ManualEvaluation	False
+<Sandro_Tomaš>	<livesIn>	<Zagreb>	0.22522522522522526	ManualEvaluation	True
+<Harry_A._Sieben>	<wasBornIn>	<Hastings,_Minnesota>	0.280241935483871	ManualEvaluation	True
+<Co_Hoedeman>	<diedIn>	<Amsterdam>	0.22480620155038755	ManualEvaluation	Unknown
+<Dario_Argento>	<produced>	<The_Cat_o'_Nine_Tails>	0.2648203061840747	ManualEvaluation	False
+<Omar_Abdel_Aziz>	<wasBornIn>	<Cairo>	0.280241935483871	ManualEvaluation	True
+<Arthur_C._Clarke>	<isCitizenOf>	<Dutch_period_in_Ceylon>	0.20261865793780687	ManualEvaluation	False
+<Pope_Nicholas_III>	<wasBornIn>	<Viterbo>	0.22324310901415445	ManualEvaluation	False
+<Veniero_Colasanti>	<isCitizenOf>	<Papal_States>	0.23402466367713004	ManualEvaluation	False
+<Taylor_Nichols>	<diedIn>	<Louisville,_Kentucky>	0.22480620155038755	ManualEvaluation	Unknown
+<Gustav_Schübler>	<diedIn>	<Heilbronn>	0.22480620155038755	ManualEvaluation	Unknown
 <Thomas_C._Sawyer>	<livesIn>	<Akron,_Ohio>	0.22522522522522526	TargetSource	True
-<Erin_Wallace>	<livesIn>	<Orange_County,_Florida>	0.20778564206268957	ManualEvaluation	
-<Roswell_S._Ripley>	<diedIn>	<Worthington,_Ohio>	0.22480620155038755	ManualEvaluation	
-<Russell_Cheung>	<livesIn>	<Hong_Kong>	0.22522522522522526	ManualEvaluation	
-<Isabella_of_France>	<isCitizenOf>	<France>	0.23402466367713004	ManualEvaluation	
-<Enzo_G._Castellari>	<diedIn>	<Rome>	0.22480620155038755	ManualEvaluation	
-<Joel_Pollak>	<wasBornIn>	<Skokie,_Illinois>	0.280241935483871	ManualEvaluation	
-<Patrick_Green>	<wasBornIn>	<Cork_(city)>	0.22324310901415445	ManualEvaluation	
-<Ernest_Vajda>	<directed>	<Broken_Lullaby>	0.22570351029881053	ManualEvaluation	
-<Vincenz_Müller>	<isCitizenOf>	<Nazi_Germany>	0.20261865793780687	ManualEvaluation	
+<Erin_Wallace>	<livesIn>	<Orange_County,_Florida>	0.20778564206268957	ManualEvaluation	True
+<Roswell_S._Ripley>	<diedIn>	<Worthington,_Ohio>	0.22480620155038755	ManualEvaluation	False
+<Russell_Cheung>	<livesIn>	<Hong_Kong>	0.22522522522522526	ManualEvaluation	True
+<Isabella_of_France>	<isCitizenOf>	<France>	0.23402466367713004	ManualEvaluation	True
+<Enzo_G._Castellari>	<diedIn>	<Rome>	0.22480620155038755	ManualEvaluation	Unknown
+<Joel_Pollak>	<wasBornIn>	<Skokie,_Illinois>	0.280241935483871	ManualEvaluation	False
+<Patrick_Green>	<wasBornIn>	<Cork_(city)>	0.22324310901415445	ManualEvaluation	False
+<Ernest_Vajda>	<directed>	<Broken_Lullaby>	0.22570351029881053	ManualEvaluation	False
+<Vincenz_Müller>	<isCitizenOf>	<Nazi_Germany>	0.20261865793780687	ManualEvaluation	False
+=====================================================================================================================
 <Anastasia_Baburova>	<wasBornIn>	<Moscow>	0.22324310901415445	ManualEvaluation	
 <Paulo_Filho>	<diedIn>	<Rio_de_Janeiro>	0.22480620155038755	ManualEvaluation	
 <Richard_Kwietniowski>	<isCitizenOf>	<England>	0.23402466367713004	ManualEvaluation	
