@@ -1609,7 +1609,7 @@ public class Query{
 	}
 	
 	public static void main(String args[]) {
-		List<ByteString[]> query = FactDatabase.triples(
+/*		List<ByteString[]> query = FactDatabase.triples(
 				FactDatabase.triple("?a", "<soc_sec_id>", "?l"),
 				FactDatabase.triple("?b", "<soc_sec_id>", "?l"),
 				FactDatabase.triple("?a", "<surname>", "?f"), 
@@ -1626,7 +1626,31 @@ public class Query{
 			}
 			System.out.println();
 			result.clear();
-		}
+		}*/
+		
+		List<ByteString[]> antecedent = FactDatabase.triples(
+				FactDatabase.triple("?z3", "<surname>", "?b"),
+				FactDatabase.triple("?z1", "<rp>", "?a"),
+				FactDatabase.triple("?z1", "<rp>", "?z2"),
+				FactDatabase.triple("?z2", "<rpp>", "?z3")
+				);
+		
+		ByteString[] head = FactDatabase.triple("?a", "<rh>", "?b");
+		Query query = new Query(head, antecedent);
+		System.out.println(query.containsSinglePath());
+		List<ByteString[]> path = query.getCanonicalPath();
+		System.out.println(FactDatabase.toString(path));
+		
+		List<ByteString[]> antecedent2 = FactDatabase.triples(
+				FactDatabase.triple("?z3", "<surname>", "?b"),
+				FactDatabase.triple("?b", "<rp>", "?a"),
+				FactDatabase.triple("?z1", "<rp>", "?z2"),
+				FactDatabase.triple("?z2", "<rpp>", "?z3")
+				);
+		
+		ByteString[] head2 = FactDatabase.triple("?a", "<rh>", "?b");
+		Query query2 = new Query(head2, antecedent2);
+		System.out.println(query2.containsSinglePath());
 	}
 
 	/**
@@ -1702,30 +1726,42 @@ public class Query{
 		ByteString funcVar = getFunctionalVariable();
 		ByteString nonFuncVar = getNonFunctionalVariable();
 		List<ByteString[]> body = getBody();
-		MultiMap<ByteString, ByteString[]> variableToAtom = new MultiMap<>();
+		MultiMap<ByteString, ByteString[]> variablesToAtom= new MultiMap<>();
 		List<ByteString[]> path = new ArrayList<>();
 		// Build a multimap, variable -> {atoms where the variable occurs}
 		for (ByteString[] bodyAtom : body) {
 			if (FactDatabase.isVariable(bodyAtom[0])) {
-				variableToAtom.put(bodyAtom[0], bodyAtom);
+				variablesToAtom.put(bodyAtom[0], bodyAtom);
 			}
 			
 			if (FactDatabase.isVariable(bodyAtom[2])) {
-				variableToAtom.put(bodyAtom[2], bodyAtom);
+				variablesToAtom.put(bodyAtom[2], bodyAtom);
 			}
 		}
 		
-		// The head variables must have only one atom
-		List<ByteString[]> firstAtomList = variableToAtom.getAsList(funcVar);
-		path.add(firstAtomList.get(0).clone());
-		// Iterate while we have not seen the other head variables
+		// Start with the functional variable.
+		ByteString joinVariable = funcVar;
+		ByteString[] lastAtom = null;
 		while (true) {
-			ByteString[] lastAtom = firstAtomList.get(firstAtomList.size() - 1);
-			if (lastAtom[0].equals(nonFuncVar) 
-					|| lastAtom[2].equals(nonFuncVar)) {				
-				break;
+			List<ByteString[]> atomsList = variablesToAtom.getAsList(joinVariable);
+			// This can be only the head variable
+			if (atomsList.size() == 1) {
+				lastAtom = atomsList.get(0);				
+			} else {
+				for (ByteString[] atom : atomsList) {
+					if (atom != lastAtom) {
+						// Bingo
+						lastAtom = atom;
+						break;
+					}
+				}
 			}
-				
+			path.add(lastAtom);
+			joinVariable = 
+					lastAtom[0].equals(joinVariable) ? lastAtom[2] : lastAtom[0];
+			if (joinVariable.equals(nonFuncVar)) {
+				break;
+			}				
 		}
 		
 		return path;

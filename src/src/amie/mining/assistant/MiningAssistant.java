@@ -595,9 +595,10 @@ public class MiningAssistant{
 		}
 
 		if (enabledFunctionalityHeuristic) {
-			if(candidate.getRealLength() == 3) {
+			int realLength = candidate.getRealLength();
+			if(realLength == 3) {
 				return calculateConfidenceApproximationFor3Atoms(candidate);
-			} else {
+			} else if (realLength > 3) {
 				return calculateConfidenceApproximationForGeneralCase(candidate);
 			}
 				
@@ -647,16 +648,76 @@ public class MiningAssistant{
 	 * @return boolean True if the approximation is not applicable or produces a value above the confidence thresholds, i.e.,
 	 * there is not enough evidence to drop the rule.
 	 */
-	private boolean calculateConfidenceApproximationForGeneralCase(
+	protected boolean calculateConfidenceApproximationForGeneralCase(
 			Query candidate) {
 		// First identify whether the rule is a single path rule
 		if (!candidate.containsSinglePath()) {
 			// The approximation is not applicable.
 			return true;
 		}
-		
+		double denominator = 1.0;
 		// If the approximation is applicable, let's reorder the atoms in the canonical way
 		List<ByteString[]> path = candidate.getCanonicalPath();
+		
+		// Let's calculate the first term.
+		ByteString r1 = path.get(0)[1];
+		ByteString rh = candidate.getHead()[1];
+		double funr1 = this.source.bestFunctionality(r1);
+		double overlap = 0.0;
+		// Find the overlap between r1 and the head relation
+		if (this.source.isFunctional(rh)) {
+			if (this.source.isFunctional(r1)) {
+				overlap = this.source.overlap(rh, r1, FactDatabase.SUBJECT2SUBJECT);
+			} else {
+				overlap = this.source.overlap(rh, r1, FactDatabase.SUBJECT2OBJECT);
+			}
+		} else {
+			if (source.isFunctional(r1)) {
+				overlap = this.source.overlap(r1, rh, FactDatabase.SUBJECT2OBJECT);
+			} else {
+				overlap = this.source.overlap(rh, r1, FactDatabase.OBJECT2OBJECT);
+			}
+		}
+		// The first part of the formula
+		denominator = denominator * (overlap / funr1);
+		
+		// Now iterate
+		for (int i = 1; i < path.size(); ++i) {
+			ByteString ri = path.get(i)[1];
+			ByteString ri_1 = path.get(i - 1)[1];
+			double term = this.source.worstFunctionality(ri) 
+					/ this.source.bestFunctionality(ri);
+			if (source.isFunctional(ri_1)) {
+				term *= this.source.relationColumnSize(ri_1, 2);
+			} else {
+				term *= this.source.relationColumnSize(ri_1, 0);				
+			}
+			
+			if (source.isFunctional(ri_1)) {
+				if (source.isFunctional(ri)) {
+					overlap = this.source.overlap(ri, ri_1, FactDatabase.SUBJECT2OBJECT);
+				} else {
+					overlap = this.source.overlap(ri, ri_1, FactDatabase.OBJECT2OBJECT);
+				}
+			} else {
+				if (source.isFunctional(ri)) {
+					overlap = this.source.overlap(ri_1, ri, FactDatabase.SUBJECT2SUBJECT);	
+				} else {
+					overlap = this.source.overlap(ri_1, ri, FactDatabase.SUBJECT2OBJECT);	
+				}
+			}
+			term *= overlap;
+			denominator *= term;
+		}
+		
+		double estimatedPCA = (double)candidate.getSupport() / denominator;
+		candidate.setPcaEstimation(estimatedPCA);
+		if (estimatedPCA < this.minPcaConfidence) {
+			if (!this.silent) {
+				System.err.println("Query " + candidate + " discarded by functionality heuristic with ratio " + estimatedPCA);
+			}							
+			return false;
+		}
 		
 		return true;
 	}
@@ -668,7 +729,7 @@ public class MiningAssistant{
 	 * @return boolean True if the approximation is not applicable or produces a value above the confidence thresholds, i.e.,
 	 * there is not enough evidence to drop the rule.
 	 */
-	private boolean calculateConfidenceApproximationFor3Atoms(Query candidate) {
+	protected boolean calculateConfidenceApproximationFor3Atoms(Query candidate) {
 		int[] hardQueryInfo = null;
 		double headFunctionality = source.x_functionality(candidate.getHead()[1], candidate.getFunctionalVariablePosition());		
 		hardQueryInfo = source.identifyHardQueryTypeIII(candidate.getAntecedent());

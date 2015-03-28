@@ -252,9 +252,6 @@ public class FactDatabase {
 				add(split[0].trim(), split[1].trim(), split[2].trim());
 			else if (split.length == 4)
 				add(split[1].trim(), split[2].trim(), split[3].trim());
-			// else
-			// Announce.warning("Unsupported number of items in line:",split.length,
-			// line);
 		}
 		if (buildJoinTable)
 			buildOverlapTables();
@@ -444,6 +441,12 @@ public class FactDatabase {
 		return (inverseFunctionality(compress(relation)));
 	}
 
+	/**
+	 * Functionality given the position.
+	 * @param relation
+	 * @param x 0 = subject or 2 = object.
+	 * @return
+	 */
 	public double x_functionality(ByteString relation, int x) {
 		if (x == 0)
 			return functionality(relation);
@@ -451,6 +454,30 @@ public class FactDatabase {
 			return inverseFunctionality(relation);
 		else
 			return -1.0;
+	}
+	
+	public boolean isFunctional(ByteString relation) {
+		return functionality(relation) > inverseFunctionality(relation);
+	}
+	
+	/**
+	 * It returns the highest functionality of the relation.
+	 * @return
+	 */
+	public double bestFunctionality(ByteString relation) {
+		double fun = functionality(relation);
+		double ifun = inverseFunctionality(relation);
+		return Math.max(fun, ifun);
+	}
+	
+	/**
+	 * It returns the lowest functionality of the relation.
+	 * @return
+	 */
+	public double worstFunctionality(ByteString relation) {
+		double fun = functionality(relation);
+		double ifun = inverseFunctionality(relation);
+		return Math.min(fun, ifun);
 	}
 
 	// ---------------------------------------------------------------------------
@@ -643,8 +670,6 @@ public class FactDatabase {
 			throw new IllegalArgumentException(
 					"Cannot query with differentFrom: " + toString(triple));
 		if (triple[1].equals(EQUALSbs)) {
-/*			System.out
-					.println("   Calling 'resultsTwoVariables(equals(x,y))'. This is slow");*/
 			Map<ByteString, IntHashMap<ByteString>> result = new HashMap<>();
 			for (ByteString entity : subject2object2predicate.keySet()) {
 				IntHashMap<ByteString> innerResult = new IntHashMap<>();

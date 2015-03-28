@@ -1,5 +1,7 @@
 package amie.mining.assistant;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -676,5 +678,41 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 	public void calculateConfidenceMetrics(Query candidate) {
 		computeStandardConfidence(candidate);
 		computePCAConfidence(candidate);
+	}
+	
+	public static void main(String[] args) throws IOException {
+		FactDatabase db = new FactDatabase();
+		//db.load(new File("/home/galarrag/workspace/AMIE/Data/yago2s/yagoFacts.decoded.compressed.ttl"));
+		db.load(new File("/home/galarrag/workspace/AMIE/Data/yago2/yago2core.decoded.compressed.notypes.nolanguagecode.tsv"));
+		List<ByteString[]> pcaDenom = FactDatabase.triples(
+				FactDatabase.triple("?x", "<isMarriedTo>", "?w"),
+				FactDatabase.triple("?x", "<directed>", "?z"),
+				FactDatabase.triple("?y", "<actedIn>", "?z")
+				);
+		long timeStamp1 = System.currentTimeMillis();
+		System.out.println("Results : " + db.countPairs(ByteString.of("?x"), ByteString.of("?y"), pcaDenom));
+		System.out.println("PCA denom: " + ((System.currentTimeMillis() - timeStamp1) / 1000.0) + " seconds");
+		
+		List<ByteString[]> stdDenom = FactDatabase.triples(
+				FactDatabase.triple("?x", "<directed>", "?z"),
+				FactDatabase.triple("?y", "<actedIn>", "?z")
+				);
+		timeStamp1 = System.currentTimeMillis();
+		System.out.println("Results : " + db.countPairs(ByteString.of("?x"), ByteString.of("?y"), stdDenom));
+		System.out.println("Std-conf denom: " + ((System.currentTimeMillis() - timeStamp1) / 1000.0) + " seconds");
+		
+		Query q = new Query(FactDatabase.triple("?x", "<isMarriedTo>", "?y"), stdDenom);
+		if (db.functionality(ByteString.of("<isMarriedTo>")) 
+				> db.inverseFunctionality(ByteString.of("<isMarriedTo>"))) {
+			q.setFunctionalVariable(ByteString.of("?x"));
+		} else {
+			q.setFunctionalVariable(ByteString.of("?y"));			
+		}
+		q.setSupport(db.countPairs(ByteString.of("?x"), ByteString.of("?y"), q.getTriples()));	
+		HeadVariablesMiningAssistant assistant = new HeadVariablesMiningAssistant(db);
+		assistant.setEnabledFunctionalityHeuristic(true);
+		timeStamp1 = System.currentTimeMillis();
+		assistant.calculateConfidenceBoundsAndApproximations(q);
+		System.out.println("Calculating approximation: " + ((System.currentTimeMillis() - timeStamp1) / 1000.0) + " seconds");
 	}
 }
