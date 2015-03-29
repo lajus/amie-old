@@ -42,10 +42,11 @@ with the actual precision of each rule than the standard confidence.
 All experiments are run on a server with 48GB of RAM and 8 CPUs (Intel Xeon at 2.4GHz). All rules and all experimental results are available at \comment{Chris}{did this change?} \url{http://www.mpi-inf.mpg.de/departments/ontologies/projects/amie/}.
 
 \paragraph{Datasets} We run our experiments on different KBs.
-In all cases, we removed the \emph{rdf:type} relationship because it inflates the size of the KBs.
-We are aware that the \emph{rdf:type} relationship can be very helpful for rule mining.
-However, currently no approach (including ours) makes specific use of it.
-We plan to make use of it in future work. Furthermore, we removed all facts with literals (numbers and strings) from the KBs.
+% In all cases, we removed the \emph{rdf:type} relationship because it inflates the size of the KBs.
+% We are aware that the \emph{rdf:type} relationship can be very helpful for rule mining.
+% However, currently no approach (including ours) makes specific use of it.
+% We plan to make use of it in future work. 
+In all cases, we removed all facts with literals (numbers and strings).
 Literal values (such as geographical coordinates) are shared by only very few entities, which makes them less interesting for rule mining.
 Table~\ref{kbs} shows a summary of the KBs used for our experiments.
 
@@ -61,7 +62,7 @@ DBpedia 2.0 & 6.70M & 1.38M & 1595\footnote{This corresponds to the relations wi
 DBpedia 3.8 & 11.02M & 2.20M & 650 \\
 Freebase (people) & 8.92M & 2.07M & 51
 \end{tabular}
-\caption{Knowledge bases used to test AMIE/AMIE+}
+\caption{Knowledge bases used to test AMIE/AMIE+ \comment{chris}{update for including type}}
 \label{kbs}
 \end{table}
 %\end{savenotes}
@@ -98,14 +99,22 @@ variable of the relation (see Section~\ref{subsec:functions} about functions).
 \paragraph{Language Bias}
 AMIE and AMIE+ mine \emph{connected} and \emph{closed} Horn rules and allow recursiveness.
 Unless otherwise mentioned, we mine rules without constants (i.e., without the instantiation operator).
-Although we can mine rules of arbitrary length, enforcing a length restriction is common practice for rule-mining systems in order to keep the search tractable.
+
+
+Although we can mine rules of arbitrary length, enforcing a length restriction is common practice for rule-mining systems 
+in order to keep the search tractable.
 In addition, shorter rules are easier to understand. For an application that aims to predict new facts for KBs,
 this means that it will be easier to explain why a specific prediction was made.
 Also, as rules become longer, their support and head coverage drop. This effect is aggravated
 by the incompleteness of knowledge bases. Thus, the confidence value of
 longer rules tends to have lower statistical significance and might not reflect reality.
 
-We initially experimented with rules containing 3 and 4 atoms. However, we found that rules with more than 3 atoms were numerous and noisy.
+\comment{Chris}{either}
+We experimented with rules of 3 and 4 atoms.
+
+\comment{Chris}{or}
+We initially experimented with rules containing 3 and 4 atoms. 
+However, we found that rules with more than 3 atoms were numerous and noisy.
 Table~\ref{rules4atoms} shows some 4-atom-rules of high confidence mined with AMIE+ on YAGO2.
  Let us look at one of the examples: \\
 
@@ -533,7 +542,8 @@ In that case, the region can be given at the granularity of a city, a region, a 
 Naturally, if YAGO contains one of these, the others are possible options. Hence, PCA fails and we found rather low precision values.
 However, these cases could be addressed if one restricts the range of the relation (say, to cities).
 With such a restriction, the relations become functions or quasi-functions, which lifts them into the category where the PCA works well.
-We plan to investigate this possibility in future work.
+% We plan to investigate this possibility in future work.
+As we will see in Sec.~\ref{}, the use of types can significantly improve the preformance of AMIE. 
 
 \paragraph{Implicit Assumptions} Some statements can be inferred from the Wikipedia page even if the page does not mention them. % For instance, %\emph{livesIn} is incomplete ``in-purpose'' in the sense
 People usually do not state information that can easily be inferred by what they have stated before
@@ -557,10 +567,7 @@ For example, not every single product that a country imports and exports is expl
 Whether or not this poses a problem depends on the application.
 If ground truth is defined as what is universally true, then source incompleteness is a problem.
 If ground truth is the source of the KB (i.e., Wikipedia in this case), then source incompleteness is not an issue.
-\comment{Luis}{Does isMarriedTo fall in this category? What about non-prominent spouses (without Wikipedia article)? We would not extract the inverse statement in that case.}
-\comment{Chris}{This is the case of extraction incompleteness. Wikipedia usually is pretty precise for the spouses. So it is complete. The fact
-that yago does not extract spouses that do not have their own wikipedia pages is a problem with the extraction. Not an incompleteness
-problem}
+
 
 
 \paragraph{Extraction Incompleteness} For a large number of relations, the Wikipedia page contains more objects for a given subject than the KB.

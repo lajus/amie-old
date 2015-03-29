@@ -1,74 +1,60 @@
-\comment{R3}{Authors start with an informal discussion of changes (6.1.1 and 6.1.2, but they describe "perfect rules"  
-without really saying that AMIE+ "stops adding perfect rules"  and without saying why such an obvious thing was not done in AMIE), 
-then they go at low-level (6.1.3 for discussing a caching approach by using a pseudo-code SPARQL-ish that is not properly defined), 
-then the go high-level to define confidence upper-bonds  (with no link from mathematics to implementation). 
-This is the "new part", but it misses a global introduction, a description of the rationale of additions bringing from AMIE to AMIE+, 
-and a description of AMIE's implementation, with its internal data structures and a link from theory to implementation that shows 
-how theoretical approximations are turned into clearly described, repeatable, working algorithms.}
+Since the publication of the original AMIE framework~\cite{amie}, we have extended it with a series of improvements 
+that allow the system to run over very large KBs. 
+In the following, we will introduce and discuss these extensions and refer to this new version of AMIE as AMIE+.
+Our extensions aim to speed up 2 different parts of the main rule-mining algorithm: (i) the rule expansion phase and 
+(ii) the confidence evaluation. 
 
 
 
+% Since the publication of the original AMIE framework~\cite{amie}, we have extended it with a series of improvements 
+% that allow the system to run over very large KBs.
+% In the following, we will introduce and discuss these extensions and refer to the extended version of AMIE as AMIE+.
+% As usual when tuning a system, there are two kinds of techniques  to improve the performance:
+% those that increase performance by improving the efficiency of the algorithms and those that gain efficiency at the expense of result quality.
+% Hence, in the following, we first discuss  improvements over AMIE that preserve the quality of the original results and then extensions based 
+% on approximations,
+% which can potentially lead to a lower recall.
 
 
 
-Since the publication of the original AMIE framework~\cite{amie}, we have extended it with a series of improvements that allow the system to run over very large KBs.
-In the following, we will introduce and discuss these extensions and refer to the extended version of AMIE as AMIE+.
-As usual when tuning a system, there are two kinds of techniques  to improve the performance:
-those that increase performance by improving the efficiency of the algorithms and those that gain efficiency at the expense of result quality.
-Hence, in the following, we first discuss  improvements over AMIE that preserve the quality of the original results and then extensions based on approximations,
-which can potentially lead to a lower recall.
-% \comment{Katja}{Output is not exactly preserved as less rules are output. Text adapted accordingly.} \comment{Luis: }{I have made a couple of changes here. Have a look}
-%In the first part of this section we discuss improvements over AMIE that preserve AMIE's original output. In the second part we discuss extensions based on approximations, which can potentially lead to a different output.
-% In this section, we describe a series of improvements over the standard AMIE algorithm as it was initially presented in~\cite{amie}, which allows her to run over very large knowledge bases.
-% In the following, we denote this new version of AMIE as AMIE+
+% \subsection{Lossless Optimizations}
+% \label{prunebound}
+% The techniques discussed in this subsection do not alter the output of AMIE. They include speeding up projection queries
+% by means of query rewriting and caching or leveraging further constraints in the form of confidence thresholds or
+% rule size limits. They allow for avoiding the execution of unnecessary queries for rules that will not be output anyway.
 
-%\subsection{Pruning by Bounds}
-\subsection{Lossless Optimizations}
-% \comment{Katja}{I changed the name of the subsection}
-\label{prunebound}
+\subsection{Speeding Up Rule Expansion}
+In this section, we will discuss how AMIE+ speeds up the rule expansion phase for specific kinds of rules.
+Notice that all techniques described below do not alter AMIE's output in any way. 
 
-% The techniques discussed in this subsection do not affect the quality of the result, i.e., runtime is improved, for instance, by applying pruning techniques
-% that still produce the same results as AMIE and only low quality rules are pruned from the output that would not be useful to any application anyway.
-
-The techniques discussed in this subsection do not alter the output of AMIE. They include speeding up projection queries
-by means of query rewriting and caching or leveraging further constraints in the form of confidence thresholds or
-rule size limits. They allow for avoiding the execution of unnecessary queries for rules that will not be output anyway.
-% avoiding the run of unnecessary queries or taking advantage of c
-% that cannot be output in any case and filter out rules that are expensive to calculate, but have a very low confidence value, by the use of a confidence upper bound which is cheaper to compute.
-% \comment{Luis: }{I do not get it. The lossless optimizations are meant to prune
-% intermediate results, not the output}
-%\comment{Chris}{ok, I rewrote that have a look if you like it more} \comment{Luis}{Christina, let me know if you are ok with my rewrite}
-
-\subsubsection{Maximum Rule Length}
-\ignore{
-The maximum rule length $n$ is an input parameter for our system. AMIE stops exploring the search space as soon as all rules with a length of at most $n$ have been produced.
-In the experiments,
-we used $n=3$ though AMIE can mine longer rules. As we show later in the experimental section,
-rules with more than 3 atoms are less interesting because they often capture trivial relationships. Besides, their support tends to be very low.
-
-For AMIE+, we improved this pruning strategy as follows.
-% makes use of the maximum rule length to prune the search space even further.
-During the mining process, AMIE creates connected rules by applying all possible mining operators (line 9 in Algorithm~\ref{rm}) on previously created rules.
-% Given a rule and a maximum length, if there is no chance to close the rule with $n$ atoms, AMIE will stop refining the rule.
-This means that for a not-yet-closed rule of length $n-1$, AMIE applies, among others, the add-dangling-atom operator ($\mathcal{O}_D$). This results in a non-closed rule,
-which will still not be output. Since the rule has the maximum length $n$, it will not be further refined.
-Hence, the application of the operator $\mathcal{O}_D$ to open rules of size $n-1$ is useless.
-For this reason, AMIE+ refines open rules of length $n-1$ only by means of the add-closing-atom-operator ($\mathcal{O}_C$).
-}
-
-The maximum rule length $n$ is an input parameter for our system. AMIE stops exploring the search space as soon as all rules with a length of at most $n$ have been produced.
-In the experiments,
-we used $n=3$ though AMIE can mine longer rules. As we show later in the experimental section,
-rules with more than 3 atoms are less interesting because they often capture trivial relationships. Besides, their support tends to be very low.
-
-For AMIE+, we improved this pruning strategy as follows.
-During the mining process, AMIE creates connected rules by applying all possible mining operators (line 9 in Algorithm~\ref{rm}) on previously created rules.
-Given a maximum rule length $n$ and a non-closed Horn rule of length $n-1$, AMIE
+\paragraph{Maximum Rule Length}
+% \ignore{
+% The maximum rule length $n$ is an input parameter for our system. AMIE stops exploring the search space as soon as all rules with a length of at most $n$ have been produced.
+% In the experiments,
+% we used $n=3$ though AMIE can mine longer rules. As we show later in the experimental section,
+% rules with more than 3 atoms are less interesting because they often capture trivial relationships. Besides, their support tends to be very low.
+% 
+% For AMIE+, we improved this pruning strategy as follows.
+% During the mining process, AMIE creates connected rules by applying all possible mining operators (line 9 in Algorithm~\ref{rm}) on previously created rules.
+% This means that for a not-yet-closed rule of length $n-1$, AMIE applies, among others, the add-dangling-atom operator ($\mathcal{O}_D$). This results in a non-closed rule,
+% which will still not be output. Since the rule has the maximum length $n$, it will not be further refined.
+% Hence, the application of the operator $\mathcal{O}_D$ to open rules of size $n-1$ is useless.
+% For this reason, AMIE+ refines open rules of length $n-1$ only by means of the add-closing-atom-operator ($\mathcal{O}_C$).
+% }
+The maximum rule length $n$ is an input parameter for our system. AMIE stops exploring the search space as soon as all rules with 
+a length of at most $n$ have been produced.
+% In the experiments,
+% we used $n=3$ though AMIE can mine longer rules. As we show later in the experimental section,
+% rules with more than 3 atoms are less interesting because they often capture trivial relationships. Besides, their support tends to be very low.
+% For AMIE+, we improved this pruning strategy as follows.
+During the mining process, AMIE creates connected rules by applying all possible mining operators 
+(line 9 in Algorithm~\ref{rm}) on previously created rules.
+Given a maximum rule length $n$ and a non-closed Horn rule of length $n-1$, AMIE+
 will refine it only if it is possible to close it before exceeding the length constraint.
-This means that for a not-yet-closed rule of length $n-1$, AMIE will not apply 
+This means that for a not-yet-closed rule of length $n-1$, AMIE+ will not apply 
 the add-dangling-atom operator $\mathcal{O}_D$, because this results in a non-closed rule,
 which will be neither output nor refined. In the same spirit, if the same rule contains more than
-two non-closed variables (see Section~\ref{subsec:rules}), AMIE will skip the application of 
+two non-closed variables (see Section~\ref{subsec:rules}), AMIE+ will skip the application of 
 the add-closing atom operator $\mathcal{O}_C$. This happens because an application of the operator 
 $\mathcal{O}_C$ can close at most two variables with one atom. 
 This rationale is also applicable to the add-instantiated operator $\mathcal{O}_E$:
@@ -78,12 +64,70 @@ because the application of this operator can close at most one variable with an 
 % Hence, the application of the operator $\mathcal{O}_D$ to open rules of size $n-1$ is useless.
 % For this reason, AMIE+ refines open rules of length $n-1$ only by means of the add-closing-atom-operator ($\mathcal{O}_C$).
 
-\subsubsection{Perfect rules}
-By definition, a rule cannot achieve a PCA confidence that is higher than 100\%. Thus, once a rule has achieved 100\% PCA confidence, we can stop adding new atoms. This is because the confidence cannot increase and the support can only decrease. Hence, any refinement is futile. We call rules with 100\% PCA confidence \emph{perfect rules}.
-%A rule is perfect if it has 100\% PCA confidence. Since PCA confidence is not monotonic, the refinements of a perfect rule may not be perfect. This situation leads to a sub-optimal scenario where we obtain longer, more complex and less confident rules, having already a simpler and perfect hypothesis. For this reason, AMIE+ stops specializing perfect rules, i.e., once a rule is identified as perfect, it is not enqueued for further refinement.
+\paragraph{Perfect rules}
+By definition, a rule cannot achieve a PCA confidence that is higher than 100\%. 
+Thus, once a rule has achieved 100\% PCA confidence, we can stop adding new atoms. 
+This is because the confidence cannot increase and the support can only decrease. 
+Hence, any refinement is futile. We call rules with 100\% PCA confidence \emph{perfect rules}.
 
-%\subsubsection{Query Rewriting and Caching}
-\subsubsection{Query Rewriting}
+
+
+\paragraph{Caching Projection Queries}
+Recall from Sec.~\ref{support} that support is defined also for intermediate rules, i.e., rules that are not yet closed. 
+In other words, whenever we apply an add-dangling-atom operator to a rule $R_p$ (the parent rule) to produce
+a new rule $R_c$ (the child rule), the support of $R_c$ will be likely smaller than the support of $R_p$ (see the example in Sec.~\ref{support}).
+However, there is one case in which the addition of a dangling atom cannot reduce the support. 
+This happens when $R_c$:\comment{Chris}{@Luis: I prefer it if we define exactly when the caching can take place}
+(i) contains a relation that already exists in another atom in the parent rule  and 
+(ii) the same-relation-atoms have a variable in common.
+An example is the parent rule $R_p:livesIn(x,y)\Rightarrow citizenOf(x,y)$ and the child rule 
+$R_c: citizenOf(z,y)\wedge livesIn(x,y)\Rightarrow citizenOf(x,y)$.
+Intuitively, the addition of the dangling atom $\textit{citizenOf}(z,y)$ cannot further restrict the support of $R_p$ because
+the new atom is a less restrictive version of the atom $citizenOf(x,y)$.
+This means that $z$ will always bind to the same values as $x$. 
+From this observation, it follows that the support of $R_c$ can be rewritten as 
+\[
+ supp(R_c) = \#(x,y):  citizenOf(x,y)\wedge livesIn(x,y)\wedge citizenOf(x,y)
+\]
+\[
+ supp(R_c) = \#(x,y):   livesIn(x,y)\wedge citizenOf(x,y)
+\]
+
+
+\comment{Chris}{@Luis: I prefer to keep the support formula in. It is not that the child rule can be re-written as the parent. It is the support
+of the child that is equivalent to the support of the parent.}
+
+
+\noindent which is the same as $supp(R_p)$. Thus both $R_p$ and $R_c$ have the same support.
+This observation can be leveraged to speed up projection queries.
+AMIE uses projection queries during the rule-expansion phase to choose which relations can be used to expand the rule for 
+a specific operator (e.g., add-dangling-atom) and a specific binding (e.g., bind on variable $y$) \emph{such that the produced rule
+will pass the support threshold}.
+% Recall from Section~\ref{subsec:algorithm} that projection queries are used in AMIE to determine which
+% relations should be used in the new atoms that will expand each rule. 
+For example, for refining the example rule $R_c$ with a dangling atom joining on variable $y$, AMIE will construct the following expressions:
+\[
+?r(w,y) \wedge \textit{citizenOf}(z,y)\wedge \textit{livesIn}(x,y)\Rightarrow \textit{citizenOf}(x,y)
+\]
+\[
+?r(y,w) \wedge \textit{citizenOf}(z,y)\wedge \textit{livesIn}(x,y)\Rightarrow \textit{citizenOf}(x,y)
+\]
+\noindent and  will find the bindings of $r$ that result in rules with support above the given threshold.
+Since $R_c$ has the same support with $R_p$, all the results of the projection queries of $R_p$
+can be re-used directly (without recalculating them) by $R_c$ too. Notice, though, that since $R_c$
+contains one more variable than $R_p$ ($z$ in our example), AMIE cannot avoid firing the projection queries that involve binding new relations
+with that variable.
+
+% Since the atom $citizenOf(z,y)$ is redundant, we can rewrite the query and omit it.
+% This reduces the number of atoms of the query and therefore its running time.
+% On the other hand, this technique cannot be applied when the new atoms involve the variable $z$. This happens
+% because the new atoms impose extra constraints on $z$ which break the redundancy, e.g., 
+% there is not guarantee anymore that $z$ always binds to the same values as $x$. For this reason, AMIE only 
+% drops redundant atoms for queries where the specialization does not involve the variable in the redundant atom.
+
+
+\ignore{ % Luis' version
+\paragraph{Query Rewriting}
 
 \comment{R2}{
 3) Using the third optimization technique to expand a rule, AMIE+ chooses the same frequent relations for new atoms as in the last iteration when the rule is built if the rule 
@@ -93,8 +137,6 @@ b) How the query rewriting is done? What rules are used in the query rewriting? 
 for those rules that have the exact form as the given example?
 }
 
-\comment{Chris}{I rewrote the whole thing. I do not have any sql queries now. I also skip the notion or re-writing (perhaps we can remove it from the title). I only use re-writing in the
- example to explain the point. Check if what I day is actually correct and what AMIE is doing.}
 
 Recall from Sec.~\ref{support} that support is defined also for intermediate rules, i.e., rules that are not yet closed. 
 In other words, whenever we apply an add-dangling-atom operator to a rule $R_p$ (the parent rule) to produce
@@ -184,25 +226,59 @@ This query has already been fired in previous steps, as one of the ways to apply
 %Since this rule is shorter than the original rule, and since our algorithm performs a breadth first search, this query was already evaluated in a previous step.
 Therefore, AMIE+ caches the results of previous queries. Whenever a new query can be rewritten into a previous one, AMIE+ reuses the result of the previous query instead of evaluating the query anew.%This means that if we cache the result of the shorter rule, we can reuse it for the longer rule.
 }
-
-\subsection{Exploit Confidence Thresholds}
-
-\comment{R1}{the main proposed heuristic (which contributes most to the  speed-up) is an ad-hoc approximation of the PCA confidence for a specific type of 3-atom rules, 
-being not trivial to generalize it to any kind of rule. (Indeed, experiments are limited to 3-atom rules).}
+}
 
 
-Most rule mining applications have no use for rules with low confidence. For example, predictions based on rules with 1\% confidence are not useful in practice.
-Based on this observation, AMIE+ accepts a minimum confidence threshold for both the PCA and the standard confidence. However,
-due to the non-monotonic behavior of the confidence metrics, Algorithm~\ref{rm} does not use these thresholds for pruning.
-Hence, in AMIE, pruning based on confidence thresholds is applied only directly before the rules are output. Consequently, only the output is influenced, not the runtime.
+\subsection{Speeding up Confidence Evaluation}
 
-For AMIE+, we have developed a way to use minimum confidence thresholds to improve the performance of the system.  
-We use the confidence threshold in combination with a formula to approximate the confidence value to avoid evaluating expensive queries that would lead to low confidence rules.
+The calculation of the  rules' confidence takes a significant part of the time of the overall rule-mining process. 
+\comment{Chris}{can we add a number here?}
+This cost depends on properties of each rule. The confidence calculation (both standard and pca) involves the calculation of the 
+size of the rule's body: if the body contains atoms with very selective joins, the size of the body is relatively small and the query cost remains low. 
+On the other hand, if the body size is huge, it uses more resources (memory) which make the query expensive.
+Notice also that most rule mining applications are interested in rules above some confidence threshold.
+For example, predictions based on rules with 1\% confidence are not useful in practice.
+This means that  a rule mining system might spend a significant amount of time to evaluate expensive confidence queries only to find out that
+the rule was of low confidence and of no practical use.
+An example of such a rule that we will use also later in this section is:
+\[
+  directed(x,z) \wedge hasActor(z,y) \Rightarrow married(x,y)
+\]
+
+
+This rule concludes that a director is married to all the actors that acted in his/her movies, producing a total of 74249 married couples in YAGO2.
+AMIE needs more than 500ms to calculate the confidence of this intuitively bad rule.
+
+% In AMIE+, we are exploiting the existence of a confidence threshold to prune rules that are ``expected'' to be ``expensive'' and 
+% to have confidence lower than this threshold without actually calculating their confidence value.
+In AMIE+, we use the confidence threshold in combination with a formula to approximate the confidence value 
+to avoid evaluating expensive queries that would lead to low confidence rules.
 In the following, we discuss how to approximate confidence  for ``potentially expensive'' rules. 
-Our approximation formula is based on simple statistics, such as the functionalities or the overlaps between domains and ranges of various relations. These quantities
-can be precomputed and can later be accessed in constant time. In addition, our approximation is designed such that it is more likely to overestimate confidence than to underestimate it.
+Our approximation formula is based on simple statistics, such as the functionalities or the overlaps 
+between domains and ranges of various relations. 
+These quantities
+can be precomputed and can later be accessed in constant time. For example, AMIE+ prunes the example-rule above in less than 1ms.  
+In addition, our approximation is designed such that it is more likely to overestimate confidence than to underestimate it.
 This is important, because we use it to prune rules, and we want to avoid pruning rules that have a higher confidence in reality.
 Our experiments (see Sec.~\ref{amiepm}) show that this technique can make AMIE run in the range of minutes instead of days with 4\% or less of false pruning.
+
+
+
+% Most rule mining applications have no use for rules with low confidence. 
+% For example, predictions based on rules with 1\% confidence are not useful in practice.
+% Based on this observation, AMIE accepts a minimum confidence threshold for both the PCA and the standard confidence. However,
+% due to the non-monotonic behavior of the confidence metrics, Algorithm~\ref{rm} does not use these thresholds for pruning.
+% Hence, in AMIE, pruning based on confidence thresholds is applied only directly before the rules are output. Consequently, only the output is influenced, not the runtime.
+
+% For AMIE+, we have developed a way to use minimum confidence thresholds to improve the performance of the system.  
+% We use the confidence threshold in combination with a formula to approximate the confidence value 
+% to avoid evaluating expensive queries that would lead to low confidence rules.
+% In the following, we discuss how to approximate confidence  for ``potentially expensive'' rules. 
+% Our approximation formula is based on simple statistics, such as the functionalities or the overlaps between domains and ranges of various relations. 
+% These quantities
+% can be precomputed and can later be accessed in constant time. In addition, our approximation is designed such that it is more likely to overestimate confidence than to underestimate it.
+% This is important, because we use it to prune rules, and we want to avoid pruning rules that have a higher confidence in reality.
+% Our experiments (see Sec.~\ref{amiepm}) show that this technique can make AMIE run in the range of minutes instead of days with 4\% or less of false pruning.
 
 
 \subsubsection{Confidence Approximation}
@@ -293,8 +369,14 @@ Notice that in order to write a rule in this canonical form we may need to repla
 and change the order of the atoms.
 In the following, we first explain how to compute the approximation for the case of a single 
 path with one existential variable through a running example.
-Then we generalize to rules with many existential variables, forming a single path and, 
-in the end, we discuss the case of multiples paths.
+Then we generalize to rules with many existential variables, forming a single path. 
+If there are many paths connecting $x$ and $y$, we can compute, the support and confidence denominator for each path separately.
+The quantity $\#y_{per\;x}$ and the support for the combination of all paths can be upper-bounded by the minimum of the $\#y_{per\;x}$ and the support 
+respectively of the individual paths. We could, therefore, use these upper bounds to approximate them.
+However, the existence of multiple paths makes always the denominator query more selective and therefore not as expensive (similar to the case of the 
+example $livesIn(x,y)\wedge bornIn(x,y)\Rightarrow diedIn(x,y)$). Since the benefit from using the approximation formula for multiple-path-rules
+is expected to be limited in comparison to the risk of false pruning, we only use the approximation formula for single-path rules.
+
 
 \subsubsection{Approximating Confidence Denominator} \label{sec:appr}
 In the following, we denote the domain and range of $r$ with $dom(r)$ and $rng(r)$, respectively.
@@ -397,9 +479,7 @@ $$
   \prod_{i=2}^{n}\frac{ov_{rd}(r_{i-1},r_i) }{|rng(r_{i-1})|}\frac{ifun(r_i)}{fun(r_i)}
 \end{eqnarray*}
 
-If there are $m$ paths connecting $x$ and $y$, we can compute, support and confidence denominator for each path separately.
-The quantity $\#y_{per\;x}$ and the support for the combination of all paths can be upper-bounded by the minimum of the $\#y_{per\;x}$ and the support 
-respectively of the individual paths. However, we can use these upper bounds to approximate them.
+
 
 
 
