@@ -231,8 +231,7 @@ Therefore, AMIE+ caches the results of previous queries. Whenever a new query ca
 
 \subsection{Speeding up Confidence Evaluation}
 
-The calculation of the  rules' confidence takes a significant part of the time of the overall rule-mining process. 
-\comment{Chris}{can we add a number here?}
+The calculation of the  rules' confidence takes a significant part of the time of the overall rule-mining process (up to 29\% for YAGO2). 
 This cost depends on properties of each rule. The confidence calculation (both standard and pca) involves the calculation of the 
 size of the rule's body: if the body contains atoms with very selective joins, the size of the body is relatively small and the query cost remains low. 
 On the other hand, if the body size is huge, it uses more resources (memory) which make the query expensive.
@@ -247,7 +246,7 @@ An example of such a rule that we will use also later in this section is:
 
 
 This rule concludes that a director is married to all the actors that acted in his/her movies, producing a total of 74249 married couples in YAGO2.
-AMIE needs more than 500ms to calculate the confidence of this intuitively bad rule.
+AMIE needs more than 500ms (more than twice the average cost: 200ms) to calculate the confidence of this intuitively bad rule.
 
 % In AMIE+, we are exploiting the existence of a confidence threshold to prune rules that are ``expected'' to be ``expensive'' and 
 % to have confidence lower than this threshold without actually calculating their confidence value.
