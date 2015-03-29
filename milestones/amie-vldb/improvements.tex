@@ -72,7 +72,7 @@ Hence, any refinement is futile. We call rules with 100\% PCA confidence \emph{p
 
 
 
-\paragraph{Caching Projection Queries}
+\paragraph{Reusing Projection Queries}
 Recall from Sec.~\ref{support} that support is defined also for intermediate rules, i.e., rules that are not yet closed. 
 In other words, whenever we apply an add-dangling-atom operator to a rule $R_p$ (the parent rule) to produce
 a new rule $R_c$ (the child rule), the support of $R_c$ will be likely smaller than the support of $R_p$ (see the example in Sec.~\ref{support}).
@@ -113,10 +113,17 @@ For example, for refining the example rule $R_c$ with a dangling atom joining on
 ?r(y,w) \wedge \textit{citizenOf}(z,y)\wedge \textit{livesIn}(x,y)\Rightarrow \textit{citizenOf}(x,y)
 \]
 \noindent and  will find the bindings of $r$ that result in rules with support above the given threshold.
-Since $R_c$ has the same support with $R_p$, all the results of the projection queries of $R_p$
-can be re-used directly (without recalculating them) by $R_c$ too. Notice, though, that since $R_c$
-contains one more variable than $R_p$ ($z$ in our example), AMIE cannot avoid firing the projection queries that involve binding new relations
+Since $R_c$ has the same support with $R_p$, we can re-use from $R_p$ all the projection queries \comment{Chris}{@Luis: I say reuse the same queries
+not the query results. I.e. the queries are fired. In addition I do not say that I re-write anything because they might ask questions. The high level idea
+is that you use the same queries. However I will be surprised if we save significantly with this optimization.} that bind on the 
+common variables of $R_c$ and $R_p$ ($x$ and $y$ in our example). Notice, though, that since $R_c$
+contains one more variable than $R_p$ ($z$ in our example), AMIE cannot avoid creating the projection queries that involve binding new relations
 with that variable.
+
+% Since $R_c$ has the same support with $R_p$, all the results of the projection queries of $R_p$
+% can be re-used directly (without recalculating them) by $R_c$ too. Notice, though, that since $R_c$
+% contains one more variable than $R_p$ ($z$ in our example), AMIE cannot avoid firing the projection queries that involve binding new relations
+% with that variable.
 
 % Since the atom $citizenOf(z,y)$ is redundant, we can rewrite the query and omit it.
 % This reduces the number of atoms of the query and therefore its running time.
