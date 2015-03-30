@@ -10,7 +10,8 @@ possibly with examples (note that 4.4 and 4.4.2 have the same title, which is no
 
 
 
-The support of a rule quantifies the number of known correct predictions of the rule. However, it does not measure the false predictions of the rule.
+The support of a rule quantifies the number of known correct predictions of the rule. 
+However, it does not take into account the false predictions of the rule.
 We will now describe measures that judge the rule \emph{quality}.
 We first describe the challenges in defining such a measure in our setting 
 and discuss the most common way to measure the rule quality which we refer to as standard confidence.
@@ -29,7 +30,7 @@ Then, we introduce our own measure: the confidence under the assumption of parti
 Let us consider a given Horn rule $\vec{B} \Rightarrow r(x,y)$. Let us look at all facts with relation $r$ (Figure \ref{fig:prediction}).
 We distinguish 4 types of facts: True facts that are known to the KB (KBtrue), true facts that are unknown to the KB (NEWtrue),
 facts that are known to be false in the KB (KBfalse), and facts that are false but unknown to the KB (NEWfalse).
-The rule will make certain predictions (blue circle). These predictions can be known to be true (A), known to be false (C), or unknown (B and D).
+The rule will make certain predictions about relation $r$ (blue circle). These predictions can be known to be true (A), known to be false (C), or unknown (B and D).
 When they are unknown to the KB, they can still be true (B) or false (D) with respect to the real world.\\
 
 %\ffigure{Figure}{model}{\label{fig:prediction}Prediction under Incompleteness}{\input{figures/modelpic.tikz}}
@@ -137,7 +138,7 @@ conf_{pca}(\vec{B} \Rightarrow r(x,y)) := \frac{supp(\vec{B} \wedge r(x,y))}{\#(
 This formula normalizes the support by the number of pairs $(x,y)$ for which there exists a $y'$ with $r(x,y')$.
 For the KB introduced in Table~\ref{tab:exampleKB} and the rule $R: livesIn(x,y)\Rightarrow wasBornIn(x,y)$,
 $conf_{pca}(R)=1/2$, i.e., only $wasBornIn(Adam, Rom)$ counts as a negative example, 
-because we already know a different place of birth for Adam. The fact $wasBorn(Bob,Zurich)$ is completely disregarded as evidence.
+because we already know a different place of birth for Adam. The prediction $wasBorn(Bob,Zurich)$ is completely disregarded as evidence.
 
 Notice that Eq.~\ref{eq:pcaConf} fixes $x$ and $r$ and implies that rules will try to predict values for $y$. 
 AMIE always predicts in the most functional direction. To see this, recall that 
@@ -148,7 +149,7 @@ is larger than their inverse functionality, the most functional direction
 will be always to predict $y$ given $x$.
 
 In spite of being an assumption, the PCA is certainly true for functions, such as \emph{birthdate} and \emph{capital}.
-The assumption also holds for relations that are not functions but that have a high functionality,
+The PCA also holds for relations that are not functions but that have a high functionality,
 as we shall see in our qualitative analysis of the PCA in Section~\ref{pcaEvaluation}. 
 The PCA has been applied in the Google Knowledge Vault under the name ``local completeness assumption'' \cite{knowledgevault}.
 

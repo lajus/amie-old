@@ -92,6 +92,11 @@ public class AMIE {
 	 * Time spent in duplication elimination 
 	 **/
 	private long queueingAndDuplicateElimination;
+	
+	/**
+	 * Time spent in confidence approximations
+	 */
+	private long approximationTime;
 		
 	/**
 	 * 
@@ -111,6 +116,7 @@ public class AMIE {
 		this.specializationTime = 0l;
 		this.scoringTime = 0l;
 		this.queueingAndDuplicateElimination = 0l;
+		this.approximationTime = 0l;
 	}
 	
 	public long getSpecializationTime() {
@@ -123,6 +129,10 @@ public class AMIE {
 
 	public long getQueueingAndDuplicateElimination() {
 		return queueingAndDuplicateElimination;
+	}
+	
+	public long getApproximationTime() {
+		return approximationTime;
 	}
 
 		
@@ -182,6 +192,7 @@ public class AMIE {
         		this.specializationTime += jobObject.getSpecializationTime();
         		this.scoringTime += jobObject.getScoringTime();
         		this.queueingAndDuplicateElimination += jobObject.getQueueingAndDuplicateElimination();
+        		this.approximationTime += jobObject.getApproximationTime();
         	}
         }else{
         	RDFMinerJob jobObject = new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter, indexedResult);
@@ -190,6 +201,7 @@ public class AMIE {
     		this.specializationTime += jobObject.getSpecializationTime();
     		this.scoringTime += jobObject.getScoringTime();
     		this.queueingAndDuplicateElimination += jobObject.getQueueingAndDuplicateElimination();
+    		this.approximationTime += jobObject.getApproximationTime();    		
         }
 		
         if(realTime){
@@ -284,6 +296,9 @@ public class AMIE {
 		// Time spent in duplication elimination
 		private long queueingAndDuplicateElimination;
 		
+		// Time to calculate confidence approximations
+		private long approximationTime;
+		
 								
 		public RDFMinerJob(Collection<Query> seedsPool, 
 				List<Query> outputSet, Lock resultsLock, 
@@ -300,6 +315,7 @@ public class AMIE {
 			this.specializationTime = 0l;
 			this.scoringTime = 0l;
 			this.queueingAndDuplicateElimination = 0l;
+			this.approximationTime = 0l;
 		}
 		
 		private Query pollQuery(){
@@ -337,6 +353,7 @@ public class AMIE {
 						long timeStamp1 = System.currentTimeMillis();
 						boolean ruleSatisfiesConfidenceBounds = 
 								assistant.calculateConfidenceBoundsAndApproximations(currentRule);
+						this.approximationTime += (System.currentTimeMillis() - timeStamp1);
 						if (ruleSatisfiesConfidenceBounds) {
 							resultsLock.lock();
 							setAdditionalParents2(currentRule);
@@ -459,6 +476,11 @@ public class AMIE {
 		public long getQueueingAndDuplicateElimination() {
 			return queueingAndDuplicateElimination;
 		}
+
+		public long getApproximationTime() {
+			return approximationTime;
+		}
+
 	}
 	
 	public static void run(String[] args) throws Exception {
@@ -1008,6 +1030,7 @@ public class AMIE {
 		System.out.println("Specialization time: " + (miner.getSpecializationTime() / 1000.0) + "s");
 		System.out.println("Scoring time: " + (miner.getScoringTime() / 1000.0) + "s");
 		System.out.println("Queueing and duplicate elimination: " + (miner.getQueueingAndDuplicateElimination() / 1000.0) + "s");
+		System.out.println("Approximation time: " + (miner.getApproximationTime() / 1000.0) + "s");
 		System.out.println(rules.size() + " rules mined.");
 		long miningTime = System.currentTimeMillis() - time;
 		System.out.println("Mining done in " + NumberFormatter.formatMS(miningTime));

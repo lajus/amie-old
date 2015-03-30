@@ -614,6 +614,10 @@ public class MiningAssistant{
 	 * find enough evidence to discard the rule.
 	 */
 	private boolean calculateConfidenceBounds(Query candidate) {
+		if (candidate.getRealLength() != 3) {
+			return true;
+		}
+		
 		int[] hardQueryInfo = null;
 		hardQueryInfo = source.identifyHardQueryTypeI(candidate.getAntecedent());
 		if(hardQueryInfo != null){
@@ -645,8 +649,8 @@ public class MiningAssistant{
 	 * Given a rule with more than 3 atoms and a single path connecting the head variables, 
 	 * it computes a confidence approximation.
 	 * @param candidate
-	 * @return boolean True if the approximation is not applicable or produces a value above the confidence thresholds, i.e.,
-	 * there is not enough evidence to drop the rule.
+	 * @return boolean True if the approximation is not applicable or produces a value 
+	 * above the confidence thresholds, i.e., there is not enough evidence to drop the rule.
 	 */
 	protected boolean calculateConfidenceApproximationForGeneralCase(
 			Query candidate) {
@@ -688,9 +692,9 @@ public class MiningAssistant{
 			double term = this.source.worstFunctionality(ri) 
 					/ this.source.bestFunctionality(ri);
 			if (source.isFunctional(ri_1)) {
-				term *= this.source.relationColumnSize(ri_1, 2);
+				term = term * this.source.relationColumnSize(ri_1, 2);
 			} else {
-				term *= this.source.relationColumnSize(ri_1, 0);				
+				term = term * this.source.relationColumnSize(ri_1, 0);				
 			}
 			
 			if (source.isFunctional(ri_1)) {
@@ -706,8 +710,13 @@ public class MiningAssistant{
 					overlap = this.source.overlap(ri_1, ri, FactDatabase.SUBJECT2OBJECT);	
 				}
 			}
-			term *= overlap;
-			denominator *= term;
+			term = term * overlap;
+			denominator = denominator * term;
+			// If it gets too small, no reason to continue.
+			if (denominator == 0.0) {
+				System.err.println("Approximation got too small");
+				return true;
+			}
 		}
 		
 		double estimatedPCA = (double)candidate.getSupport() / denominator;

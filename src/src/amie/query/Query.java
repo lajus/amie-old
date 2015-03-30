@@ -1669,7 +1669,7 @@ public class Query{
 			return false;
 		}
 		IntHashMap<ByteString> histogram = variablesHistogram();
-		for (ByteString variable : getHeadVariables()) {
+		for (ByteString variable : getBodyVariables()) {
 			if (histogram.get(variable) != 2) {
 				return false;
 			}
