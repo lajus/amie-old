@@ -58,8 +58,8 @@ two non-closed variables (see Section~\ref{subsec:rules}), AMIE+ will skip the a
 the add-closing atom operator $\mathcal{O}_C$. This happens because an application of the operator 
 $\mathcal{O}_C$ can close at most two variables with one atom. 
 This rationale is also applicable to the add-instantiated operator $\mathcal{O}_E$:
-rules with more than one non-closed variable are not refined with instantiated operators, 
-because the application of this operator can close at most one variable with an atom.
+rules with more than one non-closed variable are not refined with instantiated atoms, 
+because the addition of an instantiated atom can close at most one variable.
 % Since the rule has the maximum length $n$, it will not be further refined.
 % Hence, the application of the operator $\mathcal{O}_D$ to open rules of size $n-1$ is useless.
 % For this reason, AMIE+ refines open rules of length $n-1$ only by means of the add-closing-atom-operator ($\mathcal{O}_C$).
@@ -77,18 +77,21 @@ Recall from Sec.~\ref{support} that support is defined also for intermediate rul
 In other words, whenever we apply an add-dangling-atom operator to a rule $R_p$ (the parent rule) to produce
 a new rule $R_c$ (the child rule), the support of $R_c$ will be likely smaller than the support of $R_p$ (see the example in Sec.~\ref{support}).
 However, there is one case in which the addition of a dangling atom cannot reduce the support. 
-This happens when $R_c$:\comment{Chris}{@Luis: I prefer it if we define exactly when the caching can take place}
-(i) contains a relation that already exists in another atom in the parent rule  and 
-(ii) the same-relation-atoms have a variable in common.
+This happens when $R_c$ \comment{Chris}{@Luis: I prefer it if we define exactly when the caching can take place}
+(i) already contains atoms with the same relation of the dangling atom  and 
+(ii) those atoms have a variable in common with the dangling atom.
 An example is the parent rule $R_p:livesIn(x,y)\Rightarrow citizenOf(x,y)$ and the child rule 
 $R_c: citizenOf(z,y)\wedge livesIn(x,y)\Rightarrow citizenOf(x,y)$.
 Intuitively, the addition of the dangling atom $\textit{citizenOf}(z,y)$ cannot further restrict the support of $R_p$ because
 the new atom is a less restrictive version of the atom $citizenOf(x,y)$.
 This means that $z$ will always bind to the same values as $x$. 
 From this observation, it follows that the support of $R_c$ can be rewritten as 
-\[
- supp(R_c) = \#(x,y):  citizenOf(x,y)\wedge livesIn(x,y)\wedge citizenOf(x,y)
-\]
+\begin{multline*}
+supp(R_c) = \#(x,y):  citizenOf(x,y)\wedge livesIn(x,y) \\ \wedge citizenOf(x,y)
+\end{multline*}
+% \[
+%  supp(R_c) = \#(x,y):  citizenOf(x,y)\wedge livesIn(x,y)\wedge citizenOf(x,y)
+% \]
 \[
  supp(R_c) = \#(x,y):   livesIn(x,y)\wedge citizenOf(x,y)
 \]
@@ -96,6 +99,7 @@ From this observation, it follows that the support of $R_c$ can be rewritten as
 
 \comment{Chris}{@Luis: I prefer to keep the support formula in. It is not that the child rule can be re-written as the parent. It is the support
 of the child that is equivalent to the support of the parent.}
+\comment{Luis: I agree}
 
 
 \noindent which is the same as $supp(R_p)$. Thus both $R_p$ and $R_c$ have the same support.
@@ -116,9 +120,9 @@ For example, for refining the example rule $R_c$ with a dangling atom joining on
 Since $R_c$ has the same support with $R_p$, we can re-use from $R_p$ all the projection queries \comment{Chris}{@Luis: I say reuse the same queries
 not the query results. I.e. the queries are fired. In addition I do not say that I re-write anything because they might ask questions. The high level idea
 is that you use the same queries. However I will be surprised if we save significantly with this optimization.} that bind on the 
-common variables of $R_c$ and $R_p$ ($x$ and $y$ in our example). Notice, though, that since $R_c$
-contains one more variable than $R_p$ ($z$ in our example), AMIE cannot avoid creating the projection queries that involve binding new relations
-with that variable.
+common variables of $R_c$ and $R_p$, $x$ and $y$ in this example. Notice, though, that $R_c$
+contains an additional variable, i.e., $z$ and therefore, AMIE cannot reuse the projection queries
+of $R_p$ for queries that involve new atoms with the variable $z$.
 
 % Since $R_c$ has the same support with $R_p$, all the results of the projection queries of $R_p$
 % can be re-used directly (without recalculating them) by $R_c$ too. Notice, though, that since $R_c$
@@ -238,8 +242,9 @@ Therefore, AMIE+ caches the results of previous queries. Whenever a new query ca
 
 \subsection{Speeding up Confidence Evaluation}
 
-The calculation of the  rules' confidence takes a significant part of the time of the overall rule-mining process (up to 29\% for YAGO2). 
-This cost depends on properties of each rule. The confidence calculation (both standard and pca) involves the calculation of the 
+The calculation of the confidence scores for rules takes a significant part of the time 
+of the overall rule-mining process (up to 29\% for YAGO2). 
+This cost depends on the properties of each rule. The confidence calculation (both standard and pca) involves the calculation of the 
 size of the rule's body: if the body contains atoms with very selective joins, the size of the body is relatively small and the query cost remains low. 
 On the other hand, if the body size is huge, it uses more resources (memory) which make the query expensive.
 Notice also that most rule mining applications are interested in rules above some confidence threshold.
@@ -261,7 +266,7 @@ In AMIE+, we use the confidence threshold in combination with a formula to appro
 to avoid evaluating expensive queries that would lead to low confidence rules.
 In the following, we discuss how to approximate confidence  for ``potentially expensive'' rules. 
 Our approximation formula is based on simple statistics, such as the functionalities or the overlaps 
-between domains and ranges of various relations. 
+between domains and ranges of relations. 
 These quantities
 can be precomputed and can later be accessed in constant time. For example, AMIE+ prunes the example-rule above in less than 1ms.  
 In addition, our approximation is designed such that it is more likely to overestimate confidence than to underestimate it.
