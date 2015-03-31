@@ -692,9 +692,9 @@ public class MiningAssistant{
 			double term = this.source.worstFunctionality(ri) 
 					/ this.source.bestFunctionality(ri);
 			if (source.isFunctional(ri_1)) {
-				term = term * this.source.relationColumnSize(ri_1, 2);
+				term = term / this.source.relationColumnSize(ri_1, 2);
 			} else {
-				term = term * this.source.relationColumnSize(ri_1, 0);				
+				term = term / this.source.relationColumnSize(ri_1, 0);				
 			}
 			
 			if (source.isFunctional(ri_1)) {

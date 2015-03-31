@@ -1726,7 +1726,7 @@ public class Query{
 		ByteString funcVar = getFunctionalVariable();
 		ByteString nonFuncVar = getNonFunctionalVariable();
 		List<ByteString[]> body = getBody();
-		MultiMap<ByteString, ByteString[]> variablesToAtom= new MultiMap<>();
+		MultiMap<ByteString, ByteString[]> variablesToAtom = new MultiMap<>();
 		List<ByteString[]> path = new ArrayList<>();
 		// Build a multimap, variable -> {atoms where the variable occurs}
 		for (ByteString[] bodyAtom : body) {
