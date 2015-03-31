@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -354,7 +355,7 @@ public class Query{
 	}
 	
 	public List<ByteString[]> getBody(){
-		return getAntecedent();
+		return triples.subList(1, triples.size());
 	}
 	
 	public List<ByteString[]> getAntecedent(){
@@ -828,6 +829,39 @@ public class Query{
 		}
 		
 		return varsHistogram;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	private Map<ByteString, Integer> alternativeHistogram() {
+		Map<ByteString, Integer> hist = new HashMap<>(triples.size(), 1.0f);
+		for (int i = 1; i < triples.size(); ++i) {
+			ByteString[] triple = triples.get(i);
+			if (triple[1].equals(FactDatabase.DIFFERENTFROMbs))
+				continue;
+			
+			if (FactDatabase.isVariable(triple[0])) {
+				Integer val = hist.get(triple[0]);
+				if (val == null)
+					hist.put(triple[0], 1);
+				else 
+					hist.put(triple[0], val + 1);
+			}
+			// Do not count twice if a variable occurs twice in the atom, e.g., r(x, x)
+			if (!triple[0].equals(triple[2])) {
+				if (FactDatabase.isVariable(triple[2])) {
+					Integer val = hist.get(triple[2]);
+					if (val == null)
+						hist.put(triple[2], 1);
+					else 
+						hist.put(triple[2], val + 1);
+				}
+			}
+		}
+		
+		return hist;
 	}
 	
 	/**
@@ -1664,18 +1698,42 @@ public class Query{
 	 * @return
 	 */
 	public boolean containsSinglePath() {
-		if (getHeadVariables().size() < 2) {
+		ByteString[] head = getHead();
+		if (!FactDatabase.isVariable(head[0]) || 
+				!FactDatabase.isVariable(head[2])) {
 			// We are not interested in rules with a constant in the head.
 			return false;
 		}
-		IntHashMap<ByteString> histogram = variablesHistogram();
-		for (ByteString variable : getBodyVariables()) {
-			if (histogram.get(variable) != 2) {
-				return false;
+		
+		Map<ByteString, Integer> histogram = alternativeHistogram();		
+		for (int i = 1; i < triples.size(); ++i) {
+			ByteString[] atom = triples.get(i);
+			for (int k : new int[] {0, 2}) {
+				if (FactDatabase.isVariable(atom[k])) {
+					Integer freq = histogram.get(atom[k]);
+					if (freq != null) {
+						if (occursInHead(atom[k])) {
+							if (freq != 1) {
+								return false;
+							}
+						} else {
+							if (freq != 2) {
+								return false;
+							}
+						}
+					}
+				} else {
+					return false;
+				}
 			}
 		}
 		
 		return true;
+	}
+
+	private boolean occursInHead(ByteString expression) {
+		ByteString[] head = getHead();
+		return expression.equals(head[0]) || expression.equals(head[2]);
 	}
 
 	/**
@@ -1726,16 +1784,16 @@ public class Query{
 		ByteString funcVar = getFunctionalVariable();
 		ByteString nonFuncVar = getNonFunctionalVariable();
 		List<ByteString[]> body = getBody();
-		MultiMap<ByteString, ByteString[]> variablesToAtom = new MultiMap<>();
+		Map<ByteString, List<ByteString[]>> variablesToAtom = new HashMap<>(triples.size(), 1.0f);
 		List<ByteString[]> path = new ArrayList<>();
 		// Build a multimap, variable -> {atoms where the variable occurs}
 		for (ByteString[] bodyAtom : body) {
 			if (FactDatabase.isVariable(bodyAtom[0])) {
-				variablesToAtom.put(bodyAtom[0], bodyAtom);
+				telecom.util.collections.Collections.addToMap(variablesToAtom, bodyAtom[0], bodyAtom);
 			}
 			
 			if (FactDatabase.isVariable(bodyAtom[2])) {
-				variablesToAtom.put(bodyAtom[2], bodyAtom);
+				telecom.util.collections.Collections.addToMap(variablesToAtom, bodyAtom[2], bodyAtom);
 			}
 		}
 		
@@ -1743,7 +1801,7 @@ public class Query{
 		ByteString joinVariable = funcVar;
 		ByteString[] lastAtom = null;
 		while (true) {
-			List<ByteString[]> atomsList = variablesToAtom.getAsList(joinVariable);
+			List<ByteString[]> atomsList = variablesToAtom.get(joinVariable);
 			// This can be only the head variable
 			if (atomsList.size() == 1) {
 				lastAtom = atomsList.get(0);				

@@ -689,12 +689,13 @@ public class MiningAssistant{
 		for (int i = 1; i < path.size(); ++i) {
 			ByteString ri = path.get(i)[1];
 			ByteString ri_1 = path.get(i - 1)[1];
-			double term = this.source.worstFunctionality(ri) 
-					/ this.source.bestFunctionality(ri);
+			double rng = 0.0;
+			double funri = this.source.bestFunctionality(ri);
+			double ifunri = this.source.worstFunctionality(ri);
 			if (source.isFunctional(ri_1)) {
-				term = term / this.source.relationColumnSize(ri_1, 2);
+				rng = this.source.relationColumnSize(ri_1, 2);
 			} else {
-				term = term / this.source.relationColumnSize(ri_1, 0);				
+				rng = this.source.relationColumnSize(ri_1, 0);				
 			}
 			
 			if (source.isFunctional(ri_1)) {
@@ -710,11 +711,12 @@ public class MiningAssistant{
 					overlap = this.source.overlap(ri_1, ri, FactDatabase.SUBJECT2OBJECT);	
 				}
 			}
-			term = term * overlap;
+			double term = (overlap * ifunri) / (rng * funri); 
 			denominator = denominator * term;
 			// If it gets too small, no reason to continue.
 			if (denominator == 0.0) {
-				System.err.println("Approximation got too small");
+				System.err.println("Approximation got too small for query " + FactDatabase.toString(candidate.getTriples()) 
+						+ ", last term: " + term + " = " + overlap + "*" + ifunri + "/" + rng + "*" + funri);
 				return true;
 			}
 		}
