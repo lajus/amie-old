@@ -381,13 +381,28 @@ and change the order of the atoms.
 In the following, we first explain how to compute the approximation for the case of a single 
 path with one existential variable through a running example.
 Then we generalize to rules with many existential variables, forming a single path. 
-If there are many paths connecting $x$ and $y$, we can compute, the support and confidence denominator for each path separately.
-The quantity $\#y_{per\;x}$ and the support for the combination of all paths can be upper-bounded by the minimum of the $\#y_{per\;x}$ and the support 
-respectively of the individual paths \comment{Luis}{This part is not clear. You are suggesting the minimum of which expression exactly?}. We could, therefore, use these upper bounds to approximate them.
-However, the existence of multiple paths makes always the denominator query more selective and therefore not as expensive (similar to the case of the 
-example $livesIn(x,y)\wedge bornIn(x,y)\Rightarrow diedIn(x,y)$). Since the benefit from using the approximation formula for multiple-path-rules
-is expected to be limited in comparison to the risk of false pruning, we only use the approximation formula for single-path rules. 
-\comment{Luis}{This part I do not get either.}
+
+\comment{chris}{took all formulas out. Just say we do not approximate}
+If there are $m$ paths connecting $x$ and $y$, AMIE does not make use the approximation formula. The reason for this is that the $dnm$
+for the combination of all paths will be smaller than the $dnm$ for each individual path. 
+In other words, we neither expect such rules to have large bodies nor to be particularly expensive in terms of confidence computation.
+
+
+% If there are $m$ paths connecting $x$ and $y$, we can compute, the support and confidence denominator for each path separately.
+% The quantity $\#y_{per\;x}$ (and the support) for the combination of all paths can be upper-bounded by the minimum of the $\#y_{per\;x}$ (and the support respectively) 
+%  of all individual paths \comment{Luis}{This part is not clear. You are suggesting the minimum of which expression exactly?}\comment{chris}{now?}. 
+% Our confidence approximation will then be:
+% 
+% \[
+%  \widehat{conf}_{pca} =\frac{min(supp_1,supp_2,...,supp_{m})}{min(\widehat{dnm}_1,\widehat{dnm}_2,...,\widehat{dnm}_m)}
+% \]
+% 
+% where $supp_i$ and $\widehat{dnm}_i$ are the support and the denominator approximation of path $i$.
+% Notice that the denominator of the above formula is only an upper bound for the real denominator. 
+% However, the existence of multiple paths makes always the denominator query more selective and therefore not as expensive (similar to the case of the 
+% example $livesIn(x,y)\wedge bornIn(x,y)\Rightarrow diedIn(x,y)$). Since the benefit from using the approximation formula for multiple-path-rules
+% is expected to be limited in comparison to the risk of false pruning, we only use the approximation formula for single-path rules. 
+% \comment{Luis}{This part I do not get either.}
 
 
 \subsubsection{Approximating Confidence Denominator} \label{sec:appr}
