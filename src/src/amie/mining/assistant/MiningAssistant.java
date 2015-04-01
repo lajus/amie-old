@@ -668,20 +668,9 @@ public class MiningAssistant{
 		ByteString rh = candidate.getHead()[1];
 		double funr1 = this.source.bestFunctionality(r1);
 		double overlap = 0.0;
-		// Find the overlap between r1 and the head relation
-		if (this.source.isFunctional(rh)) {
-			if (this.source.isFunctional(r1)) {
-				overlap = this.source.overlap(rh, r1, FactDatabase.SUBJECT2SUBJECT);
-			} else {
-				overlap = this.source.overlap(rh, r1, FactDatabase.SUBJECT2OBJECT);
-			}
-		} else {
-			if (source.isFunctional(r1)) {
-				overlap = this.source.overlap(r1, rh, FactDatabase.SUBJECT2OBJECT);
-			} else {
-				overlap = this.source.overlap(rh, r1, FactDatabase.OBJECT2OBJECT);
-			}
-		}
+		
+		int[] joinInformation = Query.joinPositions(path.get(0), candidate.getHead());
+		overlap = computeOverlap(joinInformation, r1, rh);
 		// The first part of the formula
 		denominator = denominator * (overlap / funr1);
 		
@@ -698,19 +687,8 @@ public class MiningAssistant{
 				rng = this.source.relationColumnSize(ri_1, 0);				
 			}
 			
-			if (source.isFunctional(ri_1)) {
-				if (source.isFunctional(ri)) {
-					overlap = this.source.overlap(ri, ri_1, FactDatabase.SUBJECT2OBJECT);
-				} else {
-					overlap = this.source.overlap(ri, ri_1, FactDatabase.OBJECT2OBJECT);
-				}
-			} else {
-				if (source.isFunctional(ri)) {
-					overlap = this.source.overlap(ri_1, ri, FactDatabase.SUBJECT2SUBJECT);	
-				} else {
-					overlap = this.source.overlap(ri_1, ri, FactDatabase.SUBJECT2OBJECT);	
-				}
-			}
+			joinInformation = Query.joinPositions(path.get(i - 1), path.get(i));
+			overlap = computeOverlap(joinInformation, r1, rh);
 			double term = (overlap * ifunri) / (rng * funri); 
 			denominator = denominator * term;
 			// If it gets too small, no reason to continue.
@@ -731,6 +709,28 @@ public class MiningAssistant{
 		}
 		
 		return true;
+	}
+
+	/**
+	 * Given two relations and the positions at which they join, it returns the number 
+	 * of entities in the overlap of such positions.
+	 * @param joinInformation
+	 * @param r1
+	 * @param rh
+	 * @return
+	 */
+	private double computeOverlap(int[] jinfo, ByteString r1, ByteString r2) {
+		if (jinfo[0] == 0 && jinfo[1] == 0) {
+			return this.source.overlap(r1, r2, FactDatabase.SUBJECT2SUBJECT);
+		} else if (jinfo[0] == 2 && jinfo[1] == 2) {
+			return this.source.overlap(r1, r2, FactDatabase.OBJECT2OBJECT);
+		} else if (jinfo[0] == 0 && jinfo[1] == 2) {
+			return this.source.overlap(r1, r2, FactDatabase.SUBJECT2OBJECT);
+		} else if (jinfo[0] == 2 && jinfo[1] == 0) {
+			return this.source.overlap(r2, r1, FactDatabase.SUBJECT2OBJECT);
+		} else {
+			return 0.0;
+		}
 	}
 
 	/**

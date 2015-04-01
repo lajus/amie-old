@@ -1824,4 +1824,25 @@ public class Query{
 		
 		return path;
 	}
+	
+	/**
+	 * Given 2 atoms joining in at least one variable, it returns the first 
+	 * pairs of variable positions of each atom.
+	 * @param r1
+	 * @param rh
+	 * @return
+	 */
+	public static int[] joinPositions(ByteString[] a1, ByteString[] a2) {
+		if (a1[0].equals(a2[0])) {
+			return new int[]{0, 0};
+		} else if (a1[2].equals(a2[2])) {
+			return new int[]{2, 2};
+		} else if (a1[0].equals(a2[2])) {
+			return new int[] {0, 2};
+		} else if (a1[2].equals(a2[0])) {
+			return new int[] {2, 0};
+		} else {
+			return null;
+		}
+	}
 }
