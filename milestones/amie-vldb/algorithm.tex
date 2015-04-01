@@ -11,6 +11,14 @@ We follow the explications in \cite{amie} and extend them with further explanati
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \subsection{Algorithm}
 \label{subsec:algorithm}
+\comment{R2}{Similarly, the Algorithm 2 is not very accurate. It would be clearer if "distinct" is added on line 15: "for all distinct x $\in$ SELECT ?x FROM K WHERE q do." (In contrast, the DISTINCT in the query on the top of Page 11 is redundant).}
+
+\comment{R3}{Here are some of my criticisms, which apply to Section 5 on AMIE - your previous work:
+1.Algorithm 1 is too high level and as such it leaves too much unexpressed (e.g. "execute in parallel", "is not pruned for output").
+2.      SQL and SPARQL are presented at page 11 only to say that they are discarded for a custom implementation.
+3.      The "vanilla in-memory database" implementation is too informally described (e.g.: each "index is a map from the first item to a map from the second item to a set of the third item": a more formal description and a figure, please!
+}
+
 \paragraph{Goal} Our goal is to mine rules of the form defined in Section~\ref{sec:preliminaries}.
 One of the main problems of any mining approach is to find an efficient way to explore the search space. The naive algorithm of enumerating all possible rules is infeasible for large KBs.
 Hence, we explore the search space by iteratively extending rules by \emph{mining operators}.
@@ -21,7 +29,8 @@ Hence, we explore the search space by iteratively extending rules by \emph{minin
 We see a rule as a sequence of atoms. The first atom is the head atom and the others are the body atoms. In the process of traversing the search space, we can extend a rule by using one of the following operators:
 \begin{enumerate}
 \item \textbf{Add Dangling Atom ($\mathcal{O}_D$})\\
-This operator adds a new atom to a rule. The new atom uses a fresh variable for one of its two arguments. The other argument (variable or entity) is shared with the rule, i.e., it occurs in some other atom of the rule.
+This operator adds a new atom to a rule. The new atom uses a fresh variable for one of its two arguments. The other argument is a variable
+that is shared with the rule, i.e., it occurs in some other atom of the rule.
 \item \textbf{Add Instantiated Atom ($\mathcal{O}_I$})\\
 This operator adds a new atom to a rule that uses an entity for one argument and shares the other argument (variable or entity) with the rule.
 \item \textbf{Add Closing Atom ($\mathcal{O}_C$})\\
@@ -36,13 +45,19 @@ Therefore, we chose the above 3 operators as a canonic set.
 
 
 \paragraph{Algorithm} \label{algo}
-Algorithm~\ref{rm} sketches our approach to mine rules. The algorithm maintains a queue of rules, which initially contains all possible head atoms.
-The algorithm iteratively dequeues a rule from the queue. If the rule is closed (see Section~\ref{sec:preliminaries}),
+Algorithm~\ref{rm} sketches our approach to mine rules. The algorithm maintains a queue of rules, 
+which initially contains all possible head atoms, that is,
+all rules of size 1.
+The algorithm iteratively dequeues a rule from the queue. If the rule 
+meets certain criteria (Lines 6 and 7), then it is output.
 % \comment{Chris}{its quality is evaluated in terms of (PCA) confidence and if it passes the corresponding threshold} \comment{Luis: }{We threshold on PCA confidence
 %  only for AMIE+}\comment{Chris}{so, are we going to output a rule with confidence 0\%?},
-then the rule is output, otherwise it is not.
-Then, the algorithm applies all operators to the rule and adds the resulting rules to the queue (unless they are pruned as described below).
-This process is repeated until the queue is empty. We parallelize this process by maintaining a centralized queue from which the threads dequeue and enqueue.
+Then, the algorithm applies all operators to the rule and adds the resulting rules to 
+the queue if they pass the minimum support threshold (Lines 9 to 15).
+This process is repeated until the queue is empty. 
+To speed up the process, our implementation parallelizes Algorithm~\ref{rm}, that is, the main loop (Lines 4 to 16) runs
+in multiple threads. 
+This achieved by synchronizing the access to the centralized queue from which the threads dequeue and enqueue.
 We do not feed predictions of the rules back into the KB. All measures (such as confidence and support) are always computed on the original KB.
 
 
@@ -53,22 +68,42 @@ We do not feed predictions of the rules back into the KB. All measures (such as 
 \caption{Rule Mining}
 \label{rm}
 \begin{algorithmic}[1]
-\Function{AMIE}{KB $\mathcal{K}$}
+\Function{AMIE}{KB $\mathcal{K}$, $minSupp$, $minConf$}
     \State $q = \langle [r_1(x,y), r_2(x,y) \dots r_m(x,y)] \rangle$
-	\State Execute in parallel:
+    \State $out = \langle \rangle$
 	\While{$\neg q$\emph{.isEmpty}()}
 	  \State $r = q.$\emph{dequeue}()
-	  \If{$r$ is closed $\wedge$ $r$ is not pruned for output}
-	    \State Output $r$
+	  \If{$AcceptedForOutput(r, out, minConf)$}
+	    \State $out.$\emph{add}$(r)$
 	  \EndIf
 	  \ForAll{operators $o$}
 	    \ForAll{rules $r' \in o(r)$}
-		  \If{$r'$ is not pruned}
+		  \If{$supp(r') \ge minSupp$}
 		    \State $q.$\emph{enqueue}$(r')$
 		  \EndIf
 		\EndFor
-      \EndFor
+	  \EndFor
 	\EndWhile
+    \State \Return $out$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Routine to decide to output a rule}
+\label{pfo}
+\begin{algorithmic}[1]
+\Function{AcceptedForOutput}{rule $r$, $out$, $minConf$}
+    \If{$r$ is not closed $\vee\; pcaconf(r) < minConf$}
+      \State \Return $false$
+    \EndIf 
+    \State $parents = parentsOfRule(r)$
+    \ForAll{$r_p \in parents$}
+      \If{$pcaConf(r) < pcaconf(r_p)$}
+	\State \Return $false$
+      \EndIf
+    \EndFor
+    \State \Return $true$
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
@@ -86,6 +121,37 @@ We do not feed predictions of the rules back into the KB. All measures (such as 
 %\comment{Katja}{How about some restructuring (introducing subsections) that shows more clearly what paragraph belongs where, i.e., at the moment ''Algorithm``, ''Pruning``, ''Reducing the output size``, etc. are all on the same level (all paragraphs).}
 
 \subsection{Reducing the search space and the output size}
+
+\paragraph{When to output a rule}  Algorithm~\ref{pfo} describes the routine to decide if a rule should be output or 
+not. If the rule is not closed (See Section~\ref{subsec:rules}) or 
+its PCA confidence is below the given confidence threshold, the algorithm discards it for output. 
+Recall that AMIE is conceived to mine rules that can predict concrete facts and therefore, non-closed rules are
+seen as intermediate steps. Moreover, the PCA confidence is only defined for closed rules.
+It is important to remark also, that the confidence threshold is enforced 
+very late in the rule mining process, i.e., right before reporting the rule. 
+This occurs because confidence is not monotonic, that is, the addition of atoms to a rule
+can both increase or decrease its confidence. Enforcing the confidence threshold at the end also implies that
+the runtime of AMIE is not affected by the magnitude of this value. For this reason, 
+the confidence threshold is an optional argument for AMIE. If omitted, the system assumes a value of 0. 
+
+If the rule is closed and confident enough, Algorithm~\ref{pfo} then applies a \emph{skyline technique} (Lines 5 to 10)
+to reduce the output. If a rule $B_1 \wedge ... \wedge B_n \wedge B_{n+1} \Rightarrow H$ does not have larger confidence
+than its parent rule $B_1 \wedge ... \wedge B_n \Rightarrow H$, then we do not output the longer rule.
+Since support and head coverage are monotonic metrics, we know that the longer rule will a smaller value for those metrics,
+than its parent rule. If the longer rule has lower confidence, then its quality is worse in all aspects.
+It follows that there is no reason to include it in the output.
+Notice however, that the skyline technique is only applied to prune the output. 
+Since confidence can increase with the addition of atoms, we should still use the longer rule 
+for further refinement.
+
+% We never enqueue a rule that is already in the queue. It is expensive to check two rules for equality.
+% However, it is easy to compute the support for each rule. Two rules can only be equal if they have the same head relation and
+% the same support. This reduces the set of rules that have to be checked. If a rule is duplicate, we do not enqueue it (lines 11 and 12 in Algorithm~\ref{rm}).
+% 
+% Since our algorithm performs a breadth-first-search, we can be sure that for any new rule, its potential duplicates will still be in the queue.
+% When we dequeue a rule with $n$ atoms, no rule with $n+1$ atoms has ever been dequeued. Thus, when we apply the mining operators to the rule with $n$ atoms, and generate a rule with $n+1$ atoms,
+% any potential duplicate of that new rule must be in the queue.
+
 \www{
 \paragraph{Pruning} If executed naively, our algorithm will have prohibitively high runtimes.
 The instantiation operator $\mathcal{O}_I$, in particular, generates atoms in the order of $|\mathcal{R}| \times |\mathcal{E}|$.
@@ -96,30 +162,21 @@ This allows for safely discarding any rule that trespasses the threshold (lines 
 }
 Recall from Section~\ref{subsec:statSignificance} that support and head coverage are defined even for rules that are not yet closed, allowing for early pruning.
 
-\paragraph{Reducing the Output Size}  We can reduce the number of output rules in many different ways.
-If a rule $B_1 \wedge ... \wedge B_n \wedge B_{n+1} \Rightarrow H$ does not have larger confidence
-than the rule $B_1 \wedge ... \wedge B_n \Rightarrow H$, then we do not output the longer rule (lines 6 and 7 in Algorithm~\ref{rm}).
-Since head coverage is monotonic, we know that the longer rule will have smaller head coverage than its parent rule, and we also do not expect it to be of higher quality because its confidence is lower. %behave better quality-wise.
-Therefore, there is no reason to include the longer rule in the output.
-However, since confidence is not monotonic, we can possibly obtain rules of higher confidence by adding even more atoms.
-Therefore, we still use the longer rule for further refinement.
-
-We never enqueue a rule that is already in the queue. It is expensive to check two rules for equality.
-However, it is easy to compute the support for each rule. Two rules can only be equal if they have the same head relation and
-the same support. This reduces the set of rules that have to be checked. If a rule is duplicate, we do not enqueue it (lines 11 and 12 in Algorithm~\ref{rm}).
-% However, it is easy to compute measures  such as head coverage, confidence, and PCA confidence for each rule.
-% Two rules can only be equal if they have the same values for these measures.
-% This restricts the rules that have to be checked. If a rule is duplicate, we do not enqueue it (Lines 11 and 12).
-
-% \comment{Chris}{To Luis: Check the following }
-% We can be sure that any potential duplicates will still be in the queue. This is because the length of the rules increases monotonically: When we dequeue a rule with $n$ atoms, no rule with $n+1$ atoms has ever been dequeued. Thus, when we apply the operators to the rule with $n$ atoms, and generate a rule with $n+1$ atoms, any potential duplicate of that new rule must be in the queue.
-% \comment{Chris}{Is this what you wanted to say?} \comment{Luis}{Yes!}
-% Since our algorithm performs a breadth-first-search, we can be sure that no duplicate rules get refined:
-% We first dequeue all rules with $n$ atoms, evaluate them and perform duplicate elimination and then continue by refinining the distinct rules of $n$ atoms to get rules with $n+1$ atoms.
-
-Since our algorithm performs a breadth-first-search, we can be sure that for any new rule, its potential duplicates will still be in the queue.
-When we dequeue a rule with $n$ atoms, no rule with $n+1$ atoms has ever been dequeued. Thus, when we apply the mining operators to the rule with $n$ atoms, and generate a rule with $n+1$ atoms,
-any potential duplicate of that new rule must be in the queue.
+% \paragraph{Reducing the Output Size}  We can reduce the number of output rules in many different ways.
+% If a rule $B_1 \wedge ... \wedge B_n \wedge B_{n+1} \Rightarrow H$ does not have larger confidence
+% than the rule $B_1 \wedge ... \wedge B_n \Rightarrow H$, then we do not output the longer rule (lines 6 and 7 in Algorithm~\ref{rm}).
+% Since head coverage is monotonic, we know that the longer rule will have smaller head coverage than its parent rule, and we also do not expect it to be of higher quality because its confidence is lower. %behave better quality-wise.
+% Therefore, there is no reason to include the longer rule in the output.
+% However, since confidence is not monotonic, we can possibly obtain rules of higher confidence by adding even more atoms.
+% Therefore, we still use the longer rule for further refinement.
+% 
+% We never enqueue a rule that is already in the queue. It is expensive to check two rules for equality.
+% However, it is easy to compute the support for each rule. Two rules can only be equal if they have the same head relation and
+% the same support. This reduces the set of rules that have to be checked. If a rule is duplicate, we do not enqueue it (lines 11 and 12 in Algorithm~\ref{rm}).
+% 
+% Since our algorithm performs a breadth-first-search, we can be sure that for any new rule, its potential duplicates will still be in the queue.
+% When we dequeue a rule with $n$ atoms, no rule with $n+1$ atoms has ever been dequeued. Thus, when we apply the mining operators to the rule with $n$ atoms, and generate a rule with $n+1$ atoms,
+% any potential duplicate of that new rule must be in the queue.
 
 
 
