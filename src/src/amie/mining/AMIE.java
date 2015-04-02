@@ -491,10 +491,10 @@ public class AMIE {
 
 		CommandLine cli = null;
 		double minStdConf = 0.0;
+		double minPCAConf = 0.0;
 		int minSup = 100;
 		int minInitialSup = 100;
 		double minHeadCover = 0.01;
-		double minPCAConf = 0.0;
 		int maxDepth = 3;
 		int recursivityLimit = 3;
 		boolean realTime = true;

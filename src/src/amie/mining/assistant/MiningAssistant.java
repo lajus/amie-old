@@ -622,7 +622,7 @@ public class MiningAssistant{
 		hardQueryInfo = source.identifyHardQueryTypeI(candidate.getAntecedent());
 		if(hardQueryInfo != null){
 			double pcaConfUpperBound = getPcaConfidenceUpperBound(candidate);			
-			if(pcaConfUpperBound < minPcaConfidence){
+			if(pcaConfUpperBound < this.minPcaConfidence){
 				if (!silent) {
 					System.err.println("Query " + candidate + " discarded by PCA confidence upper bound " + pcaConfUpperBound);			
 				}
@@ -631,7 +631,7 @@ public class MiningAssistant{
 			
 			double stdConfUpperBound = getConfidenceUpperBound(candidate);			
 			
-			if(stdConfUpperBound < minStdConfidence){
+			if(stdConfUpperBound < this.minStdConfidence){
 				if (!silent) {
 					System.err.println("Query " + candidate + " discarded by standard confidence upper bound " + stdConfUpperBound);
 				}
@@ -688,15 +688,9 @@ public class MiningAssistant{
 			}
 			
 			joinInformation = Query.joinPositions(path.get(i - 1), path.get(i));
-			overlap = computeOverlap(joinInformation, r1, rh);
+			overlap = computeOverlap(joinInformation, ri_1, ri);
 			double term = (overlap * ifunri) / (rng * funri); 
 			denominator = denominator * term;
-			// If it gets too small, no reason to continue.
-			if (denominator == 0.0) {
-				System.err.println("Approximation got too small for query " + FactDatabase.toString(candidate.getTriples()) 
-						+ ", last term: " + term + " = " + overlap + "*" + ifunri + "/" + rng + "*" + funri);
-				return true;
-			}
 		}
 		
 		double estimatedPCA = (double)candidate.getSupport() / denominator;
@@ -811,7 +805,7 @@ public class MiningAssistant{
 			}
 		}
 		
-		return false;
+		return true;
 	}
 
 	/**
