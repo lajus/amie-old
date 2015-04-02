@@ -121,6 +121,7 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 		varSetups[1] = new Pair<Integer, Integer>(2, 0);
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		ByteString relationVariable = newEdge[1];
+		ByteString lastRelation = query.getLastRealTriplePattern()[1];
 		
 		for(Pair<Integer, Integer> varSetup: varSetups){			
 			int joinPosition = varSetup.first.intValue();
@@ -158,6 +159,12 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 						query.getTriples().remove(nPatterns);
 						List<ByteString> listOfPromisingRelations = promisingRelations.decreasingKeys();
 						for(ByteString relation: listOfPromisingRelations){
+							if (query.getRealLength() > 1) {
+								if (relation.compareTo(lastRelation) < 0) {
+									continue;
+								}
+							}
+							
 							int cardinality = promisingRelations.get(relation);
 							if (cardinality < minCardinality) {
 								break;
@@ -282,6 +289,7 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 		}
 		
 		int nPatterns = query.getLength();
+		ByteString lastRelation = query.getLastRealTriplePattern()[1];
 		
 		for(int joinPosition = 0; joinPosition <= 2; joinPosition += 2){			
 			for(ByteString joinVariable: joinVariables){
@@ -317,6 +325,12 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 				// The relations are sorted by support, therefore we can stop once we have reached
 				// the minimum support.
 				for(ByteString relation: listOfPromisingRelations){
+					if (query.getRealLength() > 1) {
+						if (relation.compareTo(lastRelation) < 0) {
+							continue;
+						}
+					}
+					
 					int cardinality = promisingRelations.get(relation);
 					
 					if (cardinality < minCardinality) {

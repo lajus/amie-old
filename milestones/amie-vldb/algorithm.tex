@@ -74,12 +74,16 @@ We do not feed predictions of the rules back into the KB. All measures (such as 
 	\While{$\neg q$\emph{.isEmpty}()}
 	  \State $r = q.$\emph{dequeue}()
 	  \If{$AcceptedForOutput(r, out, minConf)$}
-	    \State $out.$\emph{add}$(r)$
+	    \If{$r \notin out$}
+	      \State $out.$\emph{add}$(r)$
+	    \EndIf
 	  \EndIf
 	  \ForAll{operators $o$}
 	    \ForAll{rules $r' \in o(r)$}
 		  \If{$hc(r') \ge \theta$}
-		    \State $q.$\emph{enqueue}$(r')$
+		    \If{$r' \notin q$}
+		      \State $q.$\emph{enqueue}$(r')$
+		    \EndIf
 		  \EndIf
 		\EndFor
 	  \EndFor
@@ -175,10 +179,10 @@ Recall from Section~\ref{subsec:statSignificance} that support and head coverage
 
 \subsubsection{Duplicate elimination} 
 \label{subsubsec:duplicateElimination}
-As mentioned in Section~\ref{subsubsec:whenToOutput} a particular rule can be produced in multiple ways.
+As mentioned in Section~\ref{subsubsec:whenToOutput} a rule can be derived in multiple ways.
 For example, the rule $actedIn(x,y) \wedge directedIn(x,y) \Rightarrow created(x,y)$ can result from the application
 of the operator $\mathcal{O}_C$ to both $actedIn(x,y) \Rightarrow created(x,y)$ and $directedIn(x,y) \Rightarrow created(x,y)$.
-This means that the same rule can be generated multiple times.
+
 
 We never enqueue a rule that is already in the queue. It is expensive to check two rules for equality.
 However, it is easy to compute the support for each rule. Two rules can only be equal if they have the same head relation and
