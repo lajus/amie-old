@@ -464,20 +464,22 @@ public class FactDatabase {
 	 * It returns the highest functionality of the relation.
 	 * @return
 	 */
-	public double bestFunctionality(ByteString relation) {
-		double fun = functionality(relation);
-		double ifun = inverseFunctionality(relation);
-		return Math.max(fun, ifun);
+	public double functionality(ByteString relation, boolean inversed) {
+		if (inversed)
+			return inverseFunctionality(relation);
+		else 
+			return functionality(relation);
 	}
 	
 	/**
 	 * It returns the lowest functionality of the relation.
 	 * @return
 	 */
-	public double worstFunctionality(ByteString relation) {
-		double fun = functionality(relation);
-		double ifun = inverseFunctionality(relation);
-		return Math.min(fun, ifun);
+	public double inverseFunctionality(ByteString relation, boolean inversed) {
+		if (inversed)
+			return functionality(relation);
+		else 
+			return inverseFunctionality(relation);
 	}
 
 	// ---------------------------------------------------------------------------

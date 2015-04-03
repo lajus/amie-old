@@ -52,13 +52,14 @@ The algorithm iteratively dequeues a rule from the queue. If the rule
 meets certain criteria (Lines 6 and 7), then it is output.
 % \comment{Chris}{its quality is evaluated in terms of (PCA) confidence and if it passes the corresponding threshold} \comment{Luis: }{We threshold on PCA confidence
 %  only for AMIE+}\comment{Chris}{so, are we going to output a rule with confidence 0\%?},
-Then, the algorithm applies all mining operators to the rule. This results in more rules which are added to 
-the queue if they pass the head coverage threshold $\theta$ (Lines 9 to 15).
+Then, the algorithm applies all mining operators to the rule (Lines 11 to 19). This results in more rules which are added to 
+the queue if they pass the head coverage threshold $\theta$ (Line 13) and they are not duplicates (Line 14).
 This process is repeated until the queue is empty. 
-To speed up the process, our implementation parallelizes Algorithm~\ref{rm}, that is, the main loop (Lines 4 to 16) runs
+To speed up the process, our implementation parallelizes Algorithm~\ref{rm}, that is, the main loop (Lines 4 to 20) runs
 in multiple threads. 
 This achieved by synchronizing the access to the centralized queue from which the threads dequeue and enqueue.
-We do not feed predictions of the rules back into the KB. All measures (such as confidence and support) are always computed on the original KB.
+% We do not feed predictions of the rules back into the KB. All measures (such as confidence and support) 
+% are always computed on the original KB.
 
 
 % \comment{Chris}{about the figure: shouldn't there be a line stating that the rule is evaluated somehow?}
@@ -131,7 +132,7 @@ We do not feed predictions of the rules back into the KB. All measures (such as 
 Algorithm~\ref{pfo} describes the routine to decide if a rule should be output or 
 not once it has been dequeued. If the rule is not closed (See Section~\ref{subsec:rules}) or 
 its PCA confidence is below the given confidence threshold, the algorithm discards it for output. 
-Recall that AMIE is conceived to mine rules that can predict concrete facts and therefore, thus non-closed rules are
+Recall that AMIE is conceived to mine rules that can predict concrete facts, thus non-closed rules are
 seen as intermediate steps. Moreover, the PCA confidence is only defined for closed rules.
 It is important to remark, that the confidence threshold is enforced 
 very late in the rule mining process, i.e., right before reporting the rule. 
@@ -144,14 +145,14 @@ the confidence threshold is an optional argument for AMIE. If omitted, the syste
 If the rule is closed and confident enough, Algorithm~\ref{pfo} then applies a \emph{skyline technique} (Lines 5 to 10)
 to reduce the output. If a rule $B_1 \wedge ... \wedge B_n \wedge B_{n+1} \Rightarrow H$ does not have larger confidence
 than its parent rule $B_1 \wedge ... \wedge B_n \Rightarrow H$, then we do not output the longer rule.
-Since support and head coverage are monotonic metrics, we know that the child rule will never have a higher value than its parent rule. 
+Since support and head coverage are monotonic metrics, we know that the child rule will never have a higher score than its parent rule. 
 If the child rule has lower confidence, then its quality is worse in all aspects and there is 
 no reason to include it in the output.
 In addition, notice that a rule can have multiple parents, for instance, the rule $actedIn(x,y) \wedge directedIn(x,y) \Rightarrow created(x,y)$
 can be derived by applying a closing-atom operator $\mathcal{O}_C$ to either $actedIn(x,y) \Rightarrow created(x,y)$ or
-$directedIn(x,y) \Rightarrow created(x,y)$. While in practice the longer rule is derived from one of those rules, AMIE
-finds all its potential parents (Line 5) and applies the skyline technique for each of them (Lines 6 to 10), i.e., the child
-rule must have higher confidence than all its parents to be accepted.
+$directedIn(x,y) \Rightarrow created(x,y)$. AMIE
+finds all the potential parents of a rule (Line 5) and applies the skyline technique to each of them (Lines 6 to 10), i.e., the child
+rule must have higher confidence than all its parents to be accepted for output.
 We emphasize that the skyline technique is only applied to prune the output. 
 Since confidence can increase with the addition of atoms, we should still use the longer rule 
 for further refinement.
@@ -182,15 +183,44 @@ Recall from Section~\ref{subsec:statSignificance} that support and head coverage
 As mentioned in Section~\ref{subsubsec:whenToOutput} a rule can be derived in multiple ways.
 For example, the rule $actedIn(x,y) \wedge directedIn(x,y) \Rightarrow created(x,y)$ can result from the application
 of the operator $\mathcal{O}_C$ to both $actedIn(x,y) \Rightarrow created(x,y)$ and $directedIn(x,y) \Rightarrow created(x,y)$.
+This implies that the specialization section (Lines 11 to 19) of Algorithm~\ref{rm} can lead to duplicate rules.
+For this reason, the AMIE algorithm does a duplicates checking before queueing a rule (Line 14). 
+While checking two rules for equality is expensive (it is a graph isomorphism verification task), 
+we observe that two rules can only be equal if they have the same head relation, the same number of atoms and
+the same head coverage (or support). This reduces drastically the set of rules that have to be checked and therefore
+the time invested in this task. 
 
+In addition, Algorithm~\ref{rm} also checks duplicates in the output (Line 7). This particular checking step 
+is necessary only in the presence of multithreading. Recall that our algorithm performs a breadth-first-search. 
+This means that in a fully sequential execution, rules of size $n-1$ are always queued before rules of size $n$. 
+It follows that, by the time we check the duplicates of a rule of size $n$ to enqueue it (Line 14 in Algorithm~\ref{rm}), 
+no rule of size $n$ has still been dequeued. In other words, if a rule is the duplicate 
+of another rule already derived, such rule must be in the queue. This property guarantees no duplicates at output time. 
+However, this does not hold in a multi-threading environment. To see this, imagine that rules 
+$R_n$ and $R'_n$ are both in the queue at timestamp $t_0$ and both can refined into rule $R_{n+1}$
+by means of the mining operator $o$. 
+Moreover, consider two threads $T_1$ and $T_2$ and the sequence of events depicted in Table~\ref{tab:duplicates}.
 
-We never enqueue a rule that is already in the queue. It is expensive to check two rules for equality.
-However, it is easy to compute the support for each rule. Two rules can only be equal if they have the same head relation and
-the same support. This reduces the set of rules that have to be checked. If a rule is duplicate, we do not enqueue it (lines 11 and 12 in Algorithm~\ref{rm}).
+\begin{table}
+\centering
+ \begin{tabular}{c|l|l}
+  Timestamp & $T_1$ & $T_2$\\  \hline
+  $t_1$ & $R_n = q.dequeue()$	&  \\
+  $t_2$ & & $R'_n = q.dequeue()$ \\
+  $t_3$ & $R_{n+1} = o(R_n)$  & \\
+  $t_4$ & $q.enqueue(R_{n+1})$  & \\
+  $t_5$ & $R_{n+1} = q.dequeue()$ & \\
+  $t_6$ & & $R_{n+1} = o(R_n)$ \\
+  $t_7$ & & $q.enqueue(R_{n+1})$ \\
+\end{tabular}
+\caption{An execution scenario that could lead to duplicate rules in the output.}\label{tab:duplicates}
+\end{table}
 
-Since our algorithm performs a breadth-first-search, we can be sure that for any new rule, its potential duplicates will still be in the queue.
-When we dequeue a rule with $n$ atoms, no rule with $n+1$ atoms has ever been dequeued. Thus, when we apply the mining operators to the rule with $n$ atoms, and generate a rule with $n+1$ atoms,
-any potential duplicate of that new rule must be in the queue.
+In this example, we enqueue the rule $R_{n+1}$ twice, at timestamps $t_4$ and $t_7$. 
+Since $T_1$ dequeues $R_{n+1}$ before $T_2$ also finds it, 
+we cannot know that the rule was already output before. Since duplicate verification
+can be performed very efficiently, we show that the time invested in this additional step does not the 
+outweight the benefit of using multiple threads.
 
 % \paragraph{Reducing the Output Size}  We can reduce the number of output rules in many different ways.
 % If a rule $B_1 \wedge ... \wedge B_n \wedge B_{n+1} \Rightarrow H$ does not have larger confidence

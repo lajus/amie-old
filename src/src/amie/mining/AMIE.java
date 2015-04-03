@@ -749,7 +749,7 @@ public class AMIE {
 			String excludedValuesStr = cli.getOptionValue("bexr");
 			String[] excludedValueArr = excludedValuesStr.split(",");
 			for(String excludedValue: excludedValueArr)
-				bodyExcludedRelations.add(ByteString.of(excludedValue));
+				bodyExcludedRelations.add(ByteString.of(excludedValue.trim()));
 		}
 	
 		if (cli.hasOption("btr")) {
@@ -757,7 +757,7 @@ public class AMIE {
 			String targetBodyValuesStr = cli.getOptionValue("btr");
 			String[] bodyTargetRelationsArr = targetBodyValuesStr.split(",");
 			for (String targetString : bodyTargetRelationsArr) {
-				bodyTargetRelations.add(ByteString.of(targetString));
+				bodyTargetRelations.add(ByteString.of(targetString.trim()));
 			}
 		}
 		
@@ -766,7 +766,7 @@ public class AMIE {
 			String targetValuesStr = cli.getOptionValue("htr");
 			String[] targetValueArr = targetValuesStr.split(",");
 			for(String targetValue: targetValueArr)
-				headTargetRelations.add(ByteString.of(targetValue));
+				headTargetRelations.add(ByteString.of(targetValue.trim()));
 		}
 		
 		if (cli.hasOption("hexr")) {
@@ -774,7 +774,7 @@ public class AMIE {
 			String excludedValuesStr = cli.getOptionValue("hexr");
 			String[] excludedValueArr = excludedValuesStr.split(",");
 			for(String excludedValue : excludedValueArr)
-				headExcludedRelations.add(ByteString.of(excludedValue));
+				headExcludedRelations.add(ByteString.of(excludedValue.trim()));
 		}
 		
 		if (cli.hasOption("maxad")) {

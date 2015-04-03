@@ -1,6 +1,7 @@
 package amie.mining.assistant;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -662,36 +663,45 @@ public class MiningAssistant{
 		double denominator = 1.0;
 		// If the approximation is applicable, let's reorder the atoms in the canonical way
 		List<ByteString[]> path = candidate.getCanonicalPath();
-		
+		System.out.println("======================");
+		System.out.println("Rule " + candidate.getRuleString());
 		// Let's calculate the first term.
 		ByteString r1 = path.get(0)[1];
 		ByteString rh = candidate.getHead()[1];
-		double funr1 = this.source.bestFunctionality(r1);
-		double overlap = 0.0;
-		
 		int[] joinInformation = Query.joinPositions(path.get(0), candidate.getHead());
+		// If r1 is not functional or it is not joining from the subject, we replace it with the corresponding inverse relation.
+		boolean relationRewritten = joinInformation[0] != 0;		
+		double funr1 = this.source.functionality(r1, relationRewritten);
+		double overlap = 0.0;
 		overlap = computeOverlap(joinInformation, r1, rh);
 		// The first part of the formula
 		denominator = denominator * (overlap / funr1);
+		System.out.println("overlap(" + r1 + ", " + rh + ") = " + overlap);
+		System.out.println("fun(" + r1 + " (" + relationRewritten + ")" + ") = " + funr1);
 		
 		// Now iterate
 		for (int i = 1; i < path.size(); ++i) {
 			ByteString ri = path.get(i)[1];
 			ByteString ri_1 = path.get(i - 1)[1];
-			double rng = 0.0;
-			double funri = this.source.bestFunctionality(ri);
-			double ifunri = this.source.worstFunctionality(ri);
-			if (source.isFunctional(ri_1)) {
-				rng = this.source.relationColumnSize(ri_1, 2);
-			} else {
-				rng = this.source.relationColumnSize(ri_1, 0);				
-			}
-			
 			joinInformation = Query.joinPositions(path.get(i - 1), path.get(i));
+			// Inverse r_{i-1} if it is not functional or it joins from the subject.
+			boolean rewriteRi_1 =  joinInformation[0] != 2;
+			boolean rewriteRi = joinInformation[1] != 0;
+			double rng = 0.0;
+			double funri = this.source.functionality(ri, rewriteRi);
+			double ifunri = this.source.inverseFunctionality(ri, rewriteRi);
+			
+			rng = this.source.relationColumnSize(ri_1, joinInformation[0]);
+			System.out.println("|range(" + ri_1 + " (" + rewriteRi_1 + ")" + ")| = " + rng);
+			
 			overlap = computeOverlap(joinInformation, ri_1, ri);
+			System.out.println(Arrays.toString(joinInformation) + " overlap(" + ri_1 + ", " + ri + ") = " + overlap);
+			System.out.println("fun(" + ri + "("+ rewriteRi +")" + ") = " + funri);
+			System.out.println("ifun(" + ri + "("+ rewriteRi +")" + ") = " + ifunri);			
 			double term = (overlap * ifunri) / (rng * funri); 
 			denominator = denominator * term;
 		}
+		System.out.println("======================");
 		
 		double estimatedPCA = (double)candidate.getSupport() / denominator;
 		candidate.setPcaEstimation(estimatedPCA);
