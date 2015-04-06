@@ -41,17 +41,17 @@ Notice that all techniques described below do not alter AMIE's output in any way
 % Hence, the application of the operator $\mathcal{O}_D$ to open rules of size $n-1$ is useless.
 % For this reason, AMIE+ refines open rules of length $n-1$ only by means of the add-closing-atom-operator ($\mathcal{O}_C$).
 % }
-The maximum rule length $n$ is an input parameter for our system. AMIE stops exploring the search space as soon as all rules with 
-a length of at most $n$ have been produced.
+The maximum rule length $l$ is an input parameter for our system. AMIE stops exploring the search space as soon as all rules with 
+a length of at most $l$ have been produced.
 % In the experiments,
 % we used $n=3$ though AMIE can mine longer rules. As we show later in the experimental section,
 % rules with more than 3 atoms are less interesting because they often capture trivial relationships. Besides, their support tends to be very low.
 % For AMIE+, we improved this pruning strategy as follows.
 During the mining process, AMIE creates connected rules by applying all possible mining operators 
 (line 9 in Algorithm~\ref{rm}) on previously created rules.
-Given a maximum rule length $n$ and a non-closed Horn rule of length $n-1$, AMIE+
+Given a maximum rule length $l$ and a non-closed Horn rule of length $l-1$, AMIE+
 will refine it only if it is possible to close it before exceeding the length constraint.
-This means that for a not-yet-closed rule of length $n-1$, AMIE+ will not apply 
+This means that for a not-yet-closed rule of length $l-1$, AMIE+ will not apply 
 the add-dangling-atom operator $\mathcal{O}_D$, because this results in a non-closed rule,
 which will be neither output nor refined. In the same spirit, if the same rule contains more than
 two non-closed variables (see Section~\ref{subsec:rules}), AMIE+ will skip the application of 
