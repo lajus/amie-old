@@ -1,20 +1,24 @@
 
-In~\cite{amie} AMIE was shown to be faster (up to 3x), more scalable and more user-friendly than other state-of-the-art systems (WARMR, ALEPH).
-PCA confidence was shown to rank more productive and more correct rules higher than other confidence metrics and to correlates better
-with the actual precision of each rule than the standard confidence.
-
+In~\cite{amie}, AMIE was shown to be up to 3 orders of magnitude faster, more scalable and more user-friendly 
+than other state-of-the-art systems, namely WARMR~\cite{GoeVan02} and ALEPH~\cite{Muggleton:1996:LPD:647996.742465}.
+The PCA confidence was shown to rank productive and correct rules higher than other confidence metrics.
+Furthermore~\cite{amie} shows that the PCA confidence correlates better with the actual precision of rules 
+than the standard confidence.
 
 In this section, we compare AMIE with AMIE+ and show the performance boost introduced
 by the optimizations presented in Section~\ref{sec:improvements}.
-Apart from that, we conduct  an extensive empirical evaluation of the PCA.
+In addition, we conduct an extensive empirical evaluation of the PCA, the main assumption in AMIE's mining model.
 This includes an experiment to evaluate how often the PCA holds in a web-extracted KB (YAGO).
-In addition, we revisit the comparison of standard and pca confidence in terms of the quality of the produced facts and investigate the influence of type information in the quality of the rules.
+In addition, we revisit the comparison between the standard and the PCA confidence 
+in terms of the quality of the produced facts and investigate the influence of type information in the quality of the rules.
 Our experimental results show that:\comment{Chris}{change those}
 \begin{itemize}
  \item The optimizations implemented in AMIE+ allow us to run on KBs with more than 1K relations and 10M facts, for which
 even AMIE took more than one day.
-\item The PCA confidence ranks more productive and more correct rules higher than other confidence metrics. In addition, the PCA confidence correlates better
-with the actual precision of each rule than the standard confidence.
+%\item The PCA confidence ranks more productive and more correct rules higher than the standard confi.
+\item Type constraints can improve the precision of the predictions made by rules from 40\% to 60\%.
+% In addition, the PCA confidence correlates better
+% with the actual precision of each rule than the standard confidence.
 \end{itemize}
 % We report our experimental results in three rounds of experiments. In the first round, we compare the original AMIE with
 % other state-the-art rule mining systems, i.e., WARMR~\cite{DehToi99,DehToi00} and ALEPH$^{\ref{foot:aleph}}$, in terms of usability and runtime.
@@ -39,7 +43,9 @@ with the actual precision of each rule than the standard confidence.
 \subsection{Experimental Setup}
 
 \paragraph{Hardware}
-All experiments are run on a server with 48GB of RAM and 8 CPUs (Intel Xeon at 2.4GHz). All rules and all experimental results are available at \comment{Chris}{did this change?} \url{http://www.mpi-inf.mpg.de/departments/ontologies/projects/amie/}.
+All experiments are run on a server with 48GB of RAM and 8 CPUs (Intel Xeon at 2.4GHz). 
+All rules and all experimental results are available at \comment{Chris}{did this change?} \comment{Luis}{I guess we will keep the
+experimental results there.} \url{http://www.mpi-inf.mpg.de/departments/ontologies/projects/amie/}.
 
 \paragraph{Datasets} We run our experiments on different KBs.
 % In all cases, we removed the \emph{rdf:type} relationship because it inflates the size of the KBs.
@@ -47,25 +53,29 @@ All experiments are run on a server with 48GB of RAM and 8 CPUs (Intel Xeon at 2
 % However, currently no approach (including ours) makes specific use of it.
 % We plan to make use of it in future work. 
 In all cases, we removed all facts with literals (numbers and strings).
-Literal values (such as geographical coordinates) are shared by only very few entities, which makes them less interesting for rule mining.
+Literal values (such as geographical coordinates) are shared by only very few entities, 
+which makes them less interesting for rule mining. Except for YAGO, 
+we removed the \emph{rdf:type} relationship because it inflates the size of the KBs. 
 Table~\ref{kbs} shows a summary of the KBs used for our experiments.
 
-%\begin{savenotes}
+\begin{savenotes}
 \begin{table}
 \footnotesize
 \begin{tabular}{l|c|c|c}
 KB & Facts & Subjects & Relations\\
 \hline
 YAGO2  & 948K & 470K & 32\\
+YAGO2 types  &  & - & -\\
 YAGO2s & 4.12M  & 1.65M & 37\\
 DBpedia 2.0 & 6.70M & 1.38M & 1595\footnote{This corresponds to the relations with more than 100 facts.} \\
 DBpedia 3.8 & 11.02M & 2.20M & 650 \\
-Freebase (people) & 8.92M & 2.07M & 51
+Wikidata\footnote{Dump from December 2014 available at \url{http://tools.wmflabs.org/wikidata-exports/rdf/exports/20140420/}} & 11.30M & 4.00M & 431
+%Freebase (people) & 8.92M & 2.07M & 51
 \end{tabular}
 \caption{Knowledge bases used to test AMIE/AMIE+ \comment{chris}{update for including type}}
 \label{kbs}
 \end{table}
-%\end{savenotes}
+\end{savenotes}
 
 \paragraph{Settings}
 Unless otherwise stated, AMIE uses a head coverage threshold of $\theta=1\%$ and
@@ -73,7 +83,7 @@ ranks the resulting rules by decreasing PCA confidence. It also counts support o
 There is no need to deviate from this default configuration when a user runs AMIE.
 There are no parameters to tune.
 AMIE+ inherits this default behavior and extends it by
-the lossless optimizations introduced in Section~\ref{prunebound}. In its parameter-less variant, which we will use in the following, 
+the lossless optimizations introduced in Section~\ref{subsec:lossless}. In its parameter-less variant, which we will use in the following, 
 AMIE+ has no confidence threshold and thus does not prune on confidence.
 
 \ignore{
