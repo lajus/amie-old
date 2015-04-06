@@ -147,7 +147,7 @@ We emphasize that the skyline technique is only applied to prune the output.
 Since confidence can increase with the addition of atoms, we should still use the longer rule 
 for further refinement.
 
-\paragraph{Count Queries for Confidence} By the time a rule is dequeued, AMIE already know its support. 
+\paragraph{Count Queries for Confidence} \label{countQueries} By the time a rule is dequeued, AMIE already know its support. 
 Recall from Section~\ref{subsubsec:pcaConf} that the PCA confidence is defined according to the formula:
 \[
 \begin{small}
@@ -161,6 +161,7 @@ of the confidence formula. For the PCA confidence, such queries have the form: \
 
 \noindent where $H$ is the head atom, $B_1, \dots, B_n$ are the body atoms and $H'= r'(x,y')$ is a variant of the
 head atom where the least-functional variable has been replaced by a fresh variable (see Section~\ref{subsubsec:pcaConf}).
+The expression COUNT($\cdot$) has COUNT(DISTINCT $\cdot$) semantics.
 We will discuss the implementation of such queries and their relation to SPARQL and SQL queries in Section~\ref{subsec:implementation}. 
 For now, we will use the above pseudo-syntax.
 
@@ -174,16 +175,16 @@ for the new atoms. Furthermore, the instantiation operator $\mathcal{O_I}$ also 
 of the arguments of the new atom.
 In order to select only relations and entities that will fulfill the head coverage constraint, 
 we rely on the KB to answer \emph{count-projection queries}.
-These are queries of the form
-\indented{SELECT $\bm{x}$, COUNT($H$) \\
-WHERE $H \wedge B_1 \wedge ... \wedge B_n$\\
-SUCH THAT COUNT($H$)$\geq k$}
+These are queries of the form \\ \\
+\noindent{SELECT $\bm{x}$, COUNT($H$) WHERE $H \wedge B_1 \wedge ... \wedge B_n$\\
+SUCH THAT COUNT($H$)$\geq k$} \\
 
 \noindent where $H, B_1, ..., B_n$ are atoms and $k$ is a natural number.
 $\bm{x}$ is the \emph{selection variable}.
 It is a variable that appears in one or more atoms at the position of one of the arguments or at the position of the relation (as it is common in SPARQL~\cite{sparql}). 
 Such queries select an entity or relation $x$ such that the result of the query $H \wedge B_1 \wedge ... \wedge B_n$ on the KB contains more than $k$ distinct query answers
-for the \emph{group atom} $H$. The group atom corresponds to the head of the rule.
+for the \emph{group atom} $H$. The group atom corresponds to the head of the rule. As for the count queries introduced
+in the last section, the expression COUNT($\cdot$) conveys COUNT(DISTINCT $\cdot$) semantics.
 % Fabian: we never said it, so the reader cannot recall
 %Recall that the expression COUNT($H$) binds to the support
 %of the whole query pattern for each value of the selection variable $?x$.
@@ -329,6 +330,10 @@ outweight the benefit of using multiple threads.
 
 \subsection{Implementation} \label{subsec:implementation}
 
+AMIE relies on count queries to calculate the confidence of rules and count-projection queries to determine
+the relations and instances for new atoms in rules and their support. We observe that count queries
+are actually a less-constrained case of count-projection queries and therefore focus in the latter.
+
 \paragraph{SQL and SPARQL} Count-projection queries are essential for the efficiency of our system. 
 Yet, standard database implementations do not provide special support for these types of queries. 
 Assuming that the KB $\mathcal{K}$ is stored as a three-columns table, i.e., each fact is a row with three columns 
@@ -456,25 +461,108 @@ Fact indexes in combination with aggregated indexes can be used to determine the
 in constant time. For example, the size of the atom $livesIn(x,y)$ can be retrieved by a simple look-up 
 in the aggregated index \texttt{P}. In constrast, the size of the atom $livesIn(x, USA)$ requires two 
 lookups in the fact index \texttt{ROS}: the first lookup to get the object values of $livesIn$ and the second
-to retrieve the list of subjects for the object value $USA$. 
+to retrieve the list of subjects for the object value $USA$. If an atom has size greater than zero, it means
+that there exists a query answer for it in the KB.
 
-The existence of a query answer can be checked naively by (1) selecting the atom with fewest instantiations using the indexes, 
-(2) running through all of its instantiations, (3) instantiating the remaining atoms accordingly and (4)
-repeating this process recursively until we find an instantiation of the query that appears in the KB.
-Select queries can be implement on top of this procedure by storing the instantiations for the variables
-in the projection as we run through them.
+The existence of an answer for a conjunction of atoms in a KB is described in Algorithm~\ref{exists}. 
+If the query contains a single atom (Line 3), we can directly verify if its size is greater than zero using
+the indexes (Line 4). Otherwise, we select the atom $B_s$ with fewest instantiations using the indexes (Line 6), 
+and run through all of its instantiations (Lines 8 to 13). We apply such instantiations to the remaining atoms (Line 9)
+and repeate this process recursively (Line 10) until we end up with a single atom. Since rules are connected query patterns, the atom $B_s$ must share at least
+one variable with the remaining atoms. This means that by instantiating $B_s$, some variables in the remaining atoms 
+become instantiated, making the atoms more selective with every recursive step.
 
+\begin{algorithm}
+\caption{Checking existence}
+\label{exists}
+\begin{algorithmic}[1]
+\Function{Exists}{$B_1 \wedge ... \wedge B_n$, $\mathcal{K}$}
+    \State $q := B_1 \wedge ... \wedge B_n$
+    \If {$length(q) = 1$}
+      \State \Return size($q$, $\mathcal{K}$) $> 0$
+    \Else
+      \State $B_s := findSmallest(q, \mathcal{K})$
+      \State $q := q - \{ B_s \} $
+      \ForAll {instantiations $b_s \in B_s$}
+	\State Replace $b_s$ in $q$
+	  \If{Exists($q$, $\mathcal{K}$)}
+	    \State \Return true
+	  \EndIf
+      \EndFor
+    \EndIf
+    \State \Return false
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
 
-\paragraph{Implementation of Count-Projection Queries} Algorithm \ref{algi} shows how we answer count-projection queries.
-The algorithm takes as input a selection variable $\bm{x}$, a projection atom $H:=R(\bm{X},\bm{Y})$, remaining atoms $B_1, ... B_n$, 
-and a KB $\mathcal{K}$. If the routine is used to find the relations for a new atom in a rule, e.g., $\bm{r}(\bm{Z}, \bm{W})$, then 
-$\bm{x} = \bm{r}$. We first check whether $\bm{x}$ appears in the projection atom (Line 3).
-If that is the case (Lines 4 to 10), we run through all instantiations of the projection atom, instantiate the query accordingly, and check for existence.
-Each existing instantiation increases the counter for the respective value of $?x$. 
-If the selection variable does not appear in the projection atom, we iterate through all instantiations of the projection atom.
-We instantiate the query accordingly, and fire a SELECT query for $?x$. We increase the counter for each value of $?x$. We report all values whose counter exceeds $k$.
+\paragraph{Implementation of Count-Projection Queries} Algorithm \ref{algi} shows how we answer count-projection queries
+of the form: \\ \\
+\noindent{SELECT $\bm{x}$, COUNT($H$) WHERE $H \wedge B_1 \wedge ... \wedge B_n$\\
+SUCH THAT COUNT($H$)$\geq k$} \\ \\
+These are the types of queries used to determine the relations and instances for new atoms in the specialization
+phase of AMIE. The algorithm takes as input a selection variable $\bm{x}$, a projection atom $H:=R(\bm{X},\bm{Y})$, remaining atoms $B_1, ... B_n$, 
+and a KB $\mathcal{K}$. 
+% For example, if the routine is used to find the relations for a new atom in a rule, e.g., 
+% $\bm{r}(\bm{Z}, \bm{W}) \wedge \vec{B} \Rightarrow r_h(x, y)$, then 
+% $\bm{x} = \bm{r}$, $H = r_h(x, y)$ and $\bm{r}(\bm{Z}, \bm{W}) \wedge \vec{B}$ accounts for the set $B_1, ... B_n$. 
+The algorithm returns a hash table with each instantiation of the selection variable 
+$\bm{x}$ as key and the number of distinct bindings of the projection atom $H$ as value. Notice that Algorithm~\ref{algi}
+does not consider the threshold condition (SUCH THAT) since it is actually enforced by the AMIE algorithm and not 
+the in-memory database. 
 
+We first check whether $\bm{x}$ appears in the projection atom (Line 3).
+If that is the case (Lines 4 to 10), we run through all instantiations of the projection atom, instantiate the query accordingly (Line 6), and check for existence (Line 7).
+Each existing instantiation increases the counter for the respective value of the selection variable $\bm{x}$ (Line 8). 
+If the selection variable does not appear in the projection atom (Lines 12 to 18), 
+we iterate through all instantiations of the projection atom.
+We instantiate the query accordingly, and fire a SELECT query for $\bm{x}$ (Line 14). 
+We then increase the counter for each value of $\bm{x}$ (Line 16).
 
+\paragraph{Implementation of Count Queries} Recall from Section~\ref{countQueries} that count queries in AMIE have the form \\ \\
+\noindent{SELECT COUNT($H'$) WHERE $H \wedge B_1 \wedge ... \wedge B_n$} \\
+
+These queries return the number of distinct bindings of the projection atom $H$ 
+that fullfill the pattern $H \wedge B_1 \wedge ... \wedge B_n$ and are used to
+calculate the confidence of rules. Since the aggregation function COUNT conveys
+distinct semantics, the in-memory database computes a SELECT DISTINCT query 
+and then reports the size of the result set. Algorithm~\ref{select} describes
+the method to select the set of distinct bindings of the projection atom $H := r(\bm{X}, \bm{Y})$ in
+$H \wedge B_1 \wedge ... \wedge B_n$. Notice that this is not a general implementation of SELECT DISTINCT queries,
+since it is designed for binary atoms: it supports up to two variables that must occur in the same atom.
+
+Algorithm~\ref{select} starts finding the atoms with the fewest number of instantiations $B_s$. If such atom is the
+projection atom (Lines 5 to 11), i.e., $B_s = H$, the algorithm goes through all the instantiations $h$ of the $H$, instantiates
+the query accordingly and checks whether there exists a solution for the instantiated query pattern in the KB (Line 8). 
+If it is the case, the solution $h$ is added to the result set. In contrast, if the most restrictive atom $B_s$ is not 
+the projection atom (Lines 13 to 17), the algorithm iterates through the instantiations $b_s$ and recursively 
+selects the solutions in the remaining atoms (Line 16).
+
+\begin{algorithm}
+\caption{Select distinct}
+\label{select}
+\begin{algorithmic}[1]
+\Function{Select}{$H$, $B_1 \wedge ... \wedge B_n$, $\mathcal{K}$}
+    \State $q := H \wedge B_1 \wedge ... \wedge B_n$
+    \State $B_s := findSmallest(q)$
+    \State $result := [ ]$
+    \If{$B_s = H$}
+      \ForAll instantiations $h \in H$
+	\State Replace $h$ in $q$
+	\If {Exists($q$, $\mathcal{K}$)}
+	  \State $result$.add($h$)
+	\EndIf
+      \EndFor
+    \Else
+      \State $q := q - \{ B_s\}$
+      \ForAll{instantiations $b_s \in B_s$}
+      	\State Replace $b_s$ in $q$
+      	\State $result$.add(Select($H$, $q$, $\mathcal{K}$))
+      \EndFor
+    \EndIf
+    \State \Return $result$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
 
 \paragraph{Summary}
 The AMIE algorithm iteratively builds more complex rules from simpler rules by the help of three operators.
@@ -484,29 +572,28 @@ Since standard database systems and standard SPARQL systems provide no specifica
 we have implemented a vanilla in-memory database, which has specific support for projection queries.
 Our entire implementation is in Java. The code can be downloaded from our Web site\footnote{\url{http://mpi-inf.mpg.de/departments/ontologies/projects/amie}}.
 
-\www{
 
 \begin{algorithm}
 \caption{Answering Projection Queries}
 \label{algi}
 \begin{algorithmic}[1]
-\Function{SELECT}{$\bm{x}$, $R(X,Y) \wedge B_1 \wedge ... \wedge B_n$, $k$, $\mathcal{K}$}
+\Function{SELECT}{$\bm{x}$, $R(X,Y) \wedge B_1 \wedge ... \wedge B_n$, $\mathcal{K}$}
     \State $map = \{\}$
+    \State $q=B_1 \wedge ... \wedge B_n$
     \If {$\bm{x} \in \{R,X,Y\}$}
-	  \ForAll{instantiations $r(x,y)$ of $R(X,Y) \in \mathcal{K}$}
-	    \State $q=B_1 \wedge ... \wedge B_n$
-		\State In $q$, replace $X$ by $x$, $Y$ by $y$
-	    \If{exists instantiation $q \in \mathcal{K}$}
+	  \ForAll{instantiations $r(x,y) \in R(\bm{X}, \bm{Y})$}
+	    \State In $q$, replace $R$ by $r$, $X$ by $x$, $Y$ by $y$
+	    \If{Exists($q$, $\mathcal{K}$)}
 		\State $map[x]++$
-		\EndIf
+	    \EndIf
 	  \EndFor
 	\Else
-	  \ForAll{instantiations $r(x,y)$ of $R(X,Y) \in \mathcal{K}$}
-	    \State $q=B_1 \wedge ... \wedge B_n$
-		\State In $q$, replace $R$ by $r$, $X$ by $x$, $Y$ by $y$
-	    \ForAll{$x\in${\small{}SELECT $?x$ FROM $\mathcal{K}$ WHERE $q$}}
-		  \State $map(x)++$
-		\EndFor
+	  \ForAll{instantiations $r(x,y) \in R(\bm{X},\bm{Y})$}
+	    \State In $q$, replace $R$ by $r$, $X$ by $x$, $Y$ by $y$
+	    \State $\mathcal{X} :=$ SELECT DISTINCT $\bm{x}$ FROM $\mathcal{K}$ WHERE $q$
+	    \ForAll{$x \in \mathcal{X}$}
+		  \State $map[x]++$
+	    \EndFor
 	  \EndFor
 	\EndIf
 	\State \Return $map$
@@ -514,4 +601,3 @@ Our entire implementation is in Java. The code can be downloaded from our Web si
 \end{algorithmic}
 \end{algorithm}
 \ \\[-1cm]
-}
