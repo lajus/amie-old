@@ -197,7 +197,7 @@ Therefore, we choose $\theta=0.01$ as a lower bound for the head coverage. We ob
 This allows for safely discarding any rule that trespasses the threshold (line~12 of Alg.~\ref{rm}).
 Recall from Section~\ref{subsec:statSignificance} that support and head coverage are defined even for rules that are not yet closed, allowing for early pruning.
 
-\paragraph{Duplicate Elimination}
+\paragraph{Duplicate Elimination} \label{subsec:duplicateElimination}
 As mentioned in Section~\ref{subsubsec:whenToOutput} a rule can be derived in multiple ways.
 For example, the rule $actedIn(x,y) \wedge directed(x,y) \Rightarrow created(x,y)$ can result from the application
 of the operator $\mathcal{O}_C$ to both $actedIn(x,y) \Rightarrow created(x,y)$ and $directed(x,y) \Rightarrow created(x,y)$.
