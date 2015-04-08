@@ -476,10 +476,16 @@ This speedup does not entail a serious decrease in the quality of the output: in
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|}
 \hline
 \multirow{3}{*}{KB} 	& \multirow{3}{*}{AMIE}  	& \multicolumn{8}{c|}{AMIE+} 	\\ \cline{3-10}
- 			&  				& \multicolumn{3}{c|}{Setup}  & \multirow{2}{*}{Rules}  	& \multirow{2}{*}{Conf. approx}	& \multirow{2}{*}{Rules} & \multirow{2}{*}{Pruning precision}   \\ \cline{1-5}
-			&  				& MRL  & MRL + PR & Default   & 	       		 	& 			 	&  			 &					\\ \cline{3-10}
-  YAGO2  		& 3.62min  			& 31.71s & 135 	  & 68        & 			 	& 3 	       		 	& 32.34s   		 &					\\
-% YAGO2(const) 		& 14.09min  			& 12.17min  & 19028 & 15526 		& 12.10min & 3 				& 12.17min & 15526 & 24 & 100\% \\
+ 			&  				& \multicolumn{3}{c|}{Lossless Setups}  	        & \multirow{2}{*}{Rules}  	& \multicolumn{2}{c|}{Confidence approximation} 	 	 & \multirow{2}{*}{Rules} & \multirow{2}{*}{Pr. precision}   \\ \cline{1-5} \cline{7-8}
+			&  				& MRL  & MRL + PR & Default	 			& 	       		 	& Multithread	& Sequential 				 	 &  			 &					\\ \hline
+  YAGO2  		& 2.95min  			& 29.41s & 28.31s & 29.37s    	 			& 135			 	& 28.19 	&       					 & -   		 	 & 100\%				\\ \hline
+  YAGO2 (const)  	& 	-  			& 11.58min & 12.18min & 11.72min 			& 19132			 	& 9.93min 	&       					 & 15634   		 & 100\%				\\ \hline  
+  YAGO2 ($l=4$)  	& 	-  			& - & - 	  & -        	   		        & 			 	& - 	       	& $>$ 1 day					 & -   		 	 & 100\%				\\ \hline
+  YAGO2s  		& $>$ 1 day  			& $>$ 1 day &  $>$ 1 day & $>$ 1 day          		& 247			 	& 59.36min 	&       					 & 94   		 & 100\%				\\ \hline
+  DBpedia 2.0  		& $>$ 1 day  			& - & - 	  & -        	  		        & 			 	& 46.88min 	&       					 & 112685   		 & -					\\ \hline
+  DBpedia 3.8  		& $>$ 1 day  			& - & - 	  & -        	  		        &  				& 7h 46min 	&       					 & 5087   		 & -					\\ \hline
+  Wikidata  		& $>$ 1 day  			& - & - 	  & -        	  		        & 			 	& 8.35min 	&       					 & 1650   		 & -					\\ \hline
+
 % YAGO2s  		& $>$ 1 day 			& $>$ 1 day & 249 & 95  		& $>$ 1 day & 6  			& 53.2min & 95 & 78 & 100\%\\
 % DBpedia 2.0  		& $>$ 1 day 			& $>$ 1 day  & 14405  & 12805 		& $>$ 1 day & 808 			& 1.77h & 117163 & 5377 & 96\%\\
 % DBpedia 3.8  		& $>$ 1 day  			& $>$ 1 day   & 4215 & 2106  		& $>$ 1 day & 292 			& 8.24h & 5193 & 2621 & 97\%\\
