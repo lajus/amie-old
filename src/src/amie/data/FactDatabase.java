@@ -2179,8 +2179,9 @@ public class FactDatabase {
 	public static void main(String[] args) throws Exception {
 		FactDatabase d = new FactDatabase();		
 
-		d.load(new File(args[0]));
-		d.load(new File(args[1]));		
+		for (String fileName : args) {
+			d.load(new File(fileName));
+		}
 		//D.p(d.selectDistinct(ByteString.of("?x"),triples(triple("?y",EQUALSstr,"?x"))));
 		
 		 //d.load(new File("/home/galarrag/workspace/AMIE/Data/yago2/yago2core.10kseedsSample.decoded.compressed.notypes.linksto.tsv"),
@@ -2192,12 +2193,18 @@ public class FactDatabase {
 						triple("?a", "<livesIn>", "?b"),
 						triple("?a", "<diedIn>", "?b"))));*/
 		  
-		  D.p(d.count(triple(ByteString.of("?a"), ByteString.of("<linksTo>"), ByteString.of("?b"))));
-		  D.p(d.selectDistinct(ByteString.of("?a"), ByteString.of("?b"),
+		
+		 D.p("Number of wikilinks: " + d.count(triple(ByteString.of("?a"), ByteString.of("<linksTo>"), ByteString.of("?b"))));
+		 D.p("Number of semantified wikilinks: " + d.countPairs(ByteString.of("?a"), ByteString.of("?b"),
 				  triples(
 						  triple(ByteString.of("?a"), ByteString.of("<linksTo>"), ByteString.of("?b")), 
 						  triple(ByteString.of("?a"), ByteString.of("?p"), ByteString.of("?b")),
 						  triple(ByteString.of("?p"), DIFFERENTFROMbs, ByteString.of("<linksTo>"))
 						  )));
+/*		 D.p("Number of non-wikilinks: " + d.countPairs(ByteString.of("?a"), ByteString.of("?b"),
+				  triples(
+						  triple(ByteString.of("?a"), ByteString.of("?p"), ByteString.of("?b")),
+						  triple(ByteString.of("?p"), DIFFERENTFROMbs, ByteString.of("<linksTo>"))
+						  )));*/
 	}
 }

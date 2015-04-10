@@ -20,6 +20,8 @@ import amie.query.AMIEreader;
 import amie.query.Query;
 
 public class SampleWikiLinksByScore {
+	
+	private static int SampleSize = 75;
 
 	private static List<List<Pair<Pair<ByteString, ByteString>, List<Prediction>>>> initializeBuckets() {
 		List<List<Pair<Pair<ByteString, ByteString>, List<Prediction>>>> buckets = new ArrayList<>(10);
@@ -32,18 +34,23 @@ public class SampleWikiLinksByScore {
 	
 	public static void main(String[] args) throws IOException {
 		if(args.length < 2){
-			System.err.println("SampleLinksByScore <rules> <trainingDb> bindingsWithoutLinks=false");
+			System.err.println("SampleLinksByScore <rules> <trainingDb> bindingsWithoutLinks=false [testingDb]");
 			System.exit(1);
 		}
 		
 		File inputFile = new File(args[0]);		
 		FactDatabase trainingDataset = new FactDatabase();	
+		FactDatabase testingDataset = new FactDatabase();
 		trainingDataset.load(new File(args[1]));
 		TSVFile tsvFile = new TSVFile(inputFile);
 		boolean bindingsWithoutLinks = false;
 
 		if (args.length > 2) {
 			bindingsWithoutLinks = Boolean.parseBoolean(args[2]);
+		}
+		
+		if (args.length > 3) {
+			testingDataset.load(new File(args[3]));
 		}
 		
 		List<List<Pair<Pair<ByteString, ByteString>, List<Prediction>>>> buckets = initializeBuckets();
@@ -66,18 +73,29 @@ public class SampleWikiLinksByScore {
 		Map<Pair<ByteString, ByteString>, List<Prediction>> linksToLabels = null;
 		System.out.println("BindingsWithoutLinks = " + bindingsWithoutLinks);
 		if (bindingsWithoutLinks)
-			linksToLabels = getPredictionsWithoutLinks(queries, trainingDataset, true);
+			linksToLabels = getPredictionsWithoutLinks(queries, trainingDataset, true, testingDataset);
 		else
-			linksToLabels = getPredictions(queries, trainingDataset, true);
+			linksToLabels = getPredictions(queries, trainingDataset, true, testingDataset);
 		
 		System.out.println(linksToLabels.size() + " links");
 		PredictionsComparator cmp = new PredictionsComparator(true);
-		
+		int numberOfHits = 0; // Number of triples found in the testing dataset.
+		int numberOfAutomSemantified = 0; // Number of automatically semantified wikilinks
 		for (Pair<ByteString, ByteString> link : linksToLabels.keySet()) {
 			List<Prediction> labels = linksToLabels.get(link);
 			Collections.sort(labels, cmp);
 			// Take the prediction with the highest score
 			Prediction representativePrediction = labels.get(0);
+			boolean automaticallySemantified = false;
+			for (Prediction prediction : labels) {
+				if (prediction.isHitInTarget()) {
+					++numberOfHits;
+					automaticallySemantified = true;
+				}
+			}
+			if (automaticallySemantified) {
+				++numberOfAutomSemantified;
+			}
 			
 			double naiveConfidence = representativePrediction.getNaiveConfidence();
 			
@@ -96,6 +114,9 @@ public class SampleWikiLinksByScore {
 			System.out.println(buckets.get(i).size() + " links");
 			printPredictions(samplePredictions(buckets.get(i)));
 		}
+		System.out.println("Number of hits: " + numberOfHits);
+		System.out.println("Number of automatically semantified wikilinks: " + numberOfAutomSemantified);		
+		
 	}
 
 	private static void printPredictions(List<Pair<Pair<ByteString, ByteString>, List<Prediction>>> predictions) {
@@ -105,10 +126,11 @@ public class SampleWikiLinksByScore {
 			for (Prediction prediction : pair.second) {
 				Triple<ByteString, ByteString, ByteString> triple = prediction.getTripleObj();
 				// Order is preserved
+				boolean checked = prediction.isHitInTarget();
 				if (pair.first.first.equals(triple.first)) {
-					System.out.print(triple.second + "[" + prediction.getNaiveConfidence() + "]" +  ", ");	
+					System.out.print(triple.second + "[" + prediction.getNaiveConfidence() + ", " + checked + "]" +  ", ");	
 				} else {
-					System.out.print(triple.second + "-inv[" + prediction.getNaiveConfidence() + "]" +  ", ");	
+					System.out.print(triple.second + "-inv[" + prediction.getNaiveConfidence() + ", " + checked + "]" +  ", ");	
 				}
 			}
 			System.out.println();
@@ -118,11 +140,11 @@ public class SampleWikiLinksByScore {
 
 	private static List<Pair<Pair<ByteString, ByteString>, List<Prediction>>> samplePredictions(
 			List<Pair<Pair<ByteString, ByteString>, List<Prediction>>> list) {
-		return (List<Pair<Pair<ByteString, ByteString>, List<Prediction>>>) telecom.util.collections.Collections.reservoirSampling(list, 30);
+		return (List<Pair<Pair<ByteString, ByteString>, List<Prediction>>>) telecom.util.collections.Collections.reservoirSampling(list, 75);
 	}
 
 	private static Map<Pair<ByteString, ByteString>, List<Prediction>> getPredictions(List<Query> queries,
-			FactDatabase trainingDataset, boolean b) {
+			FactDatabase trainingDataset, boolean b, FactDatabase testingDataset) {
 		Map<Pair<ByteString, ByteString>, List<Prediction>> result = new HashMap<Pair<ByteString, ByteString>, List<Prediction>>();
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions =
 				JointPredictions.findPredictionsForRules(queries, trainingDataset, new FactDatabase(), true);
@@ -133,7 +155,9 @@ public class SampleWikiLinksByScore {
 			Prediction prediction = new Prediction(t);
 			prediction.getRules().addAll(predictions.get(t));
 			if (containsLink(links, t.first, t.third)) {
-				// Bingo
+				if (testingDataset.contains(prediction.getTriple())) {
+					prediction.setHitInTarget(true);
+				}
 				addToMap(result, new Pair<ByteString, ByteString>(t.first, t.third), prediction);
 			}
 		}
@@ -142,7 +166,7 @@ public class SampleWikiLinksByScore {
 	}
 
 	private static Map<Pair<ByteString, ByteString>, List<Prediction>> getPredictionsWithoutLinks(List<Query> queries,
-			FactDatabase trainingDataset, boolean b) {
+			FactDatabase trainingDataset, boolean b, FactDatabase testingDataset) {
 		Map<Pair<ByteString, ByteString>, List<Prediction>> result = new HashMap<Pair<ByteString, ByteString>, List<Prediction>>();
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions =
 				JointPredictions.findPredictionsForRules(queries, trainingDataset, new FactDatabase(), true);
@@ -159,6 +183,9 @@ public class SampleWikiLinksByScore {
 						);	
 				long nRelations = trainingDataset.countDistinct(ByteString.of("?p"), noLinkQuery);
 				if (nRelations == 0) {
+					if (testingDataset.contains(prediction.getTriple())) {
+						prediction.setHitInTarget(true);
+					}
 					// Bingo
 					addToMap(result, new Pair<ByteString, ByteString>(t.first, t.third), prediction);
 				}
