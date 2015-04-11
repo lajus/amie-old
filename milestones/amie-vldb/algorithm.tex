@@ -259,17 +259,17 @@ Our implementation indexes the facts aggressively with one index for each permut
 the columns subject, relation, and object, i.e., there are six indexes, namely \texttt{SRO}, \texttt{SOR}, 
 \texttt{RSO}, \texttt{ROS}, \texttt{OSR} and \texttt{ORS}. We call them \emph{fact indexes}.
 Each fact index consists of a nested hash table, where the keys are the values for the first column and the items
-are second-level hash tables. The second-level hash tables map from values of the second column
+are second-level hash tables. The second-level hash tables map values of the second column
 to sets of values of the third column. 
-Figure~\ref{indexes} illustrates the structure of the fact index \texttt{RSO} for a set of four facts.
+%Figure~\ref{indexes} illustrates the structure of the fact index \texttt{RSO} for a set of four facts.
 Fact indexes allow us to check the existence of a triple in constant time.
-
-\begin{figure}
-%\hspace*{-5ex}
-\includegraphics[width=0.5\textwidth]{figures/indexes}\
-\caption{Structure of the fact index RSO for a set of four facts}
-\label{indexes}
-\end{figure}
+% 
+% \begin{figure}
+% %\hspace*{-5ex}
+% \includegraphics[width=0.5\textwidth]{figures/indexes}\
+% \caption{Structure of the fact index RSO for a set of four facts}
+% \label{indexes}
+% \end{figure}
 
 In addition to the fact indexes, the database relies 
 on three \emph{aggregated indexes} \texttt{S}, \texttt{P}, \texttt{O} that store the aggregated number of facts for each
