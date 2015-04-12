@@ -11,11 +11,12 @@ Algorithm~\ref{rm} sketches our approach to mine rules.
 The algorithm maintains a queue of rules (line~1), which initially contains all possible head atoms, that is, all rules of size 1.
 It then iteratively dequeues a rule from this queue.
 If the rule meets certain criteria (line~6), it is pushed to the output.
-If the current rule does not exceed the maximum number of atoms $l$ (line~9), it will go through a refinement process (described below) which
-will expand the current parent-rule creating a set of new children-rules. These newly created rules, if not duplicates or pruned by the head coverage threshold (line~12),  
-will be also pushed into the queue.
+If the rule does not exceed the maximum number of atoms $l$ (line~9), it goes through a refinement process (described below) which
+expands the rule (the parent) to produce a set of new rules (the children). These new rules, 
+if neither duplicates nor pruned by the head coverage threshold (line~12),  
+are also pushed into the queue.
 This process is repeated until the queue is empty. 
-In the following, we will see in more detail the different parts of the algorithm.
+In the following, we will see in more detail the different phases of the algorithm.
 
 
 
@@ -70,8 +71,9 @@ In the following, we will see in more detail the different parts of the algorith
 \end{algorithm}
 
 \paragraph{Refinement}\label{subsubsec:refinement}
-One of the main problems of any mining approach is to find an efficient way to explore the search space. The naive algorithm of enumerating all possible rules is infeasible for large KBs.
-Hence, we explore the search space by iteratively extending rules by \emph{mining operators} (line~10 of Alg.~\ref{rm}).
+One of the major challenges of rule mining is to find an efficient way to explore the search space. 
+The naive algorithm of enumerating all possible combinations of conjunctions of atoms is infeasible for large KBs.
+Hence, we explore the search space by iteratively extending rules using a set of \emph{mining operators} (line~10 of Alg.~\ref{rm}).
 We see a rule as a sequence of atoms. The first atom is the head atom and the others are the body atoms. 
 In the process of traversing the search space, we can extend a rule by using one of the following operators:
 \begin{enumerate}
@@ -93,8 +95,8 @@ Therefore, we chose the above 3 operators as a canonic set.
 
 AMIE tries to expand a given rule by applying all operators (one each time). The shared variable of the operator can be any variable appearing in the rule.
 Assume that AMIE, for a given operator and shared variable, needs to add the atom $r(x,y)$ to a rule. 
-For effiency reasons, we do not try blindly all possible relations in the place of $r$. Instead, we first find all relations that will lead to the creation
-of a rule that passes the head-coverage threshold.
+For efficiency reasons, we do not try blindly all possible relations in the place of $r$. Instead, we first 
+find all relations that lead to a new rule that passes the head-coverage threshold.
 In other words, we first fire a \emph{projection query} of the form
 \\ \\
 SELECT $\bm{r}$, COUNT($H$)\\
@@ -102,7 +104,7 @@ WHERE $H \wedge B_1 \wedge ... \wedge B_{n-1}\; \wedge\; \bm{r}(\bm{X},\bm{Y})$\
 SUCH THAT COUNT($H$)$\geq k$
 \\ \\
 
-where $k := \theta \times size(H)$ (see Section~\ref{par:headCoverage}) is the translation of the
+\noindent where $k := \theta \times size(H)$ (see Section~\ref{par:headCoverage}) is the translation of the
 head coverage threshold into an absolute support threshold and the expression COUNT($\cdot$) has for the rest of this section COUNT(DISTINCT $\cdot$) semantics.
 $\bm{X}$ and $\bm{Y}$ are meta-variables that
 can be either variables or constants, 
@@ -171,8 +173,8 @@ We discuss how to implement projection queries efficiently in Section~\ref{subse
 
 \paragraph{When to Output}\label{subsubsec:whenToOutput}
 Algorithm~\ref{pfo} describes the routine to decide if a rule should be output or not once it has been dequeued.
-The algorithm should first check if the rule is of the form described in Sec.~\ref{sec:preliminaries} (i.e., closed and connected).
-The refinement operators used by AMIE (see~\ref{subsubsec:refinement}) always produce connected rules. So, at the present point, the algorithm only checks if the rule is closed.
+The algorithm should first check if the rule is of the form described in Section~\ref{sec:preliminaries} (i.e., closed and connected).
+The refinement operators used by AMIE (see Section~\ref{subsubsec:refinement}) always produce connected rules. So, at the present point, the algorithm only checks if the rule is closed.
 In addition, AMIE performs a quality check for the rule. The rule should have a confidence value that (i) passes the confidence threshold (line~1)
 and (ii) improves over the confidence of all the rule's parents (line~7).
 The latter condition implies that we wish any refinement of a rule ( $B_1 \wedge ... \wedge B_n \wedge B_{n+1} \Rightarrow H$) to bring some confidence gain in comparison to its parent rule
@@ -182,7 +184,7 @@ Notice that a rule can have multiple parents, for instance, the rule $actedIn(x,
 can be derived by either adding $directed(x,y)$ to  $actedIn(x,y) \Rightarrow created(x,y)$ or by adding $actedIn(x,y)$ to
 $directed(x,y) \Rightarrow created(x,y)$. AMIE requires confidence gain over all parents of a rule.
 
-Note that the decisions made at this point, affect only the output, but do not influence the refinement process. I.e., a rule with low confidence can still be refined to obtain new rules.
+Note that the decisions made at this point, affect only the output, but do not influence the refinement process. i.e., a rule with low confidence can still be refined to obtain new rules.
 This is because confidence is a non-monotonic measure, i.e. we might get good rules with further refinement of bad rules.
 
 
@@ -211,11 +213,11 @@ the time invested in this task.
 \paragraph{Multithreading}
 To speed up the process, our implementation parallelizes Algorithm~\ref{rm}, that is, the main loop (lines~4 to~17) runs in multiple threads. 
 This achieved by synchronizing the access to the centralized queue from which the threads dequeue and enqueue.
-When AMIE uses multiple threads there is a need for an additional duplicate-elimination check at line~6 of Alg.~\ref{rm}.
+When AMIE uses multiple threads, there is a need for an additional duplicate-elimination check at line~6 of Alg.~\ref{rm}.
 \comment{Chris}{@Luis: why don't you use barriers here? I.e. all threads wait until there is no rule length n in the queue before moving to the rules with length n+1. For rules with 3 atoms in the body 
 you will only have 2 synchronization points.}
 Recall that our algorithm performs a breadth-first-search. 
-This means that in a fully sequential execution, rules of size $n-1$ are always queued before rules of size $n$. 
+This means that in a fully sequential execution, all the rules of size $n-1$ are always queued before all the rules of size $n$. 
 It follows that, by the time we check the duplicates of a rule of size $n$ to enqueue it (line~12 in Algorithm~\ref{rm}), 
 no rule of size $n$ has still been dequeued. In other words, if a rule is the duplicate 
 of another rule already derived, the original rule must be in the queue. This property guarantees no duplicates at output time. 
@@ -235,7 +237,7 @@ Moreover, consider two threads $T_1$ and $T_2$ and the sequence of events depict
   $t_3$ & $R_{n+1} = o(R_n)$  & \\
   $t_4$ & $q.enqueue(R_{n+1})$  & \\
   $t_5$ & $R_{n+1} = q.dequeue()$ & \\
-  $t_6$ & & $R_{n+1} = o(R_n)$ \\
+  $t_6$ & & $R_{n+1} = o(R'_n)$ \\
   $t_7$ & & $q.enqueue(R_{n+1})$ \\
 \end{tabular}
 \caption{An execution scenario that could lead to duplicate rules in the output.}\label{tab:duplicates}
@@ -274,7 +276,7 @@ Fact indexes allow us to check the existence of a triple in constant time.
 In addition to the fact indexes, the database relies 
 on three \emph{aggregated indexes} \texttt{S}, \texttt{P}, \texttt{O} that store the aggregated number of facts for each
 key of the fact indexes. For example, the aggregated index \texttt{P} stores the number of triples for each relation
-in the KB, e.g., $\{ livesIn=3, citizenOf=1 \}$ for the fact index depicted in Figure~\ref{indexes}. 
+in the KB, whereas the aggregated index \texttt{S} stores the number of triples where each entity appears as subject. 
 Fact indexes in combination with aggregated indexes can be used to determine the size of atom, i.e., its number of bindings, 
 in constant time. For example, the size of the atom $livesIn(x,y)$ can be retrieved by a simple look-up 
 in the aggregated index \texttt{P}. In constrast, the size of the atom $livesIn(x, USA)$ requires two 
@@ -317,7 +319,7 @@ become instantiated, making the atoms more selective with every recursive step.
 of the form: \\ \\
 \noindent{SELECT $\bm{x}$, COUNT($H$) WHERE $H \wedge B_1 \wedge ... \wedge B_n$\\
 SUCH THAT COUNT($H$)$\geq k$} \\ \\
-These are the types of queries used to determine the relations and instances for new atoms in the specialization
+These are the types of queries used to determine the relations and instances for new atoms in the refinement
 phase of AMIE. The algorithm takes as input a selection variable $\bm{x}$, a projection atom $H:=R(\bm{X},\bm{Y})$, remaining atoms $B_1, ... B_n$, 
 and a KB $\mathcal{K}$. 
 The algorithm returns a hash table with each instantiation of the selection variable 
@@ -335,12 +337,12 @@ We then increase the counter for each value of $\bm{x}$ (Line 16).
 
 
 \paragraph{Implementation of Count Queries} 
-For computing the confidence of a rule AMIE must fire a \emph{count query} to estimate the denominator
+For computing the confidence of a rule $\vec{B} \Rightarrow H$, AMIE must fire a \emph{count query} to estimate the denominator
 of the confidence formula. For the PCA confidence, such queries have the form: \\
 
-\noindent{SELECT COUNT($H'$) WHERE $H \wedge B_1 \wedge ... \wedge B_n$} \\
+\noindent{SELECT COUNT($H$) WHERE $H' \wedge B_1 \wedge ... \wedge B_n$} \\
 
-\noindent where $H$ is the head atom, $B_1, \dots, B_n$ are the body atoms and $H'= r'(x,y')$ is a variant of the
+\noindent where $H = r(x,y)$ is the head atom of the rule, $B_1, \dots, B_n$ are the body atoms and $H'= r'(x,y')$ is a variant of the
 head atom where the least-functional variable has been replaced by a fresh variable (see Section~\ref{subsubsec:pcaConf}).
 
 These queries return the number of distinct bindings of the projection atom $H$ 

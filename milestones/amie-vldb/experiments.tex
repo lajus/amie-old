@@ -487,14 +487,14 @@ This speedup does not entail a serious decrease in the quality of the output: in
 \hline
 \multirow{3}{*}{KB} 	& \multirow{3}{*}{AMIE}  	& \multicolumn{8}{c|}{AMIE+} 	\\ \cline{3-10}
  			& 				& \multicolumn{2}{c|}{Default}	& \multicolumn{6}{c|}{AMIE + conf. approx}   \\ \cline{3-10}
-			&  				&Runtime	& Rules 	& Runtime  & MRL      & MRL + QRW & Full 	   & Rules	& Prun. prec. 	   \\ \hline
-  YAGO2  		& 2.95min  			&29.37s		& 135		& 	   &          &           & 28.19s	   & 135 	& 100\%      	    \\ \hline
-  YAGO2 (const)  	& 	-  			&11.72min	& 19132		& 	   & 	      & 	  & 9.93min	   & 15634	& 100\% 	    \\ \hline  
-  YAGO2 ($l=4$)  	& 27.53min  			&9.49min	& 1382		& - 	   & - 	      & -         & 8.35min 	   & 645	& 100\%   	    \\ \hline
-  YAGO2s  		& $>$ 1 day  			&$>$ 1 day	&		&$>$ 1 day &  	      & 	  & 59.38min	   & 94	 	& 100\%		    \\ \hline
-  DBpedia 2.0  		& $>$ 1 day  			&$>$ 1 day	&		& - 	   & - 	      & -         & 46.88min	   & 112865	& 98.26\%      	    \\ \hline
-  DBpedia 3.8  		& $>$ 1 day  			&$>$ 1 day	&		& - 	   & - 	      & -         & 7h 46min 	   & 5087       & 98.41\%	    \\ \hline
-  Wikidata  		& $>$ 1 day  			&$>$ 1 day	&		& - 	   & - 	      & -         & 48.86min	   & 1650	& 96.93\%      	    \\ \hline
+			&  				&Runtime	& Rules 	& Runtime  & MRL      &MRL + QRW 		& Full	   	   & Rules	& Prun. prec. 	   \\ \hline
+  YAGO2  		& 2.95min  			&29.37s		& 135		& 3.23min  &          &           		& 28.19s	   & 135 	& 100\%      	    \\ \hline
+  YAGO2 (const)  	& 44.05min  			&11.72min	& 19132		& 38.8min  & 	      & 	  		& 9.93min	   & 15634	& 100\% 	    \\ \hline  
+  YAGO2 ($l=4$)  	& 27.53min  			&9.49min	& 1382		& - 	   & - 	      & -         		& 8.35min 	   & 645	& 100\%   	    \\ \hline
+  YAGO2s  		& $>$ 1 day  			&$>$ 1 day	& 247		&$>$ 1 day &  	      & 	  		& 59.38min	   & 94	 	& 100\%		    \\ \hline
+  DBpedia 2.0  		& $>$ 1 day  			&$>$ 1 day	& 26812		& - 	   & - 	      & -         		& 46.88min	   & 112865	& 98.26\%      	    \\ \hline
+  DBpedia 3.8  		& $>$ 1 day  			&$>$ 1 day	& 4931		& - 	   & - 	      & -         		& 7h 46min 	   & 5087       & 98.41\%	    \\ \hline
+  Wikidata  		& $>$ 1 day  			&$>$ 1 day	& 1244		& - 	   & - 	      & -         		& 48.86min	   & 1650	& 96.93\%      	    \\ \hline
 
 % YAGO2s  		& $>$ 1 day 			& $>$ 1 day & 249 & 95  		& $>$ 1 day & 6  			& 53.2min & 95 & 78 & 100\%\\
 % DBpedia 2.0  		& $>$ 1 day 			& $>$ 1 day  & 14405  & 12805 		& $>$ 1 day & 808 			& 1.77h & 117163 & 5377 & 96\%\\
@@ -697,9 +697,9 @@ This encourages us to use the PCA for the definition of our confidence. In the f
 %\subsubsection{Standard Confidence vs. PCA Confidence }
 \subsubsection{Evaluation of the PCA Confidence.}
 \label{subsubsec:std_vs_pca}
-In the following, we revisit from~\cite{amie} the comparison between the standard confidence measure 
-and the PCA confidence measure as a ranking metric for rules.
-The comparison is based on the number and precision of predictions of the most confident rules according to each metric.
+In the following, we revisit the comparison between the standard confidence 
+and the PCA confidence from~\cite{amie}.
+The evaluation is based on the number and precision of predictions of the most confident rules according to each metric.
 We then compare these results with a naive inference approach where we exploit the type signatures of 
 relations and the fact that multiple rules can lead to the same prediction. 
 
@@ -707,7 +707,7 @@ relations and the fact that multiple rules can lead to the same prediction.
 % evaluation of the PCA assumption.
 
 \paragraph{Standard vs PCA confidence}
-In~\cite{amie}, we conducted a very naive inference approach to compare the standard and the PCA confidence 
+In~\cite{amie}, we conducted an experiment to compare the standard and the PCA confidence 
 as scoring metrics for rules.
 We ran AMIE with the default setting on the YAGO2 dataset. %It contains nearly 500K entities and 948K facts.
 We sorted the rules first by descending PCA confidence, and then by descending standard confidence, and looked at the top rules.
@@ -733,33 +733,33 @@ This is because the PCA confidence is less conservative than the standard confid
 \end{figure}
 
 \paragraph{Using Type Information}
-The experimental setup for data inference described above was designed as a proof of concept 
+The naive inference approach presented in~\cite{amie} was designed as a proof of concept 
 to show the suitability of the PCA confidence as precision metric for rules mined on a web-extracted KB. Yet, it
 does not have a fully practical value, e.g., a precision of 35\% is certainly not high enough to make actual 
-predictions about the death place, future spouse, or future residence of a person. We observe, however, that this naive
-inference approach disregards two important factors. First, in Section~\cite{PCA_assumption_entities} we discussed about granularity
-differences in relations. For instance, the relation $livesIn$ can link a person to her city or country of residence. 
-This implies that for example, the rule 
-$livesIn(x, y) \Rightarrow isCitizenOf(x, y)$ can conclude that some people are citizens of cities. Such spurious predictions decrease the precision
+predictions about the death place, future spouse, or future residence of a person. We observe, however, that our 
+inference approach disregards two important factors. First, in Section~\ref{PCA_assumption_entities} we discussed about granularity
+differences in relations. For instance, the relation $livesIn$ is used to express a person's city or country of residence. 
+This implies that, for example, the rule 
+$livesIn(x, y) \Rightarrow isCitizenOf(x, y)$ can predict that some people are citizens of cities. Such spurious predictions decrease the precision
 of the inference process.
-Second, a prediction can be fired from multiple rules. This is the case for 9\% of the predictions drawn from the set of rules with more 
-than 0.1 PCA confidence. The more rules make a prediction, the higher its confidence should be and we should prioritize it for evaluation.
+Second, a prediction can be fired from multiple rules. If we consider rules as signals of evidence,  
+the more rules make a prediction, the higher its confidence should be and we should therefore prioritize it for evaluation.
+In YAGO2 9\% of the predictions are fired by more than one rule, when we use a confidence threshold of 0.1 PCA confidence. 
 
 To account for the first observation, we configured AMIE to mine \emph{typed rules}. These have the form:
 \[
  \vec{B} \wedge \textit{rdf:type}(x, D) \wedge \textit{rdf:type}(y, R) \Rightarrow r(x, y)
 \]
 
-\noindent where $D$ and $R$ correspond to the domain and range of the head relation $r$ according to the latest version of the
-YAGO3\footnote{We used YAGO3 because the type signatures for older versions were too general for some relations.}. 
+\noindent where $D$ and $R$ correspond to the domain and range of the head relation $r$ in YAGO3\footnote{We used YAGO3 because the type signatures in older versions were too general for some relations.}. 
 With a PCA confidence threshold of 0.1, AMIE found 57 typed rules on YAGO2.
-This constraint suffices to solve the granularity differences discussed in Section~\cite{PCA_assumption_entities} as, for example, 
+This constraint suffices to solve the granularity differences discussed in Section~\ref{PCA_assumption_entities} as, for example, 
 YAGO defines the relation $livesIn$ between people and cities.
 
 To consider the second observation, we change the way predictions are ranked. In the original experimental setup, if 
 multiple rules $R_1, \dots R_k$ made a prediction $p$, the prediction was only counted the first time it was fired. 
 Since the rules were ranked by decreasing PCA confidence, 
-this is equivalent to rank predictions according to this score:
+this was equivalent to rank predictions according to their highest PCA confidence: 
 \[
  score(p) := max\{pcaconf(R_1), \dots, pcaconf(R_k) \}
 \]
@@ -767,22 +767,26 @@ We propose an alternative score instead:
 \begin{equation}\label{predictions-score}
  score^*(p) := 1 - \prod_{i = 1}^{k}{(1 -pcaconf(R_i)})
 \end{equation}
-Equation~\ref{predictions-score} confers a probabilistic interpretation to the PCA confidence. The score of a prediction 
+Equation~\ref{predictions-score} aggregates the PCA confidence of the rules so that the predictions concluded by multiple rules
+are ranked higher. It also confers a probabilistic interpretation to the PCA confidence. The score of a prediction 
 is the probabibility that at least one of the rules in $R_1, \dots R_k$ concludes $p$. This is computed as 1 minus the probabibility
 that none of the rules concludes $p$. The probability of a rule not concluding $p$ is defined as 1 minus the PCA confidence of the rule.
 The probabibility that none of the rules concludes $p$ is the product of the individual probabibilities.
 
-We note that Equation~\ref{predictions-score} assumes that rules are independent from each other. While this assumption may not be true sometimes, 
+We also note that Equation~\ref{predictions-score} assumes that rules are independent from each other. While this assumption may not be true sometimes, 
 it still serves as a naive baseline for probabilistic inference methods. The upper curve in Figure~\ref{finalshow} shows the results
 of our evaluation using typed rules and the naive independence score for predictions. We procedeed as in~\cite{amie}, that is,
-the rules were used to fire predictions and then the predictions were ranked by descending score and their cumulative precision
-computed. Unlike the original experimental setup, the n-th point in the new curve corresponds to the cumulative precision
+we first used the rules to fire predictions, then we rank these predictions by descending score and computed their cumulative precision. 
+Unlike the original experimental setup, the n-th point from the left in the new curve corresponds to the cumulative precision
 of the predictions up to the n-th bucket. We bucketized the predictions by score using a bucket size of 0.1, i.e., the first point
 corresponds to the predictions with score between 1 and 0.9, the next one accounts for the predictions with score between 0.9 and 0.8 and so on.
 As we can observe, the type signatures have a significant effect in the precision of the predictions at the same level of recall of
-the original experiment. The fact that we can achieve 60\% confidence for 400K predictions, suggests that the PCA confidence in combination
-with type checking constitute a promising tool for more sophisticated rule-based inference approaches.  
-% While we cannot still add our predictions directly to a KB, such a simple approach guarantees than more than a half of the predictions
+the original experiment. The fact that we can achieve 60\% precision for 400K predictions, suggests that the PCA confidence in combination
+with type checking are promising tool for more sophisticated rule-based inference approaches.  
+While we should not add these predictions directly to a KB, we could send them to human evaluators to check their correctness.
+It is much easier for a person to check fact candidates for their correctness than to invent them from scratch. 
+In addition, this experimental setup could serve as a naive baseline for more sophisticated inference approaches.
+%such a simple approach guarantees than more than a half of the predictions
 % could be  it could still become a useful way
 % a human evaluator
 % could checked them The predicted candidates could be checked by a human before adding them to the KB. 
@@ -790,8 +794,8 @@ with type checking constitute a promising tool for more sophisticated rule-based
 % We will investigate this avenue of research in future work.
 
 % While, such experimental
-% Nevertheless, this experimental setup could
-% serve as a naive baseline for more sophisticated inference approaches. In particular, the 
+%  Nevertheless, this experimental setup could
+%  serve as a naive baseline for more sophisticated inference approaches. In particular, the 
 % predictions in KBs is 
 % has been widely studied in the literature, however the experimental setup disregards two important characteristics of the data and the rule mining process.
 % In 
