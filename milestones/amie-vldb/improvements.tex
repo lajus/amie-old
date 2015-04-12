@@ -1,7 +1,7 @@
 Since the publication of the original AMIE framework~\cite{amie}, we have extended it with a series of improvements 
 that allow the system to run over very large KBs. 
 In the following, we will introduce and discuss these extensions and refer to this new version of AMIE as AMIE+.
-Our extensions aim to speed up 2 different parts of the main rule-mining algorithm: (i) the rule expansion phase and 
+Our extensions aim to speed up 2 different parts of the main rule-mining algorithm: (i) the refinement phase and 
 (ii) the confidence evaluation. 
 
 
@@ -23,10 +23,10 @@ Our extensions aim to speed up 2 different parts of the main rule-mining algorit
 % by means of query rewriting and caching or leveraging further constraints in the form of confidence thresholds or
 % rule size limits. They allow for avoiding the execution of unnecessary queries for rules that will not be output anyway.
 
-\subsection{Speeding Up Rule Expansion}
+\subsection{Speeding Up Rule Refinement}
 \label{subsec:lossless}
-In this section, we will discuss how AMIE+ speeds up the rule expansion phase for specific kinds of rules.
-Notice that all techniques described below do not alter AMIE's output in any way. 
+In this section, we will discuss how AMIE+ speeds up the rule refinement phase for specific kinds of rules.
+We emphasize that the techniques described below do not alter AMIE's output in any way. 
 
 \paragraph{Maximum Rule Length}
 % \ignore{
@@ -49,7 +49,7 @@ a length of at most $l$ have been produced.
 % rules with more than 3 atoms are less interesting because they often capture trivial relationships. Besides, their support tends to be very low.
 % For AMIE+, we improved this pruning strategy as follows.
 During the mining process, AMIE creates connected rules by applying all possible mining operators 
-(line 9 in Algorithm~\ref{rm}) on previously created rules.
+(line 10 in Algorithm~\ref{rm}) on previously created rules.
 Given a maximum rule length $l$ and a non-closed Horn rule of length $l-1$, AMIE+
 will refine it only if it is possible to close it before exceeding the length constraint.
 This means that for a not-yet-closed rule of length $l-1$, AMIE+ will not apply 
@@ -105,19 +105,19 @@ of the child that is equivalent to the support of the parent.}
 
 \noindent which is the same as $supp(R_p)$. Thus both $R_p$ and $R_c$ have the same support.
 This observation can be leveraged to speed up projection queries.
-AMIE uses projection queries during the rule-expansion phase to choose which relations can be used to expand the rule for 
+AMIE uses projection queries during the refinement phase to choose which relations can be used to expand the rule for 
 a specific operator (e.g., add-dangling-atom) and a specific binding (e.g., bind on variable $y$) \emph{such that the produced rule
-will pass the support threshold}.
+passes the head coverage threshold}.
 % Recall from Section~\ref{subsec:algorithm} that projection queries are used in AMIE to determine which
 % relations should be used in the new atoms that will expand each rule. 
 For example, for refining the example rule $R_c$ with a dangling atom joining on variable $y$, AMIE will construct the following expressions:
 \[
-?r(w,y) \wedge \textit{citizenOf}(z,y)\wedge \textit{livesIn}(x,y)\Rightarrow \textit{citizenOf}(x,y)
+\bm{r}(w,y) \wedge \textit{citizenOf}(z,y)\wedge \textit{livesIn}(x,y)\Rightarrow \textit{citizenOf}(x,y)
 \]
 \[
-?r(y,w) \wedge \textit{citizenOf}(z,y)\wedge \textit{livesIn}(x,y)\Rightarrow \textit{citizenOf}(x,y)
+\bm{r}(y,w) \wedge \textit{citizenOf}(z,y)\wedge \textit{livesIn}(x,y)\Rightarrow \textit{citizenOf}(x,y)
 \]
-\noindent and  will find the bindings of $r$ that result in rules with support above the given threshold.
+\noindent and will find the bindings of $\bm{r}$ that result in rules with support above the given threshold.
 Since $R_c$ has the same support with $R_p$, we can re-use from $R_p$ all the projection queries \comment{Chris}{@Luis: I say reuse the same queries
 not the query results. I.e. the queries are fired. In addition I do not say that I re-write anything because they might ask questions. The high level idea
 is that you use the same queries. However I will be surprised if we save significantly with this optimization.} that bind on the 
@@ -245,7 +245,7 @@ Therefore, AMIE+ caches the results of previous queries. Whenever a new query ca
 \label{subsec:speedingConfidenceEvaluation}
 The calculation of the confidence scores for rules takes a significant part of the time 
 of the overall rule-mining process (up to 29\% for YAGO2). 
-This cost depends on the properties of each rule. The confidence calculation (both standard and pca) involves the calculation of the 
+This cost depends on the properties of each rule. The confidence calculation (both standard and PCA) involves the calculation of the 
 size of the rule's body: if the body contains atoms with very selective joins, the size of the body is relatively small and the query cost remains low. 
 On the other hand, if the body size is huge, it uses more resources (memory) which make the query expensive.
 Notice also that most rule mining applications are interested in rules above some confidence threshold.
