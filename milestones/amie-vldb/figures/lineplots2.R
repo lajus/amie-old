@@ -102,11 +102,11 @@ log.tics = function (x, exact10 = TRUE)
 rg.setDefaultOptions("pdf")
 rg.options(width.mm=40*1.8, height.mm=37*1.8, ps=7, legend.ps=7, mar=c(3,3,0.7,0.7)+0.1, bty="o", axis.lwd=1, embedFonts=F)
 
-names 		<- c("PCA confidence (rules 1-30)", "Std confidence (rules 1-30)", 	"Std confidence (rules 31-46)"	)
-colors 		<- c("black",	"grey40",		"grey60"	)
+names 		<- c("PCA+types+inference", "PCA confidence (rules 1-30)", "Std confidence (rules 1-30)", 	"Std confidence (rules 31-46)")
+colors 		<- c("black",	"grey40",		"grey60"	, "grey60")
 
-lineType 	<- c(1, 	1,		1)
-linePoint	<- c(20,	18,		17)
+lineType 	<- c(1, 	1,		1,	1)
+linePoint	<- c(20,	18,		17, 	20)
 
 
 
@@ -294,11 +294,29 @@ pca <- c(
 )
 
 
+x_types <- c(
+5774,
+62360,
+65763,
+74348,
+91691,
+126123,
+141713,
+346295
+)
 
 
 
-
-
+y_types <- c(
+0.8666666667,
+0.6984126984,
+0.6559139785,
+0.6542056075,
+0.6956521739,
+0.6851851852,
+0.6685393258,
+0.645320197
+)
 
 
 
@@ -307,9 +325,10 @@ pca <- c(
 rg.startplot("std_vs_pca.pdf")
 
 
-rg.plot(x2, pca, type="o", col=colors[1], ylab="Aggregated Precision", xlab="Aggregated Predictions (beyond the initial KB)", xlim=c(500, 400000),  ylim=c(0.25,1), lty=lineType[1], pch=linePoint[1], xaxt='n')
-lines(x_std1, std1, type="o", pch=linePoint[2], lty=lineType[2], col=colors[2])
-lines(x_std2, std2, type="o", pch=linePoint[3], lty=lineType[3], col=colors[3])
+rg.plot(x2, pca, type="o", col=colors[2], ylab="Aggregated Precision", xlab="Aggregated Predictions (beyond the initial KB)", xlim=c(500, 400000),  ylim=c(0.25,1), lty=lineType[2], pch=linePoint[2], xaxt='n')
+lines(x_std1, std1, type="o", pch=linePoint[3], lty=lineType[3], col=colors[3])
+lines(x_std2, std2, type="o", pch=linePoint[4], lty=lineType[4], col=colors[4])
+lines(x_types, y_types, type="o", pch=linePoint[1], lty=lineType[1], col=colors[1])
 legend("topright",legend=names, cex=1, col=colors, pch=linePoint, lty=lineType)#, ncol=2) 
 axis(1, at=c(0,50000,100000,150000,200000,250000, 300000, 350000, 400000),labels=c("0","50000","100000","150000","200000","250000", "300000", "350000", "400000"), tick=T, lwd=T)
 
