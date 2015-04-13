@@ -336,7 +336,8 @@ the algorithm first fires a SELECT query on variable $x$: \\ \vspace*{-0.2cm}
 
 \noindent{SELECT DISTINCT $x$ WHERE $r(x, y') \wedge \vec{B}$} \\ \vspace*{-0.2cm}
 
-\noindent then, for each binding of $x$, it instantiates the query and fires another select query on variable $y$. 
+\noindent then, for each binding of $x$, it instantiates the query and fires another select query on variable $y$.
+This suggests that the implementation of SELECT DISTINCT queries on one variable plays a crucial rule in the efficiency of this task.
 Algorithm~\ref{select} describes the implementation of SELECT DISTINCT queries on one projection variable for a conjunction of
 atoms. 
 The algorithm starts finding the atom with the fewest number 
