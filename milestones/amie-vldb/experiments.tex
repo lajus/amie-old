@@ -11,7 +11,7 @@ In addition, we conduct an extensive empirical evaluation of the PCA, the main a
 This includes an experiment to evaluate how often the PCA holds in a web-extracted KB (YAGO).
 In addition, we revisit the comparison between the standard and the PCA confidence 
 in terms of the quality of the produced facts and investigate the influence of type information in the quality of the rules.
-Our experimental results show that:\comment{Chris}{change those}
+Our experimental results show that:
 \begin{itemize}
  \item The optimizations implemented in AMIE+ allow us to run on KBs with more than 1K relations and 10M facts, for which
 even AMIE took more than one day.
@@ -97,14 +97,6 @@ AMIE can threshold on support, head coverage, confidence, and PCA confidence, an
 She can also deviate from the default setting and count support on one of the head variables (like WARMR).
 In that case, AMIE counts on the functional
 variable of the relation (see Section~\ref{subsec:functions} about functions).
-% We also compare AMIE against AMIE+ at different configurations. By default AMIE+
-% default AMIE+ and AMIE+ with
-% By default AMIE+, we denote the version of AMIE that includes optimizations that do not depend on setting a
-% PCA confidence threshold. These are the Maximum Rule Length and Query Rewriting and Caching.
-% By AMIE++,  we denote the version of AMIE that uses all optimizations including those that depend on setting a confidence threshold (0.1 in our experiments).
-% Note that AMIE+  produces exactly the same output as AMIE, whereas the output of AMIE++ might differ.
-
-%While the optimal length of rules can vary from one dataset to the other, we focus on rules up to 3 atoms for the selected datasets.
 }
 
 \paragraph{Language Bias}
@@ -345,9 +337,6 @@ refinement and output phases.
 Dataset		& Rules	&  Refinement	& Output 	& Dup. elim.  \\ \hline
 YAGO2  		& 135	&  87.48\% 	& 8.79\% 	& 3.74\% \\
 YAGO2 (c)  	& 19132	&  53.54\%	& 35.64\% 	& 10.82\% \\ \hline
-% DBpedia 2.0  		& $>$ 1 day 			& $>$ 1 day  & \\
-% DBpedia 3.8  		& $>$ 1 day  			& $>$ 1 day   & \\
-% Wikidata 		& $>$ 1 day 			& $>$ 1 day & \\ \hline
 \end{tabular}
 \caption{Time spent in the different phases of the AMIE algorithm on YAGO2.}
 \label{timeProportion}
@@ -362,32 +351,7 @@ in Section~\ref{subsec:speedingConfidenceEvaluation} to prune rules below the co
 and reduce the time spent in the confidence calculation and hence the output phase.
 
 
-%Since low-confident rules are of little use, we also run AMIE+ with a PCA confidence threshold of 10\%
-%and enable pruning by confidence upper bounds and confidence approximations.
-%For the type of rules discussed in Section~\ref{upperBound},
-%the confidence upper bounds let us know precisely if the
-%confidence of a rule will be below the threshold,
-%before calculating the actual confidence score. They are strictly speaking lossless heuristics.
-%On the other hand, our confidence
-%approximations provide a rough estimation of the confidence
-%which can be both an overestimation or underestimation of
-%the actual score. Underestimation affects the completeness of AMIE+,
-%since some rules above the confidence threshold score may still be pruned.
-%In any case, calculating the confidence upper bounds or estimating the confidence
-%is much cheaper than computing the actual confidence value.
 
-% In this section we discuss the runtime improvements of AMIE+ and AMIE++, which enable us to run on very large datasets.
-% AMIE+ uses the Maximum Rule Length and Query Rewriting and Caching, which do not alter AMIE's output.
-% AMIE++ uses additionally  pruning by confidence upper bounds and by confidence approximations.
-% These improvements might alter the output of AMIE since they prune rules that are expected to be low confident and very expensive to mine.
-% Unlike the heuristics of AMIE+, they require a minimum confidence threshold (10\% in our experiments). For the type of rules discussed in Section~\ref{upperBound},
-% the confidence upper bounds let us know precisely if the
-% confidence of a rule will be below the confidence threshold, before calculating the actual confidence score. Our confidence
-% approximations, on the other hand,
-% provide a rough estimation of the confidence score which can be both an overestimation or underestimation of
-% the actual confidence score. Underestimation affects the completeness of AMIE++,
-% since some rules with high confidence score may be pruned. In any case, calculating the confidence upper bounds or estimating the confidence
-% is much cheaper than computing the actual confidence value.
 
 
 
@@ -395,18 +359,19 @@ and reduce the time spent in the confidence calculation and hence the output pha
 \begin{savenotes}
 \begin{table*}[t]
 \footnotesize
+\centering
 \begin{tabular}{|l|ccc|c c|c c|c|}
 \hline
 \multirow{3}{*}{KB} 	&  \multicolumn{3}{c|}{AMIE}  	& \multicolumn{5}{c|}{AMIE+} 	\\ \cline{5-9}
  			& 		&	&	& \multicolumn{2}{c|}{Only Refinement}	& \multicolumn{2}{c|}{Only Output} 	&Full   \\ \cline{5-9}
 			& Total		&Ref.	&Out.	&Total		&Ref.			& Total  	&Out.    	&Total 	   \\  \hline
-  YAGO2  		& 2.95min  	&	&	&29.37s		&			& 3.23min  	&    			& 28.19s	  	    \\ 
+  YAGO2  		& 2.95min  	&	&	&29.37s		&			& 3.23min 	&    			& 28.19s	  	    \\ 
   YAGO2 (const)  	& 44.05min  	&	&	&11.72min	&			& 38.8min  	&   			& 9.93min	 	    \\
   YAGO2 ($l=4$)  	& 27.53min  	&	&	&9.49min	&			& 27.53min 	&   			& 8.35min 	 	    \\
   YAGO2s  		& $>$ 1 day  	&	&	&$>$ 1 day	&			&$>$ 1 day 	&  	      		& 59.38min	  	    \\ 
-  DBpedia 2.0  		& $>$ 1 day  	&	&	&$>$ 1 day	&			&$>$ 1 day 	& - 	     	 	& 46.88min	      	    \\ 
-  DBpedia 3.8  		& $>$ 1 day  	&	&	&$>$ 1 day	&			& - 	   	& - 	      		& 7h 46min 	     		\\
-  Wikidata  		& $>$ 1 day  	&	&	&$>$ 1 day	&			&$>$ 1 day 	& - 	      		& 48.86min	  	    \\ \hline
+  DBpedia 2.0  		& $>$ 1 day  	&	&	&$>$ 1 day	&			&$>$ 1 day 	&  	     	 	& 46.88min	      	    \\ 
+  DBpedia 3.8  		& $>$ 1 day  	&	&	&$>$ 1 day	&			&  	   	&  	      		& 7h 46min 	     		\\
+  Wikidata  		& $>$ 1 day  	&	&	&$>$ 1 day	&			&$>$ 1 day 	&  	      		& 48.86min	  	    \\ \hline
 \end{tabular}
 \caption{Runtime  comparison of AMIE and AMIE+. Ref: average time for refinement phase among threads. Out: average time for output phase among threads.}
 \label{runtimeComparison}
@@ -414,15 +379,43 @@ and reduce the time spent in the confidence calculation and hence the output pha
 \end{savenotes}
 \end{center}
 
+
+\paragraph{Runtime Comparison}
+Table~\ref{runtimeComparison} shows the runtimes of AMIE and AMIE+. For AMIE+, we show results if only the improvements affecting the refinement process are active 
+(maximum-rule-length, query-rewriting, perfect rules),
+if only the improvements affecting the output process are active (confidence approximation, confidence upper bounds, both with confidence threshold 0.1) and if all improvements are active.
+We also report the average time (among threads) needed for different phases of the mining (refinement and output).
+First, notice that AMIE is not able to finish within a day for Yago2s, DBPedia 2.0 and 3.8 and Wikidata. 
+For Yago2 (Yago2-const), we can see that AMIE+(full) is  6.3x (4.4x) faster than AMIE. This speedup is mainly due to the improvements targeting the refinement process:
+AMIE+ with only the refinement improvements is already 6x and 3.8x faster than AMIE for these datasets. This is not surprising since,
+for Yago2,  most of the time is spend in refinining rules and therefore by improving this phase we can see significant gain.
+Notice also that AMIE+(only Output) is slower than AMIE. Recall that the confidence approximation heuristic requires  computing the
+join cardinalities for every pair of relations in the KB. I.e., there is a tradeoff between an initial additional cost  for precomputing these values and the potential savings 
+if the confidence approximation manages to prune some expensive rules. For the case of Yago2, the output phase takes only around 9\% of the overall mining time, i.e.,
+confidence evaluation is not really a problem. In this case, the benefit of using the confidence approximation is less than the preprocessing cost. 
+This is not the case, however, for larger datasets.
+For Yago2s, DBPedia 2.0 and 3.8 and Wikidata, we see that using improvements only on the refinement or only on the output side is not enough.  
+If we activate all improvements, however, AMIE+ is able to terminate in the majority of cases within an hour or in the worst case over-night.
+\comment{Chris}{Here can have a barplot of speeups, grouped by dataset. What do you think? We can discuss the results after we have them}.
+
+\begin{figure*}
+\centering
+\includegraphics{figures/individual}
+\caption{Performance of individual improvements}
+\label{individual}
+\end{figure*}
+
+
 \begin{center}
 \begin{savenotes}
 \begin{table}[t]
 \footnotesize
+\centering
 \begin{tabular}{|l|r|r r|}
 \hline
-			& AMIE			 	& \multicolumn{2}{c|}{AMIE+} 	\\ \cline{2-4}
+			& AMIE			 	& \multicolumn{2}{c|}{AMIE+(full)} 	\\ \cline{2-4}
 KB			& Rules 			& Rules		& Prun. prec. 	   \\ \hline
-  YAGO2  		& 135				& 135 		& 100.00\%      	    \\ 
+  YAGO2  		& 135				& 68 		& 100.00\%      	    \\ 
   YAGO2 (const)  	& 19132				& 15634		& 100.00\% 	    \\  
   YAGO2 ($l=4$)  	& 1382				& 645		& 100.00\%   	    \\ 
   YAGO2s  		& 247*				& 94	 	& 100.00\%		    \\
@@ -437,9 +430,37 @@ KB			& Rules 			& Rules		& Prun. prec. 	   \\ \hline
 \end{center}
 
 
+\paragraph{Output Comparison}
+Table~\ref{outputComparison} shows a comparison of AMIE and AMIE+ in terms of output (number of rules).
+To assess the quality of the confidence approximation, we report in addition the \emph{pruning precision}.
+The pruning precision is the ratio of rules for which the confidence approximation introduced
+in Section~\ref{sec:appr} overestimates the actual confidence. We
+calculate this ratio by counting the number of times that the heuristics
+produce a higher value than the real confidence (among the rules on which the approximation is applicable). 
+For example, a pruning precision of 96\% means
+that in 4\% of the cases the system erroneously pruned rules with a confidence higher than 0.1.
+Note that AMIE in our experiment was configured to run without any confidence threshold, where AMIE+ with confidence threshold 0.1.
+I.e., normally we expect AMIE+ to output less rules than AMIE.
+However, if a system ran for more than one day, we interrupted it
+and considered the output until the point of interruption (noted with a ``*'' in Tab~\ref{outputComparison}).
+This fact is particularly obvious
+for DBpedia 2.0, where AMIE found only 26K rules, while AMIE+(full)  produces 112K rules.
+This means that the values reported in Table~\ref{outputComparison}
+may have been calculated on a
+subset of all the rules, thus being an estimation of the actual pruning precision.
+As we can see, the speedup provided by AMIE+(full) does notil a se entarious decrease in the quality of the output: 
+AMIE+ does not miss more than 4\% of the rules with confidence above 10\%.  
 
 
 
+
+
+\paragraph{Performance of confidence approximation w.r.t. to rule-length}
+
+
+
+
+\ignore{ %% this is luis version
 Table~\ref{amievsplus} shows the runtimes of AMIE and AMIE+ with different setups on our test KBs.
 %The different setups include: default AMIE+, AMIE+ with the PCA confidence
 %bound enabled and AMIE+ with all the optimizations.
@@ -497,11 +518,12 @@ Therefore, we need to enable the confidence approximations in order to scale to 
 This heuristic, however, comes with the additional cost of computing the
 join cardinalities for every pair of relations in the KB, which can be very expensive for KBs with many relations, such as DBpedia or Freebase.
 Nevertheless, it is run only once and, as the results show, it pays off.
-\comment{Chris}{Do we have perhaps the time needed for preprocessing for these datasets?
-We could report total time and preprocessing time and then this argument can also be seen in the table.}
-On KBs where normal rule mining would have required more than a day, AMIE+ can run in a few hours or, in the worst case, over-night.
-This speedup does not entail a serious decrease in the quality of the output: in the majority of datasets, AMIE+ does not miss any of the rules with confidence above 10\%. In the other datasets, it misses at most 4\% of them.
-
+On KBs where normal rule mining would have required more than a day, 
+AMIE+ can run in a few hours or, in the worst case, over-night.
+This speedup does not entail a serious decrease in the quality of the output: 
+in the majority of datasets, AMIE+ does not miss any of the rules with confidence above 10\%. 
+In the other datasets, it misses at most 4\% of them.
+}
 
 % \begin{center}
 % \begin{savenotes}
@@ -773,13 +795,13 @@ This is because the PCA confidence is less conservative than the standard confid
 \begin{figure}
 %\hspace*{-5ex}
 %\includegraphics{figures/std_vs_pca}\ %\\[-0.5cm]
-\includegraphics[width=0.5\textwidth]{figures/std_vs_pca_new}
+\includegraphics[width=0.5\textwidth]{figures/std_vs_pca}
 \caption{Std. confidence vs. PCA confidence}
 \label{finalshow}
 \end{figure}
 
 \paragraph{Using Type Information}
-The naive inference approach presented in~\cite{amie} was designed as a proof of concept 
+The naive deduction approach presented in~\cite{amie} was designed as a proof of concept 
 to show the suitability of the PCA confidence as precision metric for rules mined on a web-extracted KB. Yet, it
 does not have a fully practical value, e.g., a precision of 35\% is certainly not high enough to make actual 
 predictions about the death place, future spouse, or future residence of a person. We observe, however, that our 
@@ -826,6 +848,7 @@ we first used the rules to fire predictions, then we rank these predictions by d
 Unlike the original experimental setup, the n-th point from the left in the new curve corresponds to the cumulative precision
 of the predictions up to the n-th bucket. We bucketized the predictions by score using a bucket size of 0.1, i.e., the first point
 corresponds to the predictions with score between 1 and 0.9, the next one accounts for the predictions with score between 0.9 and 0.8 and so on.
+
 As we can observe, the type signatures have a significant effect in the precision of the predictions at the same level of recall of
 the original experiment. The fact that we can achieve 60\% precision for 400K predictions, suggests that the PCA confidence in combination
 with type checking are promising tool for more sophisticated rule-based inference approaches.  

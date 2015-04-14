@@ -2,7 +2,7 @@ source("~/workspace/mf/tools/mfplot.R")
 library(rg)
 
 rg.setDefaultOptions("pdf")
-rg.options(width.mm=80*1.45, height.mm=37*1.45, ps=5, legend.ps=5, mar=c(3,3,0.7,0.7)+0.1, bty="o", axis.lwd=1, embedFonts=F)
+rg.options(width.mm=80*1.6, height.mm=37*1.6, ps=5, legend.ps=5, mar=c(3,3,0.7,0.7)+0.1, bty="o", axis.lwd=1, embedFonts=F)
 
 
 #top1
@@ -57,8 +57,8 @@ x <- rg.barplot(bars, width=c(yago2.width, yago2c.width, yago2s.width,db2.width,
 #                 text(8.4,120,"2.1x", pos=4, col="black")
 #                 text(11.4,12,"2x", pos=4, col="black")
                 
-axis(1, at=c(1.5, 4.5, 7.5, 10.5, 13.5, 16.5),labels=c("Yago2(s)","Yago2-const(min)","Yago2s(min)","DBPedia 2.0(min)", "DBPedia 3.8(h)", "Wikidata(min)"))
+axis(1, at=c(1.5, 4.5, 7.5, 10.5, 13.5, 16.5),labels=c("Yago2(s)","Yago2-const(min)","Yago2s(min)","DBPedia 2.0(min)", "DBPedia 3.8(h)", "Wikidata(min)"), cex=1.3)
 # axis(1, at=c(1.5, 4.5, 7.5, 10.5, 13.5, 16.5),labels=c("D1","D2","D3","D4", "D5", "D6"))
 par(xpd=NA)
-legend("topleft", c("AMIE", "AMIE+(Out)", "AMIE+(Out+MRL)", "AMIE+(Out+MRL+QRW)", "AMIE+(Out+MRL+QRW+PR)"), fill=col, cex=1)
+legend("topleft", c("AMIE", "AMIE+(Out)", "AMIE+(Out+MRL)", "AMIE+(Out+MRL+QRW)", "AMIE+(Out+MRL+QRW+PR)"), fill=col, cex=1.2)
 rg.endplot()

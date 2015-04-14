@@ -215,8 +215,10 @@ the time invested in this task.
 
 \paragraph{Multithreading}
 To speed up the process, our implementation parallelizes Algorithm~\ref{rm}, that is, the main loop (lines~4 to~17) runs in multiple threads. 
-This achieved by synchronizing the access to the centralized queue from which the threads dequeue and enqueue.
-When AMIE uses multiple threads, there is a need for an additional duplicate-elimination check at line~6 of Alg.~\ref{rm}.
+This achieved by synchronizing the access to the centralized queue from which the threads dequeue and enqueue and the access to the output.
+In addition, when AMIE uses multiple threads, there is a need for an additional duplicate-elimination check at line~6 of Alg.~\ref{rm}.
+
+\ignore{
 \comment{Chris}{@Luis: why don't you use barriers here? I.e. all threads wait until there is no rule length n in the queue before moving to the rules with length n+1. For rules with 3 atoms in the body 
 you will only have 2 synchronization points.}
 Recall that our algorithm performs a breadth-first-search. 
@@ -252,7 +254,7 @@ we cannot know that the rule was already output before.
 Since duplicate verification
 can be performed very efficiently, we show that the time invested in this additional step does not  
 outweight the benefit of using multiple threads.
-
+}
 
 
 \subsection{Implementation Details}
