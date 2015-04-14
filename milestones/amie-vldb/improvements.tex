@@ -76,11 +76,11 @@ Hence, any refinement is futile. We call rules with 100\% PCA confidence \emph{p
 \paragraph{Reusing Projection Queries}
 Recall from Sec.~\ref{support} that support is defined also for intermediate rules, i.e., rules that are not yet closed. 
 In other words, whenever we apply an add-dangling-atom operator to a rule $R_p$ (the parent rule) to produce
-a new rule $R_c$ (the child rule), the support of $R_c$ will be likely smaller than the support of $R_p$ (see the example in Sec.~\ref{support}).
+a new rule $R_c$ (the child rule), the support of $R_c$ will likely be smaller than the support of $R_p$ (see the example in Sec.~\ref{support}).
 However, there is one case in which the addition of a dangling atom cannot reduce the support. 
 This happens when $R_c$ \comment{Chris}{@Luis: I prefer it if we define exactly when the caching can take place}
-(i) already contains atoms with the same relation of the dangling atom  and 
-(ii) those atoms have a variable in common with the dangling atom.
+(i) already contains atoms with the same relation as the dangling atom and 
+(ii) these atoms have a variable in common with the dangling atom.
 An example is the parent rule $R_p:livesIn(x,y)\Rightarrow citizenOf(x,y)$ and the child rule 
 $R_c: citizenOf(z,y)\wedge livesIn(x,y)\Rightarrow citizenOf(x,y)$.
 Intuitively, the addition of the dangling atom $\textit{citizenOf}(z,y)$ cannot further restrict the support of $R_p$ because
@@ -98,9 +98,9 @@ supp(R_c) = \#(x,y):  citizenOf(x,y)\wedge livesIn(x,y) \\ \wedge citizenOf(x,y)
 \]
 
 
-\comment{Chris}{@Luis: I prefer to keep the support formula in. It is not that the child rule can be re-written as the parent. It is the support
-of the child that is equivalent to the support of the parent.}
-\comment{Luis: I agree}
+%\comment{Chris}{@Luis: I prefer to keep the support formula in. It is not that the child rule can be re-written as the parent. It is the support
+%of the child that is equivalent to the support of the parent.}
+%\comment{Luis: I agree}
 
 
 \noindent which is the same as $supp(R_p)$. Thus both $R_p$ and $R_c$ have the same support.
@@ -118,7 +118,7 @@ For example, for refining the example rule $R_c$ with a dangling atom joining on
 \bm{r}(y,w) \wedge \textit{citizenOf}(z,y)\wedge \textit{livesIn}(x,y)\Rightarrow \textit{citizenOf}(x,y)
 \]
 \noindent and will find the bindings of $\bm{r}$ that result in rules with support above the given threshold.
-Since $R_c$ has the same support with $R_p$, we can re-use from $R_p$ all the projection queries \comment{Chris}{@Luis: I say reuse the same queries
+Since $R_c$ has the same support as $R_p$, we can re-use all the projection queries from $R_p$ \comment{Chris}{@Luis: I say reuse the same queries
 not the query results. I.e. the queries are fired. In addition I do not say that I re-write anything because they might ask questions. The high level idea
 is that you use the same queries. However I will be surprised if we save significantly with this optimization.} that bind on the 
 common variables of $R_c$ and $R_p$, $x$ and $y$ in this example. Notice, though, that $R_c$
@@ -243,11 +243,12 @@ Therefore, AMIE+ caches the results of previous queries. Whenever a new query ca
 
 \subsection{Speeding up Confidence Evaluation}
 \label{subsec:speedingConfidenceEvaluation}
+\comment{Katja}{Overall: The structure of Section~\ref{subsec:speedingConfidenceEvaluation} could be made clearer somewhere, e..g, Section 6.2.x provides an overview, Section 6.2... describes how to estimate xyz, etc. In some places it would be nice to be a bit more specific, e.g., saying explicitly how we what we mean when saying ``expensive rule''.}
 The calculation of the confidence scores for rules takes a significant part of the time 
 of the overall rule-mining process (up to 29\% for YAGO2). 
 This cost depends on the properties of each rule. The confidence calculation (both standard and PCA) involves the calculation of the 
 size of the rule's body: if the body contains atoms with very selective joins, the size of the body is relatively small and the query cost remains low. 
-On the other hand, if the body size is huge, it uses more resources (memory) which make the query expensive.
+On the other hand, if the body size is huge, it uses more resources (memory), which makes the query expensive.
 Notice also that most rule mining applications are interested in rules above some confidence threshold.
 For example, predictions based on rules with 1\% confidence are not useful in practice.
 This means that  a rule mining system might spend a significant amount of time to evaluate expensive confidence queries only to find out that
@@ -266,7 +267,7 @@ AMIE needs more than 500ms (more than twice the average cost: 200ms) to calculat
 In AMIE+, we use the confidence threshold in combination with a formula to approximate the confidence value 
 to avoid evaluating expensive queries that would lead to low confidence rules.
 In the following, we discuss how to approximate confidence  for ``potentially expensive'' rules. 
-Our approximation formula is based on simple statistics, such as the functionalities or the overlaps 
+Our approximation formula is based on basic statistics, such as the functionalities or the overlaps 
 between domains and ranges of relations. 
 These quantities
 can be precomputed and can later be accessed in constant time. For example, AMIE+ prunes the example-rule above in less than 1ms.  
@@ -295,6 +296,7 @@ Our experiments (see Sec.~\ref{amiepm}) show that this technique can make AMIE r
 
 \subsubsection{Confidence Approximation}
 
+\comment{Katja}{For ease of reading, it might be useful to also repeat what the variables represent.}
 By the time AMIE has to calculate the confidence of a rule, the system already knows the support of the rule.
 Recall that confidence and PCA confidence (see Sections~\ref{subsubsec:stdConf} and \ref{subsubsec:pcaConf}) are defined as:
 \[conf(\vec{B} \Rightarrow r_h(x,y)) := \frac{supp(\vec{B} \Rightarrow r_h(x,y))}{\#(x,y): \exists z_1,...,z_m: \vec{B}}\]
@@ -323,7 +325,7 @@ $\widehat{dnm}_{pca}$. By plugging this expression into the confidence formula, 
   \widehat{conf}_{pca}(R):=\frac{supp(R)}{\widehat{dnm}_{pca}(R)}
 \end{equation}
 
-Let us re-examine Eq.~\ref{eq:denomPCA}:
+Let us re-consider Eq.~\ref{eq:denomPCA}:
 \[
 \begin{array}{rl}
  dnm_{pca}(\vec{B}(x,y) \Rightarrow r_h(x,y)) := {} \#(x,y): \exists z_1,...,z_m,y': \\ \quad \vec{B}(x, y) \wedge r_h(x,y')
@@ -334,7 +336,7 @@ Here we resort to an abstraction that treats the body of the rule $\vec{B}(x, y)
 % i.e., the body produces $\#y_{per\; x} = 1/fun(\vec{B})$ facts per entity in its ``range'', on average. If we multiply this number
 % by the number of entities that bind to $x$, we obtain an estimate for the body size of the rule. 
 If $\vec{B}$ has functionality $fun(\vec{B})$, it means that, on average, each entity in variable $x$ 
-relates to $\#y_{per\; x} = 1/fun(\vec{B})$ bindings in $y$. If denote the domain and range of a relation $r$ as
+relates to $\#y_{per\; x} = 1/fun(\vec{B})$ bindings in $y$. If we denote the domain and range of a relation $r$ as
 $dom(r)$ and $rng(r)$ respectively, the expression $\#y_{per\; x} \times |dom(\vec{B})|$ gives us 
 an estimate for the body size of the rule. 
 However, for the PCA confidence, the denominator is restricted also by the entities in the domain of the head relation.
@@ -349,10 +351,14 @@ This consideration leads us to the expression:
 In the following, we discuss how to calculate the terms of this expression in an efficient way. Additionally, we show 
 how this approximation can help AMIE spot low confident rules for which the confidence
 calculation is very expensive. As our experimental results show, this reduces runtime significantly 
-as it avoids investing resources in expensive rules that will not be anyway output.
+as it avoids investing resources in expensive rules that will not be output otherwise.
+
+\comment{Katja}{The following subsections should then logically be one level below the current one but this one already is a subsusection. So, maye rethinkt the structure of Secton 6.2}
+
 
 \subsubsection{Expensive Rules}\label{sec:expensive_rules}
 
+\comment{Katja}{This motivation and example is nice but I am not sure if it should be here. The previous section ends with ``now let's see how we can estimate\dots'', now this motivation is again on a more general level.}
 Recall that using a confidence approximation to prune rules is worth only if the exact confidence calculation is expensive. 
 If it is not the case, the gain in runtime becomes small at the risk of unnecessary pruning.
 Therefore we only use the confidence approximation for ``expensive'' rules. 
@@ -366,7 +372,7 @@ this rule has low confidence and a large number of bindings in the body.
 %confidence is low because the number of bindings in the body is very large. 
 This phenomenon mainly occurs in expressions that contain existentially quantified variables in Eq.~\ref{eq:denomPCA}, 
 because such variables introduce many intermediate results. In our example
-rule, a director $x$ is related to many movies $z$ (the intermediate variable) that have different actors . 
+rule, a director $x$ is related to many movies $z$ (the intermediate variable) that have different actors. 
 In contrast, if a rule does not contain additional variables, 
 e.g., $livesIn(x,y)\wedge bornIn(x,y)\Rightarrow diedIn(x,y)$, the query associated to it becomes very selective.
 
@@ -383,6 +389,7 @@ In the following, we first explain how to compute the approximation for the case
 path with one existential variable through a running example.
 Then we generalize to rules with many existential variables, forming a single path. 
 
+\comment{Katja}{The following paragraph is not well connected, e.g., dnm is mentioned nowhere else in this subsubsection}
 \comment{chris}{took all formulas out. Just say we do not approximate}
 If there are $m$ paths connecting $x$ and $y$, AMIE does not make use the approximation formula. The reason for this is that the $dnm$
 for the combination of all paths will be smaller than the $dnm$ for each individual path. 
@@ -406,7 +413,7 @@ In other words, we neither expect such rules to have large bodies nor to be part
 % \comment{Luis}{This part I do not get either.}
 
 
-\subsubsection{Approximating Confidence Denominator} \label{sec:appr}
+\subsubsection{Approximating the Confidence Denominator} \label{sec:appr}
 In the following, we denote the domain and range of $r$ with $dom(r)$ and $rng(r)$, respectively.
 In addition, we use the shortcut notation $ov_{dr}(r_1,r_2)$, $ov_{rd}(r_1,r_2)$, $ov_{dd}(r_1,r_2)$, $ov_{rr}(r_1,r_2)$
 for the size of the overlap sets between the domains and ranges 
@@ -439,7 +446,6 @@ walking through this path involves the following steps:
  \item For each movie $z$, $hasActor$ will produce on average $\frac{1}{fun(hasActor)}$ actors $y$.
  \item Each of these actors in $y$ acted on average in  $\frac{1}{ifun(hasActor)}$ movies of the $hasActor$ relation.
 \end{enumerate}
-
 Up to step 2, we can approximate the number of distinct movies that bind to the variable $z$ for each director in the variable $x$ as:
 $$
 \#z_{per \; x} := \frac{ ov_{rd}(directed,hasActor) }{|rng(directed)| \times fun(directed)}
@@ -495,7 +501,7 @@ To summarize, the $ \widehat{dnm}_{pca}(R)$ for a rule $r_1(x,z)\wedge r_2(z,y) 
 \[
   \widehat{dnm}_{pca}(R) := \frac{ov_{dd}(r_1,r_h) \cdot ov_{rd}(r_1,r_2) \cdot ifun(r_2)  }{fun(r_1) \cdot |rng(r_1)| \cdot fun(r_2)}
 \]
-For the more general case of rule that contains $n-1$ existential variables forming a single path from $x$ to $y$
+For the more general case of a rule that contains $n-1$ existential variables forming a single path from $x$ to $y$
 $$
   r_1(x,z_1) \wedge r_2(z_1,z_2) \wedge ... \wedge r_n(z_{n-1},y) \Rightarrow r_h(x,y)
 $$
@@ -800,7 +806,7 @@ paths make the rule more selective?}
 
 \paragraph{Application} We precompute the functionalities,
 the inverse functionalities, and the overlaps between the domains and ranges of each pair of relations when the KB is loaded
-into the in-memory database. This results in longer loading times but pays off easily during rule mining. The size of the ranges of the relations is given by
+into the in-memory database. This results in longer loading times but pays off easily during rule mining. The sizes of the ranges of the relations are given by
 our indexes in constant time.
 After this preprocessing, the approximation of the confidence can be computed as a simple product of precomputed values without actually firing a single query.
 We apply the approximation only if the query is expensive (see Sec.~\ref{sec:expensive_rules}).
@@ -819,7 +825,7 @@ result in an overestimation of the actual confidence. This is indeed the case, a
 
 
 \subsubsection{Confidence Upper Bounds}
-In some particular cases, AMIE+ is be able to derive lower bounds for the confidence denominator ($dnm_{pca}$, $dnm_{std}$) instead of using the approximation described in Sec.~\ref{sec:appr}.
+In some particular cases, AMIE+ is able to derive lower bounds for the confidence denominator ($dnm_{pca}$, $dnm_{std}$) instead of using the approximation described in Sec.~\ref{sec:appr}.
 Consider a rule of the form:
 $$ r(x,z) \wedge r(y,z) \Rightarrow r_h(x,y) $$
 
@@ -850,7 +856,7 @@ of a single variable instead of pairs. It is therefore much cheaper than the ori
 Both Inequalities \ref{eq:stdBoundDenom} and \ref{eq:pcaBoundDenom}
 define lower bounds for the number of pairs in the denominator expressions of the standard
 and the PCA confidence, respectively. Thus, they constitute hard upper bounds for these scores that can be used to prune the rules, if found below threshold.
-
+\comment{Katja}{Rephrase last sentence - unclear meaning.}
 
 
 
