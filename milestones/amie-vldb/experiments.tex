@@ -16,10 +16,7 @@ Our experimental results show that:\comment{Chris}{change those}
  \item The optimizations implemented in AMIE+ allow us to run on KBs with more than 1K relations and 10M facts, for which
 even AMIE took more than one day.
  \item The PCA is often a valid assumption even for relations with a non-strict functional behavior. 
-%\item The PCA confidence ranks more productive and more correct rules higher than the standard confi.
  \item Type constraints can improve the precision of the predictions made by rules from 40\% to 60\%.
-% In addition, the PCA confidence correlates better
-% with the actual precision of each rule than the standard confidence.
 \end{itemize}
 % We report our experimental results in three rounds of experiments. In the first round, we compare the original AMIE with
 % other state-the-art rule mining systems, i.e., WARMR~\cite{DehToi99,DehToi00} and ALEPH$^{\ref{foot:aleph}}$, in terms of usability and runtime.
@@ -44,24 +41,22 @@ even AMIE took more than one day.
 \subsection{Experimental Setup}
 
 \paragraph{Hardware}
-All experiments are run on a server with 48GB of RAM and 8 CPUs (Intel Xeon at 2.4GHz). 
+All experiments are run on a server with \comment{Chris}{did this change?} 48GB of RAM and 8 CPUs (Intel Xeon at 2.4GHz). 
 All rules and all experimental results are available at \comment{Chris}{did this change?} \comment{Luis}{I guess we will keep the
 experimental results there.} \url{http://www.mpi-inf.mpg.de/departments/ontologies/projects/amie/}.
 
-\paragraph{Datasets} We run our experiments on different KBs.
-% In all cases, we removed the \emph{rdf:type} relationship because it inflates the size of the KBs.
-% We are aware that the \emph{rdf:type} relationship can be very helpful for rule mining.
-% However, currently no approach (including ours) makes specific use of it.
-% We plan to make use of it in future work. 
+\paragraph{Datasets} We run our experiments on different KBs. Table~\ref{kbs} shows a summary of the KBs used for our experiments.
 In all cases, we removed all facts with literals (numbers and strings).
 Literal values (such as geographical coordinates) are shared by only very few entities, 
-which makes them less interesting for rule mining. Except for YAGO (for which 
-we explicitly use the type information), we removed the \emph{rdf:type} relationship because it inflates the size of the KBs. 
-Table~\ref{kbs} shows a summary of the KBs used for our experiments. The YAGO2 types dataset consists
-of the \emph{rdf:type} statements of the entities in the YAGO core dataset. We restricted the types to those
-in the domains and ranges of the relations. For both DBpedia 2.0 and 3.8, we use
-the person data and mapping-based properties datasets. For Wikidata, we use a dump from December 2014,
-available for download at \url{http://tools.wmflabs.org/wikidata-exports/rdf/exports/20140420/}.
+which makes them less interesting for rule mining. 
+Except for YAGO (for which we explicitly use the type information), we removed the \emph{rdf:type} relationship because it inflates the size of the KBs. 
+\comment{chris}{I do not like the above. It is like saying that types make it too large for us to process. How about the following?}
+Types information was not used during mining in our runtime-performance experiments. 
+In Sec.~\ref{} we investigate the effect of types information on the quality of the produced rules, on the YAGO2-types dataset.
+This dataset contains additionally the \emph{rdf:type} statements of the entities in the YAGO core dataset. We restricted the types to those
+in the domains and ranges of the relations. 
+For both DBpedia 2.0 and 3.8, we use the person data and mapping-based properties datasets. 
+For Wikidata, we use a dump from December 2014, available for download at \url{http://tools.wmflabs.org/wikidata-exports/rdf/exports/20140420/}.
 
 \begin{savenotes}
 \begin{table}
@@ -77,20 +72,20 @@ DBpedia 3.8 & 11.02M & 2.20M & 650 \\
 Wikidata & 11.30M & 4.00M & 431
 %Freebase (people) & 8.92M & 2.07M & 51
 \end{tabular}
-\caption{Knowledge bases used to test AMIE/AMIE+ \comment{chris}{update for including type}}
+\caption{Knowledge bases used to test AMIE/AMIE+}
 \label{kbs}
 \end{table}
 \end{savenotes}
 
 \paragraph{Settings}
 By default, AMIE uses a head coverage threshold of $\theta=1\%$ and
-ranks the resulting rules by decreasing PCA confidence. It also counts support on the two head variables.
-Moreover, AMIE uses as many threads as available cores in the system (8 in our hardware platform).
+ranks the resulting rules by decreasing PCA confidence. %It also counts support on the two head variables.
+Moreover, AMIE uses as many threads as available cores in the system (8 in our hardware platform). \comment{chris}{if using a different blade, change also here}
 There is no need to deviate from this default configuration when a user runs AMIE.
 There are no parameters to tune.
 AMIE+ inherits this default behavior and extends it with the heuristics for rule expansion
-introduced in Section~\ref{subsec:lossless}. In its default setting, 
-AMIE+ has no confidence threshold and thus does not prune on confidence. 
+introduced in Section~\ref{subsec:lossless}. 
+In its default setting, AMIE+ has no confidence threshold and thus does not prune on confidence. 
 
 \ignore{
 \paragraph{Metrics}
@@ -394,12 +389,63 @@ and reduce the time spent in the confidence calculation and hence the output pha
 % since some rules with high confidence score may be pruned. In any case, calculating the confidence upper bounds or estimating the confidence
 % is much cheaper than computing the actual confidence value.
 
+
+
+\begin{center}
+\begin{savenotes}
+\begin{table*}[t]
+\footnotesize
+\begin{tabular}{|l|ccc|c c|c c|c|}
+\hline
+\multirow{3}{*}{KB} 	&  \multicolumn{3}{c|}{AMIE}  	& \multicolumn{5}{c|}{AMIE+} 	\\ \cline{5-9}
+ 			& 		&	&	& \multicolumn{2}{c|}{Only Refinement}	& \multicolumn{2}{c|}{Only Output} 	&Full   \\ \cline{5-9}
+			& Total		&Ref.	&Out.	&Total		&Ref.			& Total  	&Out.    	&Total 	   \\  \hline
+  YAGO2  		& 2.95min  	&	&	&29.37s		&			& 3.23min  	&    			& 28.19s	  	    \\ 
+  YAGO2 (const)  	& 44.05min  	&	&	&11.72min	&			& 38.8min  	&   			& 9.93min	 	    \\
+  YAGO2 ($l=4$)  	& 27.53min  	&	&	&9.49min	&			& 27.53min 	&   			& 8.35min 	 	    \\
+  YAGO2s  		& $>$ 1 day  	&	&	&$>$ 1 day	&			&$>$ 1 day 	&  	      		& 59.38min	  	    \\ 
+  DBpedia 2.0  		& $>$ 1 day  	&	&	&$>$ 1 day	&			&$>$ 1 day 	& - 	     	 	& 46.88min	      	    \\ 
+  DBpedia 3.8  		& $>$ 1 day  	&	&	&$>$ 1 day	&			& - 	   	& - 	      		& 7h 46min 	     		\\
+  Wikidata  		& $>$ 1 day  	&	&	&$>$ 1 day	&			&$>$ 1 day 	& - 	      		& 48.86min	  	    \\ \hline
+\end{tabular}
+\caption{Runtime  comparison of AMIE and AMIE+. Ref: average time for refinement phase among threads. Out: average time for output phase among threads.}
+\label{runtimeComparison}
+\end{table*}
+\end{savenotes}
+\end{center}
+
+\begin{center}
+\begin{savenotes}
+\begin{table}[t]
+\footnotesize
+\begin{tabular}{|l|r|r r|}
+\hline
+			& AMIE			 	& \multicolumn{2}{c|}{AMIE+} 	\\ \cline{2-4}
+KB			& Rules 			& Rules		& Prun. prec. 	   \\ \hline
+  YAGO2  		& 135				& 135 		& 100.00\%      	    \\ 
+  YAGO2 (const)  	& 19132				& 15634		& 100.00\% 	    \\  
+  YAGO2 ($l=4$)  	& 1382				& 645		& 100.00\%   	    \\ 
+  YAGO2s  		& 247*				& 94	 	& 100.00\%		    \\
+  DBpedia 2.0 		& 26812*			& 112865	& 98.26\%      	    \\ 
+  DBpedia 3.8 		& 4931*				& 5087       	& 98.41\%	    \\
+  Wikidata  		& 1244*				& 1650		& 96.93\%      	    \\  \hline
+\end{tabular}
+\caption{Output comparison of AMIE and AMIE+. *: output after processing for 1 day.}
+\label{outputComparison}
+\end{table}
+\end{savenotes}
+\end{center}
+
+
+
+
+
 Table~\ref{amievsplus} shows the runtimes of AMIE and AMIE+ with different setups on our test KBs.
 %The different setups include: default AMIE+, AMIE+ with the PCA confidence
 %bound enabled and AMIE+ with all the optimizations.
 %If a system ran for more than one day without finishing, we interrupted it and reported the Fabian: said below
 %output obtained until that point in time.
-For AMIE, we show only the runtime. Since our goal is to observe the effect of each enhacement in the runtime of AMIE+, 
+For AMIE, we show only the runtime. Since our goal is to observe the effect of each enhancement in the runtime of AMIE+, 
 we show runtimes for combinations of the improvements introduced in Sections~\ref{subsec:lossless} and~\ref{subsec:speedingConfidenceEvaluation}. 
 These includes:
 \begin{enumerate}
