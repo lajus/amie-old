@@ -61,8 +61,8 @@ In our experiments, we ran state-of-the-art approaches on YAGO2 for a couple of 
 }
 
 
-With the AMIE project \cite{amie}, we have shown how to mine logical rules from KBs despite the absence of explicit counter-evidence.
-A new metric, namely the confidence under the Partial Completeness Assumption (PCA), 
+With the AMIE project \cite{amie}, we have shown how to mine logical rules from KBs despite the absence of explicit counter-examples.
+The key technique was a new metric, the confidence under the Partial Completeness Assumption (PCA). It 
 allows AMIE to ``guess'' counterexamples for rules, and thus estimate their quality even under the open world assumption.
 We have shown that our approach outperforms other rule mining systems %that can also work without explicit counterexamples
 % ~\comment{Luis: }{I am not convinced about this assertion, because
@@ -90,8 +90,8 @@ thus giving a more complete picture of rule mining on large-scale knowledge base
 
 \noindent More precisely, our contributions are as follows:
 \begin{itemize}[noitemsep,nolistsep,leftmargin=0.4cm,midpenalty=0,label=$\bullet$]
-\item A comprehensive investigation of the AMIE approach, together with an evaluation of the PCA, its central assumption.
-\item A suite of optimization steps that allow a much more efficient exploration of the rules' search space.
+\item A comprehensive investigation of the AMIE approach, together with an evaluation of its fundamental assumption, the PCA.%the partial completeness assumption (PCA), its central assumption.
+\item A suite of optimization steps that allow a much more efficient exploration of the search space.
 \item Extensive experiments that show the competitiveness of our approach.
 \end{itemize}
 %\comment{Chris}{rewritten. Please check.}
@@ -102,8 +102,6 @@ thus giving a more complete picture of rule mining on large-scale knowledge base
 The rest of this paper is structured as follows: Section~\ref{sec:relatedWork} discusses related work and Section~\ref{sec:preliminaries} introduces preliminaries.
 In Section~\ref{sec:pca}, we introduce the partial completeness assumption (PCA) and, based on it, the PCA confidence measure.
 %We also investigate the applicability of the PCA in practice.
-\comment{Katja}{PCA is not mentioned or motivated above. Maybe add 1-2 more sentences in the main part of the introduction so that the reader gets a better idea.}
-\comment{Luis}{I have added it. Check it please.}
 Section~\ref{sec:alg} recaptures the AMIE approach from \cite{amie}.
 Section~\ref{sec:improvements} is the main part of the paper: It presents the pruning strategies that optimize the performance of AMIE.
 Section~\ref{sec:experiments} presents our experiments before Section~\ref{sec:conclusion} concludes.

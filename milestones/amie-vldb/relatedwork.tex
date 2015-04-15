@@ -8,7 +8,8 @@ In the following, we survey the most pertinent related work along these lines.
 Association rules \cite{AgrImiSwa93} are mined on a list of \emph{transactions}. A transaction is a set of items. 
 For example, in the context of sales analysis, a transaction is the set of products bought together by a customer in a specific event. 
 The mined rules are of the form \{\emph{ElvisCD, ElvisBook}\} $\Rightarrow$ \emph{ElvisCostume}, meaning that people who bought an Elvis CD and an Elvis book usually also bought an Elvis costume. 
-However, these are not the kind of rules that we aim to mine in this paper; we aim at mining Horn rules. %}
+However, these are not the kind of rules that we aim to mine in this paper; we aim at mining Horn rules. We show in \cite{amie} that Horn rule mining corresponds to association rule mining on a database that is exponentially large in the maximal number of variables of the rules.
+% Fabian: Since we're now self-contained, I thought we'd mention this here.
 %\www{
 One problem for association rule mining is that for some applications the standard measurements for support and confidence do not produce good results. 
 \cite{TanKumSri02} discusses a number of alternatives to measure the interestingness of a rule in general. 
@@ -38,7 +39,7 @@ ALEPH\footnote{\label{foot:aleph}\url{http://www.cs.ox.ac.uk/activities/machlear
 It employs a variety of evaluation functions for the rules as well as a variety of search strategies. 
 These approaches are not tailored to deal with large KBs under the Open World Assumption. 
 We compare our system to WARMR and ALEPH, which are the only ones available for download. 
-Our experiments do not only show that these systems mine less sensible rules than our approach, but also that they take more time to do so. 
+Our experiments do not only show that these systems mine less sensible rules than our approach, but also that they take more time to do so.
 %}
 
 \www{

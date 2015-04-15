@@ -3,18 +3,18 @@
 %\paragraph{PCA Assumption}
 \label{sec:experimentsPCA}
 
-\comment{R3}{I would like to understand sooner that 4.3 is a discarded and useless digression and I would appreciate a deeper discussion of Section 4.4, 
-possibly with examples (note that 4.4 and 4.4.2 have the same title, which is not elegant)}
+%\comment{R3}{I would like to understand sooner that 4.3 is a discarded and useless digression and I would appreciate a deeper discussion of Section 4.4,  possibly with examples (note that 4.4 and 4.4.2 have the same title, which is not elegant)}
 
-\comment{Chris}{Removed PosOnly evaluation function, merged PCA assumption-PCA confidence. Discussed by example of table 1. Removed the FUN-property stuff}
+% \comment{Chris}{Removed PosOnly evaluation function, merged PCA assumption-PCA confidence. Discussed by example of table 1. Removed the FUN-property stuff}
 
+% Fabian: Thanks! I made my pass.
 
 
 The support of a rule quantifies the number of known correct predictions of the rule. 
 However, it does not take into account the false predictions of the rule.
-We will now describe measures that judge the rule \emph{quality}.
+We will now describe measures that judge the \emph{quality} of a rule.
 We first describe the challenges in defining such a measure in our setting 
-and discuss the most common way to measure the rule quality which we refer to as standard confidence.
+and discuss the most common way to measure the rule quality, which we call the standard confidence.
 Then, we introduce our own measure: the confidence under the assumption of partial completeness.
 
 
@@ -65,12 +65,12 @@ in the set of predictions:
 
 \[conf(\vec{B} \Rightarrow r(x,y)) := \frac{supp(\vec{B} \Rightarrow r(x,y))}{\#(x,y): \exists z_1,...,z_m: \vec{B}}\]\\
 
-\noindent Recall that the size of the set A is quantified by the support of the rule.
-For instance, for Table~\ref{tab:exampleKB} and the rule $R:livesIn(x,y)\Rightarrow wasBornIn(x,y)$,
-$conf(R)=1/3$, i.e., because (a) there is one positive example for the rule and (b) the predictions 
-$wasBornIn(Adam, Rom)$ and $wasBorn(Bob,Zurich)$ are counted as negative examples as they do not appear in the KB.
+\noindent For example, consider again the rule 
+\indented{
+$R:livesIn(x,y)\Rightarrow wasBornIn(x,y)$}
+together with the KB given in Table~\ref{tab:exampleKB}. In this case, $conf(R)=1/3$, because (a) there is one positive example for the rule and (b) the predictions $wasBornIn(Adam, Rome)$ and $wasBorn(Bob,Zurich)$ are counted as negative examples since they do not appear in the KB.
 
-Standard confidence is the measure traditionally used in association rule mining and market basket analysis, where the Closed World Assumption (CWA) is made:
+Standard confidence is the measure traditionally used in association rule mining and market basket analysis, where the Closed World Assumption (CWA) is used:
 if there is no evidence in any of the transactions of the database that a user bought a specific product, then this user did not buy the product.
 Albeit natural for the market basket analysis scenario, standard confidence fails to distinguish between ``false'' and ``unknown'' facts,
 which makes it inappropriate for a scenario with Open World semantics like ours. Moreover, we also pursue a different goal than market basket analysis:
@@ -136,9 +136,8 @@ conf_{pca}(\vec{B} \Rightarrow r(x,y)) := \frac{supp(\vec{B} \Rightarrow r(x,y))
 \end{small}
 
 This formula normalizes the support by the number of pairs $(x,y)$ for which there exists a $y'$ with $r(x,y')$.
-For the KB introduced in Table~\ref{tab:exampleKB} and the rule $R: livesIn(x,y)\Rightarrow wasBornIn(x,y)$,
-$conf_{pca}(R)=1/2$, i.e., only $wasBornIn(Adam, Rom)$ counts as a negative example, 
-because we already know a different place of birth for Adam. The prediction $wasBorn(Bob,Zurich)$ is completely disregarded as evidence.
+Consider again the KB given in Table~\ref{tab:exampleKB} and the rule $R: livesIn(x,y)\Rightarrow wasBornIn(x,y)$. In this case, $conf_{pca}(R)=1/2$. Only $wasBornIn(Adam, Rome)$ counts as a negative example, 
+because we already know a different place of birth for Adam. The prediction $wasBorn(Bob,Zurich)$ is completely disregarded as evidence, because we neither know where Bob was born nor where he was not born.
 
 Notice that Eq.~\ref{eq:pcaConf} fixes $x$ and $r$ and implies that rules will try to predict values for $y$. 
 AMIE always predicts in the most functional direction. To see this, recall that 

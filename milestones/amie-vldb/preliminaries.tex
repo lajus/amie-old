@@ -17,11 +17,11 @@ denote the set of relations contained in $\mathcal{K}$ and $\mathcal{E}:=\pi_{su
 
 \subsection{Functions}
 \label{subsec:functions}
-\comment{R3}{The FUN-property of a KB is problematic, it assumes something about the major KBs are written which may be factually true (e.g. in YAGO or DBPEDIA) 
-      but should really be verified on case-by-case (e.g., what about biological KBs?) so I think it must be contextualized to the KBs under investigations and be presented as a 
-      factual observation which holds in that limited setting. }
-      
-\comment{Chris}{Removed the FUN-property. Rephrased corresponding part}      
+%\comment{R3}{The FUN-property of a KB is problematic, it assumes something about the major KBs are written which may be factually true (e.g. in YAGO or DBPEDIA) 
+ %     but should really be verified on case-by-case (e.g., what about biological KBs?) so I think it must be contextualized to the KBs under investigations and be presented as a 
+  %    factual observation which holds in that limited setting. }  
+% \comment{Chris}{Removed the FUN-property. Rephrased corresponding part}      
+% Fabian: I think it's good!
 
 A \emph{function} is a relation $r$ that has at most one object for every subject, i.e.,
 \[
@@ -43,7 +43,8 @@ $actedIn^{-1} = hasActor$, therefore $ifun(actedIn):= fun(hasActor)$.
 
 
 Some relations have roughly the same degree of functionality and of inverse functionality. Bijections are an example.
-For most relations, however, $fun$ and $ifun$ are different, \comment{Chris}{at least for general-purpose web-extracted KBs, like YAGO, DBPEDIA and Freebase}.
+Usually, however, $fun$ and $ifun$ are different.
+% \comment{Chris}{at least for general-purpose web-extracted KBs, like YAGO, DBPEDIA and Freebase}.
 Manual inspection shows that in web-extracted common sense KBs (e.g., YAGO, DBpedia) the functionality is usually higher than the inverse functionality.
 For example, a KB is more likely to specify \emph{isCitizenOf} than \emph{has\-Citizen}.
 Intuitively, this allows us to consider a fact $r(x,y)$ as a fact about $x$.
@@ -86,11 +87,11 @@ The formulas corresponding to the case that $y$ is input and $x$ is output can e
 %\comment{Katja}{I'd suggest to swap the order of 3.3 Language Bias and 3.4 Functions; discussing functions right after rules feels more naturally}
 \subsection{Rules}
 \label{subsec:rules}
-\comment{R3}{Rules are introduced with no limitations on their syntax but then, under the strange section heading "language biases", 
-      we discover that rules should be connected, closed, nonreflexive, and can be recursive (no example provided).       
-      There exists a better way of defining rule syntax \& constraints! Incidentally, using a closed rule as example of generic rule does not help the reader's intuition. }
-      
-\comment{Chris}{I merged the 2 sections and added examples}
+%\comment{R3}{Rules are introduced with no limitations on their syntax but then, under the strange section heading "language biases", 
+      %we discover that rules should be connected, closed, nonreflexive, and can be recursive (no example provided).       
+      %There exists a better way of defining rule syntax \& constraints! Incidentally, using a closed rule as example of generic rule does not help the reader's intuition. }
+% \comment{Chris}{I merged the 2 sections and added examples}
+% Fabian: Thanks! Looks good to me! I made some minor changes.
 
 An \emph{atom} is a fact that can have variables at the subject and/or object position.
 A \emph{(Horn) rule} consists of a head and a body, where the head is a single atom and the body is a set of atoms.
@@ -113,14 +114,15 @@ As an example, rules with 3 atoms can capture more complicated correlations than
 The less retrictive the language bias is,
 the more expressive the rules can potentially be, the larger the search space grows, and the less tractable the search becomes.
 
-AMIE's language bias requires rules to be \emph{connected} and \emph{closed}. We say that two atoms in a rule are \emph{connected} if they share a variable or an entity.
+AMIE's language bias requires rules to be \emph{connected}. We say that two atoms in a rule are \emph{connected} if they share a variable or an entity.
 A rule is \emph{connected} if every atom is connected transitively to every other atom of the rule.
-By mining only connected rules, AMIE avoids constructing rules that contain unrelated atoms (avoiding cross products), e.g., $diedIn(x,y)\Rightarrow wasBornIn(w,z)$.
-A variable in a rule is \emph{closed} if it appears at least twice in the rule. A rule is \emph{closed} if all its variables are \emph{closed}.
-Closed rules do not predict merely the existence of a fact (e.g. $diedIn(x,y)\Rightarrow \exists z:wasBornIn(x,z)$),
-but also concrete arguments for it (e.g. $diedIn(x,y)\Rightarrow wasBornIn(x,y)$).
+The restriction to connected rules avoids mining rules with completely unrelated atoms, such as $diedIn(x,y)\Rightarrow wasBornIn(w,z)$.
+
+AMIE also requires the rules to be \emph{closed}. A variable in a rule is \emph{closed} if it appears at least twice in the rule. A rule is \emph{closed} if all its variables are \emph{closed}.
+The restriction to closed rules avoids mining rules that predict merely the existence of a fact, as in $diedIn(x,y)\Rightarrow \exists z:wasBornIn(x,z)$. 
+
 AMIE omits also \emph{reflexive rules} of the form $r(x, x)$, as they are typically of less interest in real world KBs.
-AMIE, unlike some other ILP systems, allow for mining of \emph{recursive rules}. Recursive are rules that contain the head relation in the body, 
+However, unlike some other ILP systems, AMIE allows mining \emph{recursive rules}. These are rules that contain the head relation in the body, as
 e.g., $isMarriedTo(x,z)\; \wedge hasChild(z,y)\; \Rightarrow\; hasChild(x,y)$. 
 % We also allow the user to specify as an input parameter the maximum number of atoms for the mined rules.
 
@@ -176,9 +178,9 @@ e.g., $isMarriedTo(x,z)\; \wedge hasChild(z,y)\; \Rightarrow\; hasChild(x,y)$.
 
 \subsection{Measures of Significance} \label{subsec:statSignificance}
 
-\comment{R3}{The discussion on support and coverage is rather clear (but an example would not hurt).}
-\comment{Chris}{added example that I will also use in the confidence part}
-
+% \comment{R3}{The discussion on support and coverage is rather clear (but an example would not hurt).}
+% \comment{Chris}{added example that I will also use in the confidence part}
+% Fabian: OK, thanks!
 
 Normally, data mining systems define a notion of significance or \emph{support} for rules, which quantifies the amount of evidence for the rule in the data.
 If a rule applies only to a few instances, it is too risky to use it to draw conclusions. For this reason,
@@ -209,13 +211,21 @@ and objects in the head of all instantiations that appear in the KB:
 where $z_1,...,z_m$ are the variables of the rule apart from $x$ and $y$.
 Table~\ref{tab:exampleKB} shows an example KB that contains only 2 relations and 5 facts. For this KB, 
 our example rule $R$ has support 1, because of the facts $livesIn(Adam,Paris)$ and $wasBornIn(Adam,Paris)$.
-Note that the support is defined even for rules that are not yet closed. This allows for early pruning of unpromising candidate rules.
+
+Note that the support is defined even for rules that are not yet closed. This allows for early pruning of unpromising candidate rules. For example, consider the rule
+\indented{
+  \emph{R':} \emph{livesIn}$(x,y) \Rightarrow$ \emph{wasBornIn}$(y,z)$
+} 
+This rule is obviously unpromising, because it postulates a birth place for $y$, which is not a person. The rule is not yet closed ($x$ and $z$ appear only once). Yet, it has support 0. Thus, it can be pruned away and does not need further refinement.
+
+\ignore{ % Fabian: I tried to find another example without parallel universes
+
 To see why, consider for example the rule $R_2: hasChild(x,z) \wedge livesIn(z,y)\Rightarrow livesIn(x,y)$ which dictates that people live at the same place as their children.
 Assume that this rule was constructed by the intermediate non-closed rule $R_1:hasChild(x,z) \Rightarrow livesIn(x,y)$  by adding the atom $livesIn(z,y)$.
 $R_1$ restricts the support to those facts in $livesIn$ which involve persons that have children. 
 In a parallel universe in which it is not common for people to have children, $R_1$ will be pruned for having low support and, therefore, $R_2$ and all other rules that can be 
 created from $R_1$ will never get constructed.
-
+}
 
 
 \www{
@@ -238,7 +248,7 @@ For the example presented in Table~\ref{tab:exampleKB}, $hc(R)=1/2$.
  \begin{tabular}{c|c}
   $livesIn$ & $wasBornIn$\\  \hline
   (Adam, Paris)		& (Adam, Paris) \\
-  (Adam, Rom)		& (Carl, Rom) \\
+  (Adam, Rome)		& (Carl, Rome) \\
   (Bob, Zurich)		&  \\
  \end{tabular}
 \caption{An example KB containing two relations between people and cities.}\label{tab:exampleKB}
