@@ -30,9 +30,7 @@
 \review{R1: the main proposed heuristic (which contributes most to the  speed-up) is an ad-hoc approximation of  the PCA confidence for a specific type of 3-atom rules, being not trivial to generalize it to any kind of rule.  (Indeed, experiments are limited to 3-atom rules)\\
    R2: the rules that this technique can be applied to are still a bit limited. }
    
-   Our confidence approximation generalizes to rules with more atoms. We have now extended Sec.~\ref{subsec:pruningbyapprox} to show this. 
-   \comment{Fabian}{Do we also have experiments with more than 3 atoms? I didn't see them.}
-   %we introduce a formula for the confidence approximation for longer rules
+   Our confidence approximation generalizes to rules with more atoms. We have now extended Sec.~\ref{subsec:pruningbyapprox} to show this. We also added experiments that show that AMIE+ works with longer rules.
    
 \review{R2: when the article introduces the notation of |rng(directed)|, it says it "is the number of distinct directors in the range of directed". I strongly suspect there is a typo here.}
    
@@ -46,7 +44,7 @@
 \review{R1: authors compare their approach to two ILP methods which were proposed at earlier 2000. More robust and grounded method for mining relational data have been proposed since then. A fair
 comparison to these methods needs to be carried out in order to demonstrate the difficulty of the problem and how far the precision scores are from these methods.}
 
-We have actively followed recent research in the area, but we have not come across an ILP learner that can learn without counterxamples. \comment{Fabian}{Is that true? What about Quickfoil? Do we mention them? Did we add any related work? If so, mention it here!} We would be very grateful for any pointer to work comparable to AMIE that we missed from our related work and experiments section.
+We have actively followed recent research in the area, but we have not come across an ILP system that can learn rules without counterexamples. The reviews also did not mention such work. An exception may be the recently published system ``Quickfoil'', but upon our request, the authors told us that this system was not yet available. In any case, Quickfoil requires counterexamples, which do not exist in our setting. We would be very grateful for any pointer to work comparable to AMIE that we missed from our related work and experiments section.
    
  \review{R2: the queries presented throughout the paper (mainly in Section 5.3 and 5.4) to compute the support appear to be incorrect. [...] The article should carefully re-examine and re-write those SQL and SPARQL queries}
       
