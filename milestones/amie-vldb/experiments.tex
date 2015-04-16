@@ -1,23 +1,13 @@
+We conduct three types of experiments: In Section \ref{amiepm}, we compare AMIE with AMIE+. We show the performance gain for each of the new techniques from Section~\ref{sec:improvements}. We also conduct a proof of concept to show that the prediction quality can be enhanced by post-processing the results. In Section \ref{competitors}, we compare AMIE to competitor systems. We evaluate the number of rules and the prediction quality of the rules ion juxtaposition. Finally, in Section \ref{experimentspca}, we investigate the Partial Completeness Assumption (PCA). We evaluate how often the PCA actually holds in a real-world KB, and we also compare the PCA confidence with the standard confidence. 
 
-In~\cite{amie}, AMIE was shown to be up to 3 orders of magnitude faster, more scalable and more user-friendly 
-than other state-of-the-art systems, namely WARMR~\cite{GoeVan02} and ALEPH~\cite{Muggleton:1996:LPD:647996.742465}.
-The PCA confidence was shown to rank productive and correct rules higher than other confidence metrics.
-Furthermore~\cite{amie} shows that the PCA confidence correlates better with the actual precision of rules 
-than the standard confidence.
-
-In this section, we compare AMIE with AMIE+ and show the performance boost introduced
-by the optimizations presented in Section~\ref{sec:improvements}.
-In addition, we conduct an extensive empirical evaluation of the PCA, the main assumption in AMIE's mining model.
-This includes an experiment to evaluate how often the PCA holds in a web-extracted KB (YAGO).
-In addition, we revisit the comparison between the standard and the PCA confidence 
-in terms of the quality of the produced facts and investigate the influence of type information in the quality of the rules.
 Our experimental results show that:
 \begin{itemize}
- \item The optimizations implemented in AMIE+ allow us to run on KBs with more than 1K relations and 10M facts, for which
-even AMIE took more than one day.
- \item The PCA is often a valid assumption even for relations with a non-strict functional behavior. 
- \item Type constraints can improve the precision of the predictions made by rules from 40\% to 60\%.
+ \item The optimizations implemented in AMIE+ allow us to run on KBs with more than 1K relations and 10M facts in a matter of minutes -- while AMIE took more than one day for them.
+ \item Type constraints can improve the precision of the predictions made by rules to about 70\%.
+ \item AMIE, and in particular AMIE+, outperforms competing systems by a large margin in terms of the quality and the quantity of the mined rules.
+ \item The PCA is often a valid assumption, even for relations with a non-strict functional behavior. 
 \end{itemize}
+
 % We report our experimental results in three rounds of experiments. In the first round, we compare the original AMIE with
 % other state-the-art rule mining systems, i.e., WARMR~\cite{DehToi99,DehToi00} and ALEPH$^{\ref{foot:aleph}}$, in terms of usability and runtime.
 % In the second round, we compare AMIE with AMIE+ and show the performance boost introduced
@@ -38,23 +28,19 @@ even AMIE took more than one day.
 % \end{itemize}
 
 
-\subsection{Experimental Setup}
+\subsection{Experimental Setup}\label{setup}
 
 \paragraph{Hardware}
 All experiments are run on a server with \comment{Chris}{did this change?} 48GB of RAM and 8 CPUs (Intel Xeon at 2.4GHz). 
-All rules and all experimental results are available at \comment{Chris}{did this change?} \comment{Luis}{I guess we will keep the
-experimental results there.} \url{http://www.mpi-inf.mpg.de/departments/ontologies/projects/amie/}.
+All rules and all experimental results are available at \url{http://www.mpi-inf.mpg.de/departments/ontologies/projects/amie/}.
 
 \paragraph{Datasets} We run our experiments on different KBs. Table~\ref{kbs} shows a summary of the KBs used for our experiments.
 In all cases, we removed all facts with literals (numbers and strings).
-Literal values (such as geographical coordinates) are shared by only very few entities, 
+This is because literal values (such as geographical coordinates) are shared by only very few entities, 
 which makes them less interesting for rule mining. 
-Except for YAGO (for which we explicitly use the type information), we removed the \emph{rdf:type} relationship because it inflates the size of the KBs. 
-\comment{chris}{I do not like the above. It is like saying that types make it too large for us to process. How about the following?}
-Types information was not used during mining in our runtime-performance experiments. 
-In Sec.~\ref{} we investigate the effect of types information on the quality of the produced rules, on the YAGO2-types dataset.
-This dataset contains additionally the \emph{rdf:type} statements of the entities in the YAGO core dataset. We restricted the types to those
-in the domains and ranges of the relations. 
+We removed type information from the data sets, except for the YAGO-type data set.
+%In Sec.~\ref{} we investigate the effect of types information on the quality of the produced rules, on the YAGO2-types dataset.
+This set was obtained by adding the \emph{rdf:type} statements to the YAGO core dataset. We restricted the type statements to those in the domains and ranges of the relations. 
 For both DBpedia 2.0 and 3.8, we use the person data and mapping-based properties datasets. 
 For Wikidata, we use a dump from December 2014, available for download at \url{http://tools.wmflabs.org/wikidata-exports/rdf/exports/20140420/}.
 
@@ -67,7 +53,7 @@ KB & Facts & Subjects & Relations\\
 YAGO2 core  & 948K & 470K & 32\\
 YAGO2 types  & 2.29M & 470K & -\\
 YAGO2s & 4.12M  & 1.65M & 37\\
-DBpedia 2.0 & 6.70M & 1.38M & 1595\footnote{This corresponds to the relations with more than 100 facts.} \\
+DBpedia 2.0 & 6.70M & 1.38M & 1595\footnote{Relations with more than 100 facts only.} \\
 DBpedia 3.8 & 11.02M & 2.20M & 650 \\
 Wikidata & 11.30M & 4.00M & 431
 %Freebase (people) & 8.92M & 2.07M & 51
@@ -77,19 +63,14 @@ Wikidata & 11.30M & 4.00M & 431
 \end{table}
 \end{savenotes}
 
-\paragraph{Settings}
-By default, AMIE uses a head coverage threshold of $\theta=1\%$ and
-ranks the resulting rules by decreasing PCA confidence. %It also counts support on the two head variables.
-Moreover, AMIE uses as many threads as available cores in the system (8 in our hardware platform). \comment{chris}{if using a different blade, change also here}
-There is no need to deviate from this default configuration when a user runs AMIE.
-There are no parameters to tune.
-AMIE+ inherits this default behavior and extends it with the heuristics for rule expansion
-introduced in Section~\ref{subsec:lossless}. 
-In its default setting, AMIE+ has no confidence threshold and thus does not prune on confidence. 
+\paragraph{Settings} Unless otherwise noted, we ran AMIE and AMIE+ in their default settings (Sec.~\ref{subsec:algorithm}), i.e., $minHC=0.01$, $maxLen=3$, and $minConf=XYZ$ for AMIE+. AMIE has no pruning on confidence, and thus $minConf=0$ for AMIE.
+The systems use as many threads as available cores in the system (8 in our hardware platform). \comment{chris}{if using a different blade, change also here}
+In its default setting, AMIE+ has a confidence threshold of $0$ and thus does not prune on confidence. 
+\comment{Fabian}{This is a bit inconsistent with what we wrote before. Can we prune by default? What is the value used if we prune?}
+The instantiation operator $\mathcal{O}_I$ was disabled (``without constants'') unless mentioned otherwise.
 
-\ignore{
 \paragraph{Metrics}
-We will compare AMIE in terms of quality, ease of use and runtime to two popular state-of-the-art systems:
+We will compare AMIE and AMIE+ in terms of quality, ease of use and runtime to two popular state-of-the-art systems:
 WARMR~\cite{DehToi99,DehToi00} and ALEPH$^{\ref{foot:aleph}}$.
 To have an equal basis for the comparison with these systems, we make AMIE
 simulate their metrics.
@@ -97,22 +78,22 @@ AMIE can threshold on support, head coverage, confidence, and PCA confidence, an
 She can also deviate from the default setting and count support on one of the head variables (like WARMR).
 In that case, AMIE counts on the functional
 variable of the relation (see Section~\ref{subsec:functions} about functions).
-}
 
 \paragraph{Language Bias}
 AMIE and AMIE+ mine \emph{connected} and \emph{closed} Horn rules and allow recursiveness.
 Unless otherwise mentioned, we mine rules without constants
 in the arguments of atoms (i.e., without the instantiation operator).
 
+\ignore{Fabian: I moved this discussion to the Algorithm
 
-Although we can mine rules of arbitrary length, enforcing a length restriction is common practice for rule-mining systems 
-in order to keep the search tractable.
+Although we can mine rules of arbitrary length, enforcing a length restriction is common practice for rule-mining systems in order to keep the search tractable.
 In addition, shorter rules are easier to understand. For an application that aims to predict new facts for KBs,
 this means that it will be easier to explain why a specific prediction was made.
 Also, as rules become longer, their support and head coverage drop. This effect is aggravated
 by the incompleteness of knowledge bases. Thus, the confidence value of
 longer rules tends to have lower statistical significance and might not reflect reality.
-We experimented with rules of 3 and 4 atoms.
+We experimented with rules of 3 and 4 atoms (this is the value of $maxLen$).
+}
 
 %\comment{Chris}{either}
 
@@ -314,7 +295,7 @@ We experimented with rules of 3 and 4 atoms.
 In this section, we discuss the runtime improvements of AMIE+.
 Recall from Section~\ref{subsec:algorithm} that the AMIE algorithm consists of three main phases:
 \begin{itemize}
- \item Refinement (also called rule expansion). 
+ \item Refinement (i.e., rule expansion). 
  \item Output, which includes confidence calculation and the application of the skyline heuristic.
  \item Duplicate elimination.
 \end{itemize}
@@ -338,18 +319,21 @@ Dataset		& Rules	&  Refinement	& Output 	& Dup. elim.  \\ \hline
 YAGO2  		& 135	&  87.48\% 	& 8.79\% 	& 3.74\% \\
 YAGO2 (c)  	& 19132	&  53.54\%	& 35.64\% 	& 10.82\% \\ \hline
 \end{tabular}
-\caption{Time spent in the different phases of the AMIE algorithm on YAGO2.}
+\caption{Time spent in the different phases of the AMIE algorithm on YAGO2, with and without constants.}
 \label{timeProportion}
 \end{table}
 \end{center}
+
+\ignore{Fabian: we said this in "settings"
+
 By default, AMIE+ enables the improvements introduced in Section~\ref{subsec:lossless}, namely 
 pruning by maximum rule length (MRL), the query rewriting (QRW) and the identification of perfect rules (PR). 
-These are lossless runtime enhacements that optimize the refinement phase
+These are lossless runtime enhancements that optimize the refinement phase
 and do not alter AMIE's output.
 If an additional confidence threshold is given, AMIE+ can use the heuristics presented 
 in Section~\ref{subsec:speedingConfidenceEvaluation} to prune rules below the confidence threshold in advance
 and reduce the time spent in the confidence calculation and hence the output phase.
-
+}
 
 
 
@@ -373,7 +357,7 @@ and reduce the time spent in the confidence calculation and hence the output pha
   DBpedia 3.8  		& $>$ 1 day  	&	&	&$>$ 1 day	&			&  	   	&  	      		& 7h 46min 	     		\\
   Wikidata  		& $>$ 1 day  	&	&	&$>$ 1 day	&			&$>$ 1 day 	&  	      		& 48.86min	  	    \\ \hline
 \end{tabular}
-\caption{Runtime  comparison of AMIE and AMIE+. Ref: average time for refinement phase among threads. Out: average time for output phase among threads.}
+\caption{Runtime  comparison of AMIE and AMIE+.\\ Ref: \comment{Fabian}{average time for refinement phase among threads.}\\ Out: average time for output phase among threads.}
 \label{runtimeComparison}
 \end{table*}
 \end{savenotes}
@@ -383,15 +367,15 @@ and reduce the time spent in the confidence calculation and hence the output pha
 \paragraph{Runtime Comparison}
 Table~\ref{runtimeComparison} shows the runtimes of AMIE and AMIE+. For AMIE+, we show results if only the improvements affecting the refinement process are active 
 (maximum-rule-length, query-rewriting, perfect rules),
-if only the improvements affecting the output process are active (confidence approximation, confidence upper bounds, both with confidence threshold 0.1) and if all improvements are active.
+if only the improvements affecting the output process are active (confidence approximation, confidence upper bounds, both with confidence threshold 0.1) and if all improvements are active (Sec.~\ref{subsec:speedingConfidenceEvaluation}).
 We also report the average time (among threads) needed for different phases of the mining (refinement and output).
-First, notice that AMIE is not able to finish within a day for Yago2s, DBPedia 2.0 and 3.8 and Wikidata. 
-For Yago2 (Yago2-const), we can see that AMIE+(full) is  6.3x (4.4x) faster than AMIE. This speedup is mainly due to the improvements targeting the refinement process:
+
+We first note that AMIE is not able to finish within a day for Yago2s, DBPedia 2.0 and 3.8 and Wikidata -- while AMIE+ is.
+For Yago2 (Yago2-const), we can see that AMIE+(full) is  6.3x (4.4x) faster than AMIE. This speed-up is mainly due to the improvements that target the refinement process:
 AMIE+ with only the refinement improvements is already 6x and 3.8x faster than AMIE for these datasets. This is not surprising since,
-for Yago2,  most of the time is spend in refinining rules and therefore by improving this phase we can see significant gain.
+for Yago2,  most of the time is spent in refining rules. Therefore, by this phase results in a significant gain.
 Notice also that AMIE+(only Output) is slower than AMIE. Recall that the confidence approximation heuristic requires  computing the
-join cardinalities for every pair of relations in the KB. I.e., there is a tradeoff between an initial additional cost  for precomputing these values and the potential savings 
-if the confidence approximation manages to prune some expensive rules. For the case of Yago2, the output phase takes only around 9\% of the overall mining time, i.e.,
+join cardinalities for every pair of relations in the KB. This means that there is a trade-off between an initial additional cost  for pre-computing these values and the potential savings. For the case of Yago2, the output phase takes only around 9\% of the overall mining time, i.e. the
 confidence evaluation is not really a problem. In this case, the benefit of using the confidence approximation is less than the preprocessing cost. 
 This is not the case, however, for larger datasets.
 For Yago2s, DBPedia 2.0 and 3.8 and Wikidata, we see that using improvements only on the refinement or only on the output side is not enough.  
@@ -423,7 +407,7 @@ KB			& Rules 			& Rules		& Prun. prec. 	   \\ \hline
   DBpedia 3.8 		& 4931*				& 5087       	& 98.41\%	    \\
   Wikidata  		& 1244*				& 1650		& 96.93\%      	    \\  \hline
 \end{tabular}
-\caption{Output comparison of AMIE and AMIE+. *: output after processing for 1 day.}
+\caption{Output comparison of AMIE and AMIE+.\\ starred: output after processing for 1 day.}
 \label{outputComparison}
 \end{table}
 \end{savenotes}
@@ -431,6 +415,7 @@ KB			& Rules 			& Rules		& Prun. prec. 	   \\ \hline
 
 
 \paragraph{Output Comparison}
+\comment{Fabian}{Shouldn't we run AMIE also with a confidence threshold of 0.1, just to have the two comparable? Anyway, a confidence threshold of 10\% makes sense... If so, change in several places in this paper.}
 Table~\ref{outputComparison} shows a comparison of AMIE and AMIE+ in terms of output (number of rules).
 To assess the quality of the confidence approximation, we report in addition the \emph{pruning precision}.
 The pruning precision is the ratio of rules for which the confidence approximation introduced
@@ -439,26 +424,22 @@ calculate this ratio by counting the number of times that the heuristics
 produce a higher value than the real confidence (among the rules on which the approximation is applicable). 
 For example, a pruning precision of 96\% means
 that in 4\% of the cases the system erroneously pruned rules with a confidence higher than 0.1.
-Note that AMIE in our experiment was configured to run without any confidence threshold, where AMIE+ with confidence threshold 0.1.
-I.e., normally we expect AMIE+ to output less rules than AMIE.
+Note that AMIE runs without any confidence threshold, while AMIE+ runs with confidence threshold of 0.1.
+Thus, we expect AMIE+ to output less rules than AMIE.
 However, if a system ran for more than one day, we interrupted it
-and considered the output until the point of interruption (noted with a ``*'' in Tab~\ref{outputComparison}).
-This fact is particularly obvious
-for DBpedia 2.0, where AMIE found only 26K rules, while AMIE+(full)  produces 112K rules.
+and considered the output until the point of interruption (denoted by a ``*'' in Table~\ref{outputComparison}).
+This is particularly obvious for DBpedia 2.0, where AMIE found only 26K rules, while AMIE+(full)  produces 112K rules.
 This means that the values reported in Table~\ref{outputComparison}
 may have been calculated on a
 subset of all the rules, thus being an estimation of the actual pruning precision.
-As we can see, the speedup provided by AMIE+(full) does notil a se entarious decrease in the quality of the output: 
+As we can see, the speed-up provided by AMIE+(full) does not entail a serious decrease in the quality of the output: 
 AMIE+ does not miss more than 4\% of the rules with confidence above 10\%.  
 
-
-
+\comment{Fabian}{Several tables and graphs remain to be explained!}
 
 
 \paragraph{Performance of confidence approximation w.r.t. to rule-length}
-
-
-
+\comment{Fabian}{What is this? Will it be in the paper?}
 
 \ignore{ %% this is luis version
 Table~\ref{amievsplus} shows the runtimes of AMIE and AMIE+ with different setups on our test KBs.
@@ -674,11 +655,22 @@ Incompleteness		&\emph{isMarriedTo}		& 79.31\\
 \caption{Categories of relations w.r.t. the validity of the PCA.}
 \label{PCA_assumption_entities}
 \end{table}
-\vspace{-0.5cm}
-\subsection{Performance of the PCA Confidence} \label{exp_std_vs_pca}
-In this section, we investigate the validity of the PCA as an assumption to generate counter-examples
+
+\subsection{Comparison with Competitors} \label{competitors}
+
+\comment{Fabian}{Experiments to be added!}
+
+In~\cite{amie}, AMIE was shown to be up to 3 orders of magnitude faster, more scalable and more user-friendly 
+than other state-of-the-art systems, namely WARMR~\cite{GoeVan02} and ALEPH~\cite{Muggleton:1996:LPD:647996.742465}.
+The PCA confidence was shown to rank productive and correct rules higher than other confidence metrics.
+Furthermore~\cite{amie} shows that the PCA confidence correlates better with the actual precision of rules 
+than the standard confidence.
+
+
+\subsection{Performance of the PCA Confidence} \label{experimentspca}
+The Partial Completeness Assumption (PCA) says that if, for a given subject $s$ and a given relation $r$, the KB knows one object $o$ with $r(s,o)$, then the KB knows \emph{all} objects $o'$ with $r(s,o')$ (Sec.~\ref{sec:pca}). In this section, we investigate the validity of the PCA as an assumption to generate counter-examples
 for rule mining. Moreover, we revisit the comparison between the standard and the PCA confidence
-as a ranking metric for rules and show how the type information can increase the predictive precision of rules.
+as a ranking metric for rules. We also show how the type information can increase the predictive precision of rules.
 
 \subsubsection{PCA Evaluation}\label{pcaEvaluation}
 The original AMIE paper used the PCA but it did not evaluate whether this assumption is true or not \cite{amie}.
@@ -703,10 +695,10 @@ Table~\ref{PCA_assumption_entities} shows, for each relation, the percentage of 
 This is because our analysis also counts the cases where the KB contains bugs. If, for instance, YAGO knows the wrong place of death of a person, then there exists another value outside YAGO that is the right value. However the PCA would reject it. Hence, we count this case as a miss.
 
 The PCA extends well to relations that are strictly speaking not functions, but that have a high functionality.
-These are relations that usually have one object per subject, even though there could be multiple.
+These are relations that usually have one object per subject, even though there could be several.
 For example, a person can graduate from several universities, but most people graduate from a single university. We call these relations \emph{quasi-functions}.
 The PCA worked very well also on these, and predicted completeness correctly for $73\%-100\%$
-of the subjects under investigation. Thanks to the FUN-property, the PCA also holds for quasi inverse-functional relations such as \emph{directed}.
+of the subjects under investigation. Since the PCA takes into account the direction of the functionality, the PCA also holds for quasi inverse-functional relations such as \emph{directed}.
 
 \paragraph{Granularity Differences} Some relations, such as \emph{locatedIn} and \emph{livesIn}, hold between an entity and a geographical region.
 In that case, the region can be given at the granularity of a city, a region, a country, or a continent.
@@ -801,18 +793,17 @@ This is because the PCA confidence is less conservative than the standard confid
 \end{figure}
 
 \paragraph{Using Type Information}
-The naive deduction approach presented in~\cite{amie} was designed as a proof of concept 
-to show the suitability of the PCA confidence as precision metric for rules mined on a web-extracted KB. Yet, it
-does not have a fully practical value, e.g., a precision of 35\% is certainly not high enough to make actual 
-predictions about the death place, future spouse, or future residence of a person. We observe, however, that our 
-inference approach disregards two important factors. First, in Section~\ref{PCA_assumption_entities} we discussed about granularity
+The naive prediction approach presented in~\cite{amie} was designed as a proof of concept 
+to show the suitability of the PCA confidence as precision metric for rules mined on a Web-extracted KB. At the same time, a precision of 35\% is certainly not high enough to make actual predictions about the death place, future spouse, or future residence of a person. 
+
+To make more accurate predictions, we have to combine these rules with more signals. In Section~\ref{PCA_assumption_entities} we discussed the granularity
 differences in relations. For instance, the relation $livesIn$ is used to express a person's city or country of residence. 
 This implies that, for example, the rule 
 $livesIn(x, y) \Rightarrow isCitizenOf(x, y)$ can predict that some people are citizens of cities. Such spurious predictions decrease the precision
 of the inference process.
 Second, a prediction can be fired from multiple rules. If we consider rules as signals of evidence,  
-the more rules make a prediction, the higher its confidence should be and we should therefore prioritize it for evaluation.
-In YAGO2 9\% of the predictions are fired by more than one rule, when we use a confidence threshold of 0.1 PCA confidence. 
+then the more rules make a prediction, the higher its confidence should be and we should therefore prioritize it for evaluation.
+In YAGO2, 9\% of the predictions are fired by more than one rule, when we use a confidence threshold of 0.1 PCA confidence. 
 
 To account for the first observation, we configured AMIE to mine \emph{typed rules}. These have the form:
 \[

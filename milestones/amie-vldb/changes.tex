@@ -5,7 +5,7 @@
   \end{centering}
   
 	We thank the reviewers for their valuable comments and feedback! We revised our paper throughout to address their comments. We have added more examples, run a significant number of experiments, and rewritten large portions of the paper. 
-Among other things, we have revised Sec.~\ref{sec:improvements} to show how our approach generalizes to more than 3 atoms, and we have added an entire section on the implementation of our database (Sec.~\ref{subsec:implementation}). We also show how the precision of AMIE's predictions can be increased up to 70\% by using type information from the KB.
+Among other things, we have revised Sec.~\ref{sec:improvements} to show how our approach generalizes to more than 3 atoms, we have added an entire section on the implementation of our database (Sec.~\ref{subsec:implementation}), and we have run experiments to show the exact effect of the heuristics that we developed. We also show how the precision of AMIE's predictions can be increased up to 70\% by using type information from the KB.
   
   Our changes are as follows:
   
@@ -31,7 +31,7 @@ Among other things, we have revised Sec.~\ref{sec:improvements} to show how our 
 \review{R1: the main proposed heuristic (which contributes most to the  speed-up) is an ad-hoc approximation of  the PCA confidence for a specific type of 3-atom rules, being not trivial to generalize it to any kind of rule.  (Indeed, experiments are limited to 3-atom rules)\\
    R2: the rules that this technique can be applied to are still a bit limited. }
    
-   Our confidence approximation generalizes to rules with more atoms. We have now extended Sec.~\ref{subsec:pruningbyapprox} to show this. We also added experiments that show that AMIE+ works with longer rules.
+   Our confidence approximation generalizes to rules with more atoms. We have now extended Sec.~\ref{sec:conf_appr} to show this. We also added experiments that show that AMIE+ works with longer rules.
    
 \review{R2: when the article introduces the notation of |rng(directed)|, it says it "is the number of distinct directors in the range of directed". I strongly suspect there is a typo here.}
    
