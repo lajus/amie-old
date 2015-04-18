@@ -1,4 +1,10 @@
-We conduct three types of experiments: In Section \ref{amiepm}, we compare AMIE with AMIE+. We show the performance gain for each of the new techniques from Section~\ref{sec:improvements}. We also conduct a proof of concept to show that the prediction quality can be enhanced by post-processing the results. In Section \ref{competitors}, we compare AMIE to competitor systems. We evaluate the number of rules and the prediction quality of the rules ion juxtaposition. Finally, in Section \ref{experimentspca}, we investigate the Partial Completeness Assumption (PCA). We evaluate how often the PCA actually holds in a real-world KB, and we also compare the PCA confidence with the standard confidence. 
+We conduct three types of experiments: \comment{chris}{changed the order. Does it still make sense?}
+In Section \ref{competitors}, we compare AMIE to competitor systems. 
+We evaluate the number of rules and the prediction quality of the rules ion juxtaposition\comment{chris}{?}. 
+In Section \ref{amiepm}, we compare AMIE with AMIE+. We show the performance gain for each of the new techniques from Section~\ref{sec:improvements}. 
+We also conduct a proof of concept to show that the prediction quality can be enhanced by post-processing the results. 
+Finally, in Section \ref{experimentspca}, we investigate the Partial Completeness Assumption (PCA). 
+We evaluate how often the PCA actually holds in a real-world KB, and we also compare the PCA confidence with the standard confidence. 
 
 Our experimental results show that:
 \begin{itemize}
@@ -33,6 +39,7 @@ Our experimental results show that:
 \paragraph{Hardware}
 All experiments are run on a server with \comment{Chris}{did this change?} 48GB of RAM and 8 CPUs (Intel Xeon at 2.4GHz). 
 All rules and all experimental results are available at \url{http://www.mpi-inf.mpg.de/departments/ontologies/projects/amie/}.
+All runtime results reported are averaged over 3 runs.
 
 \paragraph{Datasets} We run our experiments on different KBs. Table~\ref{kbs} shows a summary of the KBs used for our experiments.
 In all cases, we removed all facts with literals (numbers and strings).
@@ -289,7 +296,175 @@ We experimented with rules of 3 and 4 atoms (this is the value of $maxLen$).
 % We compare the quality of the mined rules of AMIE and ALEPH in Section~\ref{exp_std_vs_pca}.
 % }%ignore
 
-% \subsubsection{AMIE vs. AMIE+ vs. AMIE++}
+\subsection{Comparison of AMIE with state-of-the-art systems} \label{competitors}
+\comment{chris}{this is just a summary. Usability stuff are out. Constants on different modes are out, etc. Please see if you are happy with the result}
+
+In this section we present an overview of the comparison between AMIE and two state-of-the-art rule mining system that are publicly available:
+WARMR~\cite{GoeVan02} and ALEPH~\cite{Muggleton:1996:LPD:647996.742465}. A more detailed description of these experiments can be found in~\cite{amie}.
+We compare these system with AMIE in terms of runtime and quality of produced rules. For a detailed usability comparison please refer to~\cite{amie}.
+
+\subsubsection{AMIE vs. WARMR}
+WARMR is a system that unifies ILP and association rule mining. Similar to APRIORI algorithms~\cite{Agrawal:1996:FDA:257938.257975}, it performs a
+breadth-first search in order to find frequent patterns.
+It generates Datalog queries of the form ``$?-A_1,A_2,...,A_n$'',
+where $A_i$ are logical atoms. WARMR applies a closed world assumption for assessing the quality of the produced rules.
+
+\paragraph{Runtime}
+For comparing WARMR with AMIE in terms of runtime, we tweeked AMIE to simulate WARMR's behavior in terms of the confidence measure used.  
+WARMR was not able to terminate on YAGO2 in a time period of 1 day. Therefore, we created a sample of YAGO2 
+(see~\cite{amie} for information on how to sample a KB for rule-mining purposes).
+In that sample, AMIE mined her rules in 7.91s seconds.
+WARMR, in contrast, took 18 hours.
+
+We also ran both systems in a mode that allows them to mine rules with constants. 
+AMIE completed the task in 1.68 minutes on average. WARMR for all relations did not terminate in 3 days.
+Therefore, we ran it only for the relations \textit{diedIn}, \textit{livesIn}, \textit{wasBornIn}, for which it took 48h. 
+Table \ref{warmrruntime} summarizes the runtime results for WARMR, AMIE, and AMIE+. 
+We conclude that AMIE is better suited for large KBs than WARMR.
+This is because WARMR is an ILP algorithm written in a logic programming environment, 
+which makes the evaluation of all candidate queries inefficient.\\
+
+\begin{table}
+\begin{tabular}{l|rr rr|}
+Constants 	& WARMR 		& AMIE 		& AMIE+\\
+\hline
+ no 		& 18h 			& 7.91s 	& 5.24s \\
+ yes 		& (48h) 	 	& 1.68min  	& 1.06min\\
+\end{tabular}
+\caption{Runtimes on YAGO2 sample\comment{Chris}{the numbers for AMIE+ are old and I do not know if we need them}}
+\label{warmrruntime}
+\end{table}
+
+
+\paragraph{Results} After filtering out non-connected rules, WARMR mined 41 closed rules. 
+AMIE+, in contrast, mined 207 closed rules, which included the ones mined by WARMR.
+We checked back with the WARMR team and learned that for a given set of atoms $B_1, ... B_n$, 
+WARMR will mine only one rule,
+picking one of the atoms as head atom (e.g., $B_1 \wedge ... \wedge B_{n-1} \Rightarrow B_n$).
+AMIE, in contrast, will mine one rule for each possible choice of head atom (as long as the thresholds are met).
+In other words, AMIE with the standard support and confidence measures simulates WARMR, but mines more rules.
+Furthermore, it runs orders of magnitude faster. 
+Especially for large datasets for which the user would have needed to use complicated sampling schemes in order to use WARMR,
+AMIE can be a very attractive alternative.
+Even for smaller datasets with rules with constants, AMIE can provide results while WARMR cannot.
+Moreover, AMIE comes with metrics that go beyond the standard confidence and the standard support.
+We will show later that these improve the quality of the results.
+
+\subsubsection{AMIE vs. ALEPH}
+
+ALEPH is an ILP system that implements a variety of scoring functions for measuring a rule's quality. For our experiments we used the 
+\emph{Positives-only} evaluation function~\cite{Muggleton:1996:LPD:647996.742465,usir1753}, 
+which is the most interesting for our setting, since it does not require the existence of explicit negative examples.
+It takes random facts as negative evidence, instead:
+\[ Score := log(P)-log\frac{R+1}{Rsize+2}-\frac{L}{P} \]
+Here, $P$ is the number of known true facts covered (KBtrue, or A resp., in Figure~\ref{fig:prediction}), $R$ is the number of random examples covered, 
+$Rsize$ is the total number of randoms, and $L$ is the number of atoms in the hypotheses. 
+The intuition is that a good rule should cover many positive examples, and few or no randomly generated examples. This ensures
+that the rule is not overly general. Furthermore, the rule should use as few atoms as possible, and thus achieve a high compression.
+
+
+
+\paragraph{Runtime}
+We ran AMIE and ALEPH on YAGO2 \cite{yago2}. For ALEPH, we used the positive-only evaluation function with $Rsize=50$ 
+and we considered only clauses that were able to explain at least 2 positive examples,
+so that we will not get grounded facts as rules in the output.
+For a fair comparison, we also instructed AMIE to run with a support threshold of 2 facts.
+AMIE terminated in 3.62 minutes and found rules for all relations. 
+ALEPH runs for one head relation at a time. For some relations (e.g.\emph{isPoliticianOf}),
+it terminated in a few seconds.
+For others, however, we had to abort the system after 1 day without results (Tables \ref{alephrun0} and \ref{alephrun1}).
+For each relation, ALEPH treats one positive example at a time. Some examples need little processing time, others block the system for hours.
+We could not figure out a way to choose examples in such a way that ALEPH runs faster.
+Hence, we used the sample of YAGO2 that we created for WARMR.
+Again, runtimes varied widely between relations (Table \ref{alephrun2}).
+Some relations ran in a few seconds, others did not terminate in a day.
+The runtimes with constants are similarly heterogeneous, with at least 7 relations not terminating in 1 day.
+
+\begin{table}
+\begin{tabular}{l|ccc}
+KB & ALEPH & AMIE & AMIE+\\
+\hline
+YAGO2 full & 4.96s to $>$ 1 day & 3.62min & 1.62min\\
+YAGO2 Sample & 0.05s to $>$ 1 day & 7.91s & 2.27s \\
+\end{tabular}
+\caption{Runtimes ALEPH vs. AMIE/AMIE+}
+\label{alephrun0}
+\end{table}
+\begin{table}[t]
+ \begin{tabular}{l|r}
+Relations & Runtime\\
+\hline
+isPoliticianOf, hasCapital, hasCurrency & $<$ 5min\\
+dealsWith, hasOfficialLanguage, imports & $<$ 5min\\
+isInterested, hasMusicalRole & $<$19min\\
+hasAcademicAdvisor, hasChild& $>$ 1 day\\
+isMarriedTo, livesIn, worksAt, isLocatedIn& $>$ 1 day\\ %[-0.4cm]
+\end{tabular}
+\caption{Runtimes of ALEPH on YAGO2}
+\label{alephrun1}
+\end{table}
+\begin{table}[t]
+\begin{tabular}{l|r}
+Relations & Runtime\\
+\hline
+diedIn, directed, hasAcademicAdvisor & $<$ 2min\\
+graduatedFrom, isPoliticianOf, playsFor & $<$ 2min\\
+wasBornIn, worksAt, isLeaderOf &  $<$ 2min\\
+exports, livesIn, isCitizenOf & $<$ 1.4h\\
+actedIn, produced, hasChild, isMarriedTo & $>$ 1 day\\ %[-0.4cm]
+\end{tabular}
+\caption{Runtimes of ALEPH on YAGO2 sample}
+\label{alephrun2}
+\end{table}
+
+\paragraph{Results}
+We compared the output of ALEPH with the positives-only evaluation function to the output of AMIE using the PCA
+confidence on the sample of YAGO2 used for the runtime experiments.
+Recall that ALEPH requires more than one day for some relations, so we used only rules for which the head
+relation runs in less than one day.
+ALEPH mined 56 rules, while AMIE mined 306 rules.
+We order the rules by decreasing score (ALEPH) and decreasing PCA confidence (AMIE).
+Table \ref{alephres} shows the number of predictions and their total precision.
+We show the aggregated values at the points where both approaches have produced around 3K, 5K, and 8K predictions.
+AMIE's PCA confidence succeeds in sorting the rules roughly by descending precision, so that the initial rules have an extraordinary precision 
+compared to ALEPH's.
+AMIE needs more rules to produce the same number of predictions as ALEPH (but she also mines more).
+
+\begin{table}
+\begin{tabular}{l|rrr}
+	    & Top $n$ & Predictions & Precision \\
+ \hline
+ Positives-only & 7 & 2997 & 27\% \\
+ PCA Confidence & 12 & 2629 & 62\% \\
+ \hline
+ Positives-only & 9 & 5031 & 26\% \\
+ PCA Confidence & 22 & 4512& 46\% \\
+ \hline
+ Positives-only & 17 & 8457 & 30\% \\
+ PCA Confidence & 23 & 13927  & 43\% \\
+\end{tabular}
+\caption{PCA confidence vs. positives-only score: aggregated precision of rules mined on YAGO2 sample.}
+\label{alephres}
+\end{table}
+
+We suspect that ALEPH's positives-only evaluation function manages to filter out overly general rules only to some extent.
+The reason is that this measure ``guesses'' negative examples at random, whereas rules usually create false predictions in a non-random way.
+Even if a rule produces many false predictions, the intersection of these false predictions and the random counterexamples may be very small.
+Consider for example the rule $bornIn(x,y) \Rightarrow diedIn(x,y)$, which produces false predictions for example for persons who have moved
+to a different place during their life.
+By creating negative examples just by considering random person-location pairs,
+we might not produce any case for which the rule will give a false prediction,
+simply because such a negative example will have a relatively small probability to be generated.
+% ALEPH will mine, e.g., \emph{livesIn}$(A,C),$\emph{isLocatedIn}$(C,B) \Rightarrow$ \emph{isPoliticianOf}$(A,B)$.
+% The problem is that ALEPH generates counterexamples by randomly using valid constants for variables $A$ and $B$.
+% Hence, the probability of creating a random example in which $B$ is the place of residence of the specific person $A$ is very low.\\
+
+\paragraph{Summary}
+Our experimental results show that AMIE can be up to 3 orders of magnitude faster
+than other state-of-the-art systems, namely WARMR~\cite{GoeVan02} and ALEPH~\cite{Muggleton:1996:LPD:647996.742465}.
+The PCA confidence was shown to rank productive and correct rules higher than other confidence metrics.
+
+
 \subsection{AMIE vs. AMIE+}\label{amiepm}
 
 In this section, we discuss the runtime improvements of AMIE+.
@@ -550,7 +725,7 @@ In the other datasets, it misses at most 4\% of them.
 % DBpedia 3.8  		& $>$ 1 day  			& $>$ 1 day   & 4215 & 2106  		& $>$ 1 day & 292 			& 8.24h & 5193 & 2621 & 97\%\\
 % Freebase 		& $>$ 1 day 			& $>$ 1 day & 182  & 131 		& $>$ 1 day & 5 			& 7.51min & 169 & 37 & 100\% \\ \hline
 \end{tabular}
-\caption{Runtime and output comparison between AMIE and AMIE+ on different KBs. Runtimes are averaged over 3 runs.}
+\caption{Runtime and output comparison between AMIE and AMIE+ on different KBs. }
 \label{amievsplus}
 \end{table*}
 \end{savenotes}
@@ -656,15 +831,10 @@ Incompleteness		&\emph{isMarriedTo}		& 79.31\\
 \label{PCA_assumption_entities}
 \end{table}
 
-\subsection{Comparison with Competitors} \label{competitors}
 
-\comment{Fabian}{Experiments to be added!}
 
-In~\cite{amie}, AMIE was shown to be up to 3 orders of magnitude faster, more scalable and more user-friendly 
-than other state-of-the-art systems, namely WARMR~\cite{GoeVan02} and ALEPH~\cite{Muggleton:1996:LPD:647996.742465}.
-The PCA confidence was shown to rank productive and correct rules higher than other confidence metrics.
-Furthermore~\cite{amie} shows that the PCA confidence correlates better with the actual precision of rules 
-than the standard confidence.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 \subsection{Performance of the PCA Confidence} \label{experimentspca}
@@ -794,7 +964,8 @@ This is because the PCA confidence is less conservative than the standard confid
 
 \paragraph{Using Type Information}
 The naive prediction approach presented in~\cite{amie} was designed as a proof of concept 
-to show the suitability of the PCA confidence as precision metric for rules mined on a Web-extracted KB. At the same time, a precision of 35\% is certainly not high enough to make actual predictions about the death place, future spouse, or future residence of a person. 
+to show the suitability of the PCA confidence as precision metric for rules mined on a Web-extracted KB. 
+At the same time, a precision of 35\% is certainly not high enough to make actual predictions about the death place, future spouse, or future residence of a person. 
 
 To make more accurate predictions, we have to combine these rules with more signals. In Section~\ref{PCA_assumption_entities} we discussed the granularity
 differences in relations. For instance, the relation $livesIn$ is used to express a person's city or country of residence. 
@@ -820,11 +991,11 @@ multiple rules $R_1, \dots R_k$ made a prediction $p$, the prediction was only c
 Since the rules were ranked by decreasing PCA confidence, 
 this was equivalent to rank predictions according to their highest PCA confidence: 
 \[
- score(p) := max\{pcaconf(R_1), \dots, pcaconf(R_k) \}
+ score(p) := max\{conf_{pca}(R_1), \dots, conf_{pca}(R_k) \}
 \]
 We propose an alternative score instead:
 \begin{equation}\label{predictions-score}
- score^*(p) := 1 - \prod_{i = 1}^{k}{(1 -pcaconf(R_i)})
+ score^*(p) := 1 - \prod_{i = 1}^{k}{(1 -conf_{pca}(R_i)})
 \end{equation}
 Equation~\ref{predictions-score} aggregates the PCA confidence of the rules so that the predictions concluded by multiple rules
 are ranked higher. It also confers a probabilistic interpretation to the PCA confidence. The score of a prediction 
