@@ -84,6 +84,13 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 		}else{
 			sourceVariables = openVariables; 
 			if(sourceVariables.size() > 1){
+				if (this.exploitMaxLengthOption) {
+					// Pruning by maximum length for the \mathcal{O}_C operator.
+					if (sourceVariables.size() > 2 
+							&& query.getRealLength() == this.maxDepth - 1) {
+						return;
+					}
+				}
 				//Give preference to the non-closed variables
 				targetVariables = sourceVariables;
 			}else{
@@ -157,6 +164,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 	 */
 	public void getDanglingEdges(Query query, int minCardinality, Collection<Query> output){		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
+		List<ByteString> openVariables = query.getOpenVariables();
 		
 		if(query.isEmpty()){
 			//Initial case
@@ -192,9 +200,12 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 			
 			//General case
 			if(query.getLength() == maxDepth - 1) {
-				if(!query.getOpenVariables().isEmpty() 
-						&& !allowConstants){
-					return;
+				if (this.exploitMaxLengthOption) {
+					if(!openVariables.isEmpty() 
+							&& !this.allowConstants 
+							&& !this.enforceConstants) {
+						return;
+					}
 				}
 			}
 			
@@ -239,9 +250,17 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 							
 							candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
 							candidate.setSupportRatio((double)candidate.getSupport() / (double)getTotalCount(candidate));
-							candidate.setParent(query);							
-							if(allowConstants){
-								getInstantiatedEdges(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minCardinality, output);
+							candidate.setParent(query);
+							if (canAddInstantiatedAtom()) {
+								// Pruning by maximum length for the \mathcal{O}_E operator.
+								if (this.exploitMaxLengthOption) {
+									if (query.getRealLength() < this.maxDepth - 1 
+											|| openVariables.size() < 2) {
+										getInstantiatedEdges(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minCardinality, output);
+									}
+								} else {
+									getInstantiatedEdges(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minCardinality, output);							
+								}
 							}
 							
 							output.add(candidate);
