@@ -369,9 +369,9 @@ and reduce the time spent in the confidence calculation and hence the output pha
 \multirow{3}{*}{KB} 	&  \multicolumn{3}{c|}{AMIE}  			& \multicolumn{5}{c|}{AMIE+} 	\\ \cline{5-9}
  			& 		&		&		& \multicolumn{2}{c|}{Only Refinement}	& \multicolumn{2}{c|}{Only Output} 	&Full   \\ \cline{5-9}
 			& Total		&Ref.		&Out.		&Total		&Ref.			& Total  	&Out.    	&Total 	   \\  \hline
-  YAGO2  		& 3.17min  	&27.63s		&3.28s		&29.37s		&8.68s			& 3.23min 	&3.57s    	& 28.19s	  	    \\ 
-  YAGO2 (const)  	& 37.57min  	&169.46s	&77.71s		&11.72min	&20.44s			& 38.8min  	&90.47s   	& 9.93min	 	    \\
-  YAGO2 ($l=4$)  	& 24.99min  	&18.05min	&3.35min	&9.49min	&66.93s			& 27.53min 	&3.42min   	& 8.35min 	 	    \\
+  YAGO2  		& 3.17min  	&27.63s		&3.28s		&29.37s		&8.68s			& 2.82min 	&3.57s    	& 28.19s	  	    \\ 
+  YAGO2 (const)  	& 37.57min  	&169.46s	&77.71s		&11.72min	&20.44s			& 37.05min  	&90.47s   	& 9.93min	 	    \\
+  YAGO2 ($l=4$)  	& 24.99min  	&18.05min	&3.35min	&9.49min	&66.93s			& 26.48min 	&3.56min   	& 8.35min 	 	    \\
   YAGO2s  		& $>$ 1 day  	&-		&-		&$>$ 1 day	&-			&$>$ 1 day 	&-  	      	& 59.38min	  	    \\ 
   DBpedia 2.0  		& $>$ 1 day  	&-		&-		&$>$ 1 day	&-			&$>$ 1 day 	&-  	     	& 46.88min	      	    \\ 
   DBpedia 3.8  		& $>$ 1 day  	&-		&-		&$>$ 1 day	&-			&14h 10min*  	&-  	      	& 7h 46min 	     		\\
@@ -599,9 +599,9 @@ In the other datasets, it misses at most 4\% of them.
 \multirow{3}{*}{KB} 	& \multirow{3}{*}{AMIE}  	& \multicolumn{9}{c|}{AMIE+} 	\\ \cline{3-11}
  			& 				& \multicolumn{2}{c|}{Default}	& \multicolumn{7}{c|}{AMIE + conf. approx}   \\ \cline{3-11}
 			&  				&Runtime	& Rules 	& Runtime  & +MRL     &+QRW 	&+PR		& Full	   	   & Rules	& Prun. prec. 	   \\ \hline
-  YAGO2  		& 3.17min  			&29.37s		& 135		& 3.23min  & 29.03s   &38.16s 	&2.98min  	& 28.19s	   & 135 	& 100\%      	    \\ \hline
-  YAGO2 (const)  	& 37.57min  			&11.72min	& 19132		& 38.8min  & 8.90min  &12.04min &36.48min  	& 9.93min	   & 15634	& 100\% 	    \\ \hline  
-  YAGO2 ($l=4$)  	& 24.99min  			&9.49min	& 1382		& 27.53min & 8.65min  &15.69min &26.39min  	& 8.35min 	   & 645	& 100\%   	    \\ \hline
+  YAGO2  		& 3.17min  			&29.37s		& 135		& 2.82min  & 29.03s   &38.16s 	&2.80min  	& 28.19s	   & 135 	& 100\%      	    \\ \hline
+  YAGO2 (const)  	& 37.57min  			&11.72min	& 19132		& 37.05min & 8.90min  &12.04min &36.48min  	& 9.93min	   & 15634	& 100\% 	    \\ \hline  
+  YAGO2 ($l=4$)  	& 24.99min  			&9.49min	& 1382		& 26.48min & 8.65min  &15.69min &26.39min  	& 8.35min 	   & 645	& 100\%   	    \\ \hline
   YAGO2s  		& $>$ 1 day  			&$>$ 1 day	& 247		&$>$ 1 day & 1h 7min  &1h 12min*&$>$ 1 day  	& 59.38min	   & 94	 	& 100\%		    \\ \hline
   DBpedia 2.0  		& $>$ 1 day  			&$>$ 1 day	& 26812		&$>$ 1 day & 1h 3min  & -       &$>$ 1 day  	& 46.88min	   & 112865	& 98.26\%      	    \\ \hline
   DBpedia 3.8  		& $>$ 1 day  			&$>$ 1 day	& 4931		&14h 10min*& 6h 10min &7h 33min*&15h 6min*  	& 7h 46min 	   & 5087       & 98.41\%	    \\ \hline
