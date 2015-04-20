@@ -21,7 +21,7 @@ public class TSVDifference {
 		try (TSVFile file = new TSVFile(new File(args[0]))) {
 			for (List<String> line : file) {
 				if (line.size() >= 3) {
-					pairs.add(new Pair<String, String>(line.get(0), line.get(2)));	
+					pairs.add(new Pair<String, String>(line.get(0).trim(), line.get(2).trim()));	
 				}
 			}
 		}
@@ -29,8 +29,8 @@ public class TSVDifference {
 		try (TSVFile file = new TSVFile(new File(args[1]))) {
 			for (List<String> line : file) {
 				if (line.size() >= 3) {
-					Pair<String, String> p = new Pair<String, String>(line.get(0), line.get(2));
-					Pair<String, String> pp = new Pair<String, String>(line.get(2), line.get(0));
+					Pair<String, String> p = new Pair<String, String>(line.get(0).trim(), line.get(2).trim());
+					Pair<String, String> pp = new Pair<String, String>(line.get(2).trim(), line.get(0).trim());
 					if (!pairs.contains(p) 
 							&& !pairs.contains(pp)) {
 						System.out.println(p.first + "\t" + line.get(1) + "\t" + p.second);

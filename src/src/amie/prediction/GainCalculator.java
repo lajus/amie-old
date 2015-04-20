@@ -61,7 +61,7 @@ public class GainCalculator {
 						System.out.println("Error");
 						System.out.println(generalRule);
 					}
-					if (deltaConf > 0.2) {
+					if (deltaConf > 0.1) {
 						System.out.println("General rule");
 						System.out.println(generalRule.getFullRuleString());
 						System.out.println("Specific rule");
@@ -80,7 +80,7 @@ public class GainCalculator {
 		System.out.println("Average confidence gain: " + (confidenceGain / matched));
 		System.out.println("Weighted confidence gain: " + (gain2 / totalSupport));
 		System.out.println("Maximum confidence: " + maxConfDelta);
-		System.out.println("Over 50% gain: " + overFiftyPercentGain);
+		System.out.println("Over 10% gain: " + overFiftyPercentGain);
 
 	}
 

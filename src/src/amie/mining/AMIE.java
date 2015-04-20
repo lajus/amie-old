@@ -593,7 +593,7 @@ public class AMIE {
 				.withDescription("Enforce constants in all atoms. Default: false")
 				.create("fconst");
 		
-		Option assistantOp = OptionBuilder.withArgName("bias-name")
+		Option assistantOp = OptionBuilder.withArgName("e-name")
                 .hasArg()
                 .withDescription("Syntatic/semantic bias: oneVar|headVars|typed|signatured|headVarsImproved. Default: headVars")
                 .create( "bias");

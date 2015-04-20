@@ -21,7 +21,7 @@ import amie.query.Query;
 
 public class SampleWikiLinksByScore {
 	
-	private static int SampleSize = 75;
+	private static int SampleSize = 100;
 
 	private static List<List<Pair<Pair<ByteString, ByteString>, List<Prediction>>>> initializeBuckets() {
 		List<List<Pair<Pair<ByteString, ByteString>, List<Prediction>>>> buckets = new ArrayList<>(10);
@@ -140,7 +140,7 @@ public class SampleWikiLinksByScore {
 
 	private static List<Pair<Pair<ByteString, ByteString>, List<Prediction>>> samplePredictions(
 			List<Pair<Pair<ByteString, ByteString>, List<Prediction>>> list) {
-		return (List<Pair<Pair<ByteString, ByteString>, List<Prediction>>>) telecom.util.collections.Collections.reservoirSampling(list, 75);
+		return (List<Pair<Pair<ByteString, ByteString>, List<Prediction>>>) telecom.util.collections.Collections.reservoirSampling(list, SampleSize);
 	}
 
 	private static Map<Pair<ByteString, ByteString>, List<Prediction>> getPredictions(List<Query> queries,

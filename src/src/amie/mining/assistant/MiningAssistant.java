@@ -685,7 +685,6 @@ public class MiningAssistant{
 			ByteString ri_1 = path.get(i - 1)[1];
 			joinInformation = Query.joinPositions(path.get(i - 1), path.get(i));
 			// Inverse r_{i-1} if it is not functional or it joins from the subject.
-			boolean rewriteRi_1 =  joinInformation[0] != 2;
 			boolean rewriteRi = joinInformation[1] != 0;
 			double rng = 0.0;
 			double funri = this.source.functionality(ri, rewriteRi);
