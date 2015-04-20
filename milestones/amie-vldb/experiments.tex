@@ -398,6 +398,9 @@ For Yago2 (Yago2-const), we can see that AMIE+(full) is  6.3x (4.4x) faster than
 that target the refinement process:
 AMIE+ with only the refinement improvements is already 6x and 3.8x faster than AMIE for these datasets. This is not surprising since,
 for Yago2,  most of the time is spent in refining rules. Therefore, by this phase results in a significant gain.
+\comment{Chris}{Not clear if we keep this:}Notice also that the larger the search space to be explored is, the biggest the impact of the heuristic on the refinement phase: for  YAGO2 (const) the refinement phase becomes 8x faster.
+
+
 Notice also that AMIE+(only Output) is slower than AMIE. Recall that the confidence approximation heuristic requires  computing the
 join cardinalities for every pair of relations in the KB. This means that there is a trade-off between an initial additional cost 
 for pre-computing these values and the potential savings. For the case of Yago2, the output phase takes only around 9\% 
@@ -406,12 +409,17 @@ confidence evaluation is not really a problem. In this case, the benefit of usin
 This is not the case, however, for larger datasets.
 For Yago2s, DBPedia 2.0 and 3.8 and Wikidata, we see that using improvements only on the refinement or only on the output side is not enough.  
 If we activate all improvements, however, AMIE+ is able to terminate in the majority of cases within an hour or in the worst case over-night.
-\comment{Chris}{Here can have a barplot of speeups, grouped by dataset. What do you think? We can discuss the results after we have them}.
+
+\comment{chris}{this is new:}
+Fig.~\ref{individual} shows the benefit of individual refinement improvements over the baseline of AMIE+(only output). 
+The improvement that offers the most speedup (up to 6.7x) is the maximum rule length (MRL), closely followed by query rewriting (QRW, up to 5.1x speedup),
+whereas perfect rules (PR) rank last.
+
 
 \begin{figure*}
 \centering
 \includegraphics{figures/individual}
-\caption{Performance of individual improvements}
+\caption{Performance of individual refinement improvements}
 \label{individual}
 \end{figure*}
 
@@ -591,7 +599,7 @@ In the other datasets, it misses at most 4\% of them.
 \multirow{3}{*}{KB} 	& \multirow{3}{*}{AMIE}  	& \multicolumn{9}{c|}{AMIE+} 	\\ \cline{3-11}
  			& 				& \multicolumn{2}{c|}{Default}	& \multicolumn{7}{c|}{AMIE + conf. approx}   \\ \cline{3-11}
 			&  				&Runtime	& Rules 	& Runtime  & +MRL     &+QRW 	&+PR		& Full	   	   & Rules	& Prun. prec. 	   \\ \hline
-  YAGO2  		& 3.17min  			&29.37s		& 135		& 3.23min  & 29.03s   &38.16min &2.98min  	& 28.19s	   & 135 	& 100\%      	    \\ \hline
+  YAGO2  		& 3.17min  			&29.37s		& 135		& 3.23min  & 29.03s   &38.16s 	&2.98min  	& 28.19s	   & 135 	& 100\%      	    \\ \hline
   YAGO2 (const)  	& 37.57min  			&11.72min	& 19132		& 38.8min  & 8.90min  &12.04min &36.48min  	& 9.93min	   & 15634	& 100\% 	    \\ \hline  
   YAGO2 ($l=4$)  	& 24.99min  			&9.49min	& 1382		& 27.53min & 8.65min  &15.69min &26.39min  	& 8.35min 	   & 645	& 100\%   	    \\ \hline
   YAGO2s  		& $>$ 1 day  			&$>$ 1 day	& 247		&$>$ 1 day & 1h 7min  &1h 12min*&$>$ 1 day  	& 59.38min	   & 94	 	& 100\%		    \\ \hline

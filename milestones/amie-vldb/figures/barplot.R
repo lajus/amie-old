@@ -21,17 +21,17 @@ yago2c.space 	<- c(1,0,0,0)
  
 tooLong <- 5000
  
-yago2s 		<- c( 24*60,	67,	72,	NA) 
+yago2s 		<- c( 24*60,	67,	72,	24*60) 
 yago2s.width 	<- c(0.5,0.5,0.5, 0.5)
 yago2s.space 	<- c(1,0,0,0)
 
 
  
-db2 		<- c( 24*60,	63,	NA,	NA) 
+db2 		<- c( 24*60,	63,	NA,	24*60) 
 db2.width 	<- c(0.5,0.5,0.5, 0.5)
 db2.space 	<- c(1,0,0,0)
 
-db3 		<- c( 24,	6.16,	7.55,	NA) 
+db3 		<- c( 24,	6.16,	7.55,	15.1) 
 db3.width 	<- c(0.5,0.5,0.5, 0.5)
 db3.space 	<- c(1,0,0,0)
 
@@ -63,7 +63,11 @@ axis(1, at=c(1.5, 4, 6.5, 9, 11.5, 14),labels=c("Yago2(s)","Yago2-const(min)","Y
 par(xpd=NA)
 legend("topleft", c( "AMIE+(Out)", "AMIE+(Out+MRL)", "AMIE+(Out+QRW)", "AMIE+(Out+PR)"), fill=col, cex=1.2)
 text(5.3,30*60,">1d", pos=4, col="black")
+text(6.8,30*60,">1d", pos=4, col="black")
+
 text(7.8,30*60,">1d", pos=4, col="black")
+text(9.3,30*60,">1d", pos=4, col="black")
 text(10.3,30,">1d", pos=4, col="black")
+
 text(12.8,30*60,">1d", pos=4, col="black")
 rg.endplot()
