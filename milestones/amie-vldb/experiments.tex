@@ -423,16 +423,15 @@ For Yago2 (Yago2-const), we can see that AMIE+(full) is  6.7x (3.8x) faster than
 that target the refinement process:
 AMIE+ with only the refinement improvements is already 6.5x and 3.2x faster than AMIE for these datasets. This is not surprising since,
 for Yago2,  most of the time is spent in refining rules. Therefore, by this phase results in a significant gain.
-\comment{Chris}{Not clear if we keep this:}Notice also that the larger the search space to be explored is, the biggest the impact of the heuristic on the refinement phase: for  YAGO2 (const) the refinement phase becomes 8x faster.
 
-
-Notice also that AMIE+(only Output) is slower than AMIE. Recall that the confidence approximation heuristic requires  computing the
+Notice also that AMIE+(only Output) is only marginally faster than AMIE. Recall that the confidence approximation heuristic requires  computing the
 join cardinalities for every pair of relations in the KB. This means that there is a trade-off between an initial additional cost 
 for pre-computing these values and the potential savings. For the case of Yago2, the output phase takes only around 9\% 
 of the overall mining time, i.e. the
-confidence evaluation is not really a problem. In this case, the benefit of using the confidence approximation is less than the preprocessing cost. 
+confidence evaluation is not really a problem. %In this case, the benefit of using the confidence approximation is less than the preprocessing cost. 
 This is not the case, however, for larger datasets.
-For Yago2s, DBPedia 2.0 and 3.8 and Wikidata, we see that using improvements only on the refinement or only on the output side is not enough.  
+\comment{chris}{check if yago2s, DBpedia2.0 and wikidata terminate with only output}
+For Yago2s, DBpedia 2.0 and 3.8 and Wikidata, we see that using improvements only on the refinement or only on the output side is not enough.  
 If we activate all improvements, however, AMIE+ is able to terminate in the majority of cases within an hour or in the worst case over-night.
 
 \comment{chris}{this is new:}

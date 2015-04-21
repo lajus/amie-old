@@ -6,15 +6,14 @@ rg.options(width.mm=80*1.6, height.mm=37*1.6, ps=5, legend.ps=5, mar=c(3,3,0.7,0
 
 
 
-
 		    # onlyOutput +MRL  +QWR 	+PR
-yago2 	<- c( 3.23*60,	29.03,	38.16 ,	2.98*60) 
+yago2 	<- c( 2.82*60,	29.03,	38.16 ,	2.80*60) 
 yago2.width 	<- c(0.5,0.5,0.5, 0.5)
 yago2.space 	<- c(1,0,0,0)
 
 
 
-yago2c 		<- c( 38.8,	8.9,	12.04, 36.48) 
+yago2c 		<- c( 37.05,	8.9,	12.04, 36.48) 
 yago2c.width	<- c(0.5,0.5,0.5, 0.5) 
 yago2c.space 	<- c(1,0,0,0)
 
@@ -31,7 +30,7 @@ db2 		<- c( 24*60,	63,	NA,	24*60)
 db2.width 	<- c(0.5,0.5,0.5, 0.5)
 db2.space 	<- c(1,0,0,0)
 
-db3 		<- c( 24,	6.16,	7.55,	15.1) 
+db3 		<- c(14.16,	6.16,	7.55,	15.1)
 db3.width 	<- c(0.5,0.5,0.5, 0.5)
 db3.space 	<- c(1,0,0,0)
 
@@ -67,7 +66,7 @@ text(6.8,30*60,">1d", pos=4, col="black")
 
 text(7.8,30*60,">1d", pos=4, col="black")
 text(9.3,30*60,">1d", pos=4, col="black")
-text(10.3,30,">1d", pos=4, col="black")
+# text(10.3,30,">1d", pos=4, col="black")
 
 text(12.8,30*60,">1d", pos=4, col="black")
 rg.endplot()
