@@ -6,6 +6,7 @@ package amie.mining;
  *
  */
 public enum Metric {
-	None, Support, Confidence, ImprovedConfidence, HeadCoverage, MinPredictiveness, MaxPredictiveness, 
-	BodySize, ImprovedConfidenceTimesPredictivenessTimesBodySize, ConfidenceTimesPredictivenessTimesBodySize, ImprovedPredictivenessStd, ImprovedPredictiveness
+	None, Support, StandardConfidence, PCAConfidence, HeadCoverage, MinPredictiveness, MaxPredictiveness, 
+	BodySize, ImprovedConfidenceTimesPredictivenessTimesBodySize, 
+	ConfidenceTimesPredictivenessTimesBodySize, ImprovedPredictivenessStd, ImprovedPredictiveness
 }

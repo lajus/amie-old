@@ -896,10 +896,12 @@ public class AMIE {
 				System.exit(1);
 			}
 		}
+		System.out.println("Using recursivity limit " + recursivityLimit);
 		
 		switch(bias) {
 		case "seedsCount" :
 			mineAssistant = new SeedsCountMiningAssistant(dataSource, schemaSource);
+			mineAssistant.setConfidenceMetric(ConfidenceMetric.StandardConfidence);
 			break;
 		case "headVars" : default:
 			mineAssistant = new HeadVariablesMiningAssistant(dataSource);

@@ -1,7 +1,6 @@
 package amie.mining.assistant;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +10,7 @@ import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Pair;
 import amie.data.FactDatabase;
+import amie.mining.ConfidenceMetric;
 import amie.query.Query;
 
 /**
@@ -156,33 +156,39 @@ public class MiningAssistant{
 	 * 1.0.
 	 */
 	protected boolean enablePerfectRules;
-
+	
+	/**
+	 * Confidence metric used to assess the quality of rules.
+	 */
+	protected ConfidenceMetric confidenceMetric;
+	
 	
 	/**
 	 * @param dataSource
 	 */
 	public MiningAssistant(FactDatabase dataSource) {
-		source = dataSource;
+		this.source = dataSource;
 		this.minStdConfidence = 0.0;
 		this.minPcaConfidence = 0.0;
 		this.maxDepth = 3;
-		allowConstants = false;
+		this.allowConstants = false;
 		ByteString[] rootPattern = Query.fullyUnboundTriplePattern1();
 		List<ByteString[]> triples = new ArrayList<ByteString[]>();
 		triples.add(rootPattern);
-		totalSubjectCount = source.countDistinct(rootPattern[0], triples);
-		totalObjectCount = source.countDistinct(rootPattern[2], triples);
-		typeString = ByteString.of("rdf:type");
-		subPropertyString = ByteString.of("rdfs:subPropertyOf");
-		headCardinalities = new HashMap<String, Long>();
+		this.totalSubjectCount = this.source.countDistinct(rootPattern[0], triples);
+		this.totalObjectCount = this.source.countDistinct(rootPattern[2], triples);
+		this.typeString = ByteString.of("rdf:type");
+		this.subPropertyString = ByteString.of("rdfs:subPropertyOf");
+		this.headCardinalities = new HashMap<String, Long>();
 		ByteString[] subclassPattern = Query.fullyUnboundTriplePattern1();
 		subclassPattern[1] = subPropertyString;
-		subclassQuery = new Query(subclassPattern, 0);
-		countAlwaysOnSubject = false;
-		silent = false;
-		pcaOptimistic = false;
-		exploitMaxLengthOption = true;
-		enableQueryRewriting = true;
+		this.subclassQuery = new Query(subclassPattern, 0);
+		this.countAlwaysOnSubject = false;
+		this.silent = false;
+		this.pcaOptimistic = false;
+		this.exploitMaxLengthOption = true;
+		this.enableQueryRewriting = true;
+		this.confidenceMetric = ConfidenceMetric.PCAConfidence;
 		buildRelationsDictionary();
 		
 	}	
@@ -837,12 +843,21 @@ public class MiningAssistant{
 			//Now check the confidence with respect to its ancestors
 			List<Query> ancestors = candidate.getAncestors();			
 			for(int i = 0; i < ancestors.size(); ++i){
-				// Skyline technique on PCA confidence
+				double ancestorConfidence = 0.0;
+				double ruleConfidence = 0.0;
+				if (this.confidenceMetric == ConfidenceMetric.PCAConfidence) {
+					ancestorConfidence = ancestors.get(i).getPcaConfidence();
+					ruleConfidence = candidate.getPcaConfidence();
+				} else {
+					ancestorConfidence = ancestors.get(i).getStdConfidence();
+					ruleConfidence = candidate.getStdConfidence();
+				}
+				// Skyline technique on PCA confidence					
 				if (ancestors.get(i).isClosed() && 
-						candidate.getPcaConfidence() <= ancestors.get(i).getPcaConfidence()){
+						ruleConfidence <= ancestorConfidence){
 					addIt = false;
 					break;
-				}
+				}		
 			}
 		}else{
 			return false;
@@ -1148,5 +1163,13 @@ public class MiningAssistant{
 
 	public void setEnablePerfectRules(boolean enablePerfectRules) {
 		this.enablePerfectRules = enablePerfectRules;
+	}
+
+	public ConfidenceMetric getConfidenceMetric() {
+		return confidenceMetric;
+	}
+
+	public void setConfidenceMetric(ConfidenceMetric confidenceMetric) {
+		this.confidenceMetric = confidenceMetric;
 	}
 }
