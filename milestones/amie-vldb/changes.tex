@@ -32,7 +32,7 @@ Among other things, we have
     an experiment in which AMIE makes uses of the type information (but still does simple deduction of facts)
     and the precision curve already moves significantly higher. }
 
-Real applications will have to combine information from multiple rules or sources to arrive at predictions with high confidence. To showcase this, we have now added a new experiment in Sec.~\ref{advanced}, in which we add type information to the mining process. We can show that this increases the accuracy of the predictions to 70\%.
+Real applications will have to combine information from multiple rules or sources to arrive at predictions with high confidence. To showcase this, we have now added a new experiment in Sec.~\ref{prediction}, in which we add type information to the mining process. We can show that this increases the accuracy of the predictions to 70\%.
 
 \review{R1: the main proposed heuristic (which contributes most to the  speed-up) is an ad-hoc approximation of  the PCA confidence for a specific type of 3-atom rules, being not trivial to generalize it to any kind of rule.  (Indeed, experiments are limited to 3-atom rules)\\
    R2: the rules that this technique can be applied to are still a bit limited. }
@@ -142,7 +142,7 @@ It is true that all three operators require that one of the variables of the new
       E.g., in rule 1, why is the rule (living in X) $\Rightarrow$ (citizen of X) stronger because a citizen imports and exports the same goods? [...]
       If these are the only 4 examples of good new rules produced by AMIE+,  I am really not impressed.}
 
-Exactly! These rules were there to show that, in general, rules with 4 atoms are not very meaningful. The reviewer is thus right by being not impressed. Therefore, AMIE mines rules only up to 3 atoms, which are usually meaningful (unless the user requests to see also rules with more atoms). Since this was not very clear, we have now rewritten the corresponding parts of the paper.
+Exactly! These rules were there to show that, in general, rules with 4 atoms are not very meaningful. The reviewer is thus right by being not impressed. Therefore, AMIE mines rules only up to 3 atoms by default. Since this was not very clear, we have now rewritten the corresponding parts of the paper.
 
 As for the name ``AMIE+'': The goal of AMIE+ is not to produce more rules, but to produce the same rules faster. This allows AMIE+ to run on datasets where AMIE could not run. We have now added a discussion in Section \ref{amiepm} to showcase this very explicitly.
 
