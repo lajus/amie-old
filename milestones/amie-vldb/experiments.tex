@@ -63,7 +63,7 @@ For Wikidata, we use a dump from December 2014, available for download at \url{h
 KB & Facts & Subjects & Relations\\
 \hline
 YAGO2 core  & 948K & 470K & 32\\
-YAGO2 types  & 2.29M & 470K & -\\
+YAGO3 types  & 2.29M & 470K & -\\
 YAGO2s & 4.12M  & 1.65M & 37\\
 DBpedia 2.0 & 6.70M & 1.38M & 1595\footnote{Relations with more than 100 facts only.} \\
 DBpedia 3.8 & 11.02M & 2.20M & 650 \\
@@ -750,7 +750,8 @@ Incompleteness		&\emph{isMarriedTo}		& 79.31\\
 \subsection{AMIE vs. State-of-the-art Systems} \label{competitors}
 \comment{chris}{this is just a summary. Usability stuff are out. Constants on different modes are out, etc. Please see if you are happy with the result}
 
-In this section we present an overview of the comparison between AMIE and two state-of-the-art rule mining system that are publicly available:
+In this section we present an overview of the comparison between AMIE and two state-of-the-art rule mining systems 
+that are publicly available:
 WARMR~\cite{GoeVan02} and ALEPH~\cite{Muggleton:1996:LPD:647996.742465}. A more detailed description of these experiments can be found in~\cite{amie}.
 We compare these system with AMIE in terms of runtime and quality of produced rules. For a detailed usability comparison please refer to~\cite{amie}.
 
@@ -761,18 +762,20 @@ It generates Datalog queries of the form ``$?-A_1,A_2,...,A_n$'',
 where $A_i$ are logical atoms. WARMR applies a closed world assumption for assessing the quality of the produced rules.
 
 \paragraph{Runtime}
-For comparing WARMR with AMIE in terms of runtime, we tweaked AMIE to simulate WARMR's confidence measure.  
-WARMR was not able to terminate on YAGO2 in a time period of 1 day. Therefore, we created a sample of YAGO2 
-(see~\cite{amie} for information on how to sample a KB for rule-mining purposes).
-In that sample, AMIE mined her rules in 7.91s seconds.
+For comparing WARMR with AMIE in terms of runtime, we tweaked AMIE to simulate WARMR's support and use the standard confidence
+as quality metric for rules.  
+WARMR was not able to terminate on YAGO2 in a time period of 1 day. Therefore, we created a sample of YAGO2 containing 47K triples
+(see~\cite{amie} for details about the sampling method).
+In that sample, AMIE mined her rules in 6.02 seconds on average accross 3 runs of the system.
 WARMR, in contrast, took 18 hours. Both systems were run with an absolute support threshold of 5 entities.
 
-We also ran both systems in a mode that allows them to mine rules with constants. 
-AMIE completed the task in 1.68 minutes on average. WARMR for all relations did not terminate in 3 days.
+We also ran both systems in a mode that allows them to mine rules with constants. For AMIE, it implies to enable
+the instantiation operator $\mathcal{O}_I$ (see Section~\ref{subsubsec:refinement}).
+AMIE completed the task in 1.43 minutes on average. WARMR for all relations did not terminate in 3 days.
 Therefore, we ran it only for the relations \textit{diedIn}, \textit{livesIn}, \textit{wasBornIn}, for which it took 48h. 
 Table \ref{warmrruntime} summarizes the runtime results for WARMR, AMIE, and AMIE+. To make AMIE+ comparable, 
 we run it without confidence threshold, therefore the reported runtime for AMIE+ uses only the enhacements for the refinement phase.
-We conclude that AMIE is better suited for large KBs than WARMR.
+We conclude that AMIE and AMIE+ are better suited for large KBs than WARMR.
 This is because WARMR is an ILP algorithm written in a logic programming environment, 
 which makes the evaluation of all candidate queries inefficient.\\
 
@@ -789,7 +792,7 @@ Constants 	& WARMR 		& AMIE 		& AMIE+\\
 
 
 \paragraph{Results} After filtering out non-connected rules, WARMR mined 41 closed rules. 
-AMIE+, in contrast, mined 74 closed rules, which included the ones mined by WARMR.
+AMIE+, in contrast, mined 75 closed rules, which included the ones mined by WARMR.
 We checked back with the WARMR team and learned that for a given set of atoms $B_1, ... B_n$, 
 WARMR will mine only one rule,
 picking one of the atoms as head atom (e.g., $B_1 \wedge ... \wedge B_{n-1} \Rightarrow B_n$).
@@ -799,8 +802,11 @@ Furthermore, it runs orders of magnitude faster.
 Especially for large datasets for which the user would have needed to use complicated sampling schemes in order to use WARMR,
 AMIE can be a very attractive alternative.
 Even for smaller datasets with rules with constants, AMIE can provide results while WARMR cannot.
-Moreover, AMIE comes with metrics that go beyond the standard confidence and the standard support.
-We will show later that these improve the quality of the results.
+Moreover, AMIE does not make a closed world assumption as WARMR does. 
+%uses the PCA confidence to measure the quality of rules comes with metrics that go beyond the standard confidence and the standard support.
+In Section~\ref{experimentspca} we show that the PCA confidence defined by AMIE
+is more suitable than the standard confidence to identify predictive rules in a web-extracted KB designed under
+an open world assumption.
 
 \subsubsection{AMIE vs. ALEPH}
 
@@ -811,18 +817,18 @@ It takes random facts as negative evidence, instead:
 \[ Score := log(P)-log\frac{R+1}{Rsize+2}-\frac{L}{P} \]
 Here, $P$ is the number of known true facts covered (KBtrue, or A resp., in Figure~\ref{fig:prediction}), $R$ is the number of random examples covered, 
 $Rsize$ is the total number of randoms, and $L$ is the number of atoms in the rule. 
-The intuition is that a good rule should cover many positive examples, and few or no randomly generated examples. This ensures
-that the rule is not overly general. Furthermore, the rule should use as few atoms as possible, and thus achieve a high compression.
+The intuition behind the formula is that, a good rule should cover many positive examples, and few or no randomly generated examples. This ensures
+that the rule is not overly general. Furthermore, the rule should use as few atoms as possible.%, and thus achieve a high compression.
 
 
 
 \paragraph{Runtime}
-We ran AMIE, AMIE+ and ALEPH on YAGO2 \cite{yago2}. For ALEPH, we used the positive-only evaluation function with $Rsize=50$ 
+We ran AMIE and ALEPH on YAGO2. For ALEPH, we used the positive-only evaluation function with $Rsize=50$ 
 and we considered only clauses that were able to explain at least 2 positive examples,
 so that we will not get grounded facts as rules in the output.
 For a fair comparison, we also instructed AMIE and AMIE+ to run with a support threshold of 2 facts.
 We did not use any confidence threshold.
-AMIE+ terminated in 3.76 minutes and found rules for all relations. 
+AMIE terminated in 4.41 minutes and found rules for all relations. 
 ALEPH runs for one head relation at a time. For some relations (e.g.\emph{isPoliticianOf}),
 it terminated in a few seconds.
 For others, however, we had to abort the system after 1 day without results (Tables \ref{alephrun0} and \ref{alephrun1}).
@@ -831,7 +837,8 @@ We could not figure out a way to choose examples in such a way that ALEPH runs f
 Hence, we used the sample of YAGO2 that we created for WARMR.
 Again, runtimes varied widely between relations (Table \ref{alephrun2}).
 Some relations ran in a few seconds, others did not terminate in a day.
-The runtimes with constants are similarly heterogeneous, with at least 7 relations not terminating in 1 day.
+The runtimes with constants are similarly heterogeneous, with at least 7 relations not terminating in 1 day \comment{Luis}{I propose
+to remove this sentence as it may raise the reviewer's curiosity about the runtimes of ALEPH with constants. Do we have those times?}.
 
 \begin{table}
 \begin{tabular}{l|ccc}
@@ -876,7 +883,7 @@ confidence on the sample of YAGO2 used for the runtime experiments.
 Recall that ALEPH requires more than one day for some relations, so we used only rules for which the head
 relation runs in less than one day.
 ALEPH mined 56 rules, while AMIE mined 302 rules.
-We order the rules by decreasing score (ALEPH) and decreasing PCA confidence (AMIE).
+We ordered the rules by decreasing score (ALEPH) and decreasing PCA confidence (AMIE).
 Table \ref{alephres} shows the number of predictions and their total precision.
 We show the aggregated values at the points where both approaches have produced around 3K, 5K, and 8K predictions.
 AMIE's PCA confidence succeeds in sorting the rules roughly by descending precision, so that the initial rules have an extraordinary precision 
@@ -946,7 +953,7 @@ Table~\ref{PCA_assumption_entities} shows, for each relation, the percentage of 
 This is because our analysis also counts the cases where the KB contains bugs. If, for instance, YAGO knows the wrong place of death of a person, then there exists another value outside YAGO that is the right value. However the PCA would reject it. Hence, we count this case as a miss.
 
 The PCA extends well to relations that are strictly speaking not functions, but that have a high functionality.
-These are relations that usually have one object per subject, even though there could be several.
+These are relations that usually have one object per subject, even though there could be several objects.
 For example, a person can graduate from several universities, but most people graduate from a single university. We call these relations \emph{quasi-functions}.
 The PCA worked very well also on these, and predicted completeness correctly for $73\%-100\%$
 of the subjects under investigation. Since the PCA takes into account the direction of the functionality, the PCA also holds for quasi inverse-functional relations such as \emph{directed}.

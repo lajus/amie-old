@@ -1,8 +1,8 @@
 % !TEX root = main.tex
 
-In this paper, we have presented AMIE, an approach for mining Horn rules on large RDF knowledge bases. AMIE is based on a formal model for rule mining under the Open World Assumption, a novel measure to simulate counter-examples, and a scalable algorithm for the mining. In contrast to state-of-the-art approaches, AMIE requires no input other than the KB and does not need configurations or parameter tuning.
+In this paper, we have presented AMIE, an approach to mine Horn rules on large RDF knowledge bases. AMIE is based on a formal model for rule mining under the Open World Assumption, a novel measure to simulate counter-examples, and a scalable mining algorithm. In contrast to state-of-the-art approaches, AMIE requires no input other than the KB and does not need configurations or parameter tuning.
 
-We have extended AMIE to AMIE+ by a series of pruning and query rewriting techniques, both lossless and approximative.
+We have extended AMIE to AMIE+ by a series of pruning and query rewriting techniques, both lossless and approximate.
 As our extensive experiments have shown, AMIE+ runs on millions of facts in only a few minutes and outperforms state-of-the-art approaches not only in terms of runtime,
 but also in terms of the number and quality of the output rules.
 %Our confidence measure can reasonably predict the precision of the rules.
@@ -10,7 +10,7 @@ but also in terms of the number and quality of the output rules.
 %\comment{Chris}{Perhaps write some impressive result here.}
 
 For future work, we aim to develop well-founded inferences approaches based on the rules mined by AMIE and 
-extend the set of rules beyond the language of closed Horn rules,
+extend the language bias beyond the language of closed Horn rules,
 so that even more non-obvious facts can be predicted.
 
 % For future work, we aim to use instance information (types) to improve the precision of rules. We also aim to explore the synergy when multiple rules predict the same fact, and to extend the set of rules beyond the language of closed Horn rules,
