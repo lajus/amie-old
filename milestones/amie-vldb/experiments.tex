@@ -50,8 +50,8 @@ All runtime results reported are averaged over 3 runs.
 
 \paragraph{Datasets} We run our experiments on different KBs. Table~\ref{kbs} shows a summary of the KBs used for our experiments.
 In all cases, we removed all facts with literals (numbers and strings).
-This is because literal values (such as geographical coordinates) are shared by only very few entities, 
-which makes them less interesting for rule mining. 
+This is because literal values (such as geographical coordinates) are shared by only very few entities,
+which makes them less interesting for rule mining.
 We removed type information from the data sets. In turn, the YAGO-type data set was obtained by adding the \emph{rdf:type} statements to the YAGO core dataset. We restricted the type statements to those in the domains and ranges of the relations.
 For both DBpedia 2.0 and 3.8, we use the person data and mapping-based properties datasets. 
 For Wikidata, we use a dump from December 2014, available for download at \url{http://tools.wmflabs.org/wikidata-exports/rdf/exports/20140420/}.
@@ -119,13 +119,13 @@ We experimented with rules of 3 and 4 atoms (this is the value of $maxLen$).
 
 
 % \comment{Chris}{or}
-% We initially experimented with rules containing 3 and 4 atoms. 
+% We initially experimented with rules containing 3 and 4 atoms.
 % However, we found that rules with more than 3 atoms were numerous and noisy.
 % Table~\ref{rules4atoms} shows some 4-atom-rules of high confidence mined with AMIE+ on YAGO2.
 %  Let us look at one of the examples: \\
-% 
+%
 % {\small \raggedleft \emph{capital}$(a,f) \wedge$ \emph{hasGeoId}$(b,j) \wedge$ \emph{hasGeoId}$(f,j) \Rightarrow$ \emph{capital}$(a,b)$} \\
-% 
+%
 % \noindent It is easy to see that $f$ and $b$ bind always to the same values since the relations $capital$ and
 % $hasGeoId$ are
 % highly functional. This makes the rule uninteresting. Moreover, AMIE+ needs 5.71min to mine rules with up to 4 atoms, producing 2144 rules in total,
@@ -136,7 +136,7 @@ We experimented with rules of 3 and 4 atoms (this is the value of $maxLen$).
 % % Minimum Description Length principle, where among two hypotheses explaining the data comparably well, the simpler (shorter) is preferred.
 % % Furthermore, ILP approaches such as~\cite{Muggleton95inverseentailment} take into account this principle, giving preference to shorter rules.
 % Therefore, we only mine rules with 3 atoms.
-% 
+%
 % {\small \vspace{0.5cm}
 % \begin{table}
 % \hspace*{-2.4ex}
@@ -159,14 +159,14 @@ We experimented with rules of 3 and 4 atoms (this is the value of $maxLen$).
 % \ignore{
 % \subsection{Comparison with State-of-the-Art Systems}
 % \noindent In this section, we compare AMIE to WARMR and ALEPH. For each system, we conduct three experiments: We first compare the usability of the competitor system to AMIE. Then, we compare their runtimes to AMIE and AMIE+.
-% 
+%
 % \subsubsection{AMIE vs. WARMR}
-% 
+%
 % \paragraph{Usability} WARMR is a system that unifies ILP and association rule mining. Similar to APRIORI algorithms~\cite{Agrawal:1996:FDA:257938.257975}, it performs a
 % breadth-first search in order to find frequent patterns.
 % WARMR generates Datalog queries of the form ``$?-A_1,A_2,...,A_n$'',
 % where $A_i$ are logical atoms.
-% 
+%
 % To discover frequent patterns (as in association rule mining), we need to have a notion of frequency. Given that WARMR considers queries as patterns and that queries can have variables,
 % it is not immediately obvious what the frequency of a given query is. Therefore, the user needs to specify
 % %define what is actually
@@ -176,7 +176,7 @@ We experimented with rules of 3 and 4 atoms (this is the value of $maxLen$).
 % In the usual scenario of market basket analysis, the system counts customer transactions.
 % In a scenario in which the database is a KB, one solution is to count entities.
 % Therefore, we add a predicate \emph{entity}$(x)$, which we fill with all entities of the KB. By contrast, AMIE does not require such a trick.
-% 
+%
 % For WARMR, the user needs to provide specific information (called type declarations) about which predicates can be added to a query, which of their variables can be fresh (output mode),
 % which should have already appeared in another atom (input mode)
 % and which can be both (input/output mode). In other words, the user needs to define the language bias in terms of type and mode declarations.
@@ -189,7 +189,7 @@ We experimented with rules of 3 and 4 atoms (this is the value of $maxLen$).
 % This means that the user needs to filter out the useful rules for his application from all the intermediate rules.
 % % Therefore, we had to filter out from the output non-interesting rules for our scenario rules . % Fabian: "non-interesting" sounds very subjective
 % For the comparison with AMIE, we filtered out non-closed and non-connected rules.
-% 
+%
 % WARMR is also able to mine rules with constants. The user can define which predicates and arguments should be instantiated with constants (we call this mode MODE1).
 % WARMR then checks all the constants appearing in the facts of that specific predicate and argument and afterwards uses them in the queries.
 % MODE1 naturally entails an increase of the branching factor in the search space and an explosion in the number of candidates that need to be evaluated.
@@ -198,7 +198,7 @@ We experimented with rules of 3 and 4 atoms (this is the value of $maxLen$).
 % In other words, there is no guarantee that the constants that WARMR will use are the most promising ones in terms of support. AMIE, in contrast, does not need any user specifications in order to mine rules with constants.
 % Thus, we conclude that the broader mission and the broader applicability of WARMR entails much more configuration,
 % acquaintance, and expert knowledge to mine Horn rules on semantic KBs than AMIE.
-% 
+%
 % \paragraph{Runtime}
 % YAGO2\cite{yago2} contains around 940K facts about 470K entities.
 % WARMR was not able to terminate on this data in a time period of 1 day. Therefore, we created a sample of YAGO2.
@@ -208,7 +208,7 @@ We experimented with rules of 3 and 4 atoms (this is the value of $maxLen$).
 % This sample contains all available information in a radius of 3 hops around the seed entities, but much less information about the entities at the periphery of the subgraph.
 % Therefore, we restricted the values for the key predicate
 % to the seed entities only.
-% 
+%
 % Since the sample is much smaller than the original KB, we lowered the support threshold to 5 entities.
 % In order to make AMIE and WARMR comparable, we tweaked AMIE so that she will also count seed entities while calculating the standard confidence.
 % We ran AMIE with the same parameters on the sample. AMIE mined her rules in 7.91s seconds (averaged over 3 runs).
@@ -218,7 +218,7 @@ We experimented with rules of 3 and 4 atoms (this is the value of $maxLen$).
 % To have reasonable runtimes, we allowed WARMR to find constants only for one predicate (\emph{diedIn}). We also restricted it to find only 20 constants. WARMR ran 19 hours.
 % Table \ref{warmrruntime} summarizes the runtime results for WARMR, AMIE, and AMIE+. We conclude that AMIE is better suited for large KBs than WARMR.
 % This is because WARMR is an ILP algorithm written in a logic programming environment, which makes the evaluation of all candidate queries inefficient.\\
-% 
+%
 % % \begin{table}
 % % \begin{tabular}{l|rr rr|}
 % % Constants & WARMR & AMIE & AMIE+\\
@@ -229,8 +229,8 @@ We experimented with rules of 3 and 4 atoms (this is the value of $maxLen$).
 % % \caption{Runtimes on YAGO2 sample}
 % % \label{warmrruntime}
 % % \end{table}
-% 
-% 
+%
+%
 % \paragraph{Results} After filtering out non-connected rules, WARMR mined 41 closed rules. AMIE+, in contrast, mined 207 closed rules, which included the ones mined by WARMR.
 % We checked back with the WARMR team and learned that for a given set of atoms $B_1, ... B_n$, WARMR will mine only one rule,
 % picking one of the atoms as head atom (e.g., $B_1 \wedge ... \wedge B_{n-1} \Rightarrow B_n$).
@@ -241,18 +241,18 @@ We experimented with rules of 3 and 4 atoms (this is the value of $maxLen$).
 % Even for smaller datasets with rules with constants, AMIE can provide results while WARMR cannot.
 % Moreover, AMIE comes with metrics that go beyond the standard confidence and the standard support.
 % We will show later that these improve the quality of the results.
-% 
-% 
+%
+%
 % \subsubsection{AMIE vs. ALEPH}
-% 
+%
 % \paragraph{Usability} ALEPH can be run with different commands that influence the search strategy. We chose the \emph{induce} command, which runs fastest.
 % For running ALEPH, the user has to specify the target predicate for learning (the head predicate of the rules).
 % In the following, we run ALEPH successively with all predicates of the KB as targets.
 % In addition, the user has to specify a series of types and mode declarations (similar to WARMR), which will be used as a language bias in order to restrict the search space.
 % In addition, the user needs to provide ALEPH with files containing the background knowledge and positive examples for the target predicate.
 % In contrast, AMIE requires no such input. It will run on a KB without any prespecified choices of predicates.
-% 
-% 
+%
+%
 % % \begin{table}
 % % \begin{tabular}{l|ccc}
 % % KB & ALEPH & AMIE & AMIE+\\
@@ -289,9 +289,9 @@ We experimented with rules of 3 and 4 atoms (this is the value of $maxLen$).
 % % \caption{Runtimes of ALEPH on YAGO2 sample}
 % % \label{alephrun2}
 % % \end{table}
-% 
-% 
-% 
+%
+%
+%
 % \paragraph{Runtime}
 % We ran AMIE and ALEPH on YAGO2 \cite{yago2}. For ALEPH, we used the positive-only evaluation function with $Rsize=50$ and we considered only clauses that were able to explain at least 2 positive examples,
 % so that we will not get grounded facts as rules in the output.
@@ -314,20 +314,20 @@ We experimented with rules of 3 and 4 atoms (this is the value of $maxLen$).
 In this section, we discuss the runtime improvements of AMIE+ over the previous version AMIE.
 Let us first discuss only AMIE. Recall from Section~\ref{subsec:algorithm} that the AMIE algorithm consists of three main phases:
 \begin{itemize}
- \item Refinement (i.e., rule expansion). 
+ \item Refinement (i.e., rule expansion).
  \item Output, which includes confidence calculation. % and the application of the skyline heuristic. Fabian: that word is never mentioned before.
  \item Duplicate elimination.
 \end{itemize}
 
-Table~\ref{timeProportion} shows the average proportion of time spent by AMIE in each task, across 
-three runs of the system. 
-We use the YAGO2 dataset and run AMIE with and without constants. 
-We observe that the refinement and output phases dominate the system's runtime. 
-When constants are not enabled, most of the time is spent in the refinement phase. In contrast, 
+Table~\ref{timeProportion} shows the average proportion of time spent by AMIE in each task, across
+three runs of the system.
+We use the YAGO2 dataset and run AMIE with and without constants.
+We observe that the refinement and output phases dominate the system's runtime.
+When constants are not enabled, most of the time is spent in the refinement phase. In contrast,
 the addition of the instantiation operator increases the number of rules and therefore the time
-spent in the output and duplicate elimination phases. In both cases, 
-the duplicate elimination is the least time-consuming phase. 
-The enhancements introduced by AMIE+ aim at reducing the time spent in the 
+spent in the output and duplicate elimination phases. In both cases,
+the duplicate elimination is the least time-consuming phase.
+The enhancements introduced by AMIE+ aim at reducing the time spent in the
 refinement and output phases.
 \begin{center}
 \begin{table}
@@ -345,11 +345,11 @@ YAGO2 (c)  	& 19132	&  53.54\%	& 35.64\% 	& 10.82\% \\ \hline
 
 \ignore{Fabian: we said this in "settings"
 
-By default, AMIE+ enables the improvements introduced in Section~\ref{subsec:lossless}, namely 
-pruning by maximum rule length (MRL), the query rewriting (QRW) and the identification of perfect rules (PR). 
+By default, AMIE+ enables the improvements introduced in Section~\ref{subsec:lossless}, namely
+pruning by maximum rule length (MRL), the query rewriting (QRW) and the identification of perfect rules (PR).
 These are lossless runtime enhancements that optimize the refinement phase
 and do not alter AMIE's output.
-If an additional confidence threshold is given, AMIE+ can use the heuristics presented 
+If an additional confidence threshold is given, AMIE+ can use the heuristics presented
 in Section~\ref{subsec:speedingConfidenceEvaluation} to prune rules below the confidence threshold in advance
 and reduce the time spent in the confidence calculation and hence the output phase.
 }
@@ -504,7 +504,7 @@ To assess the quality of the confidence approximation, we report in addition the
 The pruning precision is the ratio of rules for which the confidence approximation introduced
 in Section~\ref{sec:appr} overestimates the actual confidence. We
 calculate this ratio by counting the number of times that the heuristics
-produce a higher value than the real confidence (among the rules on which the approximation is applicable). 
+produce a higher value than the real confidence (among the rules on which the approximation is applicable).
 For example, a pruning precision of 96\% means
 that in 4\% of the cases the system erroneously pruned rules with a confidence higher than 0.1.
 As in the previous section, we set a threshold of 0.1 PCA Confidence for AMIE. We also interrupted the system 
@@ -527,8 +527,8 @@ Table~\ref{amievsplus} shows the runtimes of AMIE and AMIE+ with different setup
 %bound enabled and AMIE+ with all the optimizations.
 %If a system ran for more than one day without finishing, we interrupted it and reported the Fabian: said below
 %output obtained until that point in time.
-For AMIE, we show only the runtime. Since our goal is to observe the effect of each enhancement in the runtime of AMIE+, 
-we show runtimes for combinations of the improvements introduced in Sections~\ref{subsec:lossless} and~\ref{subsec:speedingConfidenceEvaluation}. 
+For AMIE, we show only the runtime. Since our goal is to observe the effect of each enhancement in the runtime of AMIE+,
+we show runtimes for combinations of the improvements introduced in Sections~\ref{subsec:lossless} and~\ref{subsec:speedingConfidenceEvaluation}.
 These includes:
 \begin{enumerate}
  \item AMIE+ in its default configuration, i.e., with the lossless enhancements: MRL + QRW + PR. We refer to this setting as \emph{Default}.
@@ -541,8 +541,8 @@ These includes:
  \end{enumerate}
 \end{enumerate}
 
-We also report the number of rules produced in each setting. 
-Since the lossless enhacements do not alter the output of AMIE, we report a single rule count for settings 2 and 3. 
+We also report the number of rules produced in each setting.
+Since the lossless enhacements do not alter the output of AMIE, we report a single rule count for settings 2 and 3.
 To assess the quality of the confidence approximation, we report in addition the \emph{pruning precision}.
 %In the default setting of AMIE+, the number of rules (and, in fact, the rules) are the same as in AMIE.
 %with and without the confidence threshold.% (confidence thresholds do not alter runtime in AMIE).
@@ -555,7 +555,7 @@ To assess the quality of the confidence approximation, we report in addition the
 The pruning precision is the ratio of rules for which the confidence approximation introduced
 in Section~\ref{sec:appr} overestimates the actual confidence. We
 calculate this ratio by counting the number of times that the heuristics
-produce a higher value than the real confidence (among the rules on which the approximation is applicable). 
+produce a higher value than the real confidence (among the rules on which the approximation is applicable).
 For example, a pruning precision of 96\% means
 that in 4\% of the cases the system erroneously pruned rules with a confidence higher than 0.1.
 If a system ran for more than one day, we interrupted it
@@ -569,7 +569,7 @@ while AMIE+ with all the heuristics enabled produces 117K rules.
 
 Table~\ref{amievsplus} shows that our enhancements have a significant impact in the runtime of AMIE.
 On YAGO2, AMIE+ already exhibits a speedup factor of 6.7 w.r.t. AMIE.
-For bigger and more complex datasets, however, even AMIE+  could not finish in one day. 
+For bigger and more complex datasets, however, even AMIE+  could not finish in one day.
 It is therefore required to enable all the optimizations to achieve reasonable runtimes.
 We can also see that the confidence upper bounds by themselves do not allow us to scale to the size of YAGO2s, DBpedia, or Freebase.
 For example, they can prune only 6 rules on YAGO2s.
@@ -579,10 +579,10 @@ Therefore, we need to enable the confidence approximations in order to scale to 
 This heuristic, however, comes with the additional cost of computing the
 join cardinalities for every pair of relations in the KB, which can be very expensive for KBs with many relations, such as DBpedia or Freebase.
 Nevertheless, it is run only once and, as the results show, it pays off.
-On KBs where normal rule mining would have required more than a day, 
+On KBs where normal rule mining would have required more than a day,
 AMIE+ can run in a few hours or, in the worst case, over-night.
-This speedup does not entail a serious decrease in the quality of the output: 
-in the majority of datasets, AMIE+ does not miss any of the rules with confidence above 10\%. 
+This speedup does not entail a serious decrease in the quality of the output:
+in the majority of datasets, AMIE+ does not miss any of the rules with confidence above 10\%.
 In the other datasets, it misses at most 4\% of them.
 }
 
@@ -948,7 +948,7 @@ Naturally, if YAGO contains one of these, the others are possible options. Hence
 However, these cases could be addressed if one restricts the range of the relation (say, to cities).
 With such a restriction, the relations become functions or quasi-functions, which lifts them into the category where the PCA works well.
 % We plan to investigate this possibility in future work.
-As we will see in Section ~\ref{subsubsec:std_vs_pca}, the use of types can significantly improve the performance of AMIE. 
+As we will see in Section ~\ref{subsubsec:std_vs_pca}, the use of types can significantly improve the performance of AMIE.
 
 \paragraph{Implicit Assumptions} Some statements can be inferred from the Wikipedia page even if the page does not mention them. % For instance, %\emph{livesIn} is incomplete ``in-purpose'' in the sense
 People usually do not state information that can easily be inferred by what they have stated before
@@ -1006,11 +1006,11 @@ To evaluate the precision of these guesses, we proceeded as follows: We ran our 
 
 \paragraph{Standard vs PCA confidence} Our first goal is to see whether the PCA confidence or the standard confidence perform better in this task. Since both AMIE and AMIE+ can work with both confidence metrics, and since their output is the same, we report here our results from \cite{amie} with AMIE. We ran AMIE, and sorted the resulting rules first by descending PCA confidence, and then by descending standard confidence. We looked at the top ranked rules in each case, and evaluated the precision of the predictions. 
 The bottom curves of Figure \ref{finalshow} plot the aggregated predictions versus the aggregated precision for the standard and the PCA confidence.
-The $n$-th dot from the left represents the total number of unique predictions and the total precision of these predictions, 
+The $n$-th dot from the left represents the total number of unique predictions and the total precision of these predictions,
 aggregated over the first $n$ rules.
 As we see, ranking the rules by standard confidence is a very conservative approach:
 It identifies rules with reasonable precision, but these do not produce many predictions.
-Going down in the list of ranked rules, the rules produce more predictions -- but at lower precision. 
+Going down in the list of ranked rules, the rules produce more predictions -- but at lower precision.
 The top 30 rules produce 113K predictions at an aggregated precision of 34\%.
 In contrast, if we rank the rules by PCA confidence, we quickly get large numbers of predictions. The top 10 rules already produce 135K predictions -- at a precision of 45\%.
 The top 30 rules produce 3 times more predictions than the top 30 rules by standard confidence -- at comparable precision.
@@ -1037,7 +1037,7 @@ of the inference process. Therefore, we configured AMIE+ to mine \emph{typed rul
  \vec{B} \wedge \textit{rdf:type}(x, D) \wedge \textit{rdf:type}(y, R) \Rightarrow r(x, y)
 \]
 
-\noindent where $D$ and $R$ correspond to the domain and range of the head relation $r$ in YAGO3\footnote{We used YAGO3 because the type signatures in older versions were too general for some relations.}. 
+\noindent where $D$ and $R$ correspond to the domain and range of the head relation $r$ in YAGO3\footnote{We used YAGO3 because the type signatures in older versions were too general for some relations.}.
 % With a PCA confidence threshold of 0.1, AMIE+ found 57 typed rules on YAGO2.
 %This constraint suffices to solve the granularity differences discussed in Section~\ref{PCA_assumption_entities} as, for example, YAGO defines the relation $livesIn$ between people and cities.
 
@@ -1056,10 +1056,12 @@ We propose an alternative score instead:
  score^*(p) := 1 - \prod_{i = 1}^{k}{(1 -conf_{pca}(R_i)})
 \end{equation}
 Equation~\ref{predictions-score} aggregates the PCA confidence of the rules so that the predictions concluded by multiple rules
-are ranked higher. It also confers a probabilistic interpretation to the PCA confidence. The score of a prediction 
+are ranked higher. It also confers a probabilistic interpretation to the PCA confidence. The score of a prediction
 is the probability that at least one of the rules in $R_1, \dots R_k$ concludes $p$. This is computed as 1 minus the probability
 that none of the rules concludes $p$. The probability of a rule not concluding $p$ is defined as 1 minus the PCA confidence of the rule.
 The probability that none of the rules concludes $p$ is the product of the individual probabilities.
+Equation~\ref{predictions-score} assumes that rules are independent of each other. While this assumption may not always be true,
+it still serves as a naive baseline for probabilistic inference methods.
 
 We note that Equation~\ref{predictions-score} assumes that rules are independent from each other. While this assumption may not always be true, 
 it still serves as a naive baseline for probabilistic inference methods. 
@@ -1071,30 +1073,30 @@ of the predictions up to the n-th bucket. We bucketized the predictions by score
 corresponds to the predictions with score between 1 and 0.9, the next one accounts for the predictions with score between 0.9 and 0.8 and so on.
 
 As we can observe, our heuristics have a significant effect on the precision of the predictions. The precision is much higher at each level of recall, compared to the original experiment. We can make 100,000 predictions at a precision of 70\%. At 400K predictions, we still achieve a precision of 60\%. While these predictions should not be added directly to a KB, they could be sent to human evaluators to check their correctness.
-It is much easier for a person to check fact candidates for their correctness than to invent them from scratch. 
+It is much easier for a person to check fact candidates for their correctness than to invent them from scratch.
 In addition, this experimental setup could serve as a naive baseline for more sophisticated inference approaches.
 
 %such a simple approach guarantees than more than a half of the predictions
 % could be  it could still become a useful way
 % a human evaluator
-% could checked them The predicted candidates could be checked by a human before adding them to the KB. 
-% It is much easier for a person to check fact candidates for their correctness than to invent them from scratch. 
+% could checked them The predicted candidates could be checked by a human before adding them to the KB.
+% It is much easier for a person to check fact candidates for their correctness than to invent them from scratch.
 % We will investigate this avenue of research in future work.
 
 % While, such experimental
 %  Nevertheless, this experimental setup could
-%  serve as a naive baseline for more sophisticated inference approaches. In particular, the 
-% predictions in KBs is 
+%  serve as a naive baseline for more sophisticated inference approaches. In particular, the
+% predictions in KBs is
 % has been widely studied in the literature, however the experimental setup disregards two important characteristics of the data and the rule mining process.
-% In 
+% In
 
 % As we can see, the PCA confidence ranks predictive rules higher and is therefore more suitable for data prediction than the standard confidence.
 % Nevertheless, rule mining with the PCA confidence achieves a cumulative precision in the range of 35\%-45\%.
-% 
-% This precision is certainly not high enough to make actual predictions about the death place, future spouse, or future residence of a person. However, such rules can still be useful for downstream applications. For example, if several rules predict the same fact, then this fact is more likely to be true. Hence, we could use our predictions to construct a probabilistic KB that weights each fact by the number of rules that predicted it. Facts with high cumulated confidence could be good candidates to populate KBs. 
+%
+% This precision is certainly not high enough to make actual predictions about the death place, future spouse, or future residence of a person. However, such rules can still be useful for downstream applications. For example, if several rules predict the same fact, then this fact is more likely to be true. Hence, we could use our predictions to construct a probabilistic KB that weights each fact by the number of rules that predicted it. Facts with high cumulated confidence could be good candidates to populate KBs.
 % The predicted candidates could be checked by a human before adding them to the KB. It is much easier for a person to check fact candidates for their correctness than to invent them from scratch. We will investigate this avenue of research in future work.
 % The predicted statements could also be used in ontology watermarking schemes such as in~\cite{DBLP:conf/www/SuchanekG12}. These schemes add plausible but wrong statements to the KB in order to mark it. Rule mining can deliver such statements.
-% 
+%
 % We also note that our rules are insightful. Table \ref{rules} shows some of the rules that we mined.
 % Being able to mine reasonable rules on semantic KBs of this size is an achievement beyond the current state of the art.
 
@@ -1121,19 +1123,19 @@ In addition, this experimental setup could serve as a naive baseline for more so
 % When mining rules, we are naturally interested in using an evaluation measure that correlates well with the real precision of a rule.
 % To compare standard and PCA confidence, we ranked the mined rules by their actual precision.
 % Table~\ref{cor-new} shows the average absolute error of the standard and PCA confidence weighted by the number of predictions produced by the rules based on the following formula:
-% 
+%
 % \[
 %  Error = \frac{\sum \limits_{r \in Output}{|Precision(r)-Conf(r)|\#Facts(r)}}{\sum \limits_{r \in Output}{\#Facts(r)}}
 % \]
 % %
 % We observe that, on average, the PCA confidence estimates the precision of the rules better than the standard confidence.
 % Thus, reasoning approaches can use the PCA confidence as a weight for the rule.
-% 
+%
 % Note also that the PCA confidence is much closer to the actual precision value than the standard confidence for the top 20 rules.
 % Since the error of PCA confidence is much smaller than the error of the standard confidence for the best performing rules (in terms of the actual precision),
 % our results also imply that such rules have higher chances of being discovered during the mining process if we use the PCA confidence as quality evaluation metric.
-% 
-% 
+%
+%
 % \begin{table}
 % \small
 % \begin{tabular}{l|ccc}
