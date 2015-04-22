@@ -624,7 +624,7 @@ In the other datasets, it misses at most 4\% of them.
   YAGO2 (4)  		& 24.99min  			&9.49min	& 1382		& 26.48min 			& 8.65min  			&15.69min 	&24.20min  			& 8.35min 	   & 645	& 100\%   	    \\ \hline
   YAGO2s  		& $>$ 1 day  			&$>$ 1 day	& 247		&$>$ 1 day 			& 1h 7min  		    	&1h 12min*	&$>$ 1 day  			& 59.38min	   & 94	 	& 100\%		    \\ \hline
   DBpedia 2.0  		& $>$ 1 day  			&$>$ 1 day	& 26812		&$>$ 1 day 			& 1h 3min  		    	& -       	&$>$ 1 day  			& 46.88min	   & 112865	& 98.26\%      	    \\ \hline
-  DBpedia 3.8  		& $>$ 1 day  			&$>$ 1 day	& 4931		&\textcolor{red}{14h 10min*}	& 8h 35min 			&7h 33min*	&\textcolor{red}{15h 6min*}(R)  & 7h 6min 	   & 5087       & 98.41\%	    \\ \hline
+  DBpedia 3.8  		& $>$ 1 day  			&$>$ 1 day	& 4931		&\textcolor{red}{14h 10min*}	& 8h 35min 			&7h 33min*	&10h 11min*  			& 7h 6min 	   & 5087       & 98.41\%	    \\ \hline
   Wikidata  		& $>$ 1 day  			&$>$ 1 day	& 1244		&$>$ 1 day 			& 1h 14min 			&11h 4min*	&$>$ 1 day	  		& 48.86min	   & 1650	& 96.93\%      	    \\ \hline
 
 % YAGO2s  		& $>$ 1 day 			& $>$ 1 day & 249 & 95  		& $>$ 1 day & 6  			& 53.2min & 95 & 78 & 100\%\\
@@ -1065,8 +1065,8 @@ The probability that none of the rules concludes $p$ is the product of the indiv
 Equation~\ref{predictions-score} assumes that rules are independent of each other. While this assumption may not always be true,
 it still serves as a naive baseline for probabilistic inference methods.
 
-We note that Equation~\ref{predictions-score} assumes that rules are independent from each other. While this assumption may not always be true, 
-it still serves as a naive baseline for probabilistic inference methods. 
+% We note that Equation~\ref{predictions-score} assumes that rules are independent from each other. While this assumption may not always be true, 
+% it still serves as a naive baseline for probabilistic inference methods. 
 
 \paragraph{Results} The upper curve in Figure~\ref{finalshow} shows the precision of the predictions made with both heuristics. We proceeded as in the previous experiment, that is,
 we first used the rules to fire predictions, and then we ranked these predictions by descending score and computed their cumulative precision. 
