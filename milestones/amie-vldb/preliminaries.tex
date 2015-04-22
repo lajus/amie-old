@@ -121,7 +121,7 @@ The restriction to connected rules avoids mining rules with completely unrelated
 AMIE also requires the rules to be \emph{closed}. A variable in a rule is \emph{closed} if it appears at least twice in the rule. A rule is \emph{closed} if all its variables are \emph{closed}.
 The restriction to closed rules avoids mining rules that predict merely the existence of a fact, as in $diedIn(x,y)\Rightarrow \exists z:wasBornIn(x,z)$. 
 
-AMIE omits also \emph{reflexive rules} of the form $r(x, x)$, as they are typically of less interest in real world KBs.
+AMIE omits also \emph{reflexive rules}, i.e., rules with atoms of the form $r(x, x)$, as they are typically of less interest in real world KBs.
 However, unlike some other ILP systems, AMIE allows mining \emph{recursive rules}. These are rules that contain the head relation in the body, as
 e.g., $isMarriedTo(x,z)\; \wedge hasChild(z,y)\; \Rightarrow\; hasChild(x,y)$. 
 % We also allow the user to specify as an input parameter the maximum number of atoms for the mined rules.

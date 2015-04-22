@@ -17,10 +17,12 @@ Our approach is inspired by this work and also makes use of a language bias~\cit
 
 %\www{
 \subsection{Logical Rule Mining}
-Sherlock \cite{SchEtzWel10} is an unsupervised ILP method to learn first-order Horn clauses from a set of extracted facts for a given target relation. 
-It uses probabilistic graphical models (PGMs) to infer new facts. 
-It tackles the noise of the extracted  facts by extensive filtering in a preprocessing step and by penalizing longer rules in the inference part. 
-For mining the rules, Sherlock uses two heuristics: statistical significance and statistical relevance. \comment{Luis}{To protect us from the reviewers, we should argue why Sherlock is not applicable to our setting.}
+Sherlock \cite{SchEtzWel10} is an unsupervised ILP method to learn first-order Horn clauses from a set of extracted facts 
+for a given target relation. Sherlock is designed for \emph{open domain facts}, i.e., facts extracted from free text that are not mapped to 
+any existing schema.
+Sherlock uses probabilistic graphical models (PGMs) to infer new facts. 
+It tackles the noise of the extracted facts by extensive filtering in a preprocessing step and by penalizing longer rules in the inference part. 
+To mine the rules, Sherlock uses two heuristics: statistical significance and statistical relevance. %\comment{Luis}{To protect us from the reviewers, we should argue why Sherlock is not applicable to our setting.}
 % (an alternative way to express Occam's razor).
 %}
 QuickFOIL~\cite{quickfoil} is a standard ILP system based on a generic top-down greedy algorithm and implemented 

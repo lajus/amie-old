@@ -59,7 +59,7 @@ We have now removed these queries, and discussed the custom implementation in mu
 
  \review{R2: the queries presented throughout the paper (mainly in Section 5.3 and 5.4) to compute the support appear to be incorrect. [...] The article should carefully re-examine and re-write those SQL and SPARQL queries}
 
-	  Indeed, this reviewer has found a bug in our SQL query, and we are very grateful! We confirm that the query that the reviewer proposes solves the problem! \comment{Fabian}{reformulate to mirror what happened!}
+	  Indeed, this reviewer has found a bug in one of our SQL queries, and we are very grateful! The original query was designed to retrieve the relations for new atoms resulting from the application of the mining operators described in Section~\ref{subsubsec:refinement}. For each relation in the answer, the query also reported the support of the rule if the relation were used for the new atom. Support is defined as the number of distinct bindings of the head variables of the rule. The original query in constrast, was calculating the total number of distinct bindings for all variables. We confirm that the query that the reviewer proposes solves the problem! \comment{Fabian}{reformulate to mirror what happened!} \comment{Luis}{Does it make sense?}
 
 	  This said, we followed the suggestion of R3 and removed the SPARQL and SQL queries altogether.
 
