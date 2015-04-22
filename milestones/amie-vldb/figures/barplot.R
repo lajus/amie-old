@@ -34,7 +34,7 @@ db3 		<- c(14.16,	6.16,	7.55,	15.1)
 db3.width 	<- c(0.5,0.5,0.5, 0.5)
 db3.space 	<- c(1,0,0,0)
 
-wd 		<- c( 24*60,	74,	664,	NA) 
+wd 		<- c( 24*60,	74,	664,	 24*60) 
 wd.width 	<- c(0.5,0.5,0.5, 0.5)
 wd.space 	<- c(1,0,0,0)
 
@@ -69,4 +69,6 @@ text(9.3,30*60,">1d", pos=4, col="black")
 # text(10.3,30,">1d", pos=4, col="black")
 
 text(12.8,30*60,">1d", pos=4, col="black")
+text(14.3,30*60,">1d", pos=4, col="black")
+
 rg.endplot()
