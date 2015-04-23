@@ -1,19 +1,23 @@
 \comment{Fabian}{Change the entire section to either present tense or past tense. Personally, I prefer past tense.}
-We conduct four groups of experiments. 
+\comment{Luis}{We stick to past tense then}
+We conducted four groups of experiments. 
 %\comment{chris}{changed the order. Does it still make sense?} 
 %\comment{Luis}{To me, it is more natural if we start comparing AMIE with AMIE+ and then both against the state of the art.}
  % Fabian: Perfect!! I love it this way! Moved prediction to the end, though, because it's really cool.
 
-In the first round (Section \ref{amiepm}) we compare AMIE with AMIE+. We show the performance gain 
+In the first round (Section \ref{amiepm}) we compared AMIE with AMIE+. We show the performance gain 
 for each of the new techniques from Section~\ref{sec:improvements}. 
 
-In the second group of experiments (Section \ref{competitors}), we compare AMIE+ to competitor systems. 
-The comparison is based on runtime and prediction quality of the rules.
+In the second group of experiments (Section \ref{competitors}), we compared AMIE+ to competitor systems. 
+The comparison was based on runtime and prediction quality of the rules.
 
-In the third round of experiments (Section \ref{experimentspca}), we investigate the Partial Completeness Assumption (PCA). We evaluate how often the PCA actually holds in a real-world KB. 
+In the third round of experiments (Section \ref{experimentspca}), we investigated the Partial Completeness Assumption (PCA). 
+We evaluated how often the PCA actually holds in a real-world KB (YAGO). 
 
-Finally, in Section \ref{prediction}, we conduct a proof of concept to show how the rules mined by AMIE can be used to make predictions. 
-We compare the performance of the PCA confidence with the performance of the standard confidence for this purpose. We also how post-processing of the results can increase the precision of our predictions. 
+Finally, in Section \ref{prediction}, we conducted a proof of concept to show how the rules mined by AMIE 
+can be used to make predictions. 
+We compared the performance of the PCA confidence with the performance of the standard confidence for this purpose. 
+We also showed how post-processing of the results can increase the precision of our predictions. 
 
 Our experimental results show that:
 \begin{enumerate}
@@ -46,17 +50,18 @@ Our experimental results show that:
 \subsection{Experimental Setup}\label{setup}
 
 \paragraph{Hardware}
-All experiments are run on a server with \comment{Chris}{did this change?} 48GB of RAM and 8 CPUs (Intel Xeon at 2.4GHz) with hyperthreading. 
+All experiments were run on a server with 48GB of RAM and 8 CPUs (Intel Xeon at 2.4GHz) with hyperthreading. 
 All rules and all experimental results are available at \url{http://www.mpi-inf.mpg.de/departments/ontologies/projects/amie/}.
-All runtime results reported are averaged over 3 runs.
+%All runtime results reported are averaged over 3 runs.
 
-\paragraph{Datasets} We run our experiments on different KBs. Table~\ref{kbs} shows a summary of the KBs used for our experiments.
+\paragraph{Datasets} We ran our experiments on different KBs. Table~\ref{kbs} shows a summary of the KBs used for our experiments.
 In all cases, we removed all facts with literals (numbers and strings).
 This is because literal values (such as geographical coordinates) are shared by only very few entities,
 which makes them less interesting for rule mining.
-We removed type information from the data sets. In turn, the YAGO-type data set was obtained by adding the \emph{rdf:type} statements to the YAGO core dataset. We restricted the type statements to those in the domains and ranges of the relations.
-For both DBpedia 2.0 and 3.8, we use the person data and mapping-based properties datasets. 
-For Wikidata, we use a dump from December 2014, available for download at \url{http://tools.wmflabs.org/wikidata-exports/rdf/exports/20140420/}.
+We removed type information from the data sets. In turn, the YAGO-type data set was obtained by adding the \emph{rdf:type} statements to the entities
+in the YAGO core dataset. We restricted the type statements to those in the domains and ranges of the relations.
+For both DBpedia 2.0 and 3.8, we used the person data and mapping-based properties datasets. 
+For Wikidata, we used a dump from December 2014, available for download at \url{http://tools.wmflabs.org/wikidata-exports/rdf/exports/20140420/}.
 
 \begin{savenotes}
 \begin{table}
@@ -65,11 +70,11 @@ For Wikidata, we use a dump from December 2014, available for download at \url{h
 KB & Facts & Subjects & Relations\\
 \hline
 YAGO2 core  & 948K & 470K & 32\\
-YAGO3 types  & 2.29M & 470K & -\\
+YAGO3 types  & 2.29M & 627K & -\\
 YAGO2s & 4.12M  & 1.65M & 37\\
 DBpedia 2.0 & 6.70M & 1.38M & 1595\footnote{Relations with more than 100 facts only.} \\
 DBpedia 3.8 & 11.02M & 2.20M & 650 \\
-Wikidata & 11.30M & 4.00M & 431
+Wikidata & 8.4M & 4.00M & 431
 %Freebase (people) & 8.92M & 2.07M & 51
 \end{tabular}
 \caption{Knowledge bases used to test AMIE/AMIE+}
@@ -77,14 +82,13 @@ Wikidata & 11.30M & 4.00M & 431
 \end{table}
 \end{savenotes}
 
-\comment{Luis}{I have merged the sections Language Bias and Settings}
 \paragraph{Language Bias and Settings} 
 AMIE and AMIE+ mine \emph{connected} and \emph{closed} Horn rules and allow recursiveness.
 Unless explicitly mentioned, the instantiation operator $\mathcal{O}_I$ is disabled (``without constants'').
 In their default settings, AMIE and AMIE+ define a 1\% head coverage threshold and a maximum of 3 atoms for rules, i.e., $minHC=0.01$, $maxLen=3$. 
 By default, AMIE does not impose a confidence threshold, i.e., $minConf=0$. In contrast, AMIE+ defines a PCA confidence threshold of 0.1, i.e., $minConf=0.1$ (Section~\ref{subsec:speedingConfidenceEvaluation}).
 Both systems use as many threads as available logical cores in the system (32 in our hardware platform).
-Any deviation from these settings will be stated explicitly. 
+Any deviation from these settings will be explicitly stated. 
 %\comment{chris}{if using a different blade, change also here}
 %In its default setting, AMIE+ has a confidence threshold of $0$ and thus does not prune on confidence. 
 %\comment{Fabian}{This is a bit inconsistent with what we wrote before. Can we prune by default? What is the value used if we prune?}
@@ -323,7 +327,7 @@ Let us first discuss only AMIE. Recall from Section~\ref{subsec:algorithm} that 
 
 Table~\ref{timeProportion} shows the average proportion of time spent by AMIE in each task, across
 three runs of the system.
-We use the YAGO2 dataset and run AMIE with and without constants.
+We ran AMIE on the YAGO2 dataset with and without constants (c).
 We observe that the refinement and output phases dominate the system's runtime.
 When constants are not enabled, most of the time is spent in the refinement phase. In contrast,
 the addition of the instantiation operator increases the number of rules and therefore the time
@@ -356,146 +360,121 @@ in Section~\ref{subsec:speedingConfidenceEvaluation} to prune rules below the co
 and reduce the time spent in the confidence calculation and hence the output phase.
 }
 
-
-
-
+%%%% Former Table 4 that got merged with Table 6 %%%%% 
 
 % \begin{center}
 % \begin{savenotes}
 % \begin{table*}[t]
 % \footnotesize
 % \centering
-% \begin{tabular}{|l|ccc|c c|c c|c|}
+% \begin{tabular}{|l|c|c c c|}
 % \hline
-% \multirow{3}{*}{KB} 	&  \multicolumn{3}{c|}{AMIE}  			& \multicolumn{5}{c|}{AMIE+} 	\\ \cline{5-9}
-%  			& 		&		&		& \multicolumn{2}{c|}{Only Refinement}	& \multicolumn{2}{c|}{Only Output} 	&Full   \\ \cline{5-9}
-% 			& Total		&Ref.		&Out.		&Total		&Ref.			& Total  	&Out.    	&Total 	   \\  \hline
-%   YAGO2  		& 3.17min  	&27.63s		&3.28s		&29.37s		&8.68s			& 2.82min 	&3.57s    	& 28.19s	  	    \\ 
-%   YAGO2 (const)  	& 37.57min  	&169.46s	&77.71s		&11.72min	&20.44s			& 37.05min  	&90.47s   	& 9.93min	 	    \\
-%   YAGO2 ($l=4$)  	& 24.99min  	&18.05min	&3.35min	&9.49min	&66.93s			& 26.48min 	&3.56min   	& 8.35min 	 	    \\
-%   YAGO2s  		& $>$ 1 day  	&-		&-		&$>$ 1 day	&-			&$>$ 1 day 	&-  	      	& 59.38min	  	    \\ 
-%   DBpedia 2.0  		& $>$ 1 day  	&-		&-		&$>$ 1 day	&-			&$>$ 1 day 	&-  	     	& 46.88min	      	    \\ 
-%   DBpedia 3.8  		& $>$ 1 day  	&-		&-		&$>$ 1 day	&-			&14h 10min*  	&-  	      	& 7h 46min 	     		\\
-%   Wikidata  		& $>$ 1 day  	&-		&-		&$>$ 1 day	&-			&$>$ 1 day 	&-  	      	& 48.86min	  	    \\ \hline
+%   		 	&    			& \multicolumn{3}{c|}{AMIE+} 	\\ %\cline{3-5}
+%  KB			& AMIE				& Only 				& Only  		&Full   \\
+%  			& 				&  Refinement			&  Output 		&    \\  \hline
+%   YAGO2  		& 3.17min  			&29.37s				& 2.82min 	    	& 28.19s	  	    \\ 
+%   YAGO2 (const)  	& 37.57min  			&11.72min			& 37.05min  	  	& 9.93min	 	    \\
+%   YAGO2 (4)  		& 24.99min  			&9.49min			& 26.48min 	  	& 8.35min 	 	    \\
+%   YAGO2s  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 	  	& 59.38min	  	    \\ 
+%   DBpedia 2.0  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 	  	& 46.88min	      	    \\ 
+%   DBpedia 3.8  		& $>$ 1 day  			&$>$ 1 day			&14h 10min  	  	& 7h 6min 	     		\\
+% %   Wikidata  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 	 	& 48.86min	  	    \\ \hline
+%   Wikidata  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 	 	& 25.50min	  	    \\ \hline
 % \end{tabular}
-% \caption{Runtime  comparison of AMIE and AMIE+.\\ Ref: \comment{Fabian}{average time for refinement phase among threads.}\\ Out: average time for output phase among threads.}
+% \caption{Runtime  comparison of AMIE and AMIE+. On YAGO2 (4), $maxLen=4$. On YAGO2 (const), the instantiation operator was switched on.}
 % \label{runtimeComparison}
 % \end{table*}
 % \end{savenotes}
 % \end{center}
 
-
 \begin{center}
 \begin{savenotes}
 \begin{table*}[t]
-\footnotesize
 \centering
-\begin{tabular}{|l|c|c c c|}
+\footnotesize
+\begin{tabular}{|l|c|c|c|c|c|c|c|}
 \hline
-  		 	&    			& \multicolumn{3}{c|}{AMIE+} 	\\ %\cline{3-5}
- KB			& AMIE				& Only 				& Only  		&Full   \\
- 			& 				&  Refinement			&  Output 		&    \\  \hline
-  YAGO2  		& 3.17min  			&29.37s				& 2.82min 	    	& 28.19s	  	    \\ 
-  YAGO2 (const)  	& 37.57min  			&11.72min			& 37.05min  	  	& 9.93min	 	    \\
-  YAGO2 (4)  	& 24.99min  			&9.49min			& 26.48min 	  	& 8.35min 	 	    \\
-  YAGO2s  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 	  	& 59.38min	  	    \\ 
-  DBpedia 2.0  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 	  	& 46.88min	      	    \\ 
-  DBpedia 3.8  		& $>$ 1 day  			&$>$ 1 day			&14h 10min*  	  	& 7h 6min 	     		\\
-  Wikidata  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 	 	& 48.86min	  	    \\ \hline
+\multirow{3}{*}{KB} 	& \multirow{3}{*}{AMIE}  	& \multicolumn{5}{c}{AMIE+} 	\\ \cline{3-8}
+ 			& 				& Only				& \multicolumn{4}{c|}{Only Output}   										& \multirow{2}{*}{Full}  \\ \cline{4-7}
+			&  				& Refinement			&   -				& +MRL     			&+QRW 		&+PR				& 	   	   	\\ \hline
+  YAGO2  		& 3.17min  			&29.37s				& 2.82min  			& 29.03s  	 		&38.16s 	&2.80min  			& 28.19s	   	\\ \hline
+  YAGO2 (const)  	& 37.57min  			&11.72min			& 37.05min 			& 8.90min  			&12.04min 	&36.48min  			& 9.93min	   	\\ \hline  
+  YAGO2 (4)  		& 24.99min  			&9.49min			& 26.48min 			& 8.65min  			&15.69min 	&24.20min  			& 8.35min 	   	\\ \hline
+  YAGO2s  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 			& 1h 7min  		    	&1h 12min*	&$>$ 1 day  			& 59.38min	   	\\ \hline
+  DBpedia 2.0  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 			& 45.11min*  		    	&46.37min*      &$>$ 1 day  			& 46.88min*	   	\\ \hline
+  DBpedia 3.8  		& $>$ 1 day  			&$>$ 1 day			&\textcolor{red}{14h 10min*}	& 8h 35min 			&7h 33min*	&10h 11min*  			& 7h 6min 	   	\\ \hline
+%  Wikidata  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 			& 1h 14min 			&11h 4min*	&$>$ 1 day	  		& 48.86min	   	\\ \hline
+  Wikidata  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 			& 1h 14min 			&7h 56min*	&$>$ 1 day	  		& 25.50min*	   	\\ \hline
+% YAGO2s  		& $>$ 1 day 			& $>$ 1 day & 249 & 95  		& $>$ 1 day & 6  			& 53.2min & 95 & 78 & 100\%\\
+% DBpedia 2.0  		& $>$ 1 day 			& $>$ 1 day  & 14405  & 12805 		& $>$ 1 day & 808 			& 1.77h & 117163 & 5377 & 96\%\\
+% DBpedia 3.8  		& $>$ 1 day  			& $>$ 1 day   & 4215 & 2106  		& $>$ 1 day & 292 			& 8.24h & 5193 & 2621 & 97\%\\
+% Freebase 		& $>$ 1 day 			& $>$ 1 day & 182  & 131 		& $>$ 1 day & 5 			& 7.51min & 169 & 37 & 100\% \\ \hline
 \end{tabular}
-\caption{Runtime  comparison of AMIE and AMIE+. On YAGO2 (4), $maxLen=4$. On YAGO2 (const), the instantiation operator was switched on.}
-\label{runtimeComparison}
+\caption{Runtime and output comparison between AMIE and AMIE+ on different KBs. On YAGO2 (4), $maxLen=4$. On YAGO2 (const), the instantiation operator was switched on.}
+\label{amievsplus}
 \end{table*}
 \end{savenotes}
 \end{center}
 
 
 \paragraph{Runtime Comparison}
-Table~\ref{runtimeComparison} shows the runtimes of AMIE and AMIE+. We set a threshold of 0.1 PCA Confidence for AMIE to make it
-comparable with AMIE+. For the latter, we show the results in three categories, 
-(1) if only the improvements affecting the refinement process are active 
-(maximum-rule-length, query-rewriting, perfect rules),
-(2) if only the improvements affecting the output process are active (confidence approximation, confidence upper bounds, both with confidence threshold 0.1) and
-(3) if all improvements are active (Section~\ref{subsec:speedingConfidenceEvaluation}).
-We also report the average time (among threads) needed for different phases of the mining (refinement and output). 
+Table~\ref{amievsplus} shows the runtimes of AMIE and AMIE+. We set a threshold of 0.1 PCA Confidence for AMIE to make it
+comparable with AMIE+. For the latter, we show the results in three categories:
+\begin{enumerate}
+ \item If only the improvements affecting the refinement process (Section~\ref{subsec:lossless}) were active, namely the 
+ maximum rule length (MRL), the query rewriting (QRW) and the perfect rules (PR).
+ \item If only the improvements affecting the output process were active, i.e., 
+ the confidence approximation and the confidence upper bounds, both with confidence threshold 0.1 (Only output, see Section~\ref{subsec:speedingConfidenceEvaluation}).
+ \item If all improvements were active (AMIE+ full). 
+\end{enumerate}
 
-We first note that AMIE is not able to finish within a day for Yago2s, DBPedia 2.0, DBpedia 3.8, and Wikidata. In contrast, AMIE+ can mine rules on all of these data sets in a matter of hours, and even minutes.
-For Yago2-const, we can see that the full version of AMIE+ is  3.8x faster than AMIE. On Yago2, this speed-up nearly doubles to 6.7x. This boost is mainly due to the improvements
-in the refinement process: AMIE+ with only these improvements is already 3.2x (resp. 6.5x) faster than AMIE. This is not surprising, since,
-for Yago2,  most of the time is spent in refining rules. Therefore, the improvements in this phase result in a significant gain.
+We investigate the individual effect of the refinement enhacencements, by enabling the output enhacements and one refinement
+enhacement at a time (columns +MRL, +QRW, +PR).
+% (1) if only the improvements affecting the refinement process were active 
+% (maximum-rule-length, query-rewriting, perfect rules),
+% (2) if only the improvements affecting the output process were active (confidence approximation, confidence upper bounds, both with confidence threshold 0.1) and
+% (3) if all improvements were active (Section~\ref{subsec:speedingConfidenceEvaluation}). We call the latter configuration AMIE+ full.
+%We also report the average time (among threads) needed for different phases of the mining (refinement and output). 
 
-Notice also that AMIE+(only Output) is only marginally faster than AMIE. This is because the confidence approximation heuristic requires  computing the
-join cardinalities for every pair of relations in the KB. This means that there is a trade-off between an initial additional cost 
+We first note that AMIE is not able to finish within a day for Yago2s, DBPedia 2.0, DBpedia 3.8, and Wikidata. In contrast, 
+AMIE+ can mine rules on all these datasets in a matter of hours, and even minutes.
+For Yago2-const, we can see that the full version of AMIE+ is 3.8x faster than AMIE. 
+On Yago2, this speed-up nearly doubles to 6.7x. This boost is mainly due to the improvements
+in the refinement process: AMIE+ with only these improvements is already 3.2x (resp. 6.5x) faster than AMIE. 
+This is not surprising, since,
+for Yago2, most of the time is spent in refining rules. Therefore, the improvements in this phase result in a significant gain.
+
+Notice also that AMIE+(only Output) is only marginally faster than AMIE. This is because the confidence approximation heuristic requires  
+computing the join cardinalities for every pair of relations in the KB. This means that there is a trade-off between an initial additional cost 
 for pre-computing these values and the potential savings. For the case of Yago2, the output phase takes only around 9\% 
 of the overall mining time, i.e. the
 confidence evaluation is not really a problem. %In this case, the benefit of using the confidence approximation is less than the preprocessing cost. 
-\comment{chris}{check if yago2s, DBpedia2.0 and wikidata terminate with only output}
-For Yago2s, DBpedia 2.0, DBpedia 3.8, and Wikidata, we see that using only the refinement improvements or only the output refinements is not enough.  
-If we activate all improvements, however, AMIE+ is able to terminate in the majority of cases within an hour or in the worst case over-night.
+%\comment{chris}{check if yago2s, DBpedia2.0 and wikidata terminate with only output}
+For Yago2s, DBpedia 2.0, DBpedia 3.8, and Wikidata, we see that using only the refinement improvements 
+or only the output refinements is not enough.  
+If we activate all improvements, however, AMIE+ is able to terminate in the 
+majority of cases within an hour or in the worst case over-night.
+Table~\ref{amievsplus} also shows the benefit of individual refinement improvements over the baseline of AMIE+ only output. 
+The improvement that offers the most speedup (up to 6.7x) is the maximum rule length (MRL), closely followed by query rewriting (QRW, up to 5.1x speedup),
+whereas perfect rules (PR) rank last. 
+This occurs because MRL is much more often applicable than QRW and PR. 
+Perfect rules are not so frequent in KBs. This reduces the applicability of the enhacement by itself.
 
 % \comment{chris}{this is new:}
 % Fabian: ... and it is nice!
-Fig.~\ref{individual} shows the benefit of individual refinement improvements over the baseline of AMIE+(only output). 
-The improvement that offers the most speedup (up to 6.7x) is the maximum rule length (MRL), closely followed by query rewriting (QRW, up to 5.1x speedup),
-whereas perfect rules (PR) rank last.
+% Fig.~\ref{individual} shows the benefit of individual refinement improvements over the baseline of AMIE+(only output). 
+% The improvement that offers the most speedup (up to 6.7x) is the maximum rule length (MRL), closely followed by query rewriting (QRW, up to 5.1x speedup),
+% whereas perfect rules (PR) rank last.
 
 
-\begin{figure*}
-\centering
-\includegraphics{figures/individual}
-\caption{Performance of individual refinement improvements}
-\label{individual}
-\end{figure*}
-
-
-% \begin{center}
-% \begin{savenotes}
-% \begin{table}[t]
-% \footnotesize
+% \begin{figure*}
 % \centering
-% \begin{tabular}{|l| r |r r|}
-% \hline
-% 			& \multicolumn{2}{c|}{AMIE (Conf $\ge 0.1$) }		& \multicolumn{2}{c|}{AMIE+(full)} 	\\ \cline{2-5}
-% KB			& Rules 	& $\ge 0.1$		& Rules		& Prun. prec. 	   \\ \hline
-%   YAGO2  		& 135		& 			& 68 		& 100.00\%      	    \\ 
-%   YAGO2 (const)  	& 19132		& 			& 15634		& 100.00\% 	    \\  
-%   YAGO2 ($l=4$)  	& 1382		&			& 645		& 100.00\%   	    \\ 
-%   YAGO2s  		& 247*		&			& 94	 	& 100.00\%		    \\
-%   DBpedia 2.0 		& 26812*	&			& 112865	& 98.26\%      	    \\ 
-%   DBpedia 3.8 		& 4931*		&			& 5087       	& 98.41\%	    \\
-%   Wikidata  		& 1244*		&			& 1650		& 96.93\%      	    \\  \hline
-% \end{tabular}
-% \caption{Output comparison of AMIE and AMIE+.\\ starred: output after processing for 1 day.}
-% \label{outputComparison}
-% \end{table}
-% \end{savenotes}
-% \end{center}
-
-\begin{center}
-\begin{savenotes}
-\begin{table}[t]
-\footnotesize
-\centering
-\begin{tabular}{|l| r |r r r|}
-\hline
-			& AMIE			& \multicolumn{3}{c|}{AMIE+(full)} 	\\ \cline{2-5}
-KB			& Rules 		& Rules		&Pruned	& Prun. prec. 	   \\ \hline
-  YAGO2  		& 68			& 68 		&24 	&100.00\%      	    \\ 
-  YAGO2 (const)  	& 15634			& 15634		&24	&100.00\% 	    \\  
-  YAGO2 (4)  	& 645			& 645		&203 	&100.00\%   	    \\ 
-  YAGO2s  		& 94*			& 94	 	&78 	&100.00\%		    \\
-  DBpedia 2.0 		& 24308*		& 112865	&5380 	&98.26\%      	    \\ 
-  DBpedia 3.8 		& 2470*			& 5087       	&2621 	&98.41\%	    \\
-  Wikidata  		& 746*			& 1650		&943 	&96.94\%      	    \\  \hline
-\end{tabular}
-\caption{Output comparison of AMIE (PCA conf $\ge$ 0.1) and AMIE+ full. Starred: output after processing for 1 day. On YAGO2 (4), $maxLen=4$. On YAGO2 (const), the instantiation operator was switched on.}
-\label{outputComparison}
-\end{table}
-\end{savenotes}
-\end{center}
+% \includegraphics{figures/individual}
+% \caption{Performance of individual refinement improvements}
+% \label{individual}
+% \end{figure*}
 
 
-\comment{Fabian}{What is the star in Table \ref{outputComparison}?}
 \paragraph{Output Comparison}
 %\comment{Fabian}{Shouldn't we run AMIE also with a confidence threshold of 0.1, just to have the two comparable? Anyway, a confidence threshold of 10\% makes sense... If so, change in several places in this paper.}
 %\comment{Done. Only for YAGO I rerun the experiments. For the other datasets I lie on the fact that the confidence threshold has a neglibible impact in AMIE's runtime.}
@@ -510,7 +489,30 @@ produce a higher value than the real confidence (among the rules on which the ap
 For example, a pruning precision of 96\% means
 that in 4\% of the cases the system erroneously pruned rules with a confidence higher than 0.1.
 As in the previous section, we set a threshold of 0.1 PCA Confidence for AMIE. We also interrupted the system 
-if it ran more than one day. In those cases, we report the output until the point of interruption (denoted by a ``*'' in Table~\ref{outputComparison}). \footnote{Since the pruning precision was computed by comparing the output of AMIE+ to the output of AMIE, the values reported in Table~\ref{outputComparison} may have been calculated on a subset of all the rules, thus being an estimation of the actual pruning precision.} 
+if it ran more than one day. In those cases, we report the output until the point of interruption (denoted by a ``*'' in Table~\ref{outputComparison}).\footnote{Since the pruning precision was computed by comparing the output of AMIE+ to the output of AMIE, the values reported in Table~\ref{outputComparison} may have been calculated on a subset of all the rules, thus being an estimation of the actual pruning precision.} 
+
+\begin{center}
+\begin{savenotes}
+\begin{table}[t]
+\footnotesize
+\centering
+\begin{tabular}{|l| r |r r r|}
+\hline
+			& AMIE			& \multicolumn{3}{c|}{AMIE+(full)} 	\\ \cline{2-5}
+KB			& Rules 		& Rules		&Pruned	& Prun. prec. 	   \\ \hline
+  YAGO2  		& 68			& 68 		&24 	&100.00\%      	    \\ 
+  YAGO2 (const)  	& 15634			& 15634		&24	&100.00\% 	    \\  
+  YAGO2 (4)  		& 645			& 645		&203 	&100.00\%   	    \\ 
+  YAGO2s  		& 94*			& 94	 	&78 	&100.00\%		    \\
+  DBpedia 2.0 		& 24308*		& 112865	&5380 	&98.26\%      	    		\\ 
+  DBpedia 3.8 		& 2470*			& 5087       	&2621 	&98.41\%	    		\\
+  Wikidata  		& \textcolor{red}{746*}	& 1512		&943 	&\textcolor{red}{96.94\%}      	    \\  \hline
+\end{tabular}
+\caption{Output comparison of AMIE (PCA conf $\ge$ 0.1) and AMIE+ full. Starred: output after processing for 1 day. On YAGO2 (4), $maxLen=4$. On YAGO2 (const), the instantiation operator was switched on.}
+\label{outputComparison}
+\end{table}
+\end{savenotes}
+\end{center}
 
 % Note that AMIE runs without any confidence threshold, while AMIE+ runs with confidence threshold of 0.1.
 % Thus, we expect AMIE+ to output less rules than AMIE.
@@ -519,74 +521,75 @@ if it ran more than one day. In those cases, we report the output until the poin
 %One of these cases is DBpedia 2.0, where AMIE found only 24K rules, while AMIE+(full) produces 112K rules.
 
 As we can see, the pruning by approximation does not entail a serious decrease in the quality of the output:  AMIE+ does not miss more than 4\% of the rules with confidence above 10\%.  At the same time, the pruning yields a speed-up by a factor of up to 3, as Table~\ref{runtimeComparison} shows.
-
+\ignore {
 \paragraph{Performance of confidence approximation w.r.t. to rule-length}
 \comment{Fabian}{What is this? Will it be in the paper?}
-
-\ignore{ %% this is luis version
-Table~\ref{amievsplus} shows the runtimes of AMIE and AMIE+ with different setups on our test KBs.
-%The different setups include: default AMIE+, AMIE+ with the PCA confidence
-%bound enabled and AMIE+ with all the optimizations.
-%If a system ran for more than one day without finishing, we interrupted it and reported the Fabian: said below
-%output obtained until that point in time.
-For AMIE, we show only the runtime. Since our goal is to observe the effect of each enhancement in the runtime of AMIE+,
-we show runtimes for combinations of the improvements introduced in Sections~\ref{subsec:lossless} and~\ref{subsec:speedingConfidenceEvaluation}.
-These includes:
-\begin{enumerate}
- \item AMIE+ in its default configuration, i.e., with the lossless enhancements: MRL + QRW + PR. We refer to this setting as \emph{Default}.
- \item We investigate the effect of the confidence approximation by itself and call this setting \emph{AMIE+ with confidence approximation}.
- \item We incrementally add the lossless heuristics to the last setting, leading to three additional subsettings:
- \begin{enumerate}
-  \item AMIE+ with confidence approximation + MLR
-  \item AMIE+ with confidence approximation + MLR + QRW
-  \item AMIE+ with confidence approximation + MLR + QRW + PR or simply \emph{Full AMIE+}
- \end{enumerate}
-\end{enumerate}
-
-We also report the number of rules produced in each setting.
-Since the lossless enhacements do not alter the output of AMIE, we report a single rule count for settings 2 and 3.
-To assess the quality of the confidence approximation, we report in addition the \emph{pruning precision}.
-%In the default setting of AMIE+, the number of rules (and, in fact, the rules) are the same as in AMIE.
-%with and without the confidence threshold.% (confidence thresholds do not alter runtime in AMIE).
-% and when applicable the number
-% of rules with PCA confidence equal or higher than the 10\% threshold.
-% When the PCA confidence bound is enabled, we report
-% the number of rules pruned by this heuristic. We do not report the number of rules,
-% because this enhacement is lossless, that is, we obtain the same output as the default AMIE+ with a given confidence threshold.
-%When all the optimizations are enabled, we additionally show the \emph{pruning precision}.
-The pruning precision is the ratio of rules for which the confidence approximation introduced
-in Section~\ref{sec:appr} overestimates the actual confidence. We
-calculate this ratio by counting the number of times that the heuristics
-produce a higher value than the real confidence (among the rules on which the approximation is applicable).
-For example, a pruning precision of 96\% means
-that in 4\% of the cases the system erroneously pruned rules with a confidence higher than 0.1.
-If a system ran for more than one day, we interrupted it
-and considered the output until the point of interruption.
-This means that the values reported in Table~\ref{amievsplus}
-may have been calculated on a
-subset of all the rules, thus being an estimation of the actual pruning precision.
-This fact is particularly obvious
-for DBpedia 2.0, where AMIE+ found only 14K rules without confidence threshold,
-while AMIE+ with all the heuristics enabled produces 117K rules.
-
-Table~\ref{amievsplus} shows that our enhancements have a significant impact in the runtime of AMIE.
-On YAGO2, AMIE+ already exhibits a speedup factor of 6.7 w.r.t. AMIE.
-For bigger and more complex datasets, however, even AMIE+  could not finish in one day.
-It is therefore required to enable all the optimizations to achieve reasonable runtimes.
-We can also see that the confidence upper bounds by themselves do not allow us to scale to the size of YAGO2s, DBpedia, or Freebase.
-For example, they can prune only 6 rules on YAGO2s.
-This is because they are applicable to only a very restricted set of rules, namely those of the form $r(x,z) \wedge r(y,z) \Rightarrow r_h(x,y)$ or
-$r(z,x) \wedge r(z,y) \Rightarrow r_h(x,y)$.
-Therefore, we need to enable the confidence approximations in order to scale to these KBs.
-This heuristic, however, comes with the additional cost of computing the
-join cardinalities for every pair of relations in the KB, which can be very expensive for KBs with many relations, such as DBpedia or Freebase.
-Nevertheless, it is run only once and, as the results show, it pays off.
-On KBs where normal rule mining would have required more than a day,
-AMIE+ can run in a few hours or, in the worst case, over-night.
-This speedup does not entail a serious decrease in the quality of the output:
-in the majority of datasets, AMIE+ does not miss any of the rules with confidence above 10\%.
-In the other datasets, it misses at most 4\% of them.
 }
+
+% \ignore{ %% this is luis version
+% Table~\ref{amievsplus} shows the runtimes of AMIE and AMIE+ with different setups on our test KBs.
+% %The different setups include: default AMIE+, AMIE+ with the PCA confidence
+% %bound enabled and AMIE+ with all the optimizations.
+% %If a system ran for more than one day without finishing, we interrupted it and reported the Fabian: said below
+% %output obtained until that point in time.
+% For AMIE, we show only the runtime. Since our goal is to observe the effect of each enhancement in the runtime of AMIE+,
+% we show runtimes for combinations of the improvements introduced in Sections~\ref{subsec:lossless} and~\ref{subsec:speedingConfidenceEvaluation}.
+% These includes:
+% \begin{enumerate}
+%  \item AMIE+ in its default configuration, i.e., with the lossless enhancements: MRL + QRW + PR. We refer to this setting as \emph{Default}.
+%  \item We investigate the effect of the confidence approximation by itself and call this setting \emph{AMIE+ with confidence approximation}.
+%  \item We incrementally add the lossless heuristics to the last setting, leading to three additional subsettings:
+%  \begin{enumerate}
+%   \item AMIE+ with confidence approximation + MLR
+%   \item AMIE+ with confidence approximation + MLR + QRW
+%   \item AMIE+ with confidence approximation + MLR + QRW + PR or simply \emph{Full AMIE+}
+%  \end{enumerate}
+% \end{enumerate}
+% 
+% We also report the number of rules produced in each setting.
+% Since the lossless enhacements do not alter the output of AMIE, we report a single rule count for settings 2 and 3.
+% To assess the quality of the confidence approximation, we report in addition the \emph{pruning precision}.
+% %In the default setting of AMIE+, the number of rules (and, in fact, the rules) are the same as in AMIE.
+% %with and without the confidence threshold.% (confidence thresholds do not alter runtime in AMIE).
+% % and when applicable the number
+% % of rules with PCA confidence equal or higher than the 10\% threshold.
+% % When the PCA confidence bound is enabled, we report
+% % the number of rules pruned by this heuristic. We do not report the number of rules,
+% % because this enhacement is lossless, that is, we obtain the same output as the default AMIE+ with a given confidence threshold.
+% %When all the optimizations are enabled, we additionally show the \emph{pruning precision}.
+% The pruning precision is the ratio of rules for which the confidence approximation introduced
+% in Section~\ref{sec:appr} overestimates the actual confidence. We
+% calculate this ratio by counting the number of times that the heuristics
+% produce a higher value than the real confidence (among the rules on which the approximation is applicable).
+% For example, a pruning precision of 96\% means
+% that in 4\% of the cases the system erroneously pruned rules with a confidence higher than 0.1.
+% If a system ran for more than one day, we interrupted it
+% and considered the output until the point of interruption.
+% This means that the values reported in Table~\ref{amievsplus}
+% may have been calculated on a
+% subset of all the rules, thus being an estimation of the actual pruning precision.
+% This fact is particularly obvious
+% for DBpedia 2.0, where AMIE+ found only 14K rules without confidence threshold,
+% while AMIE+ with all the heuristics enabled produces 117K rules.
+% 
+% Table~\ref{amievsplus} shows that our enhancements have a significant impact in the runtime of AMIE.
+% On YAGO2, AMIE+ already exhibits a speedup factor of 6.7 w.r.t. AMIE.
+% For bigger and more complex datasets, however, even AMIE+  could not finish in one day.
+% It is therefore required to enable all the optimizations to achieve reasonable runtimes.
+% We can also see that the confidence upper bounds by themselves do not allow us to scale to the size of YAGO2s, DBpedia, or Freebase.
+% For example, they can prune only 6 rules on YAGO2s.
+% This is because they are applicable to only a very restricted set of rules, namely those of the form $r(x,z) \wedge r(y,z) \Rightarrow r_h(x,y)$ or
+% $r(z,x) \wedge r(z,y) \Rightarrow r_h(x,y)$.
+% Therefore, we need to enable the confidence approximations in order to scale to these KBs.
+% This heuristic, however, comes with the additional cost of computing the
+% join cardinalities for every pair of relations in the KB, which can be very expensive for KBs with many relations, such as DBpedia or Freebase.
+% Nevertheless, it is run only once and, as the results show, it pays off.
+% On KBs where normal rule mining would have required more than a day,
+% AMIE+ can run in a few hours or, in the worst case, over-night.
+% This speedup does not entail a serious decrease in the quality of the output:
+% in the majority of datasets, AMIE+ does not miss any of the rules with confidence above 10\%.
+% In the other datasets, it misses at most 4\% of them.
+% }
 
 % \begin{center}
 % \begin{savenotes}
@@ -609,83 +612,6 @@ In the other datasets, it misses at most 4\% of them.
 % \end{table*}
 % \end{savenotes}
 % \end{center}
-
-\begin{center}
-\begin{savenotes}
-\begin{table*}[t]
-\footnotesize
-\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|}
-\hline
-\multirow{3}{*}{KB} 	& \multirow{3}{*}{AMIE}  	& \multicolumn{9}{c|}{AMIE+} 	\\ \cline{3-11}
- 			& 				& \multicolumn{2}{c|}{Default}	& \multicolumn{7}{c|}{AMIE + conf. approx}   \\ \cline{3-11}
-			&  				&Runtime	& Rules 	& Runtime  			& +MRL     			&+QRW 		&+PR				& Full	   	   & Rules	& Prun. prec. 	   \\ \hline
-  YAGO2  		& 3.17min  			&29.37s		& 135		& 2.82min  			& 29.03s  	 		&38.16s 	&2.80min  			& 28.19s	   & 135 	& 100\%      	    \\ \hline
-  YAGO2 (const)  	& 37.57min  			&11.72min	& 19132		& 37.05min 			& 8.90min  			&12.04min 	&36.48min  			& 9.93min	   & 15634	& 100\% 	    \\ \hline  
-  YAGO2 (4)  		& 24.99min  			&9.49min	& 1382		& 26.48min 			& 8.65min  			&15.69min 	&24.20min  			& 8.35min 	   & 645	& 100\%   	    \\ \hline
-  YAGO2s  		& $>$ 1 day  			&$>$ 1 day	& 247		&$>$ 1 day 			& 1h 7min  		    	&1h 12min*	&$>$ 1 day  			& 59.38min	   & 94	 	& 100\%		    \\ \hline
-  DBpedia 2.0  		& $>$ 1 day  			&$>$ 1 day	& 26812		&$>$ 1 day 			& 1h 3min  		    	& (R)       	&$>$ 1 day  			& 46.88min	   & 112865	& 98.26\%      	    \\ \hline
-  DBpedia 3.8  		& $>$ 1 day  			&$>$ 1 day	& 4931		&\textcolor{red}{14h 10min*}	& 8h 35min 			&7h 33min*	&10h 11min*  			& 7h 6min 	   & 5087       & 98.41\%	    \\ \hline
-  Wikidata  		& $>$ 1 day  			&$>$ 1 day	& 1244		&$>$ 1 day 			& 1h 14min 			&11h 4min*	&$>$ 1 day	  		& 48.86min	   & 1650	& 96.93\%      	    \\ \hline
-
-% YAGO2s  		& $>$ 1 day 			& $>$ 1 day & 249 & 95  		& $>$ 1 day & 6  			& 53.2min & 95 & 78 & 100\%\\
-% DBpedia 2.0  		& $>$ 1 day 			& $>$ 1 day  & 14405  & 12805 		& $>$ 1 day & 808 			& 1.77h & 117163 & 5377 & 96\%\\
-% DBpedia 3.8  		& $>$ 1 day  			& $>$ 1 day   & 4215 & 2106  		& $>$ 1 day & 292 			& 8.24h & 5193 & 2621 & 97\%\\
-% Freebase 		& $>$ 1 day 			& $>$ 1 day & 182  & 131 		& $>$ 1 day & 5 			& 7.51min & 169 & 37 & 100\% \\ \hline
-\end{tabular}
-\caption{Runtime and output comparison between AMIE and AMIE+ on different KBs. On YAGO2 (4), $maxLen=4$. On YAGO2 (const), the instantiation operator was switched on.}
-\label{amievsplus}
-\end{table*}
-\end{savenotes}
-\end{center}
-
-% \ffigure{Table}{PCA_assumption_entities}{Categories of relations w.r.t. the validity of the PCA}{
-% \begin{tabular}{p{2.3cm}|p{3cm}| p{2cm}}
-% \centering{Category}	& Relation 			& \% of hits	\\
-% \hline
-% Functions   		&\emph{wasBornIn} 		& 96.67\\
-% 			&\emph{diedIn} 			& 96.42\\
-% 			&\emph{hasCapital}		& 93.33\\
-% \hline
-% Quasi- 			&\emph{hasCurrency}		& 75\\
-% Functions		&\emph{hasOfficialLanguage} 	& 73.33\\
-% 			&\emph{graduatedFrom} 		& 64.29\\
-% 			&\emph{isCitizenOf} 		& 96.42\\
-% 			&\emph{directed}$^{-1}$ 	& 90\\
-% 			&\emph{hasAcademicAdvisor} 	& 88.89\\
-% 			&\emph{created}$^{-1}$  	& 86.67\\
-% 			&\emph{isLeaderOf} 		& 89.47\\
-% 			&\emph{isPoliticianOf}		& 100\\
-% 			&\emph{isAffiliatedTo}		& 89.47\\
-% \hline
-% Granularity 		&\emph{isLocatedIn}		& 50\\
-% Differences		&\emph{livesIn}			& 20.83\\
-% \hline
-% Implicit 		&\emph{livesIn} 		& 20.83\\
-% Assumptions		&&\\
-% \hline
-% Source  		&\emph{influences}$^{-1}$	& 34.78\\
-% Incompleteness		&\emph{imports}			& 0\\
-% 			&\emph{exports}			& 0\\
-% 			&\emph{actedIn}$^{-1}$		& 0\\
-% 			&\emph{worksAt}			& 89.66\\
-% 			&\emph{hasMusicalRole}		& 22.22\\
-% 			&\emph{dealsWith}		& 10\\
-% % 			&\emph{isInterestedIn}$^{-1}$	& ?\\
-% % 			&\emph{isKnownFor}$^{-1}$	& ?\\
-% \hline
-% Extraction 		&\emph{participatedIn}$^{-1}$	& 48.14\\
-% Incompleteness		&\emph{isMarriedTo}		& 79.31\\
-% 			&\emph{produced}$^{-1}$		& 56.67\\
-% 			&\emph{actedIn}$^{-1}$		& 0\\
-% 			&\emph{playsFor}		& 20\\
-% 			&\emph{holdsPoliticalPosition}	& 26.67\\
-% 			&\emph{hasChild}$^{-1}$		& 26.67\\
-% 			&\emph{hasWonPrize}		& 31.03\\
-% 			&\emph{dealsWith}		& 10\\
-% 			&\emph{influences}$^{-1}$	& 34.78\\
-% 			&\emph{hasMusicalRole} 		& 22.22\\
-% \end{tabular}
-% }
 
 \begin{table}[t]
 \begin{tabular}{p{2.3cm}|p{3cm}| p{2cm}}
@@ -828,7 +754,9 @@ Hence, we used the sample of YAGO2 that we created for WARMR.
 Again, runtimes varied widely between relations (Table \ref{alephrun2}).
 Some relations ran in a few seconds, others did not terminate in a day.
 The runtimes with constants are similarly heterogeneous, with at least 7 relations not terminating in 1 day \comment{Luis}{I propose
-to remove this sentence as it may raise the reviewer's curiosity about the runtimes of ALEPH with constants. }. \comment{Fabian}{If we have those times, add them to the discussion. If we don't, remove the last sentence.}
+to remove this sentence as it may raise the reviewer's curiosity about the runtimes of ALEPH with constants. }. 
+\comment{Fabian}{If we have those times, add them to the discussion. If we don't, remove the last sentence.}
+\comment{Luis}{Chris, do we have those times?}
 
 \begin{table}
 \begin{tabular}{l|ccc}

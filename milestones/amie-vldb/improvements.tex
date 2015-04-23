@@ -69,13 +69,15 @@ because the addition of an instantiated atom can close at most one variable.
 By definition, a rule cannot achieve a PCA confidence that is higher than 100\%. 
 Thus, once a rule has achieved 100\% PCA confidence, we can stop adding new atoms. 
 This is because the confidence cannot increase and the support can only decrease. 
-Hence, any refinement is futile. We call rules with 100\% PCA confidence \emph{perfect rules}.
+Hence, any refinement is futile and will be discarded by the output routine described in 
+Algorithm~\ref{pfo}. 
+We call rules with 100\% PCA confidence \emph{perfect rules}.
 
 
 
 \paragraph{Simplifying Projection Queries}
 % The notion of support is defined also for intermediate rules, i.e., rules that are not yet closed (see Sec.~\ref{support}). 
-Support is monotonically decreasing with the length of the rule (Sec.~\ref{support}). Hence, whenever we apply an add-dangling-atom operator to a rule $R_p$ (the parent rule) to produce
+Support is monotonically decreasing with the length of the rule (Section.~\ref{support}). Hence, whenever we apply an add-dangling-atom operator to a rule $R_p$ (the parent rule) to produce
 a new rule $R_c$ (the child rule), the support of $R_c$ will likely be smaller than the support of $R_p$.
 However, there is one case in which the addition of a dangling atom cannot reduce the support. 
 This happens when $R_c$ 
@@ -100,7 +102,7 @@ supp(R_c) = \#(x,y):  citizenOf(x,y)\wedge livesIn(x,y) \\ \wedge citizenOf(x,y)
 %\comment{Luis: I agree}
 
 \noindent which is the same as $supp(R_p)$. Thus both $R_p$ and $R_c$ have the same support.
-This observation can be leveraged to speed up projection queries. The query for $supp(R_p)$ has one less join and thus executes faster.
+This observation can be leveraged to speed up projection queries. The query for $supp(R_p)$ has one fewer join and thus executes faster.
 \ignore{Fabian: I am not sure I get the raison-d'etre for the following text. Projection queries have been discussed quite extensively before, no?
 In particular, we do not do anything intelligent here (like caching).
 
@@ -250,12 +252,13 @@ Therefore, AMIE+ caches the results of previous queries. Whenever a new query ca
 \paragraph{Confidence Scores} A significant part of the runtime of our algorithm is spent on computing confidence scores (up to 35\% in our experiments).
 %\comment{chris}{I do not know what is the correct number here; Fabian: this is the correct number from Luis} ). 
 The reason is that the calculation of both the standard confidence and the PCA confidence requires the calculation of the 
-number of instantiations of the rule body. If the body contains atoms with many instantiations, the joins can be very expensive to compute.
+number of instantiations of the rule body. \comment{Luis}{Until here we never suggest that we are interested in calculating the standard confidence}
+If the body contains atoms with many instantiations, the joins can be very expensive to compute.
 %very selective joins, the size of the body is relatively small and the query cost remains low. If the body size is huge, it uses more resources (memory), which makes the query expensive.
 % Fabian: I think that memory is not the issue
 
 To address this problem, we observe that most applications will be interested in rules above some confidence threshold. For example, predictions based on rules with 1\% confidence are not useful in practice.
-This means that  a rule mining system might spend a significant amount of time to evaluate expensive confidence queries only to find out that the rule was of low confidence and of no practical use.
+This means that a rule mining system might spend a significant amount of time evaluating expensive confidence queries only to find out that the rule was of low confidence and of no practical use.
 An example of such a rule (which we will also use later in this section) is:
 % Fabian: Leave the example here because we later reference it
 
@@ -270,17 +273,17 @@ AMIE needs more than 500ms (more than twice the average cost: 200ms) to calculat
 \paragraph{Approximation} We have developed a method to approximate the confidence value of such a rule very quickly. 
 %In AMIE+, we use a confidence threshold in combination with a formula to approximate the confidence value to avoid evaluating expensive queries that would lead to low confidence rules.
 Our approximation is based on statistics, such as the functionalities of the atoms, or the size of the joins between two relations. 
-We pre-compute these quantities, so that they be accessed in constant time. As a result, AMIE+ prunes the example-rule above in less than 1ms.  
+We pre-compute these quantities, so that they be accessed in constant time\comment{Luis}{Was it intended to be subjunctive: \url{http://english.stackexchange.com/questions/58634/so-that-it-be-vs-so-that-it-is?}}. As a result, AMIE+ prunes the example-rule above in less than 1ms.  
 
 Our approximation is designed such that it is more likely to overestimate confidence than to underestimate it.
 This is important, because we use it to prune rules, and we want to avoid pruning rules that have a higher confidence in reality.
-Our experiments (see Sec.~\ref{amiepm}) show that this technique prunes only 4\% of the rules erroneously. In return, it makes AMIE+ run in the range of minutes instead of days. It is thus one of the main techniques that allow AMIE+ to run on large-scale KBs.
+Our experiments (see Section~\ref{amiepm}) show that this technique prunes only 4\% of the rules erroneously. In return, it makes AMIE+ run in the range of minutes instead of days. It is thus one of the main techniques that allow AMIE+ to run on large-scale KBs.
 
-In Sec.~\ref{sec:conf_appr},  we give an overview of the confidence approximation and we explain for which form of rules we use it. 
-Sec.~\ref{sec:appr} describes how the rule's body is approximated.
+In Section~\ref{sec:conf_appr}, we give an overview of the confidence approximation and we explain for which form of rules we use it. 
+Section~\ref{sec:appr} describes how the size of the rule's body is approximated.
 % and concludes with a formula for the general case.
-Sec.~\ref{sec:appr_discussion} discusses the underlying assumptions made by our approximation and explains how it is used within AMIE+. 
-Finally, Sec.~\ref{sec:conf_upperBounds} derives upper bounds for the confidence of a particular class of rules.
+Section~\ref{sec:appr_discussion} discusses the underlying assumptions made by our approximation and explains how it is used within AMIE+. 
+Finally, Section~\ref{sec:conf_upperBounds} derives upper bounds for the confidence of a particular class of rules.
 
 % Most rule mining applications have no use for rules with low confidence. 
 % For example, predictions based on rules with 1\% confidence are not useful in practice.
@@ -344,8 +347,8 @@ Here we resort to an abstraction that treats the body of the rule $\vec{B}(x, y)
 % by the number of entities that bind to $x$, we obtain an estimate for the body size of the rule. 
 If $\vec{B}$ has functionality $fun(\vec{B})$, this means that, on average, each entity in variable $x$ 
 relates to $\#y_{per\; x} = 1/fun(\vec{B})$ bindings in $y$. If we denote the domain and range of a relation $r$ as
-$dom(r)$ and $rng(r)$ respectively, the expression $\#y_{per\; x} \times |dom(\vec{B})|$ gives us 
-an estimate for the body size of the rule. 
+$dom(r)$ and $rng(r)$ respectively, the expression $\#y_{per\; x} \cdot |dom(\vec{B})|$ gives us 
+an estimate for the body size of the rule, i.e., $d_{std}(\vec{B} \Rightarrow r_h(x,y))$. 
 However, for the PCA confidence, the denominator is restricted also by the entities in the domain of the head relation.
 This consideration leads us to the expression:
 % If we denote with $|dom(r)|$ the number of entities in the domain of relation $r$, our approximation has the form:
@@ -361,8 +364,8 @@ This consideration leads us to the expression:
 % as it avoids investing resources in expensive rules that will not be output otherwise.
 
 
-In the following, we first describe for which kind of rules it makes sense to use this approximation and then, in Sec.~\ref{sec:appr}, 
-we discuss how to calculate the terms of Eq.~\ref{eq:pcaApproxConf_general} in an efficient way. 
+In the following, we first describe for which kind of rules it makes sense to use this approximation and then, in Section.~\ref{sec:appr}, 
+we discuss how to calculate the terms of Equation~\ref{eq:pcaApproxConf_general} in an efficient way. 
 
 
 \paragraph{When to use the approximation}\label{sec:expensive_rules}
@@ -372,18 +375,24 @@ For this reason, we only use the confidence approximation for rules whose exact 
 % Recall that using a confidence approximation to prune rules is worth only if the exact confidence calculation is expensive. 
 % If it is not the case, the gain in runtime becomes small at the risk of unnecessary pruning.
 % Therefore we only use the confidence approximation for ``expensive'' rules. 
-These rules typically have a large number of bindings in the body, which translates into 
-higher runtimes and memory usage. An example is the rule that we saw above
+These rules typically have a large number of bindings in the body because of the presence of
+\emph{intermediate variables}. This translates into 
+higher runtimes and memory usage. An example is the low confident rule:
 \[
  directed(x,z) \wedge hasActor(z,y) \Rightarrow married(x,y)
 \]
-This rule concludes that a director is married to all the actors that acted in his/her movies, producing a total of 74249 married couples in YAGO2.
-This phenomenon mainly occurs in expressions that contain existentially quantified variables in Eq.~\ref{eq:denomPCA}, 
-because such variables introduce many intermediate results. In our example, a director $x$ is related to many movies $z$ (the intermediate variable) that have different actors. 
+%This rule concludes that a director is married to all the actors that acted in his/her movies, producing a total of 74249 married couples in YAGO2.
+% This phenomenon mainly occurs in expressions that contain existentially quantified variables in Eq.~\ref{eq:denomPCA}, 
+% because such variables introduce many intermediate results. 
+In this example, a director $x$ is related to many movies $z$ (the intermediate variable) that have different actors $y$. 
 Hence, we consider a rule \emph{expensive} if its body (i) contains variables other than the variables appearing in the head atom ($z$ in our example) and
 (ii) if these additional variables define a single path between the head variables ($x \rightarrow z \rightarrow y$ in our example).
+Note that rules without intermediate variables (such as $livesIn(x,y)\wedge bornIn(x,y)\Rightarrow diedIn(x,y)$)  
+or that contain multiple paths between the head variables (such as $livesIn(x,z_1)\wedge locatedIn(z_1,y)\wedge bornIn(x,z_2)\wedge locatedIn(z_2,y) \Rightarrow isCitizenOf(x,y)$)
+are usually associated with more selective queries. In these examples, both 
+$livesIn$ and $bornIn$ join on $x$ in the body and restrict the size of the result.
 
-We therefore use the confidence approximation only for rules where the head-variables $x,y$ are connected through a single chain of existentially quantified variables $z_1,..., z_{n-1}$. These rules have the form:
+We therefore use the confidence approximation only for rules where the head variables $x,y$ are connected through a single chain of existentially quantified variables $z_1,..., z_{n-1}$. These rules have the form:
 $$
   r_1(x,z_1) \wedge r_2(z_1,z_2) \wedge ... \wedge r_n(z_{n-1},y) \Rightarrow r_h(x,y)
 $$
@@ -391,11 +400,7 @@ $$
 In order to write a rule in this canonical form, we may have to replace some relations by their inverses
 (i.e., substitute $r_2(z_2,z_1)$ with $r_2^{-1}(z_1,z_2)$) and change the order of the atoms.
 
-In contrast, rules that do not contain existential variables (such as $livesIn(x,y)\wedge bornIn(x,y)\Rightarrow diedIn(x,y)$)  
-or that contain multiple paths between the head variables (such as $livesIn(x,z_1)\wedge locatedIn(z_1,y)\wedge bornIn(x,z_2)\wedge locatedIn(z_2,y) \Rightarrow isCitizenOf(x,y)$)
-are usually associated with more selective queries. In our examples, both $livesIn$ and $bornIn$ join on $x$ in the body and restrict the size of the result.
-
-We will now see how to compute the approximation.
+We will now see how to compute the approximation for this type of rules.
 
 %In the following, we first explain how to compute the approximation for the case of a single 
 %path with one existential variable through a running example.
@@ -466,14 +471,14 @@ Here, $|rng(directed)|$ is the number of distinct movies in the range of $direct
 denotes the distinct movies in the overlap between the objects of $directed$ and the subjects of $hasActor$.
 The term $\frac{1}{fun(directed)}$ corresponds to step  1.
 Our join estimation assumes that the movies in the overlap of $directed$ 
-and $hasActor$ are uniformly distributed between the different directors in $directed$.
+and $hasActor$ are uniformly distributed among the different directors in $directed$.
 
 For steps 3 and 4, we can approximate the number of actors in the variable $y$ for each movie in the variable $z$ as follows:
 $$
 \#y_{ per \; z} := \frac{ifun(hasActor)}{fun(hasActor)}
 $$
 The term $\frac{1}{fun(hasActor)}$ corresponds to Step 3. At the end of this step, 
-we already have, for a single director in $x$, a bag of actors in $y$ that correspond to it.
+we already have, for a single director $x$, a bag of actors $y$ associated to him.
 However, these are not necessarily distinct actors, since $x$ and $y$ are connected through the variable $z$ (movies). Therefore, a duplicate elimination step is needed.
 To see why, assume that each director has directed on average 3 movies and that each movie has 5 actors. Then, the rule will produce on average 15 actors $y$ for each director $x$.
 However, there is no guarantee that these actors are distinct.
@@ -820,7 +825,7 @@ the inverse functionalities, and the overlaps between the domains and ranges of 
 into the in-memory database. This results in longer loading times, but pays off easily during rule mining. The sizes of the ranges of the relations are given by
 our indexes in constant time.
 After this preprocessing, the approximation of the confidence can be computed as a simple product of precomputed values without actually firing a single query.
-We apply the approximation only if the query is expensive (see Sec.~\ref{sec:expensive_rules}).
+We apply the approximation only if the query is expensive (see Section~\ref{sec:expensive_rules}).
 % We apply the approximation only if the query has 3 atoms, contains no constants and each variable occurs exactly 2 times.
 If the approximated value is smaller than the threshold, we abandon the rule.
 Otherwise, we compute the exact PCA confidence and proceed as usual.
@@ -832,11 +837,11 @@ the estimation of the expression $\#z_{per \; x}$ uses the term $\frac{ov_{rd}(r
 This term assumes that the entities in the overlap are uniformly distributed among the entities in the range of $r_1$. 
 This also introduces some error that depends on the variance of the real distribution.
 Nevertheless, the duplicate elimination largely underestimates the count of $\#y_{per\;x}$, and therefore we expect our approximation to usually
-result in an overestimation of the actual confidence. This is indeed the case, as our experiments in Section~\ref{amiepm} will show.
+result in an overestimation of the actual confidence. This is indeed the case, as our experiments in Section~\ref{amiepm} show.
 
 
 \subsubsection{Confidence Upper Bounds}\label{sec:conf_upperBounds}
-In some particular cases, we can derive lower bounds for the confidence denominator ($d_{pca}$, $d_{std}$) instead of using the approximation described in Sec.~\ref{sec:appr}.
+In some particular cases, we can derive lower bounds for the confidence denominator ($d_{pca}$, $d_{std}$) instead of using the approximation described in Section~\ref{sec:appr}.
 Consider a rule of the form:
 $$ r(x,z) \wedge r(y,z) \Rightarrow r_h(x,y) $$
 
@@ -853,7 +858,7 @@ d_{std} \ge \#(x,x): \exists z:  r(x,z) \wedge r(x,z)
 \begin{equation}
 d_{std} \ge \#x: \exists z:  r(x,z)  \label{eq:stdBoundDenom}
 \end{equation}
-This expression can be calculated in constant time with the indexes of our in-memory database (Sect.~\ref{subsec:implementation}).
+This expression can be calculated in constant time with the indexes of our in-memory database (Section~\ref{subsec:implementation}).
 Similar analyses can be used for rules of the form $r(z,x) \wedge r(z,y) \Rightarrow r_h(x,y) $.
 
 The same reasoning applies to the denominator of the PCA confidence, yielding
@@ -866,7 +871,8 @@ of a single variable instead of pairs. It is therefore much cheaper than the ori
 Both Inequalities \ref{eq:stdBoundDenom} and \ref{eq:pcaBoundDenom}
 define lower bounds for the number of pairs in the denominator expressions of the standard
 and the PCA confidence, respectively. 
-Thus, they can be used for upper-bounding the respective confidence scores and, if found below threshold, the corresponding rules can be pruned, 
+Thus, AMIE+ uses them to upper-bound the respective confidence scores and, if found below threshold, 
+the corresponding rules can be pruned, even before computing the approximate confidence denominator. 
 % Thus, they constitute hard upper bounds for these scores that can be used to prune the rules, if found below threshold.
 % \comment{Katja}{Rephrase last sentence - unclear meaning.}
 
@@ -1065,7 +1071,7 @@ In reality, this is not always the case. Additionally,
 the estimation of the expression $num_{x_1 \; per \; x_0}$ uses the term $\frac{ov(r_0, r_1)}{|range(r_0)|}$.
 This term assumes that the entities in the overlap are uniformly distributed among the entities in the range of $r_0$. This also introduces some error that depends on the variance of the real distribution.
 Nevertheless, the duplicate elimination largely underestimates the count of $d_{per\; x_0}$, and therefore we expect our approximation to usually
-result in an overestimation of the actual confidence. This is indeed the case, as our experiments in Section \ref{amiepm} will show.
+result in an overestimation of the actual confidence. This is indeed the case, as our experiments in Section \ref{amiepm} show.
 %This means that, even though it is an approximation, it will not let AMIE+ drop many good rules.
 % Our approximation depends on assumptions that hardly hold in practice. However, it is fast to calculate exactly because of these simplifying assumptions.
 %The fast computation and small rate of false pruning make our approximated confidence an attractive solution for scalable rule mining. Fabian: We don't have experiments for this

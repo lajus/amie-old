@@ -79,7 +79,7 @@ Therefore, we chose the above 3 operators as a canonic set. We will describe in 
     \EndIf 
     \State $parents = parentsOfRule(r, out)$
     \ForAll{$r_p \in parents$}
-      \If{$conf_{pca}(r) < conf_{pca}(r_p)$}
+      \If{$conf_{pca}(r) \le conf_{pca}(r_p)$}
 	\State \Return $false$
       \EndIf
     \EndFor
@@ -110,25 +110,40 @@ This is because confidence is a non-monotonic measure, i.e. we might get good ru
 
 
 \comment{Fabian}{We have to justify the parameters at some point. Since we don't do it in the experiments, we should do it here... Please check.}
-%\comment{Luis}{I think we should do it in the experiments.}
-\paragraph{Parameters} The algorithm traverses the search space and enumerate all rules that fulfil the constraints 
-of a minimal head coverage $minHC$, a minimal confidence $minConf$, and a maximal length of $maxLen$. 
-Thus, these parameters define when the algorithm shall stop with the exploration of the space. 
-Choosing larger thresholds on head coverage and confidence, and choosing a shorter maximum rule length will make the algorithm stop earlier 
+\comment{Luis}{The section Pruning became obsolete so I am merging it with the section parameters.}
+\paragraph{Parameters and Pruning} 
+If executed naively, Algorithm~\ref{rm} will have prohibitively high runtimes.
+The instantiation operator $\mathcal{O}_I$, in particular, generates atoms in the order of $|\mathcal{R}| \times |\mathcal{E}|$.
+For this reason the algorithm defines some parameters that determine when to stop with the exploration of the space. 
+These are the minimal head coverage $minHC$, the minimal confidence $minConf$ and the maximal length $maxLen$.
+% The algorithm traverses the search space and enumerate all rules that fulfil the constraints 
+% of a minimal head coverage $minHC$, a minimal confidence $minConf$, and a maximal length of $maxLen$. 
+%Thus, these parameters define when the algorithm shall stop with the exploration of the space. 
+Choosing larger thresholds on head coverage, and choosing a shorter maximum rule length will make the algorithm stop earlier 
 and output fewer rules. Relaxing the values will make the algorithm output the very same rules as before, 
-and find also rules with a smaller head coverage and confidence or a larger number of atoms. 
-Thus, the parameters define a trade-off between the runtime and the number of rules. 
+and find also rules with a smaller head coverage or a larger number of atoms. 
+Thus, these parameters define a trade-off between the runtime and the number of rules. 
 Interestingly, a larger number of rules is not necessarily a good thing. 
-This is because a rule with a very low confidence typically has no good use in an application. 
-Assuming that a user is not interested in rules with a confidence below 10\%, we set the default value $minConf=0.1$. 
-Likewise, a rule that covers only 1\% or less of the instances of a relation is probably not interesting. 
-Therefore, we set the default value $minHC=0.01$. We show in our experiments that rules with more 
-than 3 atoms tend to be very convoluted and not insightful. 
-Hence, we set $maxLen=3$. If the user is interested in less confident, more complex, or less supported rules, 
+For instance, a rule that covers only 1\% or less of the instances of a relation is probably not interesting 
+(lack of statistical significance). Therefore, we set the default value $minHC=0.01$. Additionally, 
+we show in our experiments that rules with more 
+than 3 atoms tend to be very convoluted and not insightful. Hence, we set $maxLen=3$.
+
+The same rationale can be applied to the confidence of a rule. A rule with confidence 10\% will make correct predictions one out of
+ten times. Assuming that a user is not interested in such kind of rules, we set the default value $minConf=0.1$. 
+Notice also that Algorithm~\ref{rm} does not use confidence for pruning. This implies that the confidence
+threshold does not have a significant impact in the runtime as head coverage and maximum length.
+% Likewise, a rule that covers only 1\% or less of the instances of a relation is probably not interesting. 
+% Therefore, we set the default value $minHC=0.01$. We show in our experiments that rules with more 
+% than 3 atoms tend to be very convoluted and not insightful. 
+% Hence, we set $maxLen=3$. 
+
+That being said, if the user is interested in less confident, more complex, or less supported rules, 
 she can change these thresholds. However, we believe that there is no good reason to deviate from the default values. 
 In particular, relaxing these values will not output better rules. This makes AMIE a system that can be run off the shelf, 
 without the need for parameter tuning.
 
+\ignore {
 \paragraph{Pruning}
 If executed naively, Algorithm~\ref{rm} will have prohibitively high runtimes.
 The instantiation operator $\mathcal{O}_I$, in particular, generates atoms in the order of $|\mathcal{R}| \times |\mathcal{E}|$.
@@ -137,7 +152,7 @@ Rules that cover, for example, less than 1\% of the facts of the head relation c
 Therefore, we choose $minHC=0.01$ as a lower bound for the head coverage. We observe that head coverage decreases monotonically as we add more atoms.
 This allows for safely discarding any rule that trespasses the threshold (line~12 of Alg.~\ref{rm}).
 Recall from Section~\ref{subsec:statSignificance} that support and head coverage are defined even for rules that are not yet closed, allowing for early pruning.
-
+}
 \paragraph{Duplicate Elimination} \label{subsec:duplicateElimination}
 As mentioned in Section~\ref{subsubsec:whenToOutput} a rule can be derived in multiple ways.
 For example, the rule $actedIn(x,y) \wedge directed(x,y) \Rightarrow created(x,y)$ can result from the application
@@ -196,7 +211,8 @@ outweight the benefit of using multiple threads.
 \subsection{Count Projection Queries}
 \label{subsec:countqueries}
 
-AMIE tries to expand a given rule by applying all operators (one each time). We now explain how the operators are executed on a KB.
+AMIE tries to expand a given rule by applying all mining operators defined in the last section (one each time). 
+We now explain how the operators are implemented and executed on a KB.
 
 \paragraph{Count Projection Queries} 
 %Each operator expects as input a variable that the new atom shall share with the existing rule. 
@@ -213,16 +229,18 @@ SUCH THAT COUNT($H$)$\geq k$
 
 \noindent where $k := minHC \times size(H)$ (see Section~\ref{par:headCoverage}) is the translation of the
 head coverage threshold into an absolute support threshold and the expression COUNT($\cdot$) has for the rest of this section COUNT(DISTINCT $\cdot$) semantics.
-$\bm{X}$ and $\bm{Y}$ are meta-variables that
-can be either variables or constants, 
-depending on the type of atoms that the operator generates. The results for $\bm{r}$ are the relations that, once bound in the query, ensure that the head coverage 
-of the rule $B_1 \; \wedge ... \wedge B_{n-1} \;\wedge\; \bm{r}(\bm{X},\bm{Y}) \Rightarrow H$ is greater than $minHC$.
+$\bm{X}$ and $\bm{Y}$ can represent variables that are either fresh or already present in the rule.
+\comment{Luis}{About the meta-variables, the text originally said 
+``that can be either variables or constants, depending on the type of atoms that the operator generates". I changed
+because in principle we never add atoms where one of the arguments is a constant, because we first find the relation
+and then the constants for the arguments.}
+The results for $\bm{r}$ are the relations that, once bound in the query, ensure that the head coverage of the rule $B_1 \; \wedge ... \wedge B_{n-1} \;\wedge\; \bm{r}(\bm{X},\bm{Y}) \Rightarrow H$ is greater than $minHC$.
 Notice also that for each value of $\bm{r}$, the expression COUNT($H$) gives us the support of the new rule.
-We now discuss the cases of all three operators.
+We now discuss the cases for all three operators.
 
 \paragraph{Dangling Atom Operator} 
 % When we apply the $\mathcal{O}_I$ operator, at least one of this meta-variables binds to a constant.
-As an example, assume that Algorithm~\ref{rm} dequeues the following intermediate non-closed rule for further specialization.
+As an example, assume that Algorithm~\ref{rm} dequeues the following intermediate non-closed rule for further specialization:
 
 \indented{
 \emph{marriedTo}$(x,z) \Rightarrow $ \emph{livesIn}$(x,y)$
@@ -232,8 +250,8 @@ As an example, assume that Algorithm~\ref{rm} dequeues the following intermediat
 The application of the operator $\mathcal{O_D}$ will fire queries of the form:
 
 \indented{
-SELECT $\bm{r}$, COUNT($livesIn(x,y)$) \\
-WHERE $livesIn(x,y) \; \wedge \; marriedTo(x,z) \wedge \bm{r}(\bm{X}, \bm{Y})$\\
+SELECT $\bm{r}$, COUNT($livesIn(x,y)$) WHERE  \\
+$livesIn(x,y) \; \wedge \; marriedTo(x,z) \wedge \bm{r}(\bm{X}, \bm{Y})$\\
 SUCH THAT COUNT($livesIn(x,y)$)$\ge k$
 }
 
@@ -279,10 +297,10 @@ SUCH THAT COUNT($livesIn(x,y)$)$\ge k$
 \noindent Each binding of $\bm{w}$ forms a new rule that will be enqueued and later evaluated for output.
 
 Count-projection queries allow us to choose the relationships and entities for the operators 
-in such a way that the head coverage for the new rules is guaranteed to be above $minHC$.
+in such a way that the head coverage for the new rules is above $minHC$.
 We discuss how to implement count projection queries efficiently in Section~\ref{subsec:implementation}.
 
-\subsection{Implementation Details}
+\subsection{Query Implementation Details}
 \label{subsec:implementation}
 
 \paragraph{In-memory Database} We have shown \cite{amie} that count projection queries translate into very inefficient queries in both SPARQL and SQL. Therefore, we have implemented an in-memory database that is specifically geared towards this type of queries.
@@ -328,7 +346,7 @@ become instantiated, making the atoms more selective with every recursive step.
     \If {$n = 1$}
       \State \Return size($B_1$, $\mathcal{K}$) $> 0$
     \Else
-      \State $s := argmin_i\;\;\;\; size(B_i, \mathcal{K})$
+      \State $s := argmin_i\;\{ size(B_i, \mathcal{K}) \}$
       \State $q := q \setminus \{ B_s \} $
       \ForAll {instantiations $b_s \in B_s$}
 	\State Replace $b_s$ in $q$
@@ -359,7 +377,7 @@ bindings of $x$ in the remaining atoms (Line 16).
 \begin{algorithmic}[1]
 \Function{Select}{$\bm{x}$, $B_1 \wedge ... \wedge B_n$, $\mathcal{K}$}
     \State $q := B_1 \wedge ... \wedge B_n$
-    \State $s := argmin_i\;\;\;\; size(B_i, \mathcal{K})$
+    \State $s := argmin_i\;\{ size(B_i, \mathcal{K}) \}$
     \State $result := \lbrace \rbrace$
     \If{$\bm{x} \in B_s$}
       \ForAll {instantiations $\hat{x} \in \bm{x}$}
