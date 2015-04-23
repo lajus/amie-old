@@ -402,9 +402,9 @@ and reduce the time spent in the confidence calculation and hence the output pha
   YAGO2 (4)  		& 24.99min  			&9.49min			& 26.48min 			& 8.65min  			&15.69min 	&24.20min  			& 8.35min 	   	\\ \hline
   YAGO2s  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 			& 1h 7min  		    	&1h 12min*	&$>$ 1 day  			& 59.38min	   	\\ \hline
   DBpedia 2.0  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 			& 45.11min*  		    	&46.37min*      &$>$ 1 day  			& 46.88min*	   	\\ \hline
-  DBpedia 3.8  		& $>$ 1 day  			&$>$ 1 day			&\textcolor{red}{14h 10min*}	& 8h 35min 			&7h 33min*	&10h 11min*  			& 7h 6min 	   	\\ \hline
+  DBpedia 3.8  		& $>$ 1 day  			&$>$ 1 day			&11h 46min*			& 8h 35min 			&7h 33min*	&10h 11min*  			& 7h 6min 	   	\\ \hline
 %  Wikidata  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 			& 1h 14min 			&11h 4min*	&$>$ 1 day	  		& 48.86min	   	\\ \hline
-  Wikidata  		& $>$ 1 day  			&$>$ 1 day			&$>$ 1 day 			& 1h 14min 			&7h 56min*	&$>$ 1 day	  		& 25.50min*	   	\\ \hline
+  Wikidata  		& $>$ 1 day  			&\textcolor{red}{$>$ 1 day}	&$>$ 1 day 			& 1h 14min 			&7h 56min*	&$>$ 1 day	  		& 25.50min*	   	\\ \hline
 % YAGO2s  		& $>$ 1 day 			& $>$ 1 day & 249 & 95  		& $>$ 1 day & 6  			& 53.2min & 95 & 78 & 100\%\\
 % DBpedia 2.0  		& $>$ 1 day 			& $>$ 1 day  & 14405  & 12805 		& $>$ 1 day & 808 			& 1.77h & 117163 & 5377 & 96\%\\
 % DBpedia 3.8  		& $>$ 1 day  			& $>$ 1 day   & 4215 & 2106  		& $>$ 1 day & 292 			& 8.24h & 5193 & 2621 & 97\%\\
@@ -458,7 +458,8 @@ Table~\ref{amievsplus} also shows the benefit of individual refinement improveme
 The improvement that offers the most speedup (up to 6.7x) is the maximum rule length (MRL), closely followed by query rewriting (QRW, up to 5.1x speedup),
 whereas perfect rules (PR) rank last. 
 This occurs because MRL is much more often applicable than QRW and PR. 
-Perfect rules are not so frequent in KBs. This reduces the applicability of the enhacement by itself.
+Besides, perfect rules are relatively rare in KBs. AMIE found, for instance, 1 perfect rule on YAGO2s and 248 (out of 5K) in DBpedia 3.8. 
+%This reduces the applicability of the enhacement by itself.
 
 % \comment{chris}{this is new:}
 % Fabian: ... and it is nice!
@@ -491,6 +492,39 @@ that in 4\% of the cases the system erroneously pruned rules with a confidence h
 As in the previous section, we set a threshold of 0.1 PCA Confidence for AMIE. We also interrupted the system 
 if it ran more than one day. In those cases, we report the output until the point of interruption (denoted by a ``*'' in Table~\ref{outputComparison}).\footnote{Since the pruning precision was computed by comparing the output of AMIE+ to the output of AMIE, the values reported in Table~\ref{outputComparison} may have been calculated on a subset of all the rules, thus being an estimation of the actual pruning precision.} 
 
+\begin{table}[t]
+\begin{tabular}{|l|}
+\hline
+%\emph{y:isMarriedTo}$(x,y) \wedge$ \emph{y:livesIn}$(x,z) \Rightarrow $ \emph{y:livesIn}$(y,z)$\\
+\emph{y:isCitizenOf}$(x,y) \Rightarrow$ \emph{y:livesIn}$(x,y)$\\
+% \emph{hasAdvisor}$(x,y) \wedge $ \emph{graduatedFrom}$(x,z) \Rightarrow$ \emph{worksAt}$(y,z)$\\
+\emph{y:wasBornIn}$(x,y) \wedge$ \emph{y:isLocatedIn}$(y,z) \Rightarrow$ \emph{y:citizenOf}$(x,z)$\\
+\emph{y:hasWonPrize}$(x,G.\;W.\;Leibniz) \Rightarrow$ \emph{y:livesIn}$(x,Germany)$\\
+\emph{y:hasWonPrize}$(x,Grammy) \Rightarrow$ \emph{y:musicalRole}$(x,Guitar)$\\
+\emph{d:countySeat}$(x,y) \Rightarrow$ \emph{d:largestCity}$(x,y)$\\
+\emph{d:jurisdiction}$(z,y) \wedge\; $\emph{d:successor}$(x,z) \Rightarrow$ \emph{d:jurisdiction}$(x,y)$\\
+\emph{w:ownedBy}$(x,y) \Rightarrow$ \emph{w:subsidiary}$(y, x)$\\
+\emph{w:relative}$(y,z) \wedge $\emph{w:sister}$(z, x)  \Rightarrow$ \emph{w:relative}$(x,y)$\\
+\hline
+\end{tabular}
+\caption{Some Rules mined by AMIE on different datasets (y: YAGO, w: Wikidata, d: DBpedia).}\label{rules}
+\end{table}
+
+\begin{table}
+\hspace*{-2.4ex}
+\begin{tabular}{|l|}
+\hline
+\emph{exports}$(y,z) \wedge$ \emph{imports}$(y,z) \wedge$ \emph{livesIn}$(x,y) \Rightarrow $ \emph{citizenOf}$(x,y)$\\
+%\emph{capital}$(a,f) \wedge$ \emph{hasGeoId}$(b,j) \wedge$ \emph{hasGeoId}$(f,j) \Rightarrow$ \emph{capital}$(a,b)$ \\
+%\emph{currency}$(j,b) \wedge$ \emph{isLeaderOf}$(i,e) \wedge$ \emph{livesIn}$(i,a) \Rightarrow $ \emph{currency}$(a,b)$\\
+\emph{diedIn}$(x,z) \wedge$ \emph{locatedIn}$(z,y) \wedge$ \emph{livesIn}$(x,z) \Rightarrow $ \emph{politician}$(x,y)$\\
+%\emph{diedIn}$(f,j) \wedge$ \emph{leaderOf}$(a,f) \wedge$ \emph{locatedIn}$(j,b) \Rightarrow $ \emph{politicianOf}$(a,b)$\\
+% \emph{hasOffLang}$(j,b) \wedge$ \emph{wasBornIn}$(e,a) \wedge$ \emph{wasBornIn}$(e,j) \Rightarrow $ \emph{hasOffLang}$(a,b)$\\
+\hline
+\end{tabular}
+\caption{Examples of rules mined by AMIE on YAGO2 with $n=4$ atoms}\label{rules4atoms}
+\end{table}
+
 \begin{center}
 \begin{savenotes}
 \begin{table}[t]
@@ -506,7 +540,7 @@ KB			& Rules 		& Rules		&Pruned	& Prun. prec. 	   \\ \hline
   YAGO2s  		& 94*			& 94	 	&78 	&100.00\%		    \\
   DBpedia 2.0 		& 24308*		& 112865	&5380 	&98.26\%      	    		\\ 
   DBpedia 3.8 		& 2470*			& 5087       	&2621 	&98.41\%	    		\\
-  Wikidata  		& \textcolor{red}{746*}	& 1512		&943 	&\textcolor{red}{96.94\%}      	    \\  \hline
+  Wikidata  		& \textcolor{red}{746*}	& 1512		&773 	&\textcolor{red}{96.94\%}      	    \\  \hline
 \end{tabular}
 \caption{Output comparison of AMIE (PCA conf $\ge$ 0.1) and AMIE+ full. Starred: output after processing for 1 day. On YAGO2 (4), $maxLen=4$. On YAGO2 (const), the instantiation operator was switched on.}
 \label{outputComparison}
@@ -520,7 +554,49 @@ KB			& Rules 		& Rules		&Pruned	& Prun. prec. 	   \\ \hline
 % and considered the output until the point of interruption (denoted by a ``*'' in Table~\ref{outputComparison}).
 %One of these cases is DBpedia 2.0, where AMIE found only 24K rules, while AMIE+(full) produces 112K rules.
 
-As we can see, the pruning by approximation does not entail a serious decrease in the quality of the output:  AMIE+ does not miss more than 4\% of the rules with confidence above 10\%.  At the same time, the pruning yields a speed-up by a factor of up to 3, as Table~\ref{runtimeComparison} shows.
+As we can see, the pruning by approximation does not entail a serious decrease in the quality of the output:  AMIE+ does not miss more than 4\% of the rules with confidence above 10\%.  At the same time, the pruning yields a speed-up by a factor of up to 3, as Table~\ref{outputComparison} shows.
+
+\paragraph{Example rules}
+Table~\ref{rules} shows some examples of highly confident rules with two and three atoms mined by AMIE on the testing datasets.
+As we can observe, AMIE with its default configuration is able to mine insightful rules on large KBs. We additionally show the effect
+of increasing the maximum length of rules (parameter $maxLength$ in Algorithm~\ref{rm}) to 4 atoms. Table~\ref{rules4atoms} shows
+some examples.\comment{Luis}{TODO: Explain why rules with 4 atoms are bad}
+
+\begin{table}[t]
+\begin{tabular}{|l|}
+\hline
+%\emph{y:isMarriedTo}$(x,y) \wedge$ \emph{y:livesIn}$(x,z) \Rightarrow $ \emph{y:livesIn}$(y,z)$\\
+\emph{y:isCitizenOf}$(x,y) \Rightarrow$ \emph{y:livesIn}$(x,y)$\\
+% \emph{hasAdvisor}$(x,y) \wedge $ \emph{graduatedFrom}$(x,z) \Rightarrow$ \emph{worksAt}$(y,z)$\\
+\emph{y:wasBornIn}$(x,y) \wedge$ \emph{y:isLocatedIn}$(y,z) \Rightarrow$ \emph{y:citizenOf}$(x,z)$\\
+\emph{y:hasWonPrize}$(x,G.\;W.\;Leibniz) \Rightarrow$ \emph{y:livesIn}$(x,Germany)$\\
+\emph{y:hasWonPrize}$(x,Grammy) \Rightarrow$ \emph{y:musicalRole}$(x,Guitar)$\\
+\emph{d:countySeat}$(x,y) \Rightarrow$ \emph{d:largestCity}$(x,y)$\\
+\emph{d:jurisdiction}$(z,y) \wedge\; $\emph{d:successor}$(x,z) \Rightarrow$ \emph{d:jurisdiction}$(x,y)$\\
+\emph{w:ownedBy}$(x,y) \Rightarrow$ \emph{w:subsidiary}$(y, x)$\\
+\emph{w:relative}$(y,z) \wedge $\emph{w:sister}$(z, x)  \Rightarrow$ \emph{w:relative}$(x,y)$\\
+\hline
+\end{tabular}
+\caption{Some Rules mined by AMIE on different datasets (y: YAGO, w: Wikidata, d: DBpedia).}\label{rules}
+\end{table}
+
+\begin{table}
+\hspace*{-2.4ex}
+\begin{tabular}{|l|}
+\hline
+\emph{exports}$(y,z) \wedge$ \emph{imports}$(y,z) \wedge$ \emph{livesIn}$(x,y) \Rightarrow $ \emph{citizenOf}$(x,y)$\\
+%\emph{capital}$(a,f) \wedge$ \emph{hasGeoId}$(b,j) \wedge$ \emph{hasGeoId}$(f,j) \Rightarrow$ \emph{capital}$(a,b)$ \\
+%\emph{currency}$(j,b) \wedge$ \emph{isLeaderOf}$(i,e) \wedge$ \emph{livesIn}$(i,a) \Rightarrow $ \emph{currency}$(a,b)$\\
+\emph{diedIn}$(x,z) \wedge$ \emph{locatedIn}$(z,y) \wedge$ \emph{livesIn}$(x,z) \Rightarrow $ \emph{politician}$(x,y)$\\
+%\emph{graduatedFrom}$(x,z) \wedge$ \emph{livesIn}$(w,y) \wedge$ \emph{worksAt}$(w,z) \Rightarrow $ \emph{citizenOf}$(x,y)$\\
+\emph{advisor}$(z,w) \wedge$ \emph{citizenOf}$(w,y) \wedge$ \emph{livesIn}$(z,x) \Rightarrow $ \emph{deals}$(x,y)$ \\
+%\emph{diedIn}$(f,j) \wedge$ \emph{leaderOf}$(a,f) \wedge$ \emph{locatedIn}$(j,b) \Rightarrow $ \emph{politicianOf}$(a,b)$\\
+% \emph{hasOffLang}$(j,b) \wedge$ \emph{wasBornIn}$(e,a) \wedge$ \emph{wasBornIn}$(e,j) \Rightarrow $ \emph{hasOffLang}$(a,b)$\\
+\hline
+\end{tabular}
+\caption{Examples of rules mined by AMIE on YAGO2 with $n=4$ atoms}\label{rules4atoms}
+\end{table}
+
 \ignore {
 \paragraph{Performance of confidence approximation w.r.t. to rule-length}
 \comment{Fabian}{What is this? Will it be in the paper?}
@@ -1030,23 +1106,23 @@ In addition, this experimental setup could serve as a naive baseline for more so
 % We also note that our rules are insightful. Table \ref{rules} shows some of the rules that we mined.
 % Being able to mine reasonable rules on semantic KBs of this size is an achievement beyond the current state of the art.
 
-\ignore{
-\begin{table}
-\hspace*{-3.4ex}
-\begin{tabular}{|l|}
-\hline
-\emph{isMarriedTo}$(x,y)\ \wedge$ \emph{livesIn}$(x,z) \Rightarrow $ \emph{livesIn}$(y,z)$\\
-\emph{isCitizenOf}$(x,y) \Rightarrow$ \emph{livesIn}$(x,y)$\\
-\emph{hasAdvisor}$(x,y)\ \wedge $ \emph{graduatedFrom}$(x,z) \Rightarrow$ \emph{worksAt}$(y,z)$\\
-\emph{wasBornIn}$(x,y)\ \wedge$ \emph{isLocatedIn}$(y,z) \Rightarrow$ \emph{isCitizenOf}$(x,z)$\\
-\emph{hasWonPrize}$(x,G.\;W.\;Leibniz) \Rightarrow$ \emph{livesIn}$(x,Germany)$\\
-\emph{hasWonPrize}$(x,Grammy) \Rightarrow$ \emph{hasMusicalRole}$(x,Guitar)$\\
-\hline
-\end{tabular}
-\caption{Several rules mined by AMIE}
-\label{rules}
-\end{table}
-}
+% \ignore{
+% \begin{table}
+% \hspace*{-3.4ex}
+% \begin{tabular}{|l|}
+% \hline
+% \emph{isMarriedTo}$(x,y)\ \wedge$ \emph{livesIn}$(x,z) \Rightarrow $ \emph{livesIn}$(y,z)$\\
+% \emph{isCitizenOf}$(x,y) \Rightarrow$ \emph{livesIn}$(x,y)$\\
+% \emph{hasAdvisor}$(x,y)\ \wedge $ \emph{graduatedFrom}$(x,z) \Rightarrow$ \emph{worksAt}$(y,z)$\\
+% \emph{wasBornIn}$(x,y)\ \wedge$ \emph{isLocatedIn}$(y,z) \Rightarrow$ \emph{isCitizenOf}$(x,z)$\\
+% \emph{hasWonPrize}$(x,G.\;W.\;Leibniz) \Rightarrow$ \emph{livesIn}$(x,Germany)$\\
+% \emph{hasWonPrize}$(x,Grammy) \Rightarrow$ \emph{hasMusicalRole}$(x,Guitar)$\\
+% \hline
+% \end{tabular}
+% \caption{Several rules mined by AMIE}
+% \label{rules}
+% \end{table}
+% }
 %\ignore{
 % \paragraph{Precision of Mined Rules}
 % In general, we can also use the confidence measures to estimate the actual precision of a rule.
