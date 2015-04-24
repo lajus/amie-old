@@ -85,8 +85,7 @@ In their default settings, AMIE and AMIE+ define a 1\% head coverage threshold a
 By default, AMIE does not impose a confidence threshold, i.e., $minConf=0$. 
 In contrast, AMIE+ defines a PCA confidence threshold of 0.1, i.e., $minConf=0.1$ (Section~\ref{subsec:speedingConfidenceEvaluation}).
 Both systems use as many threads as available logical cores in the system (32 in our hardware platform). 
-\comment{chris}{is it a machine with 8 physical cores that gets up 32 logical cores with hyperthreading? In general make sure that the hardware part is correct}
-\comment{Chris}{In order to keep the search tractable and the experimental study manageable we ran AMIE with $maxLength=3$} \comment{Luis}{I crosschecked and there are 8 physical cores and 32 threads. }
+\comment{Chris}{In order to keep the search tractable and the experimental study manageable we ran AMIE with $maxLen=3$}
 Any deviation from these settings will be explicitly stated. 
 
 
@@ -559,10 +558,10 @@ AMIE+ does not miss more than 4\% of the rules with confidence above 10\%.
 At the same time, the pruning yields a speed-up by a factor of up to 3, as Table~\ref{amievsplus} shows.
 
 \paragraph{Longer rules}
-To investigate the performance of AMIE/AMIE+ with longer rules, we ran both systems also with $maxLength=4$.  
+To investigate the performance of AMIE/AMIE+ with longer rules, we ran both systems also with $maxLen=4$.  
 First, we observe an increase of one order of magnitude in the number of rules output (645 vs. 68, see Table~\ref{outputComparison}). 
 This provides a hint of how fast the search space increases for longer rules. 
-The result is that mining on YAGO2 with $maxLength=4$ is 7.9x slower than on YAGO with $maxLength=3$ (see Table~\ref{amievsplus}).
+The result is that mining on YAGO2 with $maxLen=4$ is 7.9x slower than on YAGO with $maxLen=3$ (see Table~\ref{amievsplus}).
 % For AMIE+, we can observe a drop in the speedup offered over AMIE from 6.7x to 3x. 
 In addition, we observe that the confidence approximation used in AMIE+ does not over-prune 
 high-confidence rules (100\% pruning precision) as we move to longer rules.
@@ -572,7 +571,7 @@ Table~\ref{rules} shows some examples of highly confident rules with two and thr
 As we can observe, AMIE with its default configuration is able to mine insightful rules on large KBs. We additionally 
 show in Table~\ref{rules4atoms} some rules with 4 atoms mined on YAGO2.  
 % the effect
-% of increasing the maximum length of rules (parameter $maxLength$ in Algorithm~\ref{rm}) to 4 atoms. Table~\ref{rules4atoms} shows
+% of increasing the maximum length of rules (parameter $maxLen$ in Algorithm~\ref{rm}) to 4 atoms. Table~\ref{rules4atoms} shows
 % some examples.
 % \comment{Luis}{TODO: Explain why rules with 4 atoms are bad}
 % \comment{Chris}{why do we need to say that they are bad? before we were saying they are bad because we had no experiments for longer rules. Also the examples that you have do make sense}
