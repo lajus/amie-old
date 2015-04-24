@@ -7,7 +7,8 @@ We follow the description in \cite{amie} and extend it with further explanations
 \label{subsec:algorithm}
 
 %Only overview in this point
-\paragraph{Algorithm} Algorithm~\ref{rm} shows our approach to mine rules. It takes as input a KB $\mathcal{K}$, a threshold $minHC$ on the head coverage of the mined rules, a threshold $minConf$ on the confidence, and a maximum rule length $maxLen$. We discuss the choice of parameter values further down.
+\paragraph{Algorithm} Algorithm~\ref{rm} shows our approach to mine rules. It takes as input a KB $\mathcal{K}$, a threshold $minHC$ on the head coverage of the mined rules, 
+a threshold $minConf$ on the confidence, and a maximum rule length $maxLen$. We discuss the choice of parameter values later in this section.
 The algorithm maintains a queue of rules (line~1), which initially contains all possible head atoms, that is, all rules of size 1.
 It then iteratively dequeues a rule from this queue.
 If the rule meets certain criteria (line~6), it is pushed to the output.
@@ -125,9 +126,9 @@ and find also rules with a smaller head coverage or a larger number of atoms.
 Thus, these parameters define a trade-off between the runtime and the number of rules. 
 Interestingly, a larger number of rules is not necessarily a good thing. 
 For instance, a rule that covers only 1\% or less of the instances of a relation is probably not interesting 
-(lack of statistical significance). Therefore, we set the default value $minHC=0.01$. Additionally, 
-we show in our experiments that rules with more 
-than 3 atoms tend to be very convoluted and not insightful. Hence, we set $maxLen=3$.
+(lack of statistical significance). Therefore, we set the default value $minHC=0.01$. 
+% \comment{chris}{Additionally, we show in our experiments that rules with more than 3 atoms tend to be very convoluted and not insightful. Hence, we set $maxLen=3$.}
+\comment{chris}{Additionally, according to our experience with web-based KBs, a $maxLen$ of 3 offers a good trade-off between mining speed and expressivity of rules. Hence, we set $maxLen=3$.}
 
 The same rationale can be applied to the confidence of a rule. A rule with confidence 10\% will make correct predictions one out of
 ten times. Assuming that a user is not interested in such kind of rules, we set the default value $minConf=0.1$. 
