@@ -251,8 +251,8 @@ Therefore, AMIE+ caches the results of previous queries. Whenever a new query ca
 
 \paragraph{Confidence Scores} A significant part of the runtime of our algorithm is spent on computing confidence scores (up to 35\% in our experiments).
 %\comment{chris}{I do not know what is the correct number here; Fabian: this is the correct number from Luis} ). 
-The reason is that the calculation of both the standard confidence and the PCA confidence requires the calculation of the 
-number of instantiations of the rule body. \comment{Luis}{Until here we never suggest that we are interested in calculating the standard confidence}
+The reason is that the calculation of confidence (both PCA and standard) requires the calculation of the 
+number of instantiations of the rule body. %\comment{Luis}{Until here we never suggest that we are interested in calculating the standard confidence}
 If the body contains atoms with many instantiations, the joins can be very expensive to compute.
 %very selective joins, the size of the body is relatively small and the query cost remains low. If the body size is huge, it uses more resources (memory), which makes the query expensive.
 % Fabian: I think that memory is not the issue
