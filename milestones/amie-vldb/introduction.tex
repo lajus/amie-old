@@ -24,7 +24,7 @@ We can, e.g., find out that countries often trade with countries speaking the sa
 
 \www{
 The goal of this paper is to mine such rules from KBs.
-We focus on RDF-style KBs in the spirit of the Semantic Web, such as YAGO \cite{SucKasWei07}, Freebase \cite{freebase}, and DBpedia \cite{dbpedia}. 
+We focus on RDF-style KBs in the spirit of the Semantic Web, such as YAGO \cite{SucKasWei07}, Wikidata\footnote{\url{http://www.wikidata.org}}, and DBpedia \cite{dbpedia}. 
 % $^{\ref{freebase}}$, and DBpedia \cite{dbpedia}.
 These KBs provide binary relationships in the form of RDF triples \cite{rdf}. Since RDF has only positive inference rules, these KBs contain only positive statements and no negations.
 %These KBs contain only binary relationships.
@@ -54,16 +54,16 @@ Mining rules from a data set is the central task of Inductive Logic Programming 
 \www{
 ILP approaches induce logical rules
 from ground facts. Yet, classical ILP systems cannot be applied to semantic KBs for two reasons: First, they usually require negative statements as counterexamples.
-Semantic KBs, however, usually do not contain negative statements. The semantics of RDFs are too weak to deduce negative evidence 
-from the facts in a KB\footnote{RDFs has only positive rules and no disjointness constraints or similar concepts.}. Because of the OWA, absent statements cannot serve as counter-evidence either.
+Semantic KBs, however, usually do not contain negative statements. The semantics of RDF Schema are too weak to deduce negative evidence 
+from the facts in a KB\footnote{RDF Schema has only positive rules and no disjointness constraints or similar concepts.}. Because of the OWA, absent statements cannot serve as counter-evidence either.
 Second, today's ILP systems are slow and cannot handle the huge amount of data that KBs provide.
 In our experiments, we ran state-of-the-art approaches on YAGO2 for a couple of days without obtaining any results.
 }
 
 
 With the AMIE project \cite{amie}, we have shown how to mine logical rules from KBs despite the absence of explicit counter-examples.
-The key technique was a new metric, the confidence under the Partial Completeness Assumption (PCA). It 
-allows AMIE to ``guess'' counterexamples for rules, and thus estimate their quality even under the open world assumption.
+The key technique was the Partial Completeness Assumption (PCA). It 
+allows AMIE to ``guess'' counterexamples for rules, and thus estimate their quality even under the OWA.
 We have shown that our approach outperforms other rule mining systems %that can also work without explicit counterexamples
 % ~\comment{Luis: }{I am not convinced about this assertion, because
 % at the end, all systems need a notion of counterexamples. Even ALEPH that claims to learn only from positive data, uses random facts as counter-evidence}
@@ -100,7 +100,7 @@ thus giving a more complete picture of rule mining on large-scale knowledge base
 % Section \ref{sec:improvements} is the main part of the paper: It presents the pruning strategies that multiply the performance of AMIE.
 % Section~\ref{sec:experiments} presents our experiments before Section~\ref{sec:conclusion} concludes.
 The rest of this paper is structured as follows: Section~\ref{sec:relatedWork} discusses related work and Section~\ref{sec:preliminaries} introduces preliminaries.
-In Section~\ref{sec:pca}, we introduce the partial completeness assumption (PCA) and, based on it, the PCA confidence measure.
+In Section~\ref{sec:pca}, we introduce the Partial Completeness Assumption (PCA) and, based on it, the PCA confidence measure.
 %We also investigate the applicability of the PCA in practice.
 Section~\ref{sec:alg} recaptures the AMIE approach from \cite{amie}.
 Section~\ref{sec:improvements} is the main part of the paper: It presents the pruning strategies that optimize the performance of AMIE.

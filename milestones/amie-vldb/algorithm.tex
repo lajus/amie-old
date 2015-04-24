@@ -7,8 +7,9 @@ We follow the description in \cite{amie} and extend it with further explanations
 \label{subsec:algorithm}
 
 %Only overview in this point
-\paragraph{Algorithm} Algorithm~\ref{rm} shows our approach to mine rules. It takes as input a KB $\mathcal{K}$, a threshold $minHC$ on the head coverage of the mined rules, 
-a threshold $minConf$ on the confidence, and a maximum rule length $maxLen$. We discuss the choice of parameter values later in this section.
+\paragraph{Algorithm} Algorithm~\ref{rm} shows our approach to mine rules. It takes as input a KB $\mathcal{K}$, 
+a threshold $minHC$ on the head coverage of the mined rules, a maximum rule length $maxLen$
+and a threshold $minConf$ on the confidence. We discuss the choice of parameter values later in this section.
 The algorithm maintains a queue of rules (line~1), which initially contains all possible head atoms, that is, all rules of size 1.
 It then iteratively dequeues a rule from this queue.
 If the rule meets certain criteria (line~6), it is pushed to the output.
@@ -23,7 +24,7 @@ In the following, we will see in more detail the different phases of the algorit
 \caption{Rule Mining}
 \label{rm}
 \begin{algorithmic}[1]
-\Function{AMIE}{KB $\mathcal{K}$, $minHC$, $minConf$, $maxLen$}
+\Function{AMIE}{KB $\mathcal{K}$, $minHC$, $maxLen$, $minConf$}
     \State $q = [r_1(x,y), r_2(x,y) \dots r_m(x,y)] $
     \State $out = \langle \rangle$
 	\While{$\neg q$\emph{.isEmpty}()}
@@ -59,7 +60,7 @@ In the process of traversing the search space, we can extend a rule by using one
 This operator adds a new atom to a rule. The new atom uses a fresh variable for one of its two arguments. The other argument is a variable
 that is shared with the rule, i.e., it occurs in some other atom of the rule.
 \item \textbf{Add Instantiated Atom ($\mathcal{O}_I$})\\
-This operator adds a new atom to a rule that uses an entity for one argument and shares the other argument (variable or entity) with the rule.
+This operator adds a new atom to a rule that uses an entity for one argument and shares the other argument (variable) with the rule.
 \item \textbf{Add Closing Atom ($\mathcal{O}_C$})\\
 This operator adds a new atom to a rule so that both of its arguments are shared with the rule.
 \end{enumerate}
@@ -116,7 +117,7 @@ This is because confidence is a non-monotonic measure, i.e. we might get good ru
 If executed naively, Algorithm~\ref{rm} will have prohibitively high runtimes.
 The instantiation operator $\mathcal{O}_I$, in particular, generates atoms in the order of $|\mathcal{R}| \times |\mathcal{E}|$.
 For this reason the algorithm defines some parameters that determine when to stop with the exploration of the space. 
-These are the minimal head coverage $minHC$, the minimal confidence $minConf$ and the maximal length $maxLen$.
+These are the minimal head coverage $minHC$, the maximal length $maxLen$ and the minimal confidence $minConf$.
 % The algorithm traverses the search space and enumerate all rules that fulfil the constraints 
 % of a minimal head coverage $minHC$, a minimal confidence $minConf$, and a maximal length of $maxLen$. 
 %Thus, these parameters define when the algorithm shall stop with the exploration of the space. 
@@ -128,7 +129,8 @@ Interestingly, a larger number of rules is not necessarily a good thing.
 For instance, a rule that covers only 1\% or less of the instances of a relation is probably not interesting 
 (lack of statistical significance). Therefore, we set the default value $minHC=0.01$. 
 % \comment{chris}{Additionally, we show in our experiments that rules with more than 3 atoms tend to be very convoluted and not insightful. Hence, we set $maxLen=3$.}
-\comment{chris}{Additionally, according to our experience with web-based KBs, a $maxLen$ of 3 offers a good trade-off between mining speed and expressivity of rules. Hence, we set $maxLen=3$.}
+Additionally, our experience with web-extracted KBs suggests that a rule length of 3 offers a good trade-off 
+between mining speed and expressivity of rules. Hence, we set $maxLen=3$.
 
 The same rationale can be applied to the confidence of a rule. A rule with confidence 10\% will make correct predictions one out of
 ten times. Assuming that a user is not interested in such kind of rules, we set the default value $minConf=0.1$. 
@@ -144,16 +146,16 @@ she can change these thresholds. However, we believe that there is no good reaso
 In particular, relaxing these values will not output better rules. This makes AMIE a system that can be run off the shelf, 
 without the need for parameter tuning.
 
-\ignore {
-\paragraph{Pruning}
-If executed naively, Algorithm~\ref{rm} will have prohibitively high runtimes.
-The instantiation operator $\mathcal{O}_I$, in particular, generates atoms in the order of $|\mathcal{R}| \times |\mathcal{E}|$.
-We first observe that we are usually not interested in rules that cover only very few facts of the head relation.
-Rules that cover, for example, less than 1\% of the facts of the head relation can safely be assumed to be marginal.
-Therefore, we choose $minHC=0.01$ as a lower bound for the head coverage. We observe that head coverage decreases monotonically as we add more atoms.
-This allows for safely discarding any rule that trespasses the threshold (line~12 of Alg.~\ref{rm}).
-Recall from Section~\ref{subsec:statSignificance} that support and head coverage are defined even for rules that are not yet closed, allowing for early pruning.
-}
+% \ignore {
+% \paragraph{Pruning}
+% If executed naively, Algorithm~\ref{rm} will have prohibitively high runtimes.
+% The instantiation operator $\mathcal{O}_I$, in particular, generates atoms in the order of $|\mathcal{R}| \times |\mathcal{E}|$.
+% We first observe that we are usually not interested in rules that cover only very few facts of the head relation.
+% Rules that cover, for example, less than 1\% of the facts of the head relation can safely be assumed to be marginal.
+% Therefore, we choose $minHC=0.01$ as a lower bound for the head coverage. We observe that head coverage decreases monotonically as we add more atoms.
+% This allows for safely discarding any rule that trespasses the threshold (line~12 of Alg.~\ref{rm}).
+% Recall from Section~\ref{subsec:statSignificance} that support and head coverage are defined even for rules that are not yet closed, allowing for early pruning.
+% }
 \paragraph{Duplicate Elimination} \label{subsec:duplicateElimination}
 As mentioned in Section~\ref{subsubsec:whenToOutput} a rule can be derived in multiple ways.
 For example, the rule $actedIn(x,y) \wedge directed(x,y) \Rightarrow created(x,y)$ can result from the application
@@ -229,13 +231,16 @@ SUCH THAT COUNT($H$)$\geq k$
 }
 
 \noindent where $k := minHC \times size(H)$ (see Section~\ref{par:headCoverage}) is the translation of the
-head coverage threshold into an absolute support threshold and the expression COUNT($\cdot$) has for the rest of this section COUNT(DISTINCT $\cdot$) semantics.
-$\bm{X}$ and $\bm{Y}$ can represent variables that are either fresh or already present in the rule.
+head coverage threshold into an absolute support threshold and the expression COUNT($\cdot$) 
+has COUNT(DISTINCT $\cdot$) semantics (also for the rest of this section).
+$\bm{X}$ and $\bm{Y}$ represent variables that are either fresh or already present in the rule.
 \comment{Luis}{About the meta-variables, the text originally said 
 ``that can be either variables or constants, depending on the type of atoms that the operator generates". I changed
 because in principle we never add atoms where one of the arguments is a constant, because we first find the relation
 and then the constants for the arguments.}
-The results for $\bm{r}$ are the relations that, once bound in the query, ensure that the head coverage of the rule $B_1 \; \wedge ... \wedge B_{n-1} \;\wedge\; \bm{r}(\bm{X},\bm{Y}) \Rightarrow H$ is greater than $minHC$.
+The results for $\bm{r}$ are the relations that, once bound in the query, 
+ensure that the head coverage of the rule $B_1 \; \wedge ... \wedge B_{n-1} \;\wedge\; \bm{r}(\bm{X},\bm{Y}) \Rightarrow H$ is greater
+or equal than $minHC$.
 Notice also that for each value of $\bm{r}$, the expression COUNT($H$) gives us the support of the new rule.
 We now discuss the cases for all three operators.
 

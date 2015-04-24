@@ -273,7 +273,7 @@ AMIE needs more than 500ms (more than twice the average cost: 200ms) to calculat
 \paragraph{Approximation} We have developed a method to approximate the confidence value of such a rule very quickly. 
 %In AMIE+, we use a confidence threshold in combination with a formula to approximate the confidence value to avoid evaluating expensive queries that would lead to low confidence rules.
 Our approximation is based on statistics, such as the functionalities of the atoms, or the size of the joins between two relations. 
-We pre-compute these quantities, so that they be accessed in constant time\comment{Luis}{Was it intended to be subjunctive: \url{http://english.stackexchange.com/questions/58634/so-that-it-be-vs-so-that-it-is?}}. As a result, AMIE+ prunes the example-rule above in less than 1ms.  
+We pre-compute these quantities, so that they are accessed in constant time. As a result, AMIE+ prunes the example-rule above in less than 1ms.  
 
 Our approximation is designed such that it is more likely to overestimate confidence than to underestimate it.
 This is important, because we use it to prune rules, and we want to avoid pruning rules that have a higher confidence in reality.

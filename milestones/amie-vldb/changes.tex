@@ -7,8 +7,8 @@
 	We thank the reviewers for their valuable comments and feedback! We revised our paper throughout to address their comments. We have added more examples, run a significant number of experiments, and rewritten large portions of the paper.
 Among other things, we have
 \begin{itemize}
-\item revised Sec.~\ref{sec:improvements} to show how our approach generalizes to more than 3 atoms, and added the corresponding experiments
-\item added an entire section on the implementation of our database (Sec.~\ref{subsec:implementation})
+\item revised Section~\ref{sec:improvements} to show how our approach generalizes to more than 3 atoms, and added the corresponding experiments
+\item added an entire section on the implementation of our database (Section~\ref{subsec:implementation})
 \item run experiments to show the exact effect of the heuristics that we developed
 \item shown how to increase the precision of the rules up to 70\% by using type information from the KB.
 \end{itemize}
@@ -28,16 +28,16 @@ Among other things, we have
 % Fabian: we can be more to the point and more aggressive here! See my proposal below
 	In real applications one would take advantage of the type information and use
     a more principled inference method (e.g. MLNs) to quantify the confidence of facts produced by multiple rules,
-    attach probabilities to predictions and prune low-probability facts. In Sec.~\ref{subsubsec:std_vs_pca}, we include
+    attach probabilities to predictions and prune low-probability facts. In Section~\ref{subsubsec:std_vs_pca}, we include
     an experiment in which AMIE makes uses of the type information (but still does simple deduction of facts)
     and the precision curve already moves significantly higher. }
 
-Real applications will have to combine information from multiple rules or sources to arrive at predictions with high confidence. To showcase this, we have now added a new experiment in Sec.~\ref{prediction}, in which we add type information to the mining process. We can show that this increases the accuracy of the predictions to 70\%.
+Real applications will have to combine information from multiple rules or sources to arrive at predictions with high confidence. To showcase this, we have now added a new experiment in Section~\ref{prediction}, in which we add type information to the mining process. We can show that this increases the accuracy of the predictions to 70\%.
 
 \review{R1: the main proposed heuristic (which contributes most to the  speed-up) is an ad-hoc approximation of  the PCA confidence for a specific type of 3-atom rules, being not trivial to generalize it to any kind of rule.  (Indeed, experiments are limited to 3-atom rules)\\
    R2: the rules that this technique can be applied to are still a bit limited. }
 
-   Our confidence approximation generalizes to rules with more atoms. We have now extended Sec.~\ref{sec:conf_appr} to show this. We also added experiments that show that AMIE+ works with longer rules.
+   Our confidence approximation generalizes to rules with more atoms. We have now extended Section~\ref{sec:conf_appr} to show this. We also added experiments that show that AMIE+ works with longer rules.
 
 \review{R2: when the article introduces the notation of $|rng(directed)|$, it says it "is the number of distinct directors in the range of directed". I strongly suspect there is a typo here.}
 
@@ -47,8 +47,8 @@ Real applications will have to combine information from multiple rules or source
 we can switch the two expressions. That is, we can use the expression with ov and $|rng|$ to compute \#x2 per x1 and use the other expression for \#x1 per x0. 
 Is there any preference of one way over another? How does AMIE+ choose?}
 
-   AMIE chooses to calculate the number of the entities in the less functional variable per entity in the most functional variable. This choice is based on the $conf_{pca}$ definition in Sec.~\ref{sec:pca}.
-   Sec.~\ref{sec:improvements} is now revised to clarify this.
+   AMIE chooses to calculate the number of the entities in the less functional variable per entity in the most functional variable. This choice is based on the $conf_{pca}$ definition in Section~\ref{sec:pca}.
+   Section~\ref{sec:improvements} is now revised to clarify this.
 
 \review{R1: authors compare their approach to two ILP methods which were proposed at earlier 2000. More robust and grounded method for mining relational data have been proposed since then. A fair
 comparison to these methods needs to be carried out in order to demonstrate the difficulty of the problem and how far the precision scores are from these methods.}
@@ -61,7 +61,7 @@ We have now removed these queries, and discussed the custom implementation in mu
 
  \review{R2: the queries presented throughout the paper (mainly in Section 5.3 and 5.4) to compute the support appear to be incorrect. [...] The article should carefully re-examine and re-write those SQL and SPARQL queries}
 
-	  Indeed, this reviewer has found a bug in one of our SQL queries, and we are very grateful! The original query was designed to retrieve the relations for new atoms resulting from the application of the mining operators described in Section~\ref{subsubsec:refinement}. For each relation in the answer, the query also reported the support of the rule if the relation were used for the new atom. Support is defined as the number of distinct bindings of the head variables of the rule. The original query in constrast, was calculating the total number of distinct bindings for all variables. We confirm that the query that the reviewer proposes solves the problem! \comment{Fabian}{reformulate to mirror what happened!} \comment{Luis}{Does it make sense?}
+	  Indeed, this reviewer has found a bug in one of our SQL queries, and we are very grateful! The original query was designed to retrieve the relations for new atoms resulting from the application of the mining operators described in Section~\ref{subsubsec:refinement}. For each relation in the answer, the query also reported the support of the rule if the relation were used in the new atom. Support is defined as the number of distinct bindings of the head variables of the rule. The original query in contrast, was calculating the number of distinct bindings for all variables. We confirm that the query that the reviewer proposes solves the problem! \comment{Fabian}{reformulate to mirror what happened!} \comment{Luis}{Does it make sense?}
 
 	  This said, we followed the suggestion of R3 and removed the SPARQL and SQL queries altogether.
 
@@ -86,11 +86,11 @@ We have now rewritten Section \ref{subsec:lossless} to address all 3 questions.
       This restriction limits the benefits gained from applying this technique.
       As shown in Table 7 in the experiments section, we can see that there is not a big improvement in execution time and only a small amount of rules may be removed.}
 
-It is true that this particular technique makes only a small contribution to the overall improvement. We included it merely as a special case of the confidence approximation, because it allows a lossless pruning.
+It is true that this particular technique makes only a small contribution to the overall improvement. We included it merely as a special case of the confidence approximation, because it allows for lossless pruning.
 
 \review{R2: The experiments should give a breakdown of the execution time of AMIE+ on the two rule mining steps and show the performance improvement on the respective step for each optimization technique. }
 
-We totally agree. We have now added such tables in Section \ref{amiepm}.
+We totally agree. We now have now added such tables in Section~\ref{amiepm}.
 
 \review{R2: The article gives experimental results on the quality of rules to compare the PCA confidence with the standard confidence in Section 7.4.2.
       It runs AMIE on the YAGO2 dataset, and validates the predictions that are not in the dataset. If I understand this correctly,
@@ -131,7 +131,7 @@ To make this more clear, we have now completely removed the FUN-property, and re
 
 \review{R2: The three operators used in the rule mining can actually be reduced to a single and simpler operator: add a new atom with a shared variable with the current rule.}
 
-It is true that all three operators require that one of the variables of the new atom is shared with a variable of the rule. On this high level, they are thus similar. On the level of the algorithm, however, they fire different types of queries to the KB. We have now added a new section (Sec. \ref{subsec:countqueries}) to make this explicit.
+It is true that all three operators require that one of the variables of the new atom is shared with a variable of the rule. On this high level, they are thus similar. On the level of the algorithm, however, they fire different types of queries to the KB. We have now added a new section (Section~\ref{subsec:countqueries}) to make this explicit.
 %treated differently. The add-dangling-atom operator requires that the second variable does not re-appear anywhere in the rule, the add-closing-atom requires also the second variable to be shared and the add-instantiated-atom binds the variable to a specific constant.
 
 \review{R2: The rdf:type relationship in a KB can be used to derive the type for each argument of a predicate. The information should be used, if it was not used, in the mode setting of Aleph to facilitate the learning.}
@@ -173,7 +173,7 @@ We agree. We have now rewritten the corresponding sections to make the restricti
 
 \review{R3: I would like to understand sooner that 4.3 is a discarded and useless digression and I would appreciate a deeper discussion of Section 4.4, possibly with examples.}
 
-      We removed the discussion of positives-only evaluation function from Sec.~\ref{sec:pca}.  It now briefly appears in the experiments section where its performance is evaluated.
-      In Sec.~\ref{subsubsec:pcaConf} we now include the example of Table~\ref{tab:exampleKB}.
+      We removed the discussion of positives-only evaluation function from Section~\ref{sec:pca}.  It now briefly appears in the experiments section where its performance is evaluated.
+      In Section~\ref{subsubsec:pcaConf} we now include the example of Table~\ref{tab:exampleKB}.
 
 \twocolumn
