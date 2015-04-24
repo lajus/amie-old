@@ -39,11 +39,13 @@ Real applications will have to combine information from multiple rules or source
 
    Our confidence approximation generalizes to rules with more atoms. We have now extended Sec.~\ref{sec:conf_appr} to show this. We also added experiments that show that AMIE+ works with longer rules.
 
-\review{R2: when the article introduces the notation of |rng(directed)|, it says it "is the number of distinct directors in the range of directed". I strongly suspect there is a typo here.}
+\review{R2: when the article introduces the notation of $|rng(directed)|$, it says it "is the number of distinct directors in the range of directed". I strongly suspect there is a typo here.}
 
    True. Corrected.
 
-\review{R2: There are two expressions in 6.2.2: one computes \#x1 per x0 and the other compute \#x2 per x1. Given the symmetry between $r_0$ and $r_1$ (directed and hasActor in the example), we can switch the two expressions. That is, we can use the expression with ov and |rng| to compute \#x2 per x1 and use the other expression for \#x1 per x0. Is there any preference of one way over another? How does AMIE+ choose?}
+\review{R2: There are two expressions in 6.2.2: one computes \#x1 per x0 and the other compute \#x2 per x1. Given the symmetry between $r_0$ and $r_1$ (directed and hasActor in the example), 
+we can switch the two expressions. That is, we can use the expression with ov and $|rng|$ to compute \#x2 per x1 and use the other expression for \#x1 per x0. 
+Is there any preference of one way over another? How does AMIE+ choose?}
 
    AMIE chooses to calculate the number of the entities in the less functional variable per entity in the most functional variable. This choice is based on the $conf_{pca}$ definition in Sec.~\ref{sec:pca}.
    Sec.~\ref{sec:improvements} is now revised to clarify this.
@@ -76,7 +78,6 @@ a) How to determine whether a new query can be rewritten to an old one? \\
       b) How the query rewriting is done? What rules are used in the query rewriting? \\
       c) Can this technique be applied to general rules? Or does AMIE+ only use this this technique for those rules that have the exact form as the given example? }
 
-	  \comment{Chris}{We might have to drop the query rewritting in any case}
 
 We have now rewritten Section \ref{subsec:lossless} to address all 3 questions.
 
@@ -172,7 +173,7 @@ We agree. We have now rewritten the corresponding sections to make the restricti
 
 \review{R3: I would like to understand sooner that 4.3 is a discarded and useless digression and I would appreciate a deeper discussion of Section 4.4, possibly with examples.}
 
-      We now completely removed the discussion of positives-only evaluation function since in the AMIE paper we have already shown that pca confidence outperforms it. In Sec.~\ref{subsubsec:pcaConf}
-      we now include the example of Table~\ref{tab:exampleKB}.
+      We removed the discussion of positives-only evaluation function from Sec.~\ref{sec:pca}.  It now briefly appears in the experiments section where its performance is evaluated.
+      In Sec.~\ref{subsubsec:pcaConf} we now include the example of Table~\ref{tab:exampleKB}.
 
 \twocolumn
