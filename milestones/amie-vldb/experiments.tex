@@ -1,3 +1,4 @@
+% !TEX root = main.tex
 
 We conducted four groups of experiments. 
 In the first round (Section \ref{amiepm}) we compared AMIE with AMIE+. We show the performance gain carried by
@@ -391,8 +392,8 @@ and reduce the time spent in the confidence calculation and hence the output pha
 \begin{tabular}{|l|c|c|c|c|c|c|c|}
 \hline
 \multirow{3}{*}{KB} 	& \multirow{3}{*}{AMIE}  	& \multicolumn{5}{c}{AMIE+} 	\\ \cline{3-8}
- 			& 				& Only				& \multicolumn{4}{c|}{Only Output}   										& \multirow{2}{*}{Full}  \\ \cline{4-7}
-			&  				& Refinement			&   -				& +MRL     			&+QRW 		&+PR				& 	   	   	\\ \hline
+ 			& 				& Only	& Only		& \multicolumn{3}{c|}{Output}   										& \multirow{2}{*}{Full}  \\ \cline{5-7}
+			&  				& Refinement			&   Output				& +MRL     			&+QRW 		&+PR				& 	   	   	\\ \hline
   YAGO2  		& 3.17min  			&29.37s				& 2.82min  			& 29.03s  	 		&38.16s 	&2.80min  			& 28.19s	   	\\ \hline
   YAGO2 (const)  	& 37.57min  			&11.72min			& 37.05min 			& 8.90min  			&12.04min 	&36.48min  			& 9.93min	   	\\ \hline  
   YAGO2 (4)  		& 27.14min  			&9.49min			& 26.48min 			& 8.65min  			&15.69min 	&24.20min  			& 8.35min 	   	\\ \hline
@@ -415,17 +416,16 @@ and reduce the time spent in the confidence calculation and hence the output pha
 
 \paragraph{Runtime Comparison}
 Table~\ref{amievsplus} shows the runtimes of AMIE and AMIE+. We set a threshold of 0.1 PCA Confidence for AMIE to make it
-comparable with AMIE+. For the latter, we show the results in three categories:
+comparable with AMIE+. For the latter, we show the results in several categories:
 \begin{enumerate}
- \item If only the improvements affecting the refinement process (Section~\ref{subsec:lossless}) were active, namely the 
+ \item Only output: only the improvements affecting the output process are active, i.e., 
+ the confidence approximation and the confidence upper bounds, both with confidence threshold 0.1 (Section~\ref{subsec:speedingConfidenceEvaluation}).
+ \item Only refinement: only the improvements affecting the refinement process (Section~\ref{subsec:lossless}) are active, namely the 
  maximum rule length (MRL), the query rewriting (QRW) and the perfect rules (PR).
- \item If only the improvements affecting the output process were active, i.e., 
- the confidence approximation and the confidence upper bounds, both with confidence threshold 0.1 (Only output, see Section~\ref{subsec:speedingConfidenceEvaluation}).
- \item If all improvements were active (AMIE+ full). 
+ \item Full: All improvements are active. 
 \end{enumerate}
-
-We investigate the individual effect of the refinement enhacencements, by enabling the output enhacements and one refinement
-enhacement at a time (columns +MRL, +QRW, +PR).
+We also investigate the individual effects of the enhancements by enabling the output enhancements and one refinement enhancement at a time (columns +MRL, +QRW, +PR).
+%We investigate the individual effects of the enhancements by enabling them one by one, i.e., the output enhancements and the refinement enhancements (+MRL, +QRW, +PR).
 % (1) if only the improvements affecting the refinement process were active 
 % (maximum-rule-length, query-rewriting, perfect rules),
 % (2) if only the improvements affecting the output process were active (confidence approximation, confidence upper bounds, both with confidence threshold 0.1) and
@@ -434,16 +434,16 @@ enhacement at a time (columns +MRL, +QRW, +PR).
 
 We first note that AMIE is not able to finish within a day for YAGO2s, DBPedia 2.0, DBpedia 3.8, and Wikidata. In contrast, 
 AMIE+ can mine rules on all these datasets in a matter of hours, and even minutes.
-For YAGO2-const, we can see that the full version of AMIE+ is 3.8x faster than AMIE. 
-On YAGO2, this speed-up nearly doubles to 6.7x. This boost is mainly due to the improvements
-in the refinement process: AMIE+ with only these improvements is already 3.2x faster on YAGO2-const and 6.5x faster on YAGO2 than AMIE. 
-This is not surprising, since,
-for YAGO2, most of the time is spent in refining rules (Table~\ref{timeProportion}). Therefore, the improvements in this phase result in a significant gain.
+For YAGO2 (const), we can see that the full version of AMIE+ is 3.8x faster than AMIE. 
+For YAGO2, this speed-up nearly doubles to 6.7x. This boost is mainly due to the improvements
+in the refinement process: AMIE+ with only these improvements is already 3.2x faster on YAGO2 (const) and 6.5x faster on YAGO2 than AMIE. 
+This is not surprising since 
+for YAGO2 most of the time is spent on refining rules (Table~\ref{timeProportion}). Therefore, the improvements in this phase result in a significant gain.
 
-Notice also that AMIE+(only Output) is only marginally faster than AMIE for the YAGO2 family of datasets. This is because the confidence approximation heuristic requires  
+Notice also that AMIE+ (only output) is only marginally faster than AMIE for the YAGO2 family of datasets. This is because the confidence approximation heuristic requires  
 computing the join cardinalities for every pair of relations in the KB. This means that there is a trade-off between an initial additional cost 
 for pre-computing these values and the potential savings. For the case of YAGO2, the output phase takes only around 9\% 
-of the overall mining time, i.e. the
+of the overall mining time, i.e., the
 confidence evaluation is not really a problem. %In this case, the benefit of using the confidence approximation is less than the preprocessing cost. 
 
 
