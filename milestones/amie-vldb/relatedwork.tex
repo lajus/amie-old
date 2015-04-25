@@ -18,13 +18,20 @@ Our approach is inspired by this work and also makes use of a language bias~\cit
 %\www{
 \subsection{Logical Rule Mining}
 Sherlock \cite{SchEtzWel10} is an unsupervised ILP method to learn first-order Horn clauses from a set of extracted facts 
-for a given target relation. Sherlock is designed for \emph{open domain facts}, i.e., facts extracted from free text that are not mapped to 
-any existing schema.
-Sherlock uses probabilistic graphical models (PGMs) to infer new facts. 
-It tackles the noise of the extracted facts by extensive filtering in a preprocessing step and by penalizing longer rules in the inference part. 
+for a given target relation. 
+Sherlock is designed for \emph{open domain facts}, i.e., facts extracted from free text that are not mapped to any existing schema.
+Hence, in contrast to AMIE, Sherlock is applied in the context of web extraction, where the notion of a relation rather corresponds to a pattern than a well-defined relation as used in KBs and by AMIE.
+% Sherlock uses probabilistic graphical models (PGMs) to infer new facts. 
+Sherlock is a complete approach in the sense that after producing the rules, it uses MLNs for probabilistic reasoning in order to produce facts.
+% It tackles the noise of the extracted facts by extensive filtering in a preprocessing step and by penalizing longer rules in the inference part. 
+Sherlock also takes noise into consideration and, unlike AMIE, does not assume that all extracted facts are true. 
+Hence, Sherlock tackles noise of the extracted facts by extensive filtering in a preprocessing step and penalizes longer rules since with every extra atom that is used, more noise might be introduced. 
 To mine the rules, Sherlock uses two heuristics: statistical significance and statistical relevance. %\comment{Luis}{To protect us from the reviewers, we should argue why Sherlock is not applicable to our setting.}
 % (an alternative way to express Occam's razor).
 %}
+Due to these reasons, Sherlock is not directly comparable to AMIE. 
+% Publicly available are the rules but not the code itself.
+% 
 QuickFOIL~\cite{quickfoil} is a standard ILP system based on a generic top-down greedy algorithm and implemented 
 on top of  the QuickStep in-memory storage engine~\cite{Chasseur:2013:DES:2536258.2536260}. It learns a set of hypotheses (Horn rules)
 from positive and negative examples of a target relation and a collection of background facts. When refining a rule, the QuickFOIL algorithm 
@@ -32,7 +39,7 @@ greedily picks the clause that maximizes a scoring
 function depending on the support and the confidence gain of the new rule. Once a rule is mined, the algorithm removes the positive examples
 covered by the rule and starts the induction process on the remaining facts.
 QuickFOIL can scale to problem  instances with millions of background facts thanks to a 
-set of aggresive pruning heuristics and multiple database optimizations. 
+set of aggressive pruning heuristics and multiple database optimizations. 
 However, it is not suitable for mining rules under the Open World Assumption, since it requires explicit negative examples. 
 %\www{
 The WARMR system \cite{DehToi99,DehToi00} mines patterns in data\-bases that correspond to conjunctive queries. It uses a declarative language bias to reduce the search space. 

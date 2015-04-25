@@ -1,3 +1,5 @@
+% !TEX root = main.tex
+
 Since the publication of the original AMIE framework~\cite{amie}, we have extended it with a series of improvements
 that allow the system to run over very large KBs.
 In the following, we will introduce and discuss these extensions and refer to this new version of AMIE as AMIE+.
@@ -65,7 +67,7 @@ because the addition of an instantiated atom can close at most one variable.
 % Hence, the application of the operator $\mathcal{O}_D$ to open rules of size $n-1$ is useless.
 % For this reason, AMIE+ refines open rules of length $n-1$ only by means of the add-closing-atom-operator ($\mathcal{O}_C$).
 
-\paragraph{Perfect rules}
+\paragraph{Perfect Rules}
 By definition, a rule cannot achieve a PCA confidence that is higher than 100\%.
 Thus, once a rule has achieved 100\% PCA confidence, we can stop adding new atoms.
 This is because the confidence cannot increase and the support can only decrease.
@@ -120,7 +122,7 @@ For example, for refining the example rule $R_c$ with a dangling atom joining on
 \]
 \noindent and will find the bindings of $\bm{r}$ that result in rules with support above the given threshold.
 Since $R_c$ has the same support as $R_p$, we can re-use all the projection queries from $R_p$ \comment{Chris}{@Luis: I say reuse the same queries
-not the query results. I.e. the queries are fired. In addition I do not say that I re-write anything because they might ask questions. The high level idea
+not the query results. I.e., the queries are fired. In addition I do not say that I re-write anything because they might ask questions. The high level idea
 is that you use the same queries. However I will be surprised if we save significantly with this optimization.} that bind on the
 common variables of $R_c$ and $R_p$, $x$ and $y$ in this example. Notice, though, that $R_c$
 contains an additional variable, i.e., $z$ and therefore, AMIE cannot reuse the projection queries
@@ -310,20 +312,20 @@ Finally, Section~\ref{sec:conf_upperBounds} derives upper bounds for the confide
 
 \paragraph{Computing Confidence}
 Recall that confidence and PCA confidence (see Sections~\ref{subsubsec:stdConf} and \ref{subsubsec:pcaConf}) are defined as:
-\[conf(\vec{B} \Rightarrow r_h(x,y)) := \frac{supp(\vec{B} \Rightarrow r_h(x,y))}{\#(x,y): \exists z_1,...,z_m: \vec{B}}\]
+\[conf(\vec{B} \Rightarrow r_h(x,y)) := \frac{supp(\vec{B} \Rightarrow r_h(x,y))}{\#(x,y): \exists z_1,\dots,z_m: \vec{B}}\]
 and
 \begin{multline*}
 conf_{pca}(\vec{B} \Rightarrow r_h(x,y)) :=\\
-\frac{supp(\vec{B} \Rightarrow r_h(x,y))}{\#(x,y): \exists z_1,...,z_m,y': \vec{B} \wedge r_h(x,y')}
+\frac{supp(\vec{B} \Rightarrow r_h(x,y))}{\#(x,y): \exists z_1,\dots,z_m,y': \vec{B} \wedge r_h(x,y')}
 \end{multline*}
 \noindent By the time AMIE has to calculate the confidence of a rule, the system already knows the support of the rule. Hence, the remaining step is to fire the queries for the denominators of the confidence expressions
 (see Sections~\ref{subsubsec:stdConf} and \ref{subsubsec:pcaConf}). We denote them by $d_{std}$ and $d_{pca}$:
 \begin{equation} \label{eq:denomStandardConf}
- d_{std}(\vec{B} \Rightarrow r_h(x,y)):= \#(x,y): \exists z_1,...,z_m: \vec{B}
+ d_{std}(\vec{B} \Rightarrow r_h(x,y)):= \#(x,y): \exists z_1,\dots,z_m: \vec{B}
 \end{equation}
 \begin{equation} \label{eq:denomPCA}
 \begin{array}{rl}
-d_{pca}(\vec{B} \Rightarrow r_h(x,y)) := {}& \#(x,y): \exists z_1,...,z_m,y': \\ &\quad \vec{B} \wedge r_h(x,y')
+d_{pca}(\vec{B} \Rightarrow r_h(x,y)) := {}& \#(x,y): \exists z_1,\dots,z_m,y': \\ &\quad \vec{B} \wedge r_h(x,y')
 \end{array}
 \end{equation}
 
@@ -338,10 +340,10 @@ $\widehat{d}_{pca}$. By plugging this expression into the confidence formula, we
 \noindent Let us reconsider Eq.~\ref{eq:denomPCA} and rewrite it as follows:
 \[
 \begin{array}{rl}
- d_{pca}(\vec{B}(x,y) \Rightarrow r_h(x,y)) := {} \#(x,y): \exists z_1,...,z_m,y': \\ \quad \vec{B}(x, y) \wedge r_h(x,y')
+ d_{pca}(\vec{B}(x,y) \Rightarrow r_h(x,y)) := {} \#(x,y): \exists z_1,\dots,z_m,y': \\ \quad \vec{B}(x, y) \wedge r_h(x,y')
 \end{array}
 \]
-Here we resort to an abstraction that treats the body of the rule $\vec{B}(x, y)$ as a relation on the head variables.
+Here, we resort to an abstraction that treats the body of the rule $\vec{B}(x, y)$ as a relation on the head variables.
 % If $\vec{B}$ has functionality $fun(\vec{B})$, it means that for each entity in variable $x$ (``domain'' of $\vec{B}$) the body will produce $1/fun(\vec{B})$ entities in $y$,
 % i.e., the body produces $\#y_{per\; x} = 1/fun(\vec{B})$ facts per entity in its ``range'', on average. If we multiply this number
 % by the number of entities that bind to $x$, we obtain an estimate for the body size of the rule.
@@ -355,20 +357,20 @@ This consideration leads us to the expression:
 \begin{equation} \label{eq:pcaApproxConf_general}
   \widehat{d}_{pca}(R):=|dom(\vec{B}) \cap dom(r_h)|\cdot \#y_{per\; x}
 \end{equation}
-
+% 
 % % Notice that we are trying to approximate the number of entities produced in the place of the less functional variable $y$ for each entity in the place of the most functional variable $x$.
 % %In the following we will show how to approximate the quantities $\#y_{per\; x}$ and $dom(\vec{B})$.
 % In the following, we discuss how to calculate the terms of this expression in an efficient way.
 % Additionally, we show how this approximation can help AMIE spot low confident rules for which the confidence
 % calculation is very expensive. As our experimental results show, this reduces runtime significantly
 % as it avoids investing resources in expensive rules that will not be output otherwise.
-
-
+% 
+% 
 In the following, we first describe for which kind of rules it makes sense to use this approximation and then, in Section.~\ref{sec:appr},
 we discuss how to calculate the terms of Equation~\ref{eq:pcaApproxConf_general} in an efficient way.
 
 
-\paragraph{When to use the approximation}\label{sec:expensive_rules}
+\paragraph{When to Use the Approximation}\label{sec:expensive_rules}
 Using any form of confidence approximation  always involves the risk of pruning a good rule.
 At the same time, if the exact confidence value is cheap to compute, the potential gain of using an approximation is small.
 For this reason, we only use the confidence approximation for rules whose exact confidence is relatively ``expensive'' to compute.
@@ -392,11 +394,11 @@ or that contain multiple paths between the head variables (such as $livesIn(x,z_
 are usually associated with more selective queries. In these examples, both
 $livesIn$ and $bornIn$ join on $x$ in the body and restrict the size of the result.
 
-We therefore use the confidence approximation only for rules where the head variables $x,y$ are connected through a single chain of existentially quantified variables $z_1,..., z_{n-1}$. These rules have the form:
+We therefore use the confidence approximation only for rules where the head variables $x,y$ are connected through a single chain of existentially quantified variables $z_1,\dots, z_{n-1}$. These rules have the form:
 $$
   r_1(x,z_1) \wedge r_2(z_1,z_2) \wedge ... \wedge r_n(z_{n-1},y) \Rightarrow r_h(x,y)
 $$
-
+% 
 In order to write a rule in this canonical form, we may have to replace some relations by their inverses
 (i.e., substitute $r_2(z_2,z_1)$ with $r_2^{-1}(z_1,z_2)$) and change the order of the atoms.
 
@@ -451,7 +453,7 @@ Here $\vec{B}(x, y) = directed(\bm{x},z) \wedge hasActor(z,\bm{y})$.
 To calculate the approximation defined in Equation~\ref{eq:pcaApproxConf_general},
 we need to calculate the number of directors in $\vec{B}$ that are married, i.e.,
 $|dom(\vec{B})\;\cap\;dom(isMarried)|$ and the number of actors $y$
-associated to each director $x$, i.e.,$\#y_{per\;x}$.
+associated to each director $x$, i.e., $\#y_{per\;x}$.
 We focus on the latter term.
 This requires us to walk from the most to the least functional variable, i.e., through the path $x \rightarrow z \rightarrow y$, connecting a director to his potential actors.
 If $fun(r)$ and $ifun(r)$

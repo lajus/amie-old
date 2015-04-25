@@ -384,14 +384,14 @@ and reduce the time spent in the confidence calculation and hence the output pha
 % \end{savenotes}
 % \end{center}
 %
-\begin{center}
+% \begin{center}
 \begin{savenotes}
 \begin{table*}[t]
 \centering
 \footnotesize
 \begin{tabular}{|l|c|c|c|c|c|c|c|}
 \hline
-\multirow{3}{*}{KB} 	& \multirow{3}{*}{AMIE}  	& \multicolumn{5}{c}{AMIE+} 	\\ \cline{3-8}
+\multirow{3}{*}{KB} 	& \multirow{3}{*}{AMIE}  	& \multicolumn{6}{c|}{AMIE+} 	\\ \cline{3-8}
  			& 				& Only	& Only		& \multicolumn{3}{c|}{Output +}   										& \multirow{2}{*}{Full}  \\ \cline{5-7}
 			&  				& Refinement			&   Output				& MRL     			&QRW 		&PR				& 	   	   	\\ \hline
   YAGO2  		& 3.17min  			&29.37s				& 2.82min  			& 29.03s  	 		&38.16s 	&2.80min  			& 28.19s	   	\\ \hline
@@ -411,8 +411,8 @@ and reduce the time spent in the confidence calculation and hence the output pha
 \label{amievsplus}
 \end{table*}
 \end{savenotes}
-\end{center}
-%
+% \end{center}
+
 \paragraph{Runtime Comparison}
 Table~\ref{amievsplus} shows the runtimes of AMIE and AMIE+. We set a threshold of 0.1 PCA Confidence for AMIE to make it
 comparable with AMIE+. For the latter, we show the results in several categories:
@@ -431,7 +431,7 @@ comparable with AMIE+. For the latter, we show the results in several categories
 % (2) if only the improvements affecting the output process were active (confidence approximation, confidence upper bounds, both with confidence threshold 0.1) and
 % (3) if all improvements were active (Section~\ref{subsec:speedingConfidenceEvaluation}). We call the latter configuration AMIE+ full.
 %We also report the average time (among threads) needed for different phases of the mining (refinement and output).
-
+% 
 We first note that AMIE is not able to finish within a day for YAGO2s, DBPedia 2.0, DBpedia 3.8, and Wikidata. In contrast,
 AMIE+ can mine rules on all these datasets in a matter of hours, and even minutes.
 For YAGO2 (const), we can see that the full version of AMIE+ is 3.8x faster than AMIE.
@@ -539,7 +539,7 @@ KB			& Rules 		& Rules		&Pruned	& Prun. prec. 	   \\ \hline
 \end{savenotes}
 \end{center}
 %
-\paragraph{Longer rules}
+\paragraph{Longer Rules}
 To investigate the performance of AMIE and AMIE+ with longer rules, we ran both systems also with $maxLen=4$. As Table \ref{amievsplus} shows, this affects the runtime: AMIE on YAGO2 with $maxLen=4$ is 9x slower than with $maxLen=3$. This is because the number of rules is much larger now: As Table~\ref{outputComparison} shows, the number of output rules increases by one order of magnitude from 68 to 645.
 %This provides a hint of how fast the search space increases for longer rules.
 % For AMIE+, we can observe a drop in the speedup offered over AMIE from 6.7x to 3x.
@@ -705,7 +705,7 @@ Incompleteness		&\emph{isMarriedTo}		& 79.31\\
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{AMIE(+) vs. State-of-the-art Systems} \label{competitors}
+\subsection{AMIE(+) vs. State-of-the-Art Systems} \label{competitors}
 % \comment{chris}{this is just a summary. Usability stuff are out. Constants on different modes are out, etc. Please see if you are happy with the result}
 % Fabian: great!
 In this section we compare AMIE and AMIE+ to two state-of-the-art rule mining systems
@@ -716,7 +716,7 @@ For these experiments, we did not use any confidence threshold ($minConf=0$), an
 \subsubsection{AMIE(+) vs. WARMR}
 WARMR is a system that unifies ILP and association rule mining. Similar to APRIORI algorithms~\cite{Agrawal:1996:FDA:257938.257975}, it performs a
 breadth-first search in order to find frequent patterns.
-It generates Datalog queries of the form ``$?-A_1,A_2,...,A_n$'',
+It generates Datalog queries of the form ``$?-A_1,A_2,\dots,A_n$'',
 where $A_i$ are logical atoms. WARMR applies a closed world assumption for assessing the quality of the produced rules.
 
 \paragraph{Runtime}
@@ -755,7 +755,7 @@ Constants 	& WARMR 		& AMIE 		& AMIE+\\
 
 \paragraph{Results} After filtering out non-connected rules, WARMR mined 41 closed rules.
 AMIE and AMIE+, in contrast, mined 75 closed rules, which included the ones mined by WARMR.
-We checked back with the WARMR team and learned that for a given set of atoms $B_1, ... B_n$,
+We checked back with the WARMR team and learned that for a given set of atoms $B_1,\dots, B_n$,
 WARMR will mine only one rule,
 picking one of the atoms as head atom (e.g., $B_1 \wedge ... \wedge B_{n-1} \Rightarrow B_n$).
 AMIE(+), in contrast, will mine one rule for each possible choice of head atom (as long as the thresholds are met).
@@ -989,7 +989,7 @@ For each rule, we evaluated whether the predictions that go beyond YAGO2 were tr
 We did this by either checking whether the prediction appears in a newer version of the KB (YAGO2s),
 or by manually checking them in Wikipedia. If we could find the predicted fact in neither, we evaluated it as false.
 
-\paragraph{Standard vs PCA confidence} Our first goal is to see whether the PCA confidence or the standard confidence perform better in this task.
+\paragraph{Standard vs. PCA Confidence} Our first goal is to see whether the PCA confidence or the standard confidence perform better in this task.
 Since both AMIE and AMIE+ can work with both confidence metrics, and since their output is the same, we report here our results from \cite{amie} with AMIE.
 We ran AMIE, and sorted the resulting rules first by descending PCA confidence, and then by descending standard confidence.
 We looked at the top ranked rules in each case, and evaluated the precision of the predictions.
@@ -1406,7 +1406,7 @@ In addition, this experimental setup can serve as a baseline for more sophistica
 % \end{tabular}
 % }
 % \comment{Luis}{We may group them according to the classification proposed in Section 4.4}
-% \comment{Chris}{I agree. Perhaps we should just move this discussion in 4.4 (i.e. report the numbers there) or move 4.4 here.}
+% \comment{Chris}{I agree. Perhaps we should just move this discussion in 4.4 (i.e., report the numbers there) or move 4.4 here.}
 % We make use of the FUN-property of KBs (see Section~\ref{subsec:functions}), so that relations are always more functional than inverse functional in the
 % evaluation. If this is not the case for a relation $r$, we use its inverse $r^{-1}$. This guarantees the evaluation of completeness goes always in the same direction: given
 % a subject and a relation, we verify the completeness of the object values. We omitted functions such as $wasBornIn$

@@ -27,7 +27,7 @@ A \emph{function} is a relation $r$ that has at most one object for every subjec
 \[
  \forall x: |\{y: r(x,y)\}| \leq 1
 \]
-
+% 
 Similarly, a relation is an \emph{inverse function} if each of its objects has at most one subject. 
 Since RDF KBs are usually noisy, even relations that should be functions (such as \emph{has\-Birthdate}) may exhibit two objects for the same subject.
 Vice versa, there are relations that are not functions in the strict sense, but that exhibit a similar behavior.
@@ -111,7 +111,7 @@ AMIE, like other ILP systems, does not mine general Horn Clauses, but uses a lan
 in order to restrict the size of the search space. 
 Language biases offer a trade-off between the expressiveness of the mined rules and the speed of the mining process.
 As an example, rules with 3 atoms can capture more complicated correlations than rules with 2 atoms, but come with a larger search space and thus with a much slower performance.
-The less retrictive the language bias is,
+The less restrictive the language bias is,
 the more expressive the rules can potentially be, the larger the search space grows, and the less tractable the search becomes.
 
 AMIE's language bias requires rules to be \emph{connected}. We say that two atoms in a rule are \emph{connected} if they share a variable or an entity.

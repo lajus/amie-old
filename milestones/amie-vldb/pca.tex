@@ -134,7 +134,7 @@ but the number of facts that we know to be true together with the facts that we 
 conf_{pca}(\vec{B} \Rightarrow r(x,y)) := \frac{supp(\vec{B} \Rightarrow r(x,y))}{\#(x,y): \exists z_1,...,z_m,y': \vec{B} \wedge r(x,y')}
 \end{equation}
 \end{small}
-
+% 
 This formula normalizes the support by the number of pairs $(x,y)$ for which there exists a $y'$ with $r(x,y')$.
 Consider again the KB given in Table~\ref{tab:exampleKB} and the rule $R: livesIn(x,y)\Rightarrow wasBornIn(x,y)$. In this case, $conf_{pca}(R)=1/2$. This is because (a) there is one positive example for the rule, $wasBornIn(Adam, Paris)$, and (b) the prediction $wasBornIn(Adam, Rome)$ is counted as negative example, because we already know a different place of birth for Adam. The prediction $wasBorn(Bob,Zurich)$ is completely disregarded as evidence, because we neither know where Bob was born nor where he was not born.
 

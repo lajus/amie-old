@@ -108,7 +108,7 @@ can be derived by either adding $directed(x,y)$ to  $actedIn(x,y) \Rightarrow cr
 $directed(x,y) \Rightarrow created(x,y)$. AMIE requires a confidence gain over all parents of a rule.
 
 Note that the decisions made at this point affect only the output. They do not influence the refinement process. i.e., a rule with low confidence can still be refined to obtain new rules.
-This is because confidence is a non-monotonic measure, i.e. we might get good rules with further refinement of bad rules.
+This is because confidence is a non-monotonic measure, i.e., we might get good rules with further refinement of bad rules.
 
 
 \paragraph{Parameters and Pruning}
@@ -162,7 +162,7 @@ without the need for parameter tuning.
 As mentioned in Section~\ref{subsubsec:whenToOutput} a rule can be derived in multiple ways.
 For example, the rule $actedIn(x,y) \wedge directed(x,y) \Rightarrow created(x,y)$ can result from the application
 of the operator $\mathcal{O}_C$ to both $actedIn(x,y) \Rightarrow created(x,y)$ and $directed(x,y) \Rightarrow created(x,y)$.
-For this reason, AMIE checks for the existence of duplicate rules (line~12) in order to avoid queueing the same rule multiple times.
+For this reason, AMIE checks for the existence of duplicate rules (line~12) in order to avoid queuing the same rule multiple times.
 While checking two rules for equality is expensive (it is a graph isomorphism verification task),
 we observe that two rules can only be equal if they have the same head relation, the same number of atoms and
 the same head coverage (or support). This reduces drastically the set of rules that have to be checked and therefore
@@ -175,7 +175,7 @@ This is achieved by synchronizing the access to the centralized queue from which
 %In addition, when AMIE uses multiple threads, there is a need for an additional duplicate-elimination check at line~6 of Alg.~\ref{rm}. \comment{Fabian}{Can we avoid the discussion of dup elimination in the output here? I am afraid it might raise more questions than it anwers...}
 
 \ignore{
-\comment{Chris}{@Luis: why don't you use barriers here? I.e. all threads wait until there is no rule length n in the queue before moving to the rules with length n+1. For rules with 3 atoms in the body
+\comment{Chris}{@Luis: why don't you use barriers here? I.e., all threads wait until there is no rule length n in the queue before moving to the rules with length n+1. For rules with 3 atoms in the body
 you will only have 2 synchronization points.}
 Recall that our algorithm performs a breadth-first-search.
 This means that in a fully sequential execution, all the rules of size $n-1$ are always queued before all the rules of size $n$.
@@ -209,7 +209,7 @@ Since $T_1$ dequeues $R_{n+1}$ before $T_2$ also finds it,
 we cannot know that the rule was already output before.
 Since duplicate verification
 can be performed very efficiently, we show that the time invested in this additional step does not
-outweight the benefit of using multiple threads.
+outweigh the benefit of using multiple threads.
 }
 
 
@@ -309,7 +309,7 @@ We discuss how to implement count projection queries efficiently in Section~\ref
 \subsection{Query Implementation Details}
 \label{subsec:implementation}
 
-\paragraph{In-memory Database} We have shown \cite{amie} that count projection queries translate into very inefficient queries in both SPARQL and SQL. Therefore, we have implemented an in-memory database that is specifically geared towards this type of queries.
+\paragraph{In-Memory Database} We have shown \cite{amie} that count projection queries translate into very inefficient queries in both SPARQL and SQL. Therefore, we have implemented an in-memory database that is specifically geared towards this type of queries.
 Our implementation indexes the facts aggressively with one index for each permutation of
 the columns subject (\texttt{S}), relation (\texttt{R}), and object (\texttt{O}). This means that there are six indexes, namely \texttt{SRO}, \texttt{SOR}, \texttt{RSO}, \texttt{ROS}, \texttt{OSR} and \texttt{ORS}. We call them \emph{fact indexes}.
 Each fact index is a hash table, which maps elements of the first column to a nested hash table. This nested hash table maps elements of the second column to a set of elements of the third column. For example, the index \texttt{ORS} has as keys the objects of all triples in the KB. It maps each object $o$ to a hash table. This hash table has as keys all possible relations of the KB. It maps each relation $r$ to a set of subjects $\{s_1,...,s_n\}$, such that $r(s_i, o)$ for $i=1...n$.
@@ -414,7 +414,7 @@ SELECT COUNT($x$, $y$) WHERE $r(x, y') \wedge \vec{B}$
 \noindent where $x$, $y$ are the variables in the head atom of the rule, $\vec{B} = B_1, \dots, B_n$ are the body atoms, and $r(x,y')$
 is a variant of the head atom where the least-functional variable has been replaced by a fresh variable $y'$ (see Section~\ref{subsubsec:pcaConf}).
 These queries return the number of distinct bindings of the head variables
-that fulfil the pattern $r(x, y')\; \wedge\; \vec{B}$. They are used to
+that fulfill the pattern $r(x, y')\; \wedge\; \vec{B}$. They are used to
 calculate the confidence of rules. The in-memory database first fires a SELECT query on variable $x$:
 
 \indented{
