@@ -3,10 +3,11 @@
 \onecolumn
 
   \begin{centering}
-   \LARGE\textbf{Summary of changes\\[1cm]}
+   \LARGE\textbf{Response letter and summary of changes\\[1cm]}
   \end{centering}
 
-	We thank the reviewers for their valuable comments and feedback! We revised our paper throughout to address their comments. We have added more examples, run a significant number of experiments, and rewritten large portions of the paper.
+\noindent
+We thank the reviewers for their valuable comments and feedback! We revised our paper to address the comments. We have added more examples, run a significant number of experiments, and rewritten large portions of the paper.
 Among other things, we have
 \begin{itemize}
 \item revised Section~\ref{sec:improvements} to show how our approach generalizes to more than 3 atoms, and added the corresponding experiments
@@ -34,19 +35,21 @@ Among other things, we have
     an experiment in which AMIE makes uses of the type information (but still does simple deduction of facts)
     and the precision curve already moves significantly higher. }
 
-Real applications will have to combine information from multiple rules or sources to arrive at predictions with high confidence. To showcase this, we have now added a new experiment in Section~\ref{prediction}, in which we add type information to the mining process. We can show that this increases the accuracy of the predictions to 70\%.
+Real applications will have to combine information from multiple rules or sources to arrive at predictions with high confidence. To showcase this, we have now added a new experiment in Section~\ref{prediction}, in which we add type information to the mining process. We show that this increases the accuracy of the predictions to 70\%.
 
 \review{\textbf{R1}: the main proposed heuristic (which contributes most to the  speed-up) is an ad-hoc approximation of  the PCA confidence for a specific type of 3-atom rules, being not trivial to generalize it to any kind of rule.  (Indeed, experiments are limited to 3-atom rules)\\
    \textbf{R2}: the rules that this technique can be applied to are still a bit limited. }
 
    Our confidence approximation generalizes to rules with more atoms. We have now extended Section~\ref{sec:conf_appr} to show this. We also added experiments that show that AMIE+ works with longer rules.
 
-\review{\textbf{R2}: when the article introduces the notation of $|rng(directed)|$, it says it "is the number of distinct directors in the range of directed". I strongly suspect there is a typo here.}
 
-   True. Corrected.
 
-\review{\textbf{R2}: There are two expressions in 6.2.2: one computes \#x1 per x0 and the other compute \#x2 per x1. Given the symmetry between $r_0$ and $r_1$ (directed and hasActor in the example),
-we can switch the two expressions. That is, we can use the expression with ov and $|rng|$ to compute \#x2 per x1 and use the other expression for \#x1 per x0.
+\review{\textbf{R2}: when the article introduces the notation of $|rng(directed)|$, it says it "is the number of distinct directors in the range of directed". I strongly suspect there is a typo here}
+
+   We thank the reviewer for the comment. We have corrected the text accordingly.
+
+\review{\textbf{R2}: There are two expressions in 6.2.2: one computes \#x1 per x0 and the other compute \#x2 per x1. Given the symmetry between $r_0$ and $r_1$ (directed and hasActor in the example), 
+we can switch the two expressions. That is, we can use the expression with ov and $|rng|$ to compute \#x2 per x1 and use the other expression for \#x1 per x0. 
 Is there any preference of one way over another? How does AMIE+ choose?}
 
    AMIE chooses to calculate the number of the entities in the less functional variable per entity in the most functional variable. This choice is based on the $conf_{pca}$ definition in Section~\ref{sec:pca}.
@@ -63,7 +66,7 @@ We have now removed these queries, and discussed the custom implementation in mu
 
  \review{\textbf{R2}: the queries presented throughout the paper (mainly in Section 5.3 and 5.4) to compute the support appear to be incorrect. [...] The article should carefully re-examine and re-write those SQL and SPARQL queries}
 
-	  Indeed, this reviewer has found a bug in one of our SQL queries, and we are very grateful! The original query was designed to retrieve the relations for new atoms resulting from the application of the mining operators described in Section~\ref{subsubsec:refinement}. For each relation in the answer, the query also reported the support of the rule if the relation were used in the new atom. Support is defined as the number of distinct bindings of the head variables of the rule. The original query in contrast, was calculating the number of distinct bindings for all variables. We confirm that the query that the reviewer proposes solves the problem!
+	  Indeed, reviewer 2 has found a mistake in one of our SQL queries, and we are very grateful. The original query was designed to retrieve the relations for new atoms resulting from the application of the mining operators described in Section~\ref{subsubsec:refinement}. For each relation in the answer, the query also reported the support of the rule if the relation were used in the new atom. Support is defined as the number of distinct bindings of the head variables of the rule. The original query in contrast, was calculating the number of distinct bindings for all variables. We confirm that the query that the reviewer proposes solves the problem! \comment{Fabian}{reformulate to mirror what happened!} \comment{Luis}{Does it make sense?}
 
 	  This said, we followed the suggestion of \textbf{R3} and removed the SPARQL and SQL queries altogether.
 
@@ -92,7 +95,7 @@ It is true that this particular technique makes only a small contribution to the
 
 \review{\textbf{R2}: The experiments should give a breakdown of the execution time of AMIE+ on the two rule mining steps and show the performance improvement on the respective step for each optimization technique. }
 
-We totally agree. We now have now added such tables in Section~\ref{amiepm}.
+We totally agree. We now have added such tables in Section~\ref{amiepm}.
 
 \review{\textbf{R2}: The article gives experimental results on the quality of rules to compare the PCA confidence with the standard confidence in Section 7.4.2.
       It runs AMIE on the YAGO2 dataset, and validates the predictions that are not in the dataset. If I understand this correctly,
@@ -141,11 +144,13 @@ It is true that all three operators require that one of the variables of the new
       Type information was indeed used for Aleph to facilitate the learning. Otherwise, Aleph cannot work.
       In this revision, we also include an experiment in which we use type information for AMIE.
 
+
+
 \review{\textbf{R3}: why AMIE+? If one looks at the 4-atom rules of Table 2, none of them seems very good.
       E.g., in rule 1, why is the rule (living in X) $\Rightarrow$ (citizen of X) stronger because a citizen imports and exports the same goods? [...]
       If these are the only 4 examples of good new rules produced by AMIE+,  I am really not impressed.}
 
-Exactly! These rules were there to show that, in general, rules with 4 atoms are not very meaningful. The reviewer is thus right by being not impressed. Therefore, AMIE mines rules only up to 3 atoms by default. Since this was not very clear, we have now rewritten the corresponding parts of the paper.
+Exactly! These rules were there to show that, in general, rules with 4 atoms are not very meaningful. The reviewer is thus right by not being impressed. Therefore, AMIE mines rules only up to 3 atoms by default. Since this was not very clear, we have now rewritten the corresponding parts of the paper.
 
 As for the name ``AMIE+'': The goal of AMIE+ is not to produce more rules, but to produce the same rules faster. This allows AMIE+ to run on datasets where AMIE could not run. We have now added a discussion in Section \ref{amiepm} to showcase this very explicitly.
 
