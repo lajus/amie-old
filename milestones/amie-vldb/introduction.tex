@@ -24,7 +24,7 @@ We can, e.g., find out that countries often trade with countries speaking the sa
 
 \www{
 The goal of this paper is to mine such rules from KBs.
-We focus on RDF-style KBs in the spirit of the Semantic Web, such as YAGO \cite{SucKasWei07}, Wikidata\footnote{\url{http://www.wikidata.org}}, and DBpedia \cite{dbpedia}. 
+We focus on RDF-style KBs in the spirit of the Semantic Web, such as YAGO \cite{SucKasWei07}, Wikidata\footnote{\url{http://www.wikidata.org}}, and DBpedia \cite{dbpedia}.
 % $^{\ref{freebase}}$, and DBpedia \cite{dbpedia}.
 These KBs provide binary relationships in the form of RDF triples \cite{rdf}. Since RDF has only positive inference rules, these KBs contain only positive statements and no negations.
 %These KBs contain only binary relationships.
@@ -54,7 +54,7 @@ Mining rules from a data set is the central task of Inductive Logic Programming 
 \www{
 ILP approaches induce logical rules
 from ground facts. Yet, classical ILP systems cannot be applied to semantic KBs for two reasons: First, they usually require negative statements as counterexamples.
-Semantic KBs, however, usually do not contain negative statements. The semantics of RDF Schema are too weak to deduce negative evidence 
+Semantic KBs, however, usually do not contain negative statements. The semantics of RDF Schema are too weak to deduce negative evidence
 from the facts in a KB\footnote{RDF Schema has only positive rules and no disjointness constraints or similar concepts.}. Because of the OWA, absent statements cannot serve as counter-evidence either.
 Second, today's ILP systems are slow and cannot handle the huge amount of data that KBs provide.
 In our experiments, we ran state-of-the-art approaches on YAGO2 for a couple of days without obtaining any results.
@@ -62,14 +62,14 @@ In our experiments, we ran state-of-the-art approaches on YAGO2 for a couple of 
 
 
 With the AMIE project \cite{amie}, we have shown how to mine logical rules from KBs despite the absence of explicit counter-examples.
-The key technique was the Partial Completeness Assumption (PCA). It 
-allows AMIE to ``guess'' counterexamples for rules, and thus estimate their quality even under the OWA.
-We have shown that our approach outperforms other rule mining systems %that can also work without explicit counterexamples
+The key technique was the Partial Completeness Assumption (PCA). It
+allowed AMIE to ``guess'' counterexamples for rules, and thus estimate their quality even under the OWA.
+We have shown that our approach outperformed other rule mining systems %that can also work without explicit counterexamples
 % ~\comment{Luis: }{I am not convinced about this assertion, because
 % at the end, all systems need a notion of counterexamples. Even ALEPH that claims to learn only from positive data, uses random facts as counter-evidence}
 both in terms of the quality and the quantity of the mined rules.
-AMIE could already run on KBs with up to one million statements -- a size that was far beyond the reach of any previous ILP-based rule mining system.
-AMIE achieves this without any need for parameter tuning or expert input.
+AMIE could already run on KBs with up to one million statements -- a size that was beyond the reach of any previous ILP-based rule mining system.
+AMIE achieved this without any need for parameter tuning or expert input.
 %\comment{Chris}{I am still not persuaded about this one.} \comment{Fabian}{The argument is that there is no parameter that governs a trade-off between two qualities (like, e.g., some $\alpha$ has to trade off between breadth of the results and their quality; or some $\iota$ has to be chosen so as to reflect the estimated average completeness of the KB). AMIE will just run. The user can choose from the output what he likes (support>0.3), but that is a different story, because it is selection of a subset of results.}
 
 With the present paper, we develop AMIE even further.
@@ -85,14 +85,15 @@ Such large KBs were previously out of reach even for AMIE. %, or indeed for any 
 %The new system, AMIE+, can find Horn rules in the current versions of  DBpedia and YAGO -- something that was previously out of reach.
 % \comment{Fabian}{We have to avoid that reviewers think here ``But DBpedia has more than 12m facts''} \comment{Luis: }{Reformulated!}
 %DBpedia (2M entities, 12M facts) and YAGO (1.6M entities, 4M facts)\comment{Chris}{@Luis: is that YAGO, YAGO2 or YAGO2s?}
-In addition, we provide a thorough investigation and evaluation of the metrics we use,
+We also show how the precision of the predictions can be increased to up to 70\% by using type information and joint reasoning.
+In addition, we provide a thorough investigation of the metrics we use,
 thus giving a more complete picture of rule mining on large-scale knowledge bases.
 
 \noindent More precisely, our contributions are as follows:
 \begin{itemize}[noitemsep,nolistsep,leftmargin=0.4cm,midpenalty=0,label=$\bullet$]
-\item A comprehensive investigation and description of the AMIE approach, together with an evaluation of its fundamental assumption, the PCA. %the partial completeness assumption (PCA), its central assumption.
+\item A comprehensive investigation and description of the AMIE approach, including a description of our in-memory database and an evaluation of AMIE's fundamental assumption, the PCA. %the partial completeness assumption (PCA), its central assumption.
 \item A suite of optimization steps that allow a much more efficient exploration of the search space.
-\item Extensive experiments that show the competitiveness of our approach.
+\item Extensive experiments that show the competitiveness of our approach, including techniques to increase the precision of our predictions to 70\%.
 \end{itemize}
 %\comment{Chris}{rewritten. Please check.}
 % The rest of this paper is structured as follows. Section~\ref{sec:relatedWork} discusses related work and Section~\ref{sec:preliminaries} introduces preliminaries.
@@ -102,7 +103,7 @@ thus giving a more complete picture of rule mining on large-scale knowledge base
 The rest of this paper is structured as follows: Section~\ref{sec:relatedWork} discusses related work and Section~\ref{sec:preliminaries} introduces preliminaries.
 In Section~\ref{sec:pca}, we introduce the Partial Completeness Assumption (PCA) and, based on it, the PCA confidence measure.
 %We also investigate the applicability of the PCA in practice.
-Section~\ref{sec:alg} recaptures the AMIE approach from \cite{amie}.
+Section~\ref{sec:alg} recaptures the AMIE approach from \cite{amie}, extending it by a description of our in-memory database.
 Section~\ref{sec:improvements} is the main part of the paper: It presents the pruning strategies that optimize the performance of AMIE.
 Section~\ref{sec:experiments} presents our experiments before Section~\ref{sec:conclusion} concludes.
 

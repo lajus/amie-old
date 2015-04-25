@@ -10,10 +10,10 @@
 % Fabian: Thanks! I made my pass.
 
 
-The support of a rule quantifies the number of known correct predictions of the rule. 
+The support of a rule quantifies the number of known correct predictions of the rule.
 However, it does not take into account the false predictions of the rule.
-We will now describe measures that judge the \emph{quality} of a rule.
-We first describe the challenges in defining such a measure in our setting 
+Following \cite{amie}, we will now describe measures that judge the \emph{quality} of a rule.
+We first describe the challenges in defining such a measure in our setting
 and discuss the most common way to measure the rule quality, which we call the standard confidence.
 Then, we introduce our own measure: the confidence under the assumption of partial completeness.
 
@@ -60,15 +60,15 @@ We will now present these approaches in detail.
 
 \subsection{The CWA and Standard Confidence} \label{subsubsec:stdConf}
 The standard confidence measure takes all facts that are not in the KB (i.e., NEWtrue and NEWfalse) as negative evidence.
-Thus, the standard confidence of a rule is the ratio of its predictions that are in the KB, i.e., the share of A (KBtrue) 
+Thus, the standard confidence of a rule is the ratio of its predictions that are in the KB, i.e., the share of A (KBtrue)
 in the set of predictions:
 
 \[conf(\vec{B} \Rightarrow r(x,y)) := \frac{supp(\vec{B} \Rightarrow r(x,y))}{\#(x,y): \exists z_1,...,z_m: \vec{B}}\]\\
 
-\noindent For example, consider again the rule 
+\noindent For example, consider again the rule
 \indented{
 $R:livesIn(x,y)\Rightarrow wasBornIn(x,y)$}
-together with the KB given in Table~\ref{tab:exampleKB}. In this case, $conf(R)=1/3$, because (a) there is one positive example for the rule and (b) the predictions $wasBornIn(Adam, Rome)$ and $wasBorn(Bob,Zurich)$ are counted as negative examples since they do not appear in the KB.
+together with the KB given in Table~\ref{tab:exampleKB}. In this case, $conf(R)=1/3$, because (a) there is one positive example for the rule, $wasBornIn(Adam, Paris)$, and (b) the predictions $wasBornIn(Adam, Rome)$ and $wasBorn(Bob,Zurich)$ are counted as negative examples since they do not appear in the KB.
 
 Standard confidence is the measure traditionally used in association rule mining and market basket analysis, where the Closed World Assumption (CWA) is used:
 if there is no evidence in any of the transactions of the database that a user bought a specific product, then this user did not buy the product.
@@ -120,11 +120,11 @@ The PCA is the assumption that if $r(x,y) \in$ \emph{KBtrue} for some $x,y$, the
 \[\forall y': r(x,y') \in \mbox{\emph{KBtrue}}\ \cup\ \mbox{\emph{NEWtrue}} \Rightarrow r(x,y') \in \mbox{\emph{KBtrue}}\]
 In other words, we assume that if we know one $y$ for a given $x$ and $r$, then we know all $y$ for that $x$ and $r$.
 This assumption allow us to generate counter-examples in a way that is less restrictive than the standard confidence.
-In our example from Table~\ref{tab:exampleKB}, the PCA will assume that any other place of birth for 
-Adam and Carl is false. Conversely, the PCA will not assume anything about the places of birth of Carl, because
+In our example from Table~\ref{tab:exampleKB}, the PCA will assume that any other place of birth for
+Adam and Carl is false. Conversely, the PCA will not assume anything about the places of birth of Bob, because
 the KB does not know any.
-With this notion in mind, we redefine the definition of confidence for rules. Under the PCA, 
-the denominator of the confidence formula is not the size of the entire set of conclusions 
+With this notion in mind, we redefine the definition of confidence for rules. Under the PCA,
+the denominator of the confidence formula is not the size of the entire set of conclusions
 derived from the body of the rule,
 but the number of facts that we know to be true together with the facts that we assume to be false.
 
@@ -136,20 +136,19 @@ conf_{pca}(\vec{B} \Rightarrow r(x,y)) := \frac{supp(\vec{B} \Rightarrow r(x,y))
 \end{small}
 
 This formula normalizes the support by the number of pairs $(x,y)$ for which there exists a $y'$ with $r(x,y')$.
-Consider again the KB given in Table~\ref{tab:exampleKB} and the rule $R: livesIn(x,y)\Rightarrow wasBornIn(x,y)$. In this case, $conf_{pca}(R)=1/2$. Only $wasBornIn(Adam, Rome)$ counts as a negative example, 
-because we already know a different place of birth for Adam. The prediction $wasBorn(Bob,Zurich)$ is completely disregarded as evidence, because we neither know where Bob was born nor where he was not born.
+Consider again the KB given in Table~\ref{tab:exampleKB} and the rule $R: livesIn(x,y)\Rightarrow wasBornIn(x,y)$. In this case, $conf_{pca}(R)=1/2$. This is because (a) there is one positive example for the rule, $wasBornIn(Adam, Paris)$, and (b) the prediction $wasBornIn(Adam, Rome)$ is counted as negative example, because we already know a different place of birth for Adam. The prediction $wasBorn(Bob,Zurich)$ is completely disregarded as evidence, because we neither know where Bob was born nor where he was not born.
 
-Notice that Eq.~\ref{eq:pcaConf} fixes $x$ and $r$ and implies that rules will try to predict values for $y$. 
-AMIE always predicts in the most functional direction. To see this, recall that 
-it is more intuitive to predict the birthplace of a specific person 
+Notice that Eq.~\ref{eq:pcaConf} fixes $x$ and $r$ and implies that rules will try to predict values for $y$.
+AMIE always predicts in the most functional direction. To see this, recall that
+it is more intuitive to predict the birthplace of a specific person
 than predict all the people that were born in a specific city.
-Since in Sec.~\ref{subsec:functions} we re-write all relations so that their functionality 
-is larger than their inverse functionality, the most functional direction 
+Since in Sec.~\ref{subsec:functions} we re-write all relations so that their functionality
+is larger than their inverse functionality, the most functional direction
 will be always to predict $y$ given $x$.
 
 In spite of being an assumption, the PCA is certainly true for functions, such as \emph{birthdate} and \emph{capital}.
 The PCA also holds for relations that are not functions but that have a high functionality,
-as we shall see in our qualitative analysis of the PCA in Section~\ref{experimentspca}. 
+as we shall see in our qualitative analysis of the PCA in Section~\ref{experimentspca}.
 The PCA has been applied in the Google Knowledge Vault under the name ``local completeness assumption'' \cite{knowledgevault}.
 
 
