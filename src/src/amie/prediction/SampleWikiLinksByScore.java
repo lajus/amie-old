@@ -21,7 +21,7 @@ import amie.query.Query;
 
 public class SampleWikiLinksByScore {
 	
-	private static int SampleSize = 100;
+	private static int SampleSize = 200000;
 
 	private static List<List<Pair<Pair<ByteString, ByteString>, List<Prediction>>>> initializeBuckets() {
 		List<List<Pair<Pair<ByteString, ByteString>, List<Prediction>>>> buckets = new ArrayList<>(10);

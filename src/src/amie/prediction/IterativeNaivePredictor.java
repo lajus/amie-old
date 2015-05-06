@@ -12,16 +12,16 @@ import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Triple;
 import amie.data.FactDatabase;
-import amie.data.HistogramFactDatabase;
 import amie.mining.AMIE;
 import amie.mining.assistant.HeadVariablesMiningAssistant;
 import amie.mining.assistant.MiningAssistant;
 import amie.mining.assistant.TypedMiningAssistant;
+import amie.prediction.data.HistogramTupleIndependentFactDatabase;
 import amie.query.Query;
 import amie.utils.Utils;
 
 public class IterativeNaivePredictor {
-	private HistogramFactDatabase trainingDb;
+	private HistogramTupleIndependentFactDatabase trainingDb;
 	
 	private FactDatabase testingDb;
 	
@@ -29,11 +29,11 @@ public class IterativeNaivePredictor {
 	
 	public static final int DefaultSupportThreshold = 100;
 	
-	public IterativeNaivePredictor(HistogramFactDatabase training) {
+	public IterativeNaivePredictor(HistogramTupleIndependentFactDatabase training) {
 		this.trainingDb = training;
 	}
 	
-	public IterativeNaivePredictor(HistogramFactDatabase training, FactDatabase testing) {
+	public IterativeNaivePredictor(HistogramTupleIndependentFactDatabase training, FactDatabase testing) {
 		this.trainingDb = training;
 		this.testingDb = testing;
 	}
@@ -63,19 +63,20 @@ public class IterativeNaivePredictor {
 			List<Query> rules = amieMiner.mine(false, Collections.EMPTY_LIST);
 			System.out.println("Rule mining took " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
 			System.out.println(rules.size() + " rules found");
-			// Build the uncertaint version of the rules
-			List<Query> uncertainRules = new ArrayList<Query>();
+			// Build the uncertain version of the rules
+			List<Query> finalRules = new ArrayList<Query>();
 			for(Query rule: rules) {
 				// Readjust the scores
-				Query newRule = getUncertainVersion(rule, scores);
-				// This means the rule drops the support threshold when the uncertainty is considered.
-				if (newRule != null) {
-					uncertainRules.add(newRule);
-					System.out.println(newRule.getBasicRuleString());
+				if (i > 0) { // Only the latter iterations will contain fuzzy facts.
+					calculateProbabilisticScores(rule);
+					if (rule.getProbabilisticSupport() >= DefaultSupportThreshold
+							&& rule.getProbabilisticPCAConfidence() >= DefaultPCAConfidenceThreshold) {
+						finalRules.add(rule);
+					}
 				}
 			}
 			// Get the predictions
-			List<Prediction> predictions = JointPredictions.getPredictions(rules, trainingDb, testingDb, true);
+			List<Prediction> predictions = JointPredictions.getPredictions(finalRules, trainingDb, testingDb, true);
 			// First calculate the confidence of the combined rule
 			int addedPredictions = 0;
 			for (Prediction prediction : predictions) {
@@ -101,6 +102,11 @@ public class IterativeNaivePredictor {
 		//PredictionsComparator predictionsCmp = new PredictionsComparator();
 		//Collections.sort(resultingPredictions, predictionsCmp);
 		return resultingPredictions;
+	}
+
+	private void calculateProbabilisticScores(Query rule) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	/**
@@ -250,7 +256,7 @@ public class IterativeNaivePredictor {
 			System.exit(1);
 		}
 		
-		HistogramFactDatabase training = new HistogramFactDatabase();
+		HistogramTupleIndependentFactDatabase training = new HistogramTupleIndependentFactDatabase();
 		FactDatabase testing = new FactDatabase();
 		training.load(new File(args[0]));
 		double confidenceThreshold = 0.0;

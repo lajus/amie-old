@@ -184,7 +184,7 @@ public class MiningAssistant{
 		subclassPattern[1] = subPropertyString;
 		this.subclassQuery = new Query(subclassPattern, 0);
 		this.countAlwaysOnSubject = false;
-		this.silent = false;
+		this.silent = true;
 		this.pcaOptimistic = false;
 		this.exploitMaxLengthOption = true;
 		this.enableQueryRewriting = true;

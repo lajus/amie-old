@@ -106,7 +106,7 @@ public class FactDatabase {
 	public static final int SUBJECT2OBJECT = 2;
 
 	public static final int OBJECT2OBJECT = 4;
-
+	
 	// ---------------------------------------------------------------------------
 	// Loading
 	// ---------------------------------------------------------------------------
@@ -215,52 +215,42 @@ public class FactDatabase {
 	public static boolean isVariable(CharSequence s) {
 		return (s.length() > 0 && s.charAt(0) == '?');
 	}
+	
 
-	/** Loads a file or all files in the folder */
-	public void load(File f) throws IOException {
-		load(f, false);
+	/**
+	 * It clears the overlap tables and rebuilds them. Recommended when new facts has been added
+	 * to the KB after the initial loading.
+	 */
+	public void rebuildOverlapTables() {
+		resetOverlapTables(); 
+		buildOverlapTables();
 	}
 
-	public void load(File f, boolean buildJoinTable) throws IOException {
-		load(f, "Loading " + f.getName(), buildJoinTable);
+	/**
+	 * It clears all overlap tables.
+	 */
+	private void resetOverlapTables() {
+		resetMap(subject2subjectOverlap);
+		resetMap(subject2objectOverlap);
+		resetMap(object2objectOverlap);
+		
 	}
 
-	/** Loads a file or all files in the folder */
-	protected void load(File f, String message) throws IOException {
-		load(f, message, false);
-	}
-
-	protected void load(File f, String message, boolean buildJoinTable)
-			throws IOException {
-		long size = size();
-		if (f.isDirectory()) {
-			long time = System.currentTimeMillis();
-			Announce.doing("Loading files in " + f.getName());
-			for (File file : f.listFiles())
-				load(file);
-			Announce.done("Loaded "
-					+ (size() - size)
-					+ " facts in "
-					+ NumberFormatter.formatMS(System.currentTimeMillis()
-							- time));
+	/**
+	 * It resets an overlap index.
+	 * @param map
+	 */
+	private void resetMap(Map<ByteString, IntHashMap<ByteString>> map) {
+		for (ByteString key : map.keySet()) {
+			map.put(key, new IntHashMap<ByteString>());
 		}
-		for (String line : new FileLines(f, "UTF-8", message)) {
-			if (line.endsWith("."))
-				line = Char17.cutLast(line);
-			String[] split = line.split("\t");
-			if (split.length == 3)
-				add(split[0].trim(), split[1].trim(), split[2].trim());
-			else if (split.length == 4)
-				add(split[1].trim(), split[2].trim(), split[3].trim());
-		}
-		if (buildJoinTable)
-			buildOverlapTables();
-
-		if (message != null)
-			Announce.message("     Loaded", (size() - size), "facts");
 	}
 
-	private void buildOverlapTables() {
+	/**
+	 * It builds the overlap tables for relations. They contain the number of subjects and
+	 * objects in common between pairs of relations. They can be used for join cardinality estimation.
+	 */
+	public void buildOverlapTables() {
 		for (ByteString r1 : predicateSize) {
 			Set<ByteString> subjects1 = predicate2subject2object.get(r1)
 					.keySet();
@@ -296,6 +286,13 @@ public class FactDatabase {
 		}
 	}
 
+	/**
+	 * Calculates the number of elements in the intersection of two
+	 * sets of ByteStrings.
+	 * @param s1
+	 * @param s2
+	 * @return
+	 */
 	private static int computeOverlap(Set<ByteString> s1, Set<ByteString> s2) {
 		int overlap = 0;
 		for (ByteString r : s1) {
@@ -305,33 +302,12 @@ public class FactDatabase {
 		return overlap;
 	}
 
-	/** Loads a files in the folder that match the regex pattern */
-	public void load(File folder, Pattern namePattern) throws IOException {
-		load(folder, namePattern, false);
-	}
-
-	public void load(File folder, Pattern namePattern, boolean loadJoinTable)
-			throws IOException {
-		List<File> files = new ArrayList<File>();
-		for (File file : folder.listFiles())
-			if (namePattern.matcher(file.getName()).matches()) {
-				files.add(file);
-			}
-		load(files, loadJoinTable);
-	}
-
 	/** Loads the files */
 	public void load(File... files) throws IOException {
-		load(Arrays.asList(files), false);
+		load(Arrays.asList(files));
 	}
 
-	/** Loads the files */
 	public void load(List<File> files) throws IOException {
-		load(files, false);
-	}
-
-	public void load(List<File> files, final boolean loadJoinTable)
-			throws IOException {
 		long size = size();
 		long time = System.currentTimeMillis();
 		long memory = Runtime.getRuntime().freeMemory();
@@ -340,13 +316,12 @@ public class FactDatabase {
 		for (final File file : files) {
 			running[0]++;
 			new Thread() {
-
 				public void run() {
 					try {
 						synchronized (Announce.blanks) {
 							Announce.message("Starting " + file.getName());
 						}
-						load(file, (String) null, false);
+						load(file, null);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -371,31 +346,50 @@ public class FactDatabase {
 			e.printStackTrace();
 		}
 		
-		if (loadJoinTable) {
-			Announce.message("Building overlap tables");
-			buildOverlapTables();
-		}
-		
 		Announce.done("Loaded " + (size() - size) + " facts in "
 				+ NumberFormatter.formatMS(System.currentTimeMillis() - time)
 				+ " using "
 				+ ((Runtime.getRuntime().freeMemory() - memory) / 1000000)
 				+ " MB");
 	}
+	
+	protected void load(File f, String message)
+			throws IOException {
+		long size = size();
+		if (f.isDirectory()) {
+			long time = System.currentTimeMillis();
+			Announce.doing("Loading files in " + f.getName());
+			for (File file : f.listFiles())
+				load(file);
+			Announce.done("Loaded "
+					+ (size() - size)
+					+ " facts in "
+					+ NumberFormatter.formatMS(System.currentTimeMillis()
+							- time));
+		}
+		for (String line : new FileLines(f, "UTF-8", message)) {
+			if (line.endsWith("."))
+				line = Char17.cutLast(line);
+			String[] split = line.split("\t");
+			if (split.length == 3)
+				add(split[0].trim(), split[1].trim(), split[2].trim());
+			else if (split.length == 4)
+				add(split[1].trim(), split[2].trim(), split[3].trim());
+		}
 
-	/** Loads the files */
-	public void loadSequential(List<File> files) throws IOException {
-		loadSequential(files, false);
+		if (message != null)
+			Announce.message("     Loaded", (size() - size), "facts");
 	}
 
-	public void loadSequential(List<File> files, boolean buildJoinTable)
+	/** Loads the files */
+	public void loadSequential(List<File> files)
 			throws IOException {
 		long size = size();
 		long time = System.currentTimeMillis();
 		long memory = Runtime.getRuntime().freeMemory();
 		Announce.doing("Loading files");
 		for (File file : files)
-			load(file, buildJoinTable);
+			load(file);
 		Announce.done("Loaded " + (size() - size) + " facts in "
 				+ NumberFormatter.formatMS(System.currentTimeMillis() - time)
 				+ " using "
@@ -2114,6 +2108,10 @@ public class FactDatabase {
 	public static ByteString[] triple2Array(
 			Triple<ByteString, ByteString, ByteString> t) {
 		return new ByteString[] { t.first, t.second, t.third };
+	}
+	
+	public static Triple<ByteString, ByteString, ByteString> array2Triple(ByteString[] triple) {
+		return new Triple<ByteString, ByteString, ByteString>(triple[0], triple[1], triple[2]);
 	}
 
 	public static void hardQueriesTest(FactDatabase d) {

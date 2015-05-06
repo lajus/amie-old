@@ -1,4 +1,4 @@
-package amie.data;
+package amie.prediction.data;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.util.Map;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 
-public class HistogramFactDatabase extends FactDatabase{
+public class HistogramTupleIndependentFactDatabase extends TupleIndependentFactDatabase{
 
 	private Map<ByteString, IntHashMap<Integer>> histograms = new HashMap<>();
 	
@@ -17,9 +17,8 @@ public class HistogramFactDatabase extends FactDatabase{
 	
 	private Map<ByteString, Long> sums = new HashMap<>();
 	
-	protected void load(File f, String message, boolean buildJoinTable)
-			throws IOException {
-		super.load(f, message, buildJoinTable);
+	protected void load(File f) throws IOException {
+		super.load(f);
 		// Construct the histogram tables
 		for (ByteString relation : predicateSize) {
 			IntHashMap<Integer> counts;
@@ -89,7 +88,10 @@ public class HistogramFactDatabase extends FactDatabase{
 		}
 	}
 	
-	public double cardinalityGreaterThan(ByteString relation, int cardinality,  Map<ByteString, IntHashMap<Integer>> histogram, boolean normalized) {
+	public double cardinalityGreaterThan(ByteString relation, 
+			int cardinality,  
+			Map<ByteString, IntHashMap<Integer>> histogram, 
+			boolean normalized) {
 		if (cardinality <= 0) {
 			if (normalized) {
 				return 1.0;
@@ -126,9 +128,15 @@ public class HistogramFactDatabase extends FactDatabase{
 		}
 	}
 	
-	public static void main(String args[]) throws IOException {
-		HistogramFactDatabase db = new HistogramFactDatabase();
-		db.load(new File("/home/galarrag/workspace/AMIE/Data/yago2/yago2core.10kseedsSample.decoded.compressed.notypes.tsv"));
+	public static void main(String args[])  {
+		HistogramTupleIndependentFactDatabase db = new HistogramTupleIndependentFactDatabase();
+		try {
+			db.load(new File("/home/galarrag/workspace/AMIE/Data/yago2/yago2core.10kseedsSample.decoded.compressed.notypes.tsv"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		}
 		System.out.println("P(<dealsWith>) = 1 :" + db.probabilityOfCardinalityEqualsTo(ByteString.of("<dealsWith>"), 1));
 		System.out.println("P(<dealsWith>) > 1 :" + db.probabilityOfCardinalityGreaterThan(ByteString.of("<dealsWith>"), 1));		
 		

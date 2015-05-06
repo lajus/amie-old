@@ -53,6 +53,19 @@ import amie.query.Query;
  */
 public class AMIE {
 	/**
+	 * Default PCA confidence threshold
+	 */
+	private static final double DEFAULT_PCA_CONFIDENCE = 0.1;
+	
+	
+	/**
+	 * Default Head coverage threshold
+	 * 
+	 */
+	
+	private static final double DEFAULT_HEAD_COVERAGE = 0.01;
+	
+	/**
 	 * It implements all the operators defined for the mining process: ADD-EDGE, INSTANTIATION, SPECIALIZATION and
 	 * CLOSE-CIRCLE
 	 */
@@ -491,10 +504,10 @@ public class AMIE {
 
 		CommandLine cli = null;
 		double minStdConf = 0.0;
-		double minPCAConf = 0.0;
+		double minPCAConf = DEFAULT_PCA_CONFIDENCE;
 		int minSup = 100;
 		int minInitialSup = 100;
-		double minHeadCover = 0.01;
+		double minHeadCover = DEFAULT_HEAD_COVERAGE;
 		int maxDepth = 3;
 		int recursivityLimit = 3;
 		boolean realTime = true;
@@ -503,7 +516,7 @@ public class AMIE {
 		boolean allowConstants = false;
 		boolean enableConfidenceUpperBounds = true;
 		boolean enableFunctionalityHeuristic = true;
-		boolean silent = false;
+		boolean verbose = false;
 		boolean pcaOptimistic = false;
 		boolean enforceConstants = false;
 		boolean avoidUnboundTypeAtoms = true;
@@ -514,8 +527,8 @@ public class AMIE {
 		long sourcesLoadingTime = 0l;
 		// ========================================
 		int nProcessors = Runtime.getRuntime().availableProcessors();
-		String bias = "headVars";
-		Metric metric = Metric.HeadCoverage;
+		String bias = "headVars"; // Counting support on the two head variables.
+		Metric metric = Metric.HeadCoverage; // Metric used to prune the search space.
 		MiningAssistant mineAssistant = null;		
 		Collection<ByteString> bodyExcludedRelations = null;
 		Collection<ByteString> headExcludedRelations = null;
@@ -523,7 +536,7 @@ public class AMIE {
 		Collection<ByteString> bodyTargetRelations = null;
 		FactDatabase targetSource = null;
 		FactDatabase schemaSource = null;
-		int nThreads = nProcessors;
+		int nThreads = nProcessors; // By default use as many threads as processors.
 		HelpFormatter formatter = new HelpFormatter();
 		
 		// create the command line parser
@@ -624,9 +637,9 @@ public class AMIE {
 			 	.withDescription("Optimistic approximation for functionality heuristic.")
 			 	.create("optimistic");
 		
-		Option silentOp = OptionBuilder.withArgName("silent")
-			 	.withDescription("Minimal verbosity")
-			 	.create("silent");
+		Option verboseOp = OptionBuilder.withArgName("verbose")
+			 	.withDescription("Maximal verbosity")
+			 	.create("verbose");
 		
 		Option recursivityLimitOpt = OptionBuilder.withArgName("recursivity-limit")
 				.withDescription("Recursivity limit")
@@ -648,6 +661,16 @@ public class AMIE {
 		Option disablePerfectRulesOp = OptionBuilder.withArgName("disable-perfect-rules")
 				.withDescription("Disable perfect rules.")
 				.create("dpr");
+		
+		Option onlyOutputEnhancementOp = OptionBuilder.withArgName("only-output")
+				.withDescription("If enabled, it activates only the output enhacements, that is, the confidence approximation and upper bounds. "
+						+ " It overrides any other configuration that is incompatible.")
+				.create("oout");
+		
+		Option fullOp = OptionBuilder.withArgName("full")
+				.withDescription("It enables all enhancements: lossless heuristics and confidence approximation and upper bounds"
+						+ " It overrides any other configuration that is incompatible.")
+				.create("full");
 						
 		options.addOption(stdConfidenceOpt);
 		options.addOption(supportOpt);
@@ -667,7 +690,7 @@ public class AMIE {
 		options.addOption(assistantOp);
 		options.addOption(coresOp);
 		options.addOption(confidenceBoundsOp);
-		options.addOption(silentOp);
+		options.addOption(verboseOp);
 		options.addOption(funcHeuristicOp);
 		options.addOption(optimisticApproxOp);
 		options.addOption(recursivityLimitOpt);
@@ -675,11 +698,22 @@ public class AMIE {
 		options.addOption(doNotExploitMaxLengthOp);
 		options.addOption(disableQueryRewriteOp);
 		options.addOption(disablePerfectRulesOp);
+		options.addOption(onlyOutputEnhancementOp);
+		options.addOption(fullOp);
 		
 		try {
 			cli = parser.parse(options, args);
 		} catch(ParseException e) {
 			System.out.println( "Unexpected exception: " + e.getMessage());
+			formatter.printHelp( "AMIE", options );
+			System.exit(1);
+		}
+		
+		// These configurations override any other option
+		boolean onlyOutput = cli.hasOption("oout");
+		boolean full = cli.hasOption("full");
+		if (onlyOutput && full) {
+			System.err.println("The options only-output and full are incompatible. Pick either one.");
 			formatter.printHelp( "AMIE", options );
 			System.exit(1);
 		}
@@ -692,7 +726,7 @@ public class AMIE {
 		
 		if (cli.hasOption("btr") && cli.hasOption("bexr")) {
 			System.err.println("The options body-target-relations and body-excluded-relations cannot appear at the same time");
-			formatter.printHelp( "AMIE", options );
+			formatter.printHelp( "AMIE+", options );
 			System.exit(1);			
 		}
 										
@@ -702,8 +736,8 @@ public class AMIE {
 				minSup = Integer.parseInt(minSupportStr);
 			}catch(NumberFormatException e){
 				System.err.println("The option -mins (support threshold) requires an integer as argument");
-				System.err.println("AMIE [OPTIONS] <.tsv INPUT FILES>");
-				formatter.printHelp( "AMIE", options );
+				System.err.println("AMIE+ [OPTIONS] <.tsv INPUT FILES>");
+				formatter.printHelp( "AMIE+", options );
 				System.exit(1);
 			}
 		}
@@ -784,14 +818,14 @@ public class AMIE {
 			}catch(NumberFormatException e){
 				System.err.println("The argument for option -maxad (maximum depth) must be an integer greater than 2");
 				System.err.println("AMIE [OPTIONS] <.tsv INPUT FILES>");
-				formatter.printHelp( "AMIE", options );
+				formatter.printHelp( "AMIE+", options );
 				System.exit(1);
 			}
 			
 			if(maxDepth < 2){
 				System.err.println("The argument for option -maxad (maximum depth) must be greater or equal than 2");
 				System.err.println("AMIE [OPTIONS] <.tsv INPUT FILES>");
-				formatter.printHelp( "AMIE", options );
+				formatter.printHelp( "AMIE+", options );
 				System.exit(1);
 			}
 		}
@@ -837,13 +871,18 @@ public class AMIE {
 				
 		FactDatabase dataSource = new FactDatabase();
 		long timeStamp1 = System.currentTimeMillis();
-		dataSource.load(dataFiles, cli.hasOption("optimfh"));
+		dataSource.load(dataFiles);
 		long timeStamp2 = System.currentTimeMillis();
+		if (cli.hasOption("optimfh")) {
+			Announce.message("Building overlap tables for confidence approximation.");
+			dataSource.buildOverlapTables();
+			Announce.done("Overlap tables were built.");
+		}
 		sourcesLoadingTime = timeStamp2 - timeStamp1;
 		
 		if (!targetFiles.isEmpty()) {
 			targetSource = new FactDatabase();
-			targetSource.load(targetFiles, cli.hasOption("optimfh"));
+			targetSource.load(targetFiles);
 		}
 		
 		if (!schemaFiles.isEmpty()) {
@@ -879,12 +918,11 @@ public class AMIE {
 			}			
 		}
 		
-		
 		if (cli.hasOption("bias")) {
 			bias = cli.getOptionValue("bias");
 		}
 		
-		silent = cli.hasOption("silent");
+		verbose = cli.hasOption("verbose");
 		
 		if (cli.hasOption("rl")) {
 			try {
@@ -897,6 +935,16 @@ public class AMIE {
 			}
 		}
 		System.out.println("Using recursivity limit " + recursivityLimit);
+		
+		enableConfidenceUpperBounds = cli.hasOption("optimcb");
+		if(enableConfidenceUpperBounds) {
+			System.out.println("Enabling standard and PCA confidences upper bounds for pruning [EXPERIMENTAL]");
+		}
+		
+		enableFunctionalityHeuristic = cli.hasOption("optimfh");
+		if(enableFunctionalityHeuristic) {
+			System.out.println("Enabling functionality heuristic with ratio for pruning of low confident rules [EXPERIMENTAL]");			
+		}
 		
 		switch(bias) {
 		case "seedsCount" :
@@ -943,24 +991,34 @@ public class AMIE {
 				System.out.println("Counting on the subject variable of the head relation");
 			else
 				System.out.println("Counting on the most functional variable of the head relation");
-		}
-		mineAssistant.setSchemaSource(schemaSource);
-		
-		enableConfidenceUpperBounds = cli.hasOption("optimcb");
-		if(enableConfidenceUpperBounds) {
-			System.out.println("Enabling standard and PCA confidences upper bounds for pruning [EXPERIMENTAL]");
-		}
-		
-		enableFunctionalityHeuristic = cli.hasOption("optimfh");
-		if(enableFunctionalityHeuristic) {
-			System.out.println("Enabling functionality heuristic with ratio for pruning of low confident rules [EXPERIMENTAL]");			
-		}
-		
+		}	
 		allowConstants = cli.hasOption("const");
 		countAlwaysOnSubject = cli.hasOption("caos");
 		realTime = !cli.hasOption("oute");
 		enforceConstants = cli.hasOption("fconst");
 		
+		// These configurations override others
+		if (onlyOutput) {
+			System.out.println("Using the only output enhacements configuration.");		
+			enablePerfectRulesPruning = false;
+			enableQueryRewriting = false;
+			exploitMaxLengthForRuntime = false;
+			enableConfidenceUpperBounds = true;
+			enableFunctionalityHeuristic = true;
+			minPCAConf = DEFAULT_PCA_CONFIDENCE;
+		}
+		
+		if (full) {
+			System.out.println("Using the FULL configuration.");
+			enablePerfectRulesPruning = true;
+			enableQueryRewriting = true;
+			exploitMaxLengthForRuntime = true;
+			enableConfidenceUpperBounds = true;
+			enableFunctionalityHeuristic = true;
+			minPCAConf = DEFAULT_PCA_CONFIDENCE;
+		}
+
+		mineAssistant.setSchemaSource(schemaSource);
 		mineAssistant.setEnabledConfidenceUpperBounds(enableConfidenceUpperBounds);
 		mineAssistant.setEnabledFunctionalityHeuristic(enableFunctionalityHeuristic);
 		mineAssistant.setMaxDepth(maxDepth);
@@ -972,13 +1030,14 @@ public class AMIE {
 		mineAssistant.setHeadExcludedRelations(headExcludedRelations);
 		mineAssistant.setTargetBodyRelations(bodyTargetRelations);
 		mineAssistant.setCountAlwaysOnSubject(countAlwaysOnSubject);
-		mineAssistant.setSilent(silent);
+		mineAssistant.setSilent(verbose);
 		mineAssistant.setPcaOptimistic(pcaOptimistic);
 		mineAssistant.setRecursivityLimit(recursivityLimit);
 		mineAssistant.setAvoidUnboundTypeAtoms(avoidUnboundTypeAtoms);
 		mineAssistant.setExploitMaxLengthOption(exploitMaxLengthForRuntime);
 		mineAssistant.setEnableQueryRewriting(enableQueryRewriting);
 		mineAssistant.setEnablePerfectRules(enablePerfectRulesPruning);
+		mineAssistant.setSilent(!verbose);
 		
 		AMIE miner = new AMIE(mineAssistant, minInitialSup, minMetricValue, metric, nThreads);
 		if(minStdConf > 0.0) {
@@ -1002,7 +1061,7 @@ public class AMIE {
 		}
 		
 		if (exploitMaxLengthForRuntime && enableQueryRewriting && enablePerfectRulesPruning) {
-			System.out.println("Lossless heuristics enabled");
+			System.out.println("Lossless (query refinement) heuristics enabled");
 		} else {			
 			if (!exploitMaxLengthForRuntime) {
 				System.out.println("Pruning by maximum rule length disabled");
@@ -1029,11 +1088,15 @@ public class AMIE {
 			for(Query rule: rules)
 				System.out.println(rule.getFullRuleString());
 		}
-		System.out.println("Specialization time: " + (miner.getSpecializationTime() / 1000.0) + "s");
-		System.out.println("Scoring time: " + (miner.getScoringTime() / 1000.0) + "s");
-		System.out.println("Queueing and duplicate elimination: " + (miner.getQueueingAndDuplicateElimination() / 1000.0) + "s");
-		System.out.println("Approximation time: " + (miner.getApproximationTime() / 1000.0) + "s");
-		System.out.println(rules.size() + " rules mined.");
+		
+		if (verbose) {
+			System.out.println("Specialization time: " + (miner.getSpecializationTime() / 1000.0) + "s");
+			System.out.println("Scoring time: " + (miner.getScoringTime() / 1000.0) + "s");
+			System.out.println("Queueing and duplicate elimination: " + (miner.getQueueingAndDuplicateElimination() / 1000.0) + "s");
+			System.out.println("Approximation time: " + (miner.getApproximationTime() / 1000.0) + "s");
+			System.out.println(rules.size() + " rules mined.");
+		}
+		
 		long miningTime = System.currentTimeMillis() - time;
 		System.out.println("Mining done in " + NumberFormatter.formatMS(miningTime));
 		Announce.done("Total time " + NumberFormatter.formatMS(miningTime + sourcesLoadingTime));

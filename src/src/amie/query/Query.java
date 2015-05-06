@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,6 @@ import java.util.TreeSet;
 
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
-import javatools.datatypes.MultiMap;
 import amie.data.EquivalenceChecker2;
 import amie.data.FactDatabase;
 
@@ -162,6 +160,17 @@ public class Query{
 	private boolean containsQuasiBindings;
 	
 	/**
+	 * Probabilistic version of the support of a rule calculated
+	 * considering the probabilities of the positive examples of the rule.
+	 */
+	private double probabilisticSupport;
+		
+	/**
+	 * Probabilistic version of the body size of a rule.
+	 */
+	private double probabilisticPCABodySize;
+	
+	/**
 	 * List of parents: queries that are equivalent to the current query except 
 	 * by one body atom.
 	 */
@@ -219,6 +228,8 @@ public class Query{
 		pcaEstimationOptimistic = 0.0;
 		belowMinimumSupport = false;
 		containsQuasiBindings = false;
+		probabilisticPCABodySize = -1.0;
+		probabilisticSupport = 0.0;
 		ancestors = new ArrayList<>();
 	}
 			
@@ -634,6 +645,26 @@ public class Query{
 		return triples.get(0)[getNonFunctionalVariablePosition()];
 	}
 	
+	public double getProbabilisticSupport() {
+		return probabilisticSupport;
+	}
+
+	public void setProbabilisticSupport(double probabilisticSupport) {
+		this.probabilisticSupport = probabilisticSupport;
+	}
+
+	public double getProbabilisticPCABodySize() {
+		return probabilisticPCABodySize;
+	}
+
+	public void setProbabilisticPCABodySize(double probabilisticPCABodySize) {
+		this.probabilisticPCABodySize = probabilisticPCABodySize;
+	}
+	
+	public double getProbabilisticPCAConfidence() {
+		return this.probabilisticSupport / this.probabilisticPCABodySize;
+	}
+
 	/**
 	 * @param functionalVariable the functionalVariable to set
 	 */
@@ -781,7 +812,7 @@ public class Query{
 	}
 
 	/**
-	 * Returns true if the rule contains redudant recursive atoms, i.e., atoms with a relation that
+	 * Returns true if the rule contains redundant recursive atoms, i.e., atoms with a relation that
 	 * occurs more than once AND that do not have any effect on the query result.
 	 * @return
 	 */
@@ -1121,9 +1152,9 @@ public class Query{
 		strBuilder.append("\t" + stdConfUpperBound);
 		strBuilder.append("\t" + pcaConfUpperBound);
 		strBuilder.append("\t" + pcaEstimation);
-		strBuilder.append("\t" + pcaEstimationOptimistic);		
+/*		strBuilder.append("\t" + pcaEstimationOptimistic);		
 		strBuilder.append("\t" + confidenceRunningTime);
-		strBuilder.append("\t" + pcaConfidenceRunningTime);
+		strBuilder.append("\t" + pcaConfidenceRunningTime);*/
 
 		return strBuilder.toString();
 	}
