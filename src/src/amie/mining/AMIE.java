@@ -52,7 +52,6 @@ import amie.query.Query;
  *
  */
 public class AMIE {
-    //test
 	/**
 	 * Default PCA confidence threshold
 	 */
