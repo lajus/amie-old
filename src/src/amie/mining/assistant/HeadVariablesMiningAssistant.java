@@ -15,6 +15,12 @@ import javatools.datatypes.Pair;
 import amie.data.FactDatabase;
 import amie.query.Query;
 
+/**
+ * Mining assistant that defines support and confidence as the number of 
+ * distinct bindings of the head variables.
+ * @author galarrag
+ *
+ */
 public class HeadVariablesMiningAssistant extends MiningAssistant{
 	/**
 	 * Store counts for hard queries
@@ -32,9 +38,9 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 		return source.size();
 	}
 	
-	public void getDanglingEdges(Query query, Collection<ByteString> relations, int minCardinality, Collection<Query> output) {
+	public void getInitialDanglingEdgesFromSeeds(Query query, Collection<ByteString> relations, int minCardinality, Collection<Query> output) {
 		//The query must be empty
-		if(!query.isEmpty()){
+		if (!query.isEmpty()){
 			throw new IllegalArgumentException("Expected an empty query");
 		}
 		

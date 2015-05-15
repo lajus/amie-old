@@ -324,8 +324,15 @@ public class MiningAssistant{
 		return allowConstants || enforceConstants;
 	}
 	
-	
-	public void getDanglingEdges(Query query, Collection<ByteString> relations, int minCardinality, Collection<Query> output) {
+	/**
+	 * Returns a list of one-atom queries using the head relations provided in the collection 
+	 * "relations".
+	 * @param query
+	 * @param relations
+	 * @param minCardinality
+	 * @param output
+	 */
+	public void getInitialDanglingEdgesFromSeeds(Query query, Collection<ByteString> relations, int minCardinality, Collection<Query> output) {
 		//The query must be empty
 		if(!query.isEmpty()){
 			throw new IllegalArgumentException("Expected an empty query");

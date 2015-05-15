@@ -1664,7 +1664,7 @@ public class Query{
 	 */
 	public static void getParentsOfSize(List<ByteString[]> antecedent, 
 			ByteString[] head,
-			int windowSize, List<List<ByteString[]>> parentsOfSizeI) {
+			int windowSize, List<List<ByteString[]>> output) {
 		int fixedSubsetSize = windowSize - 1;
 		if (antecedent.size() < windowSize) {
 			return;
@@ -1676,10 +1676,10 @@ public class Query{
 			combination.add(head);
 			combination.addAll(fixedPrefix);
 			combination.add(antecedent.get(i));
-			parentsOfSizeI.add(combination);
+			output.add(combination);
 		}
 		if (windowSize > 1) {
-			getParentsOfSize(antecedent.subList(1, antecedent.size()), head, windowSize, parentsOfSizeI);
+			getParentsOfSize(antecedent.subList(1, antecedent.size()), head, windowSize, output);
 		}
 	}
 	
@@ -1802,7 +1802,7 @@ public class Query{
 	 * Returns the head variables of the rule.
 	 * @return
 	 */
-	private List<ByteString> getHeadVariables() {
+	public List<ByteString> getHeadVariables() {
 		List<ByteString> headVariables = new ArrayList<>();
 		ByteString[] head = getHead();
 		if (FactDatabase.isVariable(head[0])) {
@@ -1885,5 +1885,19 @@ public class Query{
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * Returns a new rule that is a copy of the current rules plus
+	 * the two edges sent as arguments.
+	 * @param newEdge1
+	 * @param newEdge2
+	 * @return
+	 */
+	public Query addEdges(ByteString[] newEdge1, ByteString[] newEdge2) {
+		Query newQuery = new Query(this, (int)this.support);
+		newQuery.triples.add(newEdge1.clone());
+		newQuery.triples.add(newEdge2.clone());
+		return newQuery;		
 	}
 }

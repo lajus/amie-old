@@ -16,7 +16,7 @@ public class InstantiatedHeadMiningAssistant extends HeadVariablesMiningAssistan
 		super(dataSource);
 	}
 	
-	public void getDanglingEdges(Query query, Collection<ByteString> relations, int minCardinality, Collection<Query> output) {
+	public void getInitialDanglingEdgesFromSeeds(Query query, Collection<ByteString> relations, int minCardinality, Collection<Query> output) {
 		//The query must be empty
 		if(!query.isEmpty()) {
 			throw new IllegalArgumentException("Expected an empty query");

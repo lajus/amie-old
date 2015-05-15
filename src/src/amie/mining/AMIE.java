@@ -39,6 +39,7 @@ import amie.mining.assistant.FullRelationSignatureMiningAssistant;
 import amie.mining.assistant.HeadVariablesImprovedMiningAssistant;
 import amie.mining.assistant.HeadVariablesMiningAssistant;
 import amie.mining.assistant.InstantiatedHeadMiningAssistant;
+import amie.mining.assistant.KeyMinerMiningAssistant;
 import amie.mining.assistant.MiningAssistant;
 import amie.mining.assistant.RelationSignatureMiningAssistant;
 import amie.mining.assistant.SeedsCountMiningAssistant;
@@ -110,6 +111,16 @@ public class AMIE {
 	 * Time spent in confidence approximations
 	 */
 	private long approximationTime;
+
+
+	/**
+	 * Rules of the form A ^ B ^ C => D are output if their immediate parents, e.g.,
+	 * A ^ B => D and A ^ C => D and A ^ C => D have higher confidence. If this option
+	 * is enabled the check is extended also to parents of degree 2, e.g., A => D
+	 * B => D, C => D. 
+	 * 
+	 */
+	private boolean checkParentsOfDegree2;
 		
 	/**
 	 * 
@@ -173,7 +184,7 @@ public class AMIE {
 		if(seeds == null || seeds.isEmpty())
 			assistant.getDanglingEdges(rootQuery, minInitialSupport, seedsPool);
 		else
-			assistant.getDanglingEdges(rootQuery, seeds, minInitialSupport, seedsPool);
+			assistant.getInitialDanglingEdgesFromSeeds(rootQuery, seeds, minInitialSupport, seedsPool);
 		
 		if(realTime){
 			consumerObj = new RuleConsumer(result, resultsLock, resultsCondVar);
@@ -455,6 +466,9 @@ public class AMIE {
 				}
 				List<List<ByteString[]>> parentsOfSizeI = new ArrayList<>();
 				Query.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), queryPattern.get(0), queryPattern.size() - 2, parentsOfSizeI);
+				if (checkParentsOfDegree2) {
+					Query.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), queryPattern.get(0), queryPattern.size() - 3, parentsOfSizeI);
+				}
 				for (List<ByteString[]> parent : parentsOfSizeI) {
 					for (Query candidate : candidateParents) {
 						List<ByteString[]> candidateParentPattern = candidate.getRealTriples();
@@ -947,6 +961,10 @@ public class AMIE {
 		}
 		
 		switch(bias) {
+		case "keys" :
+			mineAssistant = new KeyMinerMiningAssistant(dataSource);
+			System.out.println("Overriding recursivity limit. Using a value of " + mineAssistant.getRecursivityLimit());
+			break;
 		case "seedsCount" :
 			mineAssistant = new SeedsCountMiningAssistant(dataSource, schemaSource);
 			mineAssistant.setConfidenceMetric(ConfidenceMetric.StandardConfidence);
@@ -1040,6 +1058,10 @@ public class AMIE {
 		mineAssistant.setSilent(!verbose);
 		
 		AMIE miner = new AMIE(mineAssistant, minInitialSup, minMetricValue, metric, nThreads);
+		if (bias.equals("keys")) {
+			miner.setCheckParentsOfDegree2(true);
+		}
+		
 		if(minStdConf > 0.0) {
 			System.out.println("Filtering on standard confidence with minimum threshold " + minStdConf);
 		} else {
@@ -1100,6 +1122,10 @@ public class AMIE {
 		long miningTime = System.currentTimeMillis() - time;
 		System.out.println("Mining done in " + NumberFormatter.formatMS(miningTime));
 		Announce.done("Total time " + NumberFormatter.formatMS(miningTime + sourcesLoadingTime));
+	}
+
+	public void setCheckParentsOfDegree2(boolean b) {
+		this.checkParentsOfDegree2 = b;
 	}
 
 	/**
