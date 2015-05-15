@@ -3,6 +3,7 @@ package amie.prediction.data;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,8 +133,7 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	}
 	
 	/**
-	 * Returns the probability of a given sequence of atoms where it is known
-	 * that exists only one variable.
+	 * Returns the probabilities for all the bindings of the given query.
 	 * @param query
 	 * @param var
 	 * @return Probability for each binding of the select variable
@@ -141,6 +141,13 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	protected List<Double> probabibilityOfQuery(List<ByteString[]> query) {
 		// Count the number of variables
 		List<Double> result = new ArrayList<Double>();
+		if (!containsVariables(query)) {
+			for (ByteString[] atom : query) {
+				result.add(probabilityOf(atom));
+			}
+			return result;
+		}
+		
 		if (containsSingleVariable(query)) {
 			return probabibilityOfQuery(query, getFirstVariable(query));
 		}
@@ -247,6 +254,57 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 		return sum;
 	}
 	
+	
+	public double pcaProbabilityOf(List<ByteString[]> query, 
+			ByteString[] projection, ByteString var1, ByteString var2) {
+		ByteString existentialVariable = null;
+		ByteString commonVariable = null;
+		ByteString existentializedVariable = null;
+		double sum = 0.0;
+		if (projection[0].equals(var1) || projection[0].equals(var2)) {
+			existentialVariable = projection[2];
+			commonVariable = projection[0];
+			existentializedVariable = projection[0].equals(var1) ? var2 : var1; 
+		} else if (projection[2].equals(var1) || projection[2].equals(var2)) {
+			existentialVariable = projection[0];
+			commonVariable = projection[2];
+			existentializedVariable = projection[2].equals(var1) ? var2 : var1; 
+		}
+		
+		Map<ByteString, IntHashMap<ByteString>> bindings = selectDistinct(commonVariable, existentializedVariable, query);		
+		List<ByteString[]> projectionList = new ArrayList<ByteString[]>();
+		projectionList.add(projection);
+		
+		try(Instantiator h1inst = new Instantiator(projectionList, commonVariable);
+				Instantiator b1inst = new Instantiator(query, commonVariable);
+				Instantiator b2inst = new Instantiator(query, existentializedVariable)) {
+			for (ByteString valCommon : bindings.keySet()) {
+				b1inst.instantiate(valCommon);
+				h1inst.instantiate(valCommon);
+				for (ByteString valExistentialized : bindings.get(valCommon)) {
+					b2inst.instantiate(valExistentialized);			
+					List<Double> bodyProbabilities = probabibilityOfQuery(query);
+					double headProbability = 1.0;
+					Set<ByteString> examples = selectDistinct(existentialVariable, projectionList);
+					try (Instantiator h2inst = new Instantiator(projectionList, existentialVariable)) {
+						if (examples.contains(valExistentialized)) {
+							continue;
+						}
+						
+						for (ByteString example : examples) {
+							h2inst.instantiate(example);							
+							headProbability *= (1.0 - probabilityOf(projection));
+						}
+						headProbability = 1.0 - headProbability;
+					}
+					sum += probability(headProbability, bodyProbabilities);
+				}
+			}
+		}
+		
+		return sum;
+	}
+	
 	/**
 	 * Implementation of the formula for the probabilistic support of a 
 	 * fact.
@@ -266,9 +324,11 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	/**
 	 * 
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void main(String args[]) {
+	public static void main(String args[]) throws IOException {
 		TupleIndependentFactDatabase db = new TupleIndependentFactDatabase();
+		//db.load(new File("/home/galarrag/workspace/AMIE/Data/yago2/sample-final/yago2core.10kseedsSample.decoded.compressed.notypes.tsv"));
 		db.add("<Francois>", "<livesIn>", "<Paris>", 0.9);
 		db.add("<Francois>", "<livesIn>", "<Nantes>", 0.9);
 		db.add("<Paris>", "<locatedIn>", "<France>", 1.0);
@@ -276,19 +336,36 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 		db.add("<Francois>", "<livesIn>", "<France>", 0.9);
 		db.add("<Ana>", "<livesIn>", "<Gye>", 0.9);
 		db.add("<Gye>", "<locatedIn>", "<Ecuador>", 0.5);
-		db.add("<Ana>", "<livesIn>", "<Ecuador>", 1.0);		
+		db.add("<Ana>", "<livesIn>", "<Ecuador>", 1.0);	
+		db.add("<Luis>", "<created>", "<Titanic>", 0.5);	
+		db.add("<Luis>", "<directed>", "<Titanic>", 0.9);
+		db.add("<Ana>", "<created>", "<Blah>", 0.77);	
+		db.add("<Ana>", "<directed>", "<Transformers>", 0.75);	
+		db.add("<Francois>", "<directed>", "<Amelie>", 0.8);	
 		//List<ByteString[]> query = triples(triple(ByteString.of("<Francois>"), ByteString.of("<livesIn>"), ByteString.of("?x")),
 		//		triple(ByteString.of("?x"), ByteString.of("<locatedIn>"), ByteString.of("<France>")));
 		//List<ByteString[]> query2 = triples(triple(ByteString.of("<Francois>"), ByteString.of("<livesIn>"), ByteString.of("?x")),
 		//		triple(ByteString.of("?x"), ByteString.of("<locatedIn>"), ByteString.of("?y")));
 		List<ByteString[]> query3 = triples(triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?y")),
 				triple(ByteString.of("?y"), ByteString.of("<locatedIn>"), ByteString.of("?z")));
-		List<ByteString[]> query4 = triples(triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?y")),
-				triple(ByteString.of("?y"), ByteString.of("<locatedIn>"), ByteString.of("?z")),
-				triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?w")));
+		List<ByteString[]> query5 = triples(triple(ByteString.of("?a"), ByteString.of("<created>"), ByteString.of("?b")));
 		//System.out.println(db.probabibilityOfQuery(query));
 		//System.out.println(db.probabibilityOfQuery(query2));
 		System.out.println(db.probabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?z"))));
-		System.out.println(db.probabilityOf(query4, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?z"))));
+		System.out.println(db.pcaProbabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?w")), 
+				ByteString.of("?x"), ByteString.of("?z")));
+		System.out.println(db.probabilityOf(query5, triple(ByteString.of("?a"), ByteString.of("<directed>"), ByteString.of("?b"))));
+		System.out.println(db.pcaProbabilityOf(query5, triple(ByteString.of("?a"), ByteString.of("<directed>"), ByteString.of("?x")), 
+				ByteString.of("?a"), ByteString.of("?b")));
+		
+		db.add("<Francois>", "<livesIn>", "<USA>");
+		System.out.println(db.pcaProbabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?w")), 
+				ByteString.of("?x"), ByteString.of("?z")));
+		
+		db.add("<Diana>", "<livesIn>", "<Lyon>");
+		db.add("<Lyon>", "<isLocatedIn>", "<France>");
+		db.add("<Diana>", "<livesIn>", "<UK>");
+		System.out.println(db.pcaProbabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?w")), 
+				ByteString.of("?x"), ByteString.of("?z")));
 	}
 }

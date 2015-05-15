@@ -253,6 +253,8 @@ public class Query{
 		pcaEstimationOptimistic = 0.0;	
 		belowMinimumSupport = false;
 		containsQuasiBindings = false;
+		probabilisticPCABodySize = -1.0;
+		probabilisticSupport = 0.0;
 		ancestors = new ArrayList<>();
 	}
 	
@@ -275,6 +277,8 @@ public class Query{
 		pcaEstimation = 0.0;
 		pcaEstimationOptimistic = 0.0;
 		containsQuasiBindings = false;
+		probabilisticPCABodySize = -1.0;
+		probabilisticSupport = 0.0;
 		ancestors = new ArrayList<>();
 	}
 	
@@ -327,6 +331,8 @@ public class Query{
 		pcaEstimationOptimistic = 0.0;
 		++highestVariable;
 		containsQuasiBindings = false;
+		probabilisticPCABodySize = -1.0;
+		probabilisticSupport = 0.0;
 		ancestors = new ArrayList<>();
 	}
 
@@ -662,7 +668,11 @@ public class Query{
 	}
 	
 	public double getProbabilisticPCAConfidence() {
-		return this.probabilisticSupport / this.probabilisticPCABodySize;
+		if (this.probabilisticPCABodySize > 0.0) {
+			return this.probabilisticSupport / this.probabilisticPCABodySize;
+		} else {
+			return -1.0;
+		}
 	}
 
 	/**
@@ -1152,9 +1162,9 @@ public class Query{
 		strBuilder.append("\t" + stdConfUpperBound);
 		strBuilder.append("\t" + pcaConfUpperBound);
 		strBuilder.append("\t" + pcaEstimation);
-/*		strBuilder.append("\t" + pcaEstimationOptimistic);		
-		strBuilder.append("\t" + confidenceRunningTime);
-		strBuilder.append("\t" + pcaConfidenceRunningTime);*/
+		strBuilder.append("\t" + getProbabilisticPCAConfidence());		
+		strBuilder.append("\t" + getProbabilisticSupport());
+		strBuilder.append("\t" + getProbabilisticPCABodySize());
 
 		return strBuilder.toString();
 	}

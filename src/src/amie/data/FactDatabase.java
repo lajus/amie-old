@@ -111,6 +111,8 @@ public class FactDatabase {
 	// Loading
 	// ---------------------------------------------------------------------------
 
+	public FactDatabase() {}
+
 	/** Adds a fact */
 	protected boolean add(ByteString subject, ByteString relation,
 			ByteString object,

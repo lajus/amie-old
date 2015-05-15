@@ -41,7 +41,7 @@ public class TypedMiningAssistant extends HeadVariablesMiningAssistant {
 		}
 	}
 		
-	public void getSpecializationCandidates(Query query, int minCardinality, Collection<Query> output){
+	public void getSpecializationCandidates(Query query, int minCardinality, Collection<Query> output) {
 		List<Query> tmpCandidates = new ArrayList<Query>();
 		ByteString[] head = query.getHead();
 		
@@ -95,7 +95,7 @@ public class TypedMiningAssistant extends HeadVariablesMiningAssistant {
 		}
 	}
 
-	protected boolean testLength(Query candidate){
+	protected boolean testLength(Query candidate) {
 		return candidate.getLengthWithoutTypes(typeString) < maxDepth;
 	}
 }

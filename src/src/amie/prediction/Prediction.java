@@ -154,10 +154,15 @@ public class Prediction {
 	}
 	
 	public double getConfidence() {
-		if (Prediction.metric == Metric.PCAConfidence)
-			return getJointRule().getPcaConfidence();
-		else
+		Query jointRule = getJointRule();
+		if (Prediction.metric == Metric.PCAConfidence) {
+			if (jointRule.getProbabilisticPCAConfidence() < 0.0)
+				return jointRule.getPcaConfidence();
+			else 
+				return jointRule.getProbabilisticPCAConfidence();
+		} else {
 			return getJointRule().getStdConfidence();
+		}
 	}
 	
 	public int getIterationId() {

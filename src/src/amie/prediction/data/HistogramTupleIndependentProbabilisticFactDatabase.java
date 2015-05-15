@@ -9,7 +9,7 @@ import java.util.Map;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 
-public class HistogramTupleIndependentFactDatabase extends TupleIndependentFactDatabase{
+public class HistogramTupleIndependentProbabilisticFactDatabase extends TupleIndependentFactDatabase{
 
 	private Map<ByteString, IntHashMap<Integer>> histograms = new HashMap<>();
 	
@@ -129,7 +129,7 @@ public class HistogramTupleIndependentFactDatabase extends TupleIndependentFactD
 	}
 	
 	public static void main(String args[])  {
-		HistogramTupleIndependentFactDatabase db = new HistogramTupleIndependentFactDatabase();
+		HistogramTupleIndependentProbabilisticFactDatabase db = new HistogramTupleIndependentProbabilisticFactDatabase();
 		try {
 			db.load(new File("/home/galarrag/workspace/AMIE/Data/yago2/yago2core.10kseedsSample.decoded.compressed.notypes.tsv"));
 		} catch (IOException e) {
