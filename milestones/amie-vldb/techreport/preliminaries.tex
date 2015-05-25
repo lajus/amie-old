@@ -1,0 +1,354 @@
+% !TEX root = main.tex
+
+%\www{
+\subsection{RDF KBs}
+In this paper, we focus on RDF~\cite{rdf} knowledge bases. We follow here the introduction of the preliminaries from \cite{amie}.
+An RDF KB can be considered a set of facts, where each fact is a triple of the form $\langle x, r, y\rangle$ with $x$ denoting the subject, $r$ the relation (or predicate), and $y$ the object of the fact. %}
+There are several equivalent alternative representations of facts; in this paper we borrow the notation from Datalog and represent a fact as $r(x,y)$. For example, we write \emph{father(Elvis,Lisa)}.
+%In this paper, we deal with RDF knowledge bases \cite{rdf}. An RDF KB can be seen as a set of facts. Each fact is a triple of the form $\langle x, r, y\rangle$, where $x$ is the subject, $r$ is the relation (or predicate), and $y$ is the object of the fact. In this paper, we use a logical notation for facts, and write $r(x,y)$. A KB can contain, e.g., the fact \emph{fatherOf(ElvisPresley, LisaPresley)}.
+%\www{
+The facts of an RDF KB can usually be divided into an \emph{A-Box} and a \emph{T-Box}. While the A-Box contains instance data, the T-Box is the subset of facts that define classes, domains, ranges for predicates, and the class hierarchy. Although T-Box information can also be used by our mining approach, we are mainly concerned with the A-Box, i.e., the set of facts relating one particular entity to another.
+%An RDF KB usually contains a \emph{T-Box}. This is a subset of facts that define classes, domains and ranges for predicates, and a class hierarchy. Although we also feed the T-Box into our miner, we are mainly concerned with the \emph{A-Box} of the KB. This is the set of facts that say that a certain individual entity is related to a certain other entity by a relation.
+
+In the following, we assume a given KB $\mathcal{K}$ as input. Let $\mathcal{R}:=\pi_{relation}(\mathcal{K})$ 
+denote the set of relations contained in $\mathcal{K}$ and $\mathcal{E}:=\pi_{subject}(\mathcal{K}) \cup \pi_{object}(\mathcal{K})$ the set of entities.
+%}
+
+
+\subsection{Functions}
+\label{subsec:functions}
+%\comment{R3}{The FUN-property of a KB is problematic, it assumes something about the major KBs are written which may be factually true (e.g. in YAGO or DBPEDIA) 
+ %     but should really be verified on case-by-case (e.g., what about biological KBs?) so I think it must be contextualized to the KBs under investigations and be presented as a 
+  %    factual observation which holds in that limited setting. }  
+% \comment{Chris}{Removed the FUN-property. Rephrased corresponding part}      
+% Fabian: I think it's good!
+
+A \emph{function} is a relation $r$ that has at most one object for every subject, i.e.,
+\[
+ \forall x: |\{y: r(x,y)\}| \leq 1
+\]
+% 
+Similarly, a relation is an \emph{inverse function} if each of its objects has at most one subject. 
+Since RDF KBs are usually noisy, even relations that should be functions (such as \emph{has\-Birthdate}) may exhibit two objects for the same subject.
+Vice versa, there are relations that are not functions in the strict sense, but that exhibit a similar behavior.
+For example, \emph{has\-Nationality} can give several nationalities to a person, but the vast majority of people only have one nationality.
+Therefore, we use the notion of \emph{functionality}~\cite{paris}. The functionality of a relation $r$ is a value between 0 and 1, which is 1 if $r$ is a function:
+%In all of the following, we assume a given KB $\mathcal{K}$. We denote with $\mathcal{R}=\pi_{relation}(\mathcal{K})$ the set of relations, and with $\mathcal{E}=\pi_{subject}(\mathcal{K}) \cup \pi_{object}(\mathcal{K})$ the set of entities of the KB. A \emph{function} is a relation that has at most one object for every subject, $\forall x: |\{y: r(x,y)\}| \leq 1$. A relation is an \emph{inverse function}, if each of its objects has at most one subject. Since RDF KBs are usually noisy, even relations that should be functions (such as \emph{hasBirthdate}) may exhibit two objects for the same subject. Therefore, we use the notion of \emph{functionality} \cite{paris}. The functionality of a relation $r$ is a value between 0 and 1 that is 1 if $r$ is a function:
+\[fun(r) := \frac{\#x: \exists y: r(x,y)}{\#(x,y): r(x,y)}\]
+%\[ifun(r) := \frac{\#y: \exists x: r(x,y)}{\#(x,y): r(x,y)}\]
+where  $\#x:X$ is an abbreviation for $|\{x: X \in \mathcal{K}\}|$.
+The inverse functionality is defined accordingly as $ifun(r):=fun(r^{-1})$, where $r^{-1}$ denotes
+the inverse relation of $r$, that is, the relation defined by swapping the arguments of $r$, e.g.,
+$actedIn^{-1} = hasActor$, therefore $ifun(actedIn):= fun(hasActor)$.
+
+
+Some relations have roughly the same degree of functionality and of inverse functionality. Bijections are an example.
+Usually, however, $fun$ and $ifun$ are different.
+% \comment{Chris}{at least for general-purpose web-extracted KBs, like YAGO, DBPEDIA and Freebase}.
+Manual inspection shows that in web-extracted common sense KBs (e.g., YAGO, DBpedia) the functionality is usually higher than the inverse functionality.
+For example, a KB is more likely to specify \emph{isCitizenOf} than \emph{has\-Citizen}.
+Intuitively, this allows us to consider a fact $r(x,y)$ as a fact about $x$.
+In the following, we will assume that for all relations $r$, $fun(r)\geq ifun(r)$.
+Whenever this is not the case, $r$ can be replaced by its inverse relation $r^{-1}$. Then, $fun(r^{-1})\geq ifun(r^{-1})$.
+In the following, we assume that all relations have been substituted with their inverses if their inverse functionality is larger than their functionality.
+This will simplify the analysis without affecting the generality of our approach.
+% We call the fact that the functionality is always at least as large as the inverse functionality the \emph{FUN-property} of a KB. 
+
+
+
+\ignore{was before:
+In general in our mining process, we will assess the quality of a rule based on its ability to make correct predictions, 
+i.e., to correctly predict one of the variables, given the relation in question and the other variable.
+In other words, our rule evaluation process considers one of the variables as \emph{input variable} and the other one as \emph{output variable}.
+The most natural decision for the input variable is to choose the variable with the most functional behavior, i.e., the subject for functional and the object for the inverse functional relations.
+Manual inspection shows, however, that relations in semantic KBs tend to be more functional than inverse functional. Intuitively, this allows us to consider a fact $r(x,y)$ as a fact about $x$.
+Therefore, in the following we will provide formulas only for the case that the subject $x$ is the input and the object $y$ is the output.
+The formulas corresponding to the case that $y$ is input and $x$ is output can easily be derived by swapping $x$ and $y$.
+}
+
+%\comment{Fabian}{About the order: I think it's good to have first everything KB, and then everything rules}
+
+% \www{
+% \subsection{Functions}
+% A \emph{function} is a relation $r$ that has at most one object for every subject, i.e., $\forall x: |\{y: r(x,y)\}| \leq 1$. A relation is an \emph{inverse function} if each of its objects has at most one subject. Since RDF KBs are usually noisy, even relations that should be functions (such as \emph{hasBirthdate}) may exhibit two objects for the same subject. Therefore, we use the notion of \emph{functionality}~\cite{paris}. The functionality of a relation $r$ is a value between 0 and 1, that is 1 if $r$ is a function:
+% %In all of the following, we assume a given KB $\mathcal{K}$. We denote with $\mathcal{R}=\pi_{relation}(\mathcal{K})$ the set of relations, and with $\mathcal{E}=\pi_{subject}(\mathcal{K}) \cup \pi_{object}(\mathcal{K})$ the set of entities of the KB. A \emph{function} is a relation that has at most one object for every subject, $\forall x: |\{y: r(x,y)\}| \leq 1$. A relation is an \emph{inverse function}, if each of its objects has at most one subject. Since RDF KBs are usually noisy, even relations that should be functions (such as \emph{hasBirthdate}) may exhibit two objects for the same subject. Therefore, we use the notion of \emph{functionality} \cite{paris}. The functionality of a relation $r$ is a value between 0 and 1 that is 1 if $r$ is a function:
+% \[fun(r) := \frac{\#x: \exists y: r(x,y)}{\#(x,y): r(x,y)}\]
+% %\[ifun(r) := \frac{\#y: \exists x: r(x,y)}{\#(x,y): r(x,y)}\]
+% with  $\#x:X$ as an abbreviation for $|\{x: X \in \mathcal{K}\}|$. The inverse functionality is defined accordingly as $ifun(r):=fun(r^{-1})$.
+% Without loss of generality, we assume that $\forall r \in \mathcal{R}: fun(r)\geq ifun(r)$ (\emph{FUN-Property}).
+% If that is not the case for a relation $r$, we can replace all facts $r(x,y)$ with the inverse relation, $r^-(y,x)$, which entails $fun(r^-)\geq ifun(r^-)$.
+% For example, if the KB contains the inverse functional relation \emph{directed(person,movie)}, we can create the functional relation \emph{isDirectedBy(movie,person)} and use only that one in the rule mining process.
+% Manual inspection shows, however, that relations in semantic KBs tend to be more functional than inverse functional. Intuitively, this allows us to consider a fact $r(x,y)$ as a fact about $x$.
+% }
+
+
+
+
+%\comment{Katja}{I'd suggest to swap the order of 3.3 Language Bias and 3.4 Functions; discussing functions right after rules feels more naturally}
+\subsection{Rules}
+\label{subsec:rules}
+%\comment{R3}{Rules are introduced with no limitations on their syntax but then, under the strange section heading "language biases", 
+      %we discover that rules should be connected, closed, nonreflexive, and can be recursive (no example provided).       
+      %There exists a better way of defining rule syntax \& constraints! Incidentally, using a closed rule as example of generic rule does not help the reader's intuition. }
+% \comment{Chris}{I merged the 2 sections and added examples}
+% Fabian: Thanks! Looks good to me! I made some minor changes.
+
+An \emph{atom} is a fact that can have variables at the subject and/or object position.
+A \emph{(Horn) rule} consists of a head and a body, where the head is a single atom and the body is a set of atoms.
+We denote a rule with head $r(x,y)$ and body $\{B_1,..., B_n\}$ by an implication
+%An \emph{atom} is a fact that can have variables in place of the subject and/or the object. A \emph{(Horn) rule} consists of a head and a body, where the head is a single atom and the body is a set of atoms. We denote a rule with head $r(x,y)$ and body $\{B_1,..., B_n\}$ by an implication
+\indented{
+$B_1 \wedge B_2 \wedge ... \wedge B_n \Rightarrow r(x,y)$
+}
+which we abbreviate as $\vec{B} \Rightarrow r(x,y)$.
+
+An \emph{instantiation} of a rule is a copy of the rule, where all variables have been substituted by constants.
+A \emph{prediction} of a rule is the head atom of an instantiated rule if all body atoms of the instantiated rule appear in the KB.
+For example, the above rule can predict \emph{citizenOf(Lisa,USA)} if the KB knows a parent of Lisa, e.g.,
+\emph{hasChild(Elvis,Lisa)}, who is American, e.g.,\emph{citizenOf(Elvis,USA)}.
+
+AMIE, like other ILP systems, does not mine general Horn Clauses, but uses a language bias (constraints to the form of the mined rules) 
+in order to restrict the size of the search space. 
+Language biases offer a trade-off between the expressiveness of the mined rules and the speed of the mining process.
+As an example, rules with 3 atoms can capture more complicated correlations than rules with 2 atoms, but come with a larger search space and thus with a much slower performance.
+The less restrictive the language bias is,
+the more expressive the rules can potentially be, the larger the search space grows, and the less tractable the search becomes.
+
+AMIE's language bias requires rules to be \emph{connected}. We say that two atoms in a rule are \emph{connected} if they share a variable or an entity.
+A rule is \emph{connected} if every atom is connected transitively to every other atom of the rule.
+The restriction to connected rules avoids mining rules with completely unrelated atoms, such as $diedIn(x,y)\Rightarrow wasBornIn(w,z)$.
+
+AMIE also requires the rules to be \emph{closed}. A variable in a rule is \emph{closed} if it appears at least twice in the rule. A rule is \emph{closed} if all its variables are \emph{closed}.
+The restriction to closed rules avoids mining rules that predict merely the existence of a fact, as in $diedIn(x,y)\Rightarrow \exists z:wasBornIn(x,z)$. 
+
+AMIE omits also \emph{reflexive rules}, i.e., rules with atoms of the form $r(x, x)$, as they are typically of less interest in real world KBs.
+However, unlike some other ILP systems, AMIE allows mining \emph{recursive rules}. These are rules that contain the head relation in the body, as
+e.g., $isMarriedTo(x,z)\; \wedge hasChild(z,y)\; \Rightarrow\; hasChild(x,y)$. 
+% We also allow the user to specify as an input parameter the maximum number of atoms for the mined rules.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% An \emph{atom} is a fact that can have variables at the subject and/or object position.
+% A \emph{(Horn) rule} consists of a head and a body, where the head is a single atom and the body is a set of atoms.
+% We denote a rule with head $r(x,y)$ and body $\{B_1,..., B_n\}$ by an implication
+% %An \emph{atom} is a fact that can have variables in place of the subject and/or the object. A \emph{(Horn) rule} consists of a head and a body, where the head is a single atom and the body is a set of atoms. We denote a rule with head $r(x,y)$ and body $\{B_1,..., B_n\}$ by an implication
+% \indented{
+% $B_1 \wedge B_2 \wedge ... \wedge B_n \Rightarrow r(x,y)$
+% }
+% which we abbreviate as $\vec{B} \Rightarrow r(x,y)$. One example of such a rule is:
+% % \indented{
+% % \emph{hasChild}$(p,c)$ $\wedge$ \emph{citizenOf}$(p,s) \Rightarrow$ \emph{isCitizenOf}$(c,s)$}
+% \[ hasChild(p,c) \wedge citizenOf(p,s) \Rightarrow citizenOf(c,s) \]
+% An \emph{instantiation} of a rule is a copy of the rule, where all variables have been substituted by constants.
+% A \emph{prediction} of a rule is the head atom of an instantiated rule if all body atoms of the instantiated rule appear in the KB.
+% For example, the above rule can predict \emph{citizenOf(Lisa,USA)} if the KB knows a parent of Lisa (\emph{hasChild(Elvis,Lisa)}) who is American (\emph{citizenOf(Elvis,USA)}).
+% 
+% 
+% \subsection{Language Bias}
+% 
+% %\comment{chris}{reformulate. @Luis: check if ok}
+% In order to restrict the size of the search space, ILP systems commonly use a language bias.
+% % to restrict the search space, which can easily become huge otherwise.
+% Language biases offer a trade-off between the expressive power of the mined rules and the speed of the mining process.
+% As an example, rules with 3 atoms can capture more complicated correlations than rules with 2 atoms, but come with a larger search space and thus with a much slower performance.
+% The less retrictive the language bias is,
+% %\comment{Luis}{Aren't longer rules actually more specific?}\comment{chris}{rewritten. check again Fabian: I think it's good}
+% the more expressive the rules can potentially be, the larger the search space grows, and the less tractable the search becomes.
+% In the following, we describe AMIE's language bias.
+% 
+% We say that two atoms in a rule are \emph{connected} if they share a variable or an entity.
+% A rule is \emph{connected} if every atom is connected transitively to every other atom of the rule.
+% AMIE mines only connected rules, i.e., it avoids constructing rules that contain unrelated atoms (avoiding cross products).
+% We also allow the user to specify a maximum number of atoms for the mined rules.
+% A variable in a rule is \emph{closed} if it appears at least twice in the rule. A rule is \emph{closed} if all its variables are \emph{closed}.
+% Closed rules do not predict merely the existence of a fact (e.g. $diedIn(x,y)\Rightarrow \exists z:wasBornIn(x,z)$),
+% but also concrete arguments for it (e.g. $diedIn(x,y)\Rightarrow wasBornIn(x,y)$). AMIE mines only closed rules.
+% \emph{Reflexive rules} contain atoms of the form $r(x, x)$. AMIE omits these, as they are typically of less interest in real world KBs.
+% \emph{Recursive rules} are rules that contain the head relation in the body. Some ILP approaches exclude such rules, AMIE does not.
+% % In the present work, we focus on closed Horn rules.
+% % \comment{Fabian}{Do we need the following here?}\comment{chris}{Let's wait. If we do not need the notions of input and output variable we can remove it in the end}
+% % \comment{Katja}{It seems like we never use the term input/output variable anywhere else in the paper. So, we should remove it.}
+% % Each rule has an \emph{input} and an \emph{output} variable. These are the variables of the head predicate.
+% % Our quality evaluation metrics (see Sec.~\ref{subsubsec:pcaConf}) will measure the ability of a rule to produce the correct entity for the output variable,
+% % given the input argument.
+% % Although the choice for the input and output variables can depend on the application,
+% % the most natural decision is to assign the input to the variable with the most functional behavior, i.e., the subject according to the \emph{FUN-property}.
+% %
+
+\subsection{Measures of Significance} \label{subsec:statSignificance}
+
+% \comment{R3}{The discussion on support and coverage is rather clear (but an example would not hurt).}
+% \comment{Chris}{added example that I will also use in the confidence part}
+% Fabian: OK, thanks!
+
+Normally, data mining systems define a notion of significance or \emph{support} for rules, which quantifies the amount of evidence for the rule in the data.
+If a rule applies only to a few instances, it is too risky to use it to draw conclusions. For this reason,
+data mining systems frequently report only rules above a given support threshold. 
+In the following, we define this metric for AMIE's setting and introduce another notion of significance, the \emph{head coverage}.
+
+
+\paragraph{Support} \label{support}In our context, the support of a rule quantifies the number of correct predictions in the existing data.
+One desired property for support is \emph{monotonicity}, that is, the addition of more atoms and constraints to the rule should 
+always decrease its support. As we will show in Section~\ref{subsec:algorithm}, such property is crucial for pruning.
+There are several ways to define the support: it can be the number of instantiations of a rule that appear in the KB.
+This measure, however, is not monotonic if we add atoms to the body. Consider, for example, the rule
+\indented{
+  \emph{R:} \emph{livesIn}$(x,y) \Rightarrow$ \emph{wasBornIn}$(x,y)$
+} 
+If we add the atom \emph{hasGender}$(x,\;male)$ to the body, the number of instantiations $x$, $y$ in the KB decreases.
+In contrast, if we add an atom with a fresh variable, e.g., \emph{hasFriend}$(x,z)$, to the body, 
+the number of instantiations $x$, $y$, $z$ increases for every friend of $x$. This is true even 
+if we add another atom with $z$ to obtain a closed rule.
+Alternatively, we can count the number of facts in one particular body atom.
+Under this definition, however, 
+the same rule can have different support values depending on the selected body atom.
+We can also count the number of facts of the head atom.
+This measure decreases monotonically if more body atoms are added and avoids equivalent rules with different support values.
+With this in mind, we define the support of a rule as the number of distinct pairs of subjects 
+and objects in the head of all instantiations that appear in the KB:
+\[supp(\vec{B} \Rightarrow r(x,y)) := \#(x,y): \exists z_1,...,z_m: \vec{B} \wedge r(x,y)\]
+where $z_1,...,z_m$ are the variables of the rule apart from $x$ and $y$.
+Table~\ref{tab:exampleKB} shows an example KB that contains only 2 relations and 5 facts. For this KB, 
+our example rule $R$ has support 1, because of the facts $livesIn(Adam,Paris)$ and $wasBornIn(Adam,Paris)$.
+
+Note that the support is defined even for rules that are not yet closed. This allows for early pruning of unpromising candidate rules. For example, consider the rule
+\indented{
+  \emph{R':} \emph{livesIn}$(x,y) \Rightarrow$ \emph{wasBornIn}$(y,z)$
+} 
+This rule is obviously unpromising, because it postulates a birth place for $y$, which is not a person. The rule is not yet closed ($x$ and $z$ appear only once). Yet, it has support 0. Thus, it can be pruned away and does not need further refinement.
+
+\ignore{ % Fabian: I tried to find another example without parallel universes
+
+To see why, consider for example the rule $R_2: hasChild(x,z) \wedge livesIn(z,y)\Rightarrow livesIn(x,y)$ which dictates that people live at the same place as their children.
+Assume that this rule was constructed by the intermediate non-closed rule $R_1:hasChild(x,z) \Rightarrow livesIn(x,y)$  by adding the atom $livesIn(z,y)$.
+$R_1$ restricts the support to those facts in $livesIn$ which involve persons that have children. 
+In a parallel universe in which it is not common for people to have children, $R_1$ will be pruned for having low support and, therefore, $R_2$ and all other rules that can be 
+created from $R_1$ will never get constructed.
+}
+
+
+\www{
+\paragraph{Head Coverage} \label{par:headCoverage}
+Support is an absolute number. This means that a user defining thresholds on support has to know the absolute size of the KB 
+to give meaningful values. Moreover, if the support threshold is higher than the size of some relation, this relation will
+be disregarded as head relation for rule mining.
+To avoid this, we propose a proportional version of support. A naive way would be to use the absolute number of support 
+(as defined in the previous paragraph) over the size of the KB.
+This definition, however, does not solve the problem for small relations. 
+Therefore, we propose to use the notion of \emph{head coverage}:
+\[hc(\vec{B} \Rightarrow r(x,y)) := \frac{supp(\vec{B} \Rightarrow r(x,y))}{size(r)}\]
+}
+with $size(r) := \#(x',y') : r(x',y')$ denoting the number of facts in relation $r$. Head coverage quantifies the ratio of the known true facts that are implied by the rule.
+For the example presented in Table~\ref{tab:exampleKB}, $hc(R)=1/2$.
+
+
+\begin{table}
+\centering
+ \begin{tabular}{c|c}
+  $livesIn$ & $wasBornIn$\\  \hline
+  (Adam, Paris)		& (Adam, Paris) \\
+  (Adam, Rome)		& (Carl, Rome) \\
+  (Bob, Zurich)		&  \\
+ \end{tabular}
+\caption{An example KB containing two relations between people and cities.}\label{tab:exampleKB}
+\end{table}
+
+
+
+% \www{
+% \subsection{Rules}
+% An \emph{atom} is a fact that can have variables at the subject and/or object position. A \emph{(Horn) rule} consists of a head and a body, where the head is a single atom and the body is a set of atoms. We denote a rule with head $r(x,y)$ and body $\{B_1,..., B_n\}$ by an implication
+% %An \emph{atom} is a fact that can have variables in place of the subject and/or the object. A \emph{(Horn) rule} consists of a head and a body, where the head is a single atom and the body is a set of atoms. We denote a rule with head $r(x,y)$ and body $\{B_1,..., B_n\}$ by an implication
+% \indented{
+% $B_1 \wedge B_2 \wedge ... \wedge B_n \Rightarrow r(x,y)$
+% }
+% which we abbreviate as $\vec{B} \Rightarrow r(x,y)$. One example of such a rule is
+% \indented{
+% \emph{hasChild}$(p,c)$ $\wedge$ \emph{isCitizenOf}$(p,s) \Rightarrow$ \emph{isCitizenOf}$(c,s)$}
+% An \emph{instantiation} of a rule is a copy of the rule, where all variables have been substituted by entities.
+% A \emph{prediction} of a rule is the head atom of an instantiated rule if all body atoms of the instantiated rule appear in the KB.
+% For example, the above rule can predict \emph{isCitizenOf(Lisa,USA)} if the KB knows a parent of Lisa (\emph{hasChild(Elvis,Lisa)}) who is American (\emph{isCitizenOf(Elvis,USA)}).
+% }
+%
+% \www{
+% \subsection{Language Bias}
+% As most ILP systems, AMIE uses a language bias to restrict the search space.
+% % of the algorithm, which can be enormous.
+% %In its current form, our system AMIE also uses a language bias.
+% %The runtime and quality performance of AMIE under more broad language biases is a target for future work.
+% %AMIE mines only \emph{connected} and  \emph{closed} rules.
+% We say that two atoms in a rule are \emph{connected} if they share a variable or an entity.
+% A rule is \emph{connected} if every atom is connected transitively to every other atom of the rule. AMIE mines only connected rules, i.e., it avoids constructing rules that contain unrelated atoms.
+% We say that a rule is \emph{closed} if every variable in the rule appears at least twice. Such rules do not predict merely the existence of a fact (e.g. $diedIn(x,y)\Rightarrow \exists z:wasBornIn(x,z)$),
+% but also concrete arguments for it (e.g. $diedIn(x,y)\Rightarrow wasBornIn(x,y)$). AMIE mines only closed rules. We allow \emph{recursive rules} that contain the head relation in the body.
+% }
+
+% Two atoms in a rule are \emph{connected} if they share a variable or an entity.
+% A rule is \emph{connected} if every atom is connected transitively to every other atom of the rule.
+% We mine only connected rules. Furthermore, we are interested only in \emph{closed rules},
+% in which every variable appears at least twice. Such rules do not predict merely the existence of a fact (e.g. $diedIn(x,z)\Rightarrow wasBornIn(x,y)$),
+% but also predict concrete arguments for it (e.g. $diedIn(x,y)\Rightarrow wasBornIn(x,y)$).
+% We allow \emph{recursive rules} that contain the head relation in the body.
+% These requirements constitute our language bias and define the rules that we are interested in.
+
+% \comment{Chris}{I suggest to take the next part (about Association Rule Mining) out or completely rewrite it. I find it difficult to follow and too long.}
+%
+% \comment{Fabian}{The question is: Should the journal paper be a superset of the WWW paper, i.e., contain all of it and more? Then the section should stay. If the journal paper should be a new paper on the same foundations, then all irrelevant stuff from WWW should not be repeated here. What is your view? I tend more towards the second option, and removed the section for now.}
+%
+% \comment{Luis}{I agree about removing this section because it is not easy to follow (it took me a while to find a way to explain it in the presentation). Though it is the only apparent link to the association rule mining theory, we could strengthen the connection
+% by rephrasing the related work section.}
+%
+% \comment{Katja}{I agree to remove it, it does not discuss any additional insights other than that association rule mining cannot applied -- and that is what has already been covered in less detail in the related work section. }
+%
+% \ignore{
+% \subsection{Parallels to Association Rule Mining}
+%
+% %Association Rule Mining discovers correlations in shopping transactions.
+% % Thus, association rules are different in nature from the Horn rules we aim at.
+% % Still, association rule mining could be used, at least conceptually, to mine logical rules by building the list of transactions as follows:
+% % Each transaction is labeled by an $n$-tuple of entities, which are somehow connected in the data-graph. Since these entities are somehow connected, they can possibly instantiate a rule.
+% % Each item is an atom $r(x_i,x_j)$ on variables indexed by $1 \leq i, j \leq n$.
+% % A transaction with label $\langle c_1, \dots, c_n\rangle$ contains an item $r(x_i,x_j)$ if $r(c_i, c_j)$ is in the KB (Figure~\ref{transact} shows an example).
+% % Then, association rules on this transaction list correspond to Horn rules on the KB.
+% % In the example, we can mine the association rule
+% % % $\{$\emph{mother}$(x_3,x_2)$, \emph{marr}$(x_1,x_3) \} \Rightarrow $ \emph{father}$(x_1,x_2)$, which corresponds to the Horn rule \emph{mother}$(x_3,x_2) \wedge$ \emph{marr}$(x_1,x_3) \Rightarrow$ \emph{father}$(x_1,x_2)$.\\
+% % $\{$\emph{mother}$(A,B)$, \emph{marr}$(C,A) \} \Rightarrow $ \emph{father}$(C,B)$, which corresponds to the Horn rule \emph{mother}$(A,B) \wedge$ \emph{marr}$(C,A) \Rightarrow$ \emph{father}$(C,B)$.\\
+% %\comment{check again}
+% Association Rule Mining discovers correlations in shopping transactions.
+% Thus, association rules are different in nature from the Horn rules we aim at.
+% Still, we can show some similarities between the two approaches. Let us define one transaction for every set of $n$ entities that are connected in the KB.
+% For example, in Figure~\ref{transact}, we will define a transaction for the entities \emph{Elvis}, \emph{Lisa} and \emph{Priscilla}, because they are connected through the facts \emph{mother(Priscilla,Lisa)}, \emph{father(Elvis,Lisa)}, \emph{marr(Elvis, Priscilla)}.
+% We label the transaction with the set of these entities.
+% Each atom $r(x_i,x_j)$ on variables indexed by $1 \leq i, j \leq n$ corresponds to an item. A transaction with label $\langle C_1, \dots, C_n\rangle$ contains an item $r(x_i,x_j)$ if $r(C_i, C_j)$ is in the KB.
+% For example, the transaction  $\langle$\emph{Elvis, Lisa, Priscilla}$\rangle$ contains the items \{\emph{mother($x_3$,$x_2$), father($x_1$,$x_2$), marr($x_1$,$x_3$)}\},
+% since the ground atoms \emph{mother(Priscilla,Lisa)}, \emph{father(Elvis,Lisa)} and \emph{marr(Elvis, Priscilla)} are in the KB.
+% In this representation, association rules are Horn rules.
+% In the example, we can mine the association rule
+% \[ \{mother(x_3,x_2),marr(x_1,x_3)\}\Rightarrow \{father(x_1,x_2)\} \]
+% which corresponds to the Horn rule
+% \[ mother(x_3,x_2) \wedge marr(x_1,x_3) \Rightarrow father(x_1,x_2) \]
+% }
+%
+% % Fabian: We have to use x_1, x_2, x_3 here instead of m,c,f in order for the indexes to work
+%
+% \ignore{
+% \ffigure{Figure}{transact}{Mining Rules with 3 Variables}{
+% \begin{small}
+% \hspace*{-2ex}
+% \begin{tabular}{l|l}
+% Transaction Label & Transaction Items\\
+% \hline
+% $\langle$Elvis,Lisa,Priscilla$\rangle$ & \{mother($x_3$,$x_2$),father($x_1$,$x_2$),marr($x_1$,$x_3$)\}\\
+% $\langle$Barack,Mali,Mich.$\rangle$ & \{mother($x_3$,$x_2$),father($x_1$,$x_2$),marr($x_1$,$x_3$)\}\\
+% $\langle$Fran\c{c}ois,Flora,S\'ego$\rangle$ & \{mother($x_3$,$x_2$),father($x_1$,$x_2$)\}\\
+% \end{tabular}
+% \end{small}
+% }
+% }
+% \ignore{
+% Constructing such a table with all possible combinations of entities is practically not very viable.
+% Apart from that, it faces a number of design issues (e.g., how to deal with transactions that contain the same entities in different orderings).
+% %that the same 2-tuple of entities will appear in multiple transactions, thus inflating the support of a rule that relies on it).
+% Therefore, association rule mining cannot be used directly to mine Horn rules. However, we take inspiration from the parallels between the two types of mining for our system, AMIE.
+% }

@@ -1,0 +1,187 @@
+% !TEX root = main.tex
+
+\onecolumn
+
+  \begin{centering}
+   \LARGE\textbf{Response letter and summary of changes\\[1cm]}
+  \end{centering}
+
+\noindent
+We thank the reviewers for their valuable comments and feedback! We revised our paper to address the comments. We have added more examples, run a significant number of experiments, and rewritten large portions of the paper.
+Among other things, we have
+\begin{itemize}
+\item revised Section~\ref{sec:improvements} to show how our approach generalizes to more than 3 atoms, and added the corresponding experiments
+\item added an entire section on the implementation of our database (Section~\ref{subsec:implementation})
+\item run experiments to show the exact effect of the heuristics that we developed
+\item shown how to increase the precision of the rules up to 70\% by using type information from the KB.
+\end{itemize}
+
+\noindent In the following, we respond to the individual comments by the reviewers (reviewer 1 (R1), reviewer 2 (R2), and reviewer 3 (R3)):
+
+  \review{\textbf{R1}: my main concern with this paper is the very poor precision of the predicted statements produced by the mined rules (35\%-45\%).}
+
+\ignore{ % Fabian: Is the following to the point?
+    The original AMIE paper presents the PCA assumption as a better alternative to the CWA used in traditional rule mining systems. In order to support this claim,
+    we devised an overly simple experiment: We directly use the rules to draw predictions without any further verification
+    step and evaluated their precision.
+%     This experiment was good enough to compare the CWA and the PCA, but it was not meant to show the end performance
+%     in terms of quality that one could get from such a system.
+    Such experimental setup was designed to compare the CWA and the PCA, rather than introducing a new rule-based
+    inference approach.
+% Fabian: we can be more to the point and more aggressive here! See my proposal below
+	In real applications one would take advantage of the type information and use
+    a more principled inference method (e.g. MLNs) to quantify the confidence of facts produced by multiple rules,
+    attach probabilities to predictions and prune low-probability facts. In Section~\ref{subsubsec:std_vs_pca}, we include
+    an experiment in which AMIE makes uses of the type information (but still does simple deduction of facts)
+    and the precision curve already moves significantly higher. }
+
+Real applications will have to combine information from multiple rules or sources to arrive at predictions with high confidence. To showcase this, we have now added a new experiment in Section~\ref{prediction}, in which we add type information to the mining process. We show that this increases the accuracy of the predictions to 70\%.
+
+\review{\textbf{R1}: the main proposed heuristic (which contributes most to the  speed-up) is an ad-hoc approximation of  the PCA confidence for a specific type of 3-atom rules, being not trivial to generalize it to any kind of rule.  (Indeed, experiments are limited to 3-atom rules)\\
+   \textbf{R2}: the rules that this technique can be applied to are still a bit limited. }
+
+   Our confidence approximation generalizes to rules with more atoms. We have now extended Section~\ref{sec:conf_appr} to show this. We also added experiments that show that AMIE+ works with longer rules.
+
+
+
+\review{\textbf{R2}: when the article introduces the notation of $|rng(directed)|$, it says it "is the number of distinct directors in the range of directed". I strongly suspect there is a typo here}
+
+   We thank the reviewer for the comment. We have corrected the text accordingly.
+
+\review{\textbf{R2}: There are two expressions in 6.2.2: one computes \#x1 per x0 and the other compute \#x2 per x1. Given the symmetry between $r_0$ and $r_1$ (directed and hasActor in the example), 
+we can switch the two expressions. That is, we can use the expression with ov and $|rng|$ to compute \#x2 per x1 and use the other expression for \#x1 per x0. 
+Is there any preference of one way over another? How does AMIE+ choose?}
+
+   AMIE chooses to calculate the number of the entities in the less functional variable per entity in the most functional variable. This choice is based on the $conf_{pca}$ definition in Section~\ref{sec:pca}.
+   Section~\ref{sec:improvements} is now revised to clarify this.
+
+\review{\textbf{R1}: authors compare their approach to two ILP methods which were proposed at earlier 2000. More robust and grounded method for mining relational data have been proposed since then. A fair
+comparison to these methods needs to be carried out in order to demonstrate the difficulty of the problem and how far the precision scores are from these methods.}
+
+We have actively followed recent research in the area, but we have not come across an ILP system that can learn rules without counterexamples. The reviews also did not mention such work. One newer work is the recently published system ``Quickfoil'', but upon our request, the authors told us that this system was not yet available. In any case, Quickfoil requires counterexamples, which do not exist in our setting. We have added a discussion of this system. We would be very grateful for any pointer to work comparable to AMIE that we missed from our related work and experiments section.
+
+\review{\textbf{R3}:  SQL and SPARQL are presented at page 11 only to say that they are discarded for a custom implementation.}
+
+We have now removed these queries, and discussed the custom implementation in much more detail.
+
+ \review{\textbf{R2}: the queries presented throughout the paper (mainly in Section 5.3 and 5.4) to compute the support appear to be incorrect. [...] The article should carefully re-examine and re-write those SQL and SPARQL queries}
+
+	  Indeed, reviewer 2 has found a mistake in one of our SQL queries, and we are very grateful. The original query was designed to retrieve the relations for new atoms resulting from the application of the mining operators described in Section~\ref{subsubsec:refinement}. For each relation in the answer, the query also reported the support of the rule if the relation were used in the new atom. Support is defined as the number of distinct bindings of the head variables of the rule. The original query in contrast, was calculating the number of distinct bindings for all variables. We confirm that the query that the reviewer proposes solves the problem! 
+% 	  \comment{Fabian}{reformulate to mirror what happened!} \comment{Luis}{Does it make sense?}
+
+	  This said, we followed the suggestion of \textbf{R3} and removed the SPARQL and SQL queries altogether.
+
+\review{\textbf{R2}: The first optimization avoids evaluating non-closed rules in the last iteration. The article lacks experimental results to show the effect of this technique.}
+
+We have now added experiments that show the effect of the different pruning  strategies.
+
+\review{\textbf{R2}: The second optimization stops expanding a rule if it has a 100\% PCA confidence. I found this a bit confusing.  Since AMIE+ does not compute the PCA confidence during expanding rules, then the question is how AMIE+ identifies whether a rule has a 100\% PCA  confidence or not and whether the PCA confidence is actually computed. The article needs to clarify how and when this optimization can be applied.}
+
+We have now expanded Section \ref{subsec:algorithm}	with an explicit algorithm. Each rule is first evaluated (i.e., the PCA confidence is computed) and then refined. If the rule has a PCA confidence of 100\%, it is not  refined further.
+
+\review{\textbf{R2}: Using the third optimization technique to expand a rule, AMIE+ chooses the same frequent relations for new atoms as in the last iteration when the rule is built if the rule is equivalent to its parent rule. The article uses an example to describe this technique, but lacks some formal definitions and discussions. The article should have more details to give answers to several critical questions: \\
+a) How to determine whether a new query can be rewritten to an old one? \\
+      b) How the query rewriting is done? What rules are used in the query rewriting? \\
+      c) Can this technique be applied to general rules? Or does AMIE+ only use this this technique for those rules that have the exact form as the given example? }
+
+
+We have now rewritten Section \ref{subsec:lossless} to address all 3 questions.
+
+\review{\textbf{R2}: The fourth optimization technique uses a confidence threshold to filter out generated closed rules that have a small confidence upper bound to avoid expensive computations for its actual confidence.
+      This technique can only be used for rules with exactly two body atoms of the same predicate sharing one variable.
+      This restriction limits the benefits gained from applying this technique.
+      As shown in Table 7 in the experiments section, we can see that there is not a big improvement in execution time and only a small amount of rules may be removed.}
+
+It is true that this particular technique makes only a small contribution to the overall improvement. We included it merely as a special case of the confidence approximation, because it allows for lossless pruning.
+
+\review{\textbf{R2}: The experiments should give a breakdown of the execution time of AMIE+ on the two rule mining steps and show the performance improvement on the respective step for each optimization technique. }
+
+We totally agree. We now have added such tables in Section~\ref{amiepm}.
+
+\review{\textbf{R2}: The article gives experimental results on the quality of rules to compare the PCA confidence with the standard confidence in Section 7.4.2.
+      It runs AMIE on the YAGO2 dataset, and validates the predictions that are not in the dataset. If I understand this correctly,
+      the predictions are made on the training set YAGO2, and those that do not exist in the training set are validated in a newer YAGO2s version or manually.
+      To evaluate the prediction capability of a method, it is better to separate the training and the testing set.
+      The article, however, generates the rules and uses the rules to generate predictions on the same dataset.
+      Therefore, a possibly better design is to run AMIE on a training subset of YAGO2, apply those rules to a separate testing subset of YAGO2 to generate new predictions and
+      validate each prediction on YAGO2 or in other ways. Similarly, when the article compares AMIE+ with other methods, the experiments should contain a type
+      of experiments that separate the training and the testing data and use recalls as well as precisions as metrics.}
+
+      As the reviewer points out, we use YAGO2 as a training set on which AMIE learns the rules and then keep for the evaluation (test set) only the produced facts that do not exist in the training set.
+      In other words, in our set-up, training and testing takes place on disjoint sets of data.
+      Taking a sample from YAGO2 to use it for test data, as the reviewer suggests, can be problematic. The implicit assumption behind random sampling is that incompleteness in
+      web-extracted KBs appears in a random way, which is not true. If we knew exactly how incompleteness works (and therefore how to sample our KB properly), we would have solved the original
+      problem that we are trying solve with AMIE.
+
+\review{\textbf{R3}: The FUN-property of a KB is problematic, it assumes something about the major KBs are written which may be factually true (e.g. in YAGO or DBPEDIA)
+      but should really be verified on case-by-case (e.g., what about biological KBs?) so I think it must be contextualized to the KBs under investigations and be presented as a
+      factual observation which holds in that limited setting.
+      }
+
+	  What we proposed was as follows: Given any relation $r$, its functionality $fun(r)$ is either larger than its inverse functionality $ifun(r)$ or not. If it is not, we replace all facts $r(x,y)$ in the KB by $r^{-1}(y,x)$. After this operation, the functionality is always larger than the inverse functionality -- no matter how the KB was designed originally.
+      %The FUN-property states that relations in KBs can be swapped with their inverses (e.g., hasCitizen with isCitizenOf) such that all relations in the KB appear to have higher functionality than inverse functionality. The PCA confidence formula derived later will predict for each predicate $r(x,y)$ the less functional variable $y$ given a relation $r$ and the most functional variable $x$.      By introducing the FUN-property (and re-writing the relations) we avoid having 2 versions of the PCA confidence formula (case 1 if $x$ is more functional, case 2 if $y$ is more functional).
+
+      Since the notion of the FUN-property created confusion, we have completely removed this notion, and re-phrased the corresponding parts.
+
+\review{\textbf{R2}: In Section 4.4.1, it is not quite accurate to say that "Thanks to the FUN-property, the assumption is also true for inverse-functional relations."
+      Strictly speaking, the assumption is true for inverse-functional relations only when we know the complete domain of the y variable in r(x, y).
+      If there is an unknown value of y, we clearly cannot know whether r(x, y) is true for r, a given value x, and the unknown value of y.
+      The article needs to make this implicit assumption explicit that the domain for each variable is complete. }
+
+% Fabian: I don't understand what he means. Is it this?
+
+The PCA states that we either know all objects or none for a functional relation. Vice versa, we know either all subjects or none for an inverse functional relation. In your example of an inverse functional relation (say, $r=isBirthPlaceOf$) with an unknown object (say, $y=John$), we do not know any $x$ with $r(x,y)$. This is one of the cases covered by the assumption.
+
+To make this more clear, we have now completely removed the FUN-property, and rephrased all corresponding parts.
+
+
+\review{\textbf{R2}: The three operators used in the rule mining can actually be reduced to a single and simpler operator: add a new atom with a shared variable with the current rule.}
+
+It is true that all three operators require that one of the variables of the new atom is shared with a variable of the rule. On this high level, they are thus similar. On the level of the algorithm, however, they fire different types of queries to the KB. We have now added a new section (Section~\ref{subsec:countqueries}) to make this explicit.
+%treated differently. The add-dangling-atom operator requires that the second variable does not re-appear anywhere in the rule, the add-closing-atom requires also the second variable to be shared and the add-instantiated-atom binds the variable to a specific constant.
+
+\review{\textbf{R2}: The rdf:type relationship in a KB can be used to derive the type for each argument of a predicate. The information should be used, if it was not used, in the mode setting of Aleph to facilitate the learning.}
+
+      Type information was indeed used for Aleph to facilitate the learning. Otherwise, Aleph cannot work.
+      In this revision, we also include an experiment in which we use type information for AMIE.
+
+
+
+\review{\textbf{R3}: why AMIE+? If one looks at the 4-atom rules of Table 2, none of them seems very good.
+      E.g., in rule 1, why is the rule (living in X) $\Rightarrow$ (citizen of X) stronger because a citizen imports and exports the same goods? [...]
+      If these are the only 4 examples of good new rules produced by AMIE+,  I am really not impressed.}
+
+Exactly! These rules were there to show that, in general, rules with 4 atoms are not very meaningful. The reviewer is thus right by not being impressed. Therefore, AMIE mines rules only up to 3 atoms by default. Since this was not very clear, we have now rewritten the corresponding parts of the paper.
+
+As for the name ``AMIE+'': The goal of AMIE+ is not to produce more rules, but to produce the same rules faster. This allows AMIE+ to run on datasets where AMIE could not run. We have now added a discussion in Section \ref{amiepm} to showcase this very explicitly.
+
+%\comment{Chris}{I have no idea what to say here}
+
+\review{\textbf{R3}:  Algorithm 1 is too high level and as such it leaves too much unexpressed (e.g. "execute in parallel", "is not pruned for output").}
+
+We have now completely rewritten Section \ref{subsec:algorithm}, and we have described every step of the algorithm in detail.
+
+\review{\textbf{R3}:  The "vanilla in-memory database" implementation is too informally described (e.g.: each "index is a map from the first item to a map from the second item to a set of the third item": a more formal description and a figure, please!}
+
+We have now added a completely new section, Section \ref{subsec:implementation}, which describes the in-memory database in detail -- including algorithms for all types of queries that we run on it.
+
+\review{\textbf{R3}: The wide set of experiments is good, but it recaps in 7.1 and 7.2 ``obsolete'' results of WWW where AMIE was shown superior to other systems --
+      in spite of the fact that now AMIE+ is present and it is superior to AMIE.}
+
+That is true. We have rewritten the experiments section to show the competitors, AMIE, and AMIE+ all together.
+
+\review{\textbf{R3}: Rules are introduced with no limitations on their syntax but then, under the strange section heading "language biases", we discover that rules should be connected, closed, nonreflexive, and can be recursive (no example provided).
+      There exists a better way of defining rule syntax \& constraints! Incidentally, using a closed rule as example of generic rule does not help the reader's intuition.}
+
+We agree. We have now rewritten the corresponding sections to make the restrictions more clear right from the beginning. We have also included more examples for the different kinds of rules.
+
+ \review{\textbf{R3}: The discussion on support and coverage is rather clear (but an example would not hurt).}
+
+      We have added an example KB in  Table~\ref{tab:exampleKB} and discussed the metrics on this example KB.
+
+\review{\textbf{R3}: I would like to understand sooner that 4.3 is a discarded and useless digression and I would appreciate a deeper discussion of Section 4.4, possibly with examples.}
+
+      We removed the discussion of positives-only evaluation function from Section~\ref{sec:pca}.  It now briefly appears in the experiments section where its performance is evaluated.
+      In Section~\ref{subsubsec:pcaConf} we now include the example of Table~\ref{tab:exampleKB}.
+
+\twocolumn

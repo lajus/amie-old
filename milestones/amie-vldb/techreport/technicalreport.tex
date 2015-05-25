@@ -1,0 +1,156 @@
+%\RequirePackage{fix-cm}
+%\documentclass[twocolumn]{svjour3}          % twocolumn
+\documentclass[twocolumn]{article}          % twocolumn
+%
+%\smartqed  % flush right qed marks, e.g. at end of proof
+%
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage[
+        pdftex,
+        %letterpaper,
+	a4paper=true,
+	bookmarks=true,
+        bookmarksopen=false,
+        bookmarksnumbered=true,
+        colorlinks=true,
+	linkcolor=blue,
+	citecolor=blue,
+	filecolor=blue,
+	urlcolor=blue,
+        pdfauthor={Luis Galarraga, Christina Teflioudi, Katja Hose, Fabian M. Suchanek},
+        pdftitle={AMIE: Association Rule Mining under Incomplete Evidence in Ontological Knowledge Bases},
+        plainpages=false,
+        pdfpagelabels,
+]{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{cite}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{caption}
+\usepackage{footnote}
+\usepackage{balance}
+\usepackage{bm}
+\usepackage[english]{babel}
+\usepackage{subfig}
+%\usepackage[section]{placeins}
+
+\newcommand{\indented}[1]{
+\begin{tabbing}
+hallo\=\+\kill
+#1
+\end{tabbing}
+}
+\newcommand{\www}[1]{#1}
+\newcommand{\review}[1]{\ \\\noindent\textit{#1}\\}
+% \newcommand{\comment}[2]{{\color{red}{#1: #2}}}
+\newcommand{\comment}[2]{}
+\renewcommand{\paragraph}[1]{\noindent\textbf{#1.}}
+\renewcommand{\vec}[1]{\overrightarrow{#1}}
+\newcommand{\ignore}[1]{}
+
+\sloppy
+
+\begin{document}
+\title{Rule Mining with AMIE+\\[0.5cm]
+Fouille de règles avec AMIE+\\[0.5cm]}
+\author{
+Luis Gal\'arraga\\
+T\'el\'ecom ParisTech, France\\[0.4cm]
+Christina Teflioudi\\
+Max Planck Institute for Informatics, Germany\\[0.4cm]
+Katja Hose\\
+Aalborg University\\[0.4cm]
+Fabian M. Suchanek\\
+T\'el\'ecom ParisTech, France
+}
+\date{May 2015}
+\maketitle
+\newpage
+\onecolumn
+
+\begin{abstract}
+Recent advances in information extraction have led to huge knowledge bases (KBs), which capture knowledge in a ma\-chine-readable format.
+Inductive Logic Programming (ILP) can be used to mine logical rules from these KBs, such as ``If two persons are married, then they (usually) live in the same city''.
+While ILP is a mature field, mining logical rules from KBs is difficult, because KBs make an open world assumption.
+This means that absent information cannot be taken as counterexamples.
+Our approach AMIE~\cite{amie} has shown how rules can be mined effectively from KBs even in the absence of counterexamples.
+In this paper, we show how this approach can be optimized to mine even larger KBs with more than 12M statements. We also explain how the precision of the rule predictions can be increased to 70\%.
+Extensive experiments show how our new approach, AMIE+, extends to areas of mining that were previously beyond reach.\\
+
+The software and the data are available at \url{http://www.mpi-inf.mpg.de/departments/databases-and-information-systems/research/yago-naga/amie/}.\\
+
+\begin{center}
+\textbf{Résumé}\\
+\end{center}
+
+Aujourd’hui, les avances dans l'extraction d'informations nous ont donné de grandes bases de connaissances (BdC), qui contiennent des faits sur le monde dans un format qui peut être compris par la machine. Les techniques du
+Inductive Logic Programming (ILP) peuvent être utilisées pour trouver des règles dans ces BdC, comme par exemple la règle ``Si deux personnes sont mariées, elles vivent (d’habitude) dans la même ville''.
+ILP est un domaine mûr. En même temps, la fouille des règles dans les BdC reste difficile, car les BdC font la Open world assumption. Ceci veut dire qu’une information qui est absente ne peut pas être utilisée comme contre-exemple. Avec notre approche AMIE~\cite{amie}, nous avons montré comment on peut trouver des règles de manière efficace dans les BdC malgré l'absence des contre-exemples. Dans le rapport présent, nous montrons comment cette approche peut être étendue à des BdC encore plus grandes, avec plus de 12 million de faits. Nous expliquons également comment la précision des prédictions peut être augmentée à 70\%. Nos expérimentations montrent que notre nouvelle approche, AMIE+, s'applique à des domaines de la fouille des règles qui étaient hors de portée avant.\\
+
+Le logiciel et les données sont disponibles sur \url{http://www.mpi-inf.mpg.de/departments/databases-and-information-systems/research/yago-naga/amie/}.
+\end{abstract}
+\twocolumn
+
+\newpage
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Introduction}
+\label{sec:introduction}
+\input{introduction}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Related Work}
+\label{sec:relatedWork}
+\input{relatedwork}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Preliminaries}
+\label{sec:preliminaries}
+\input{preliminaries}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Confidence Measures}
+\label{sec:pca}
+\input{pca}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{AMIE}
+\label{sec:alg}
+\input{algorithm}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Scalability Improvements: AMIE+}
+\label{sec:improvements}
+\input{improvements}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Experiments}
+\label{sec:experiments}
+\input{experiments}
+
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Conclusion}
+\label{sec:conclusion}
+\input{conclusion}
+
+%\begin{acknowledgements}
+% ----------> Add Luis' grant here if ever the paper gets in!
+%\end{acknowledgements}
+%\newpage
+\balance
+\bibliographystyle{spmpsci}      % mathematics and physical sciences
+\bibliography{references}   % name your BibTeX data base
+\end{document}

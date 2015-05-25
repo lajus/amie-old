@@ -1,0 +1,224 @@
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{{#1}}
+\providecommand{\urlprefix}{URL }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{DOI~\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{DOI~\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+
+\bibitem{Abedjan:2012:ROW:2396761.2398467}
+Abedjan, Z., Lorey, J., Naumann, F.: Reconciling ontologies and the web of
+  data.
+\newblock In: CIKM (2012)
+
+\bibitem{AdeRaeBru95}
+Ad{\'e}, H., Raedt, L., Bruynooghe, M.: Declarative bias for
+  specific-to-general ilp systems.
+\newblock Machine Learning \textbf{20} (1995)
+
+\bibitem{AgrImiSwa93}
+Agrawal, R., Imieli\'{n}ski, T., Swami, A.: Mining association rules between
+  sets of items in large databases.
+\newblock In: SIGMOD (1993)
+
+\bibitem{Agrawal:1996:FDA:257938.257975}
+Agrawal, R., Mannila, H., Srikant, R., Toivonen, H., Verkamo, A.I.: Fast
+  discovery of association rules.
+\newblock In: Advances in knowledge discovery and data mining (1996)
+
+\bibitem{dbpedia}
+Auer, S., Bizer, C., Kobilarov, G., Lehmann, J., Cyganiak, R., Ives, Z.G.:
+  {DBpedia}: A nucleus for a {W}eb of open data.
+\newblock In: ISWC (2007)
+
+\bibitem{carlson-aaai}
+Carlson, A., Betteridge, J., Kisiel, B., Settles, B., Jr., E.R.H., Mitchell,
+  T.M.: Toward an architecture for never-ending language learning.
+\newblock In: AAAI (2010)
+
+\bibitem{Chasseur:2013:DES:2536258.2536260}
+Chasseur, C., Patel, J.M.: Design and evaluation of storage organizations for
+  read-optimized main memory databases.
+\newblock Proc. VLDB Endow. \textbf{6}(13) (2013)
+
+\bibitem{ChiMunNij04}
+Chi, Y., Muntz, R.R., Nijssen, S., Kok, J.N.: {Frequent Subtree Mining - An
+  Overview}.
+\newblock Fundam. Inf. \textbf{66}(1-2) (2004)
+
+\bibitem{CimHotSta04}
+Cimiano, P., Hotho, A., Staab, S.: {Comparing Conceptual, Divisive and
+  Agglomerative Clustering for Learning Taxonomies from Text}.
+\newblock In: ECAI (2004)
+
+\bibitem{DBLP:conf/semweb/dAmatoBS12}
+d'Amato, C., Bryl, V., Serafini, L.: Data-driven logical reasoning.
+\newblock In: URSW (2012)
+
+\bibitem{DamFanEsp10}
+d'Amato, C., Fanizzi, N., Esposito, F.: {Inductive learning for the Semantic
+  Web: What does it buy?}
+\newblock Semant. web \textbf{1}(1,2) (2010)
+
+\bibitem{DavGuiBri07}
+David, J., Guillet, F., Briand, H.: {Association Rule Ontology Matching
+  Approach}.
+\newblock Int. J. Semantic Web Inf. Syst. \textbf{3}(2) (2007)
+
+\bibitem{DehToi00}
+Dehaspe, L., Toironen, H.: Discovery of relational association rules.
+\newblock In: Relational Data Mining. Springer-Verlag New York, Inc. (2000)
+
+\bibitem{DehToi99}
+Dehaspe, L., Toivonen, H.: {Discovery of frequent DATALOG patterns}.
+\newblock Data Min. Knowl. Discov. \textbf{3}(1) (1999)
+
+\bibitem{knowledgevault}
+Dong, X., Gabrilovich, E., Heitz, G., Horn, W., Lao, N., Murphy, K., Strohmann,
+  T., Sun, S., Zhang, W.: Knowledge vault: A web-scale approach to
+  probabilistic knowledge fusion.
+\newblock In: KDD (2014)
+
+\bibitem{amie}
+Gal{\'a}rraga, L.A., Teflioudi, C., Hose, K., Suchanek, F.M.: {AMIE:
+  Association Rule Mining under Incomplete Evidence in Ontological Knowledge
+  Bases}.
+\newblock In: WWW (2013)
+
+\bibitem{GoeVan02}
+Goethals, B., Van~den Bussche, J.: {Relational Association Rules: Getting
+  WARMER}.
+\newblock In: Pattern Detection and Discovery, vol. 2447. Springer Berlin /
+  Heidelberg (2002)
+
+\bibitem{grice}
+Grice, P.: Logic and conversation.
+\newblock J. Syntax and semantics \textbf{3} (1975)
+
+\bibitem{GriEdwPre04}
+Grimnes, G.A., Edwards, P., Preece, A.D.: {Learning Meta-descriptions of the
+  FOAF Network}.
+\newblock In: ISWC (2004)
+
+\bibitem{HelLehAue09}
+Hellmann, S., Lehmann, J., Auer, S.: {Learning of OWL Class Descriptions on
+  Very Large Knowledge Bases}.
+\newblock Int. J. Semantic Web Inf. Syst. \textbf{5}(2) (2009)
+
+\bibitem{Huang:2010:MPL:2022735.2022750}
+Huang, Y., Tresp, V., Bundschus, M., Rettinger, A., Kriegel, H.P.: Multivariate
+  prediction for learning on the semantic web.
+\newblock In: ILP (2011)
+
+\bibitem{JozLawLuk10}
+Jozefowska, J., Lawrynowicz, A., Lukaszewski, T.: {The role of semantics in
+  mining frequent patterns from knowledge bases in description logics with
+  rules}.
+\newblock Theory Pract. Log. Program. \textbf{10}(3) (2010)
+
+\bibitem{KurKar01}
+Kuramochi, M., Karypis, G.: {Frequent Subgraph Discovery}.
+\newblock In: ICDM. IEEE Computer Society (2001)
+
+\bibitem{Leh09}
+Lehmann, J.: {{DL-Learner:} Learning Concepts in Description Logics}.
+\newblock Journal of Machine Learning Research (JMLR) \textbf{10} (2009)
+
+\bibitem{DBLP:journals/tplp/Lisi08}
+Lisi, F.A.: Building rules on top of ontologies for the semantic web with
+  inductive logic programming.
+\newblock TPLP \textbf{8}(3) (2008)
+
+\bibitem{MaeZac02}
+Maedche, A., Zacharias, V.: {Clustering Ontology-Based Metadata in the Semantic
+  Web}.
+\newblock In: PKDD (2002)
+
+\bibitem{yago3}
+Mahdisoltani, F., Biega, J., Suchanek, F.M.: Yago3: A knowledge base from
+  multilingual wikipedias.
+\newblock In: CIDR (2015)
+
+\bibitem{usir1753}
+Mamer, T., Bryant, C., McCall, J.: L-modified ilp evaluation functions for
+  positive-only biological grammar learning.
+\newblock In: F.~Zelezny, N.~Lavrac (eds.) Inductive logic programming, no.
+  5194 in LNAI. Springer-Verlag (2008)
+
+\bibitem{McgFikRic00}
+McGuinness, D.L., Fikes, R., Rice, J., Wilder, S.: {An Environment for Merging
+  and Testing Large Ontologies}.
+\newblock In: KR (2000)
+
+\bibitem{Muggleton95inverseentailment}
+Muggleton, S.: Inverse entailment and progol.
+\newblock New Generation Comput. \textbf{13}(3{\&}4) (1995)
+
+\bibitem{Muggleton:1996:LPD:647996.742465}
+Muggleton, S.: Learning from positive data.
+\newblock In: ILP (1997)
+
+\bibitem{urdf}
+Nakashole, N., Sozio, M., Suchanek, F., Theobald, M.: Query-time reasoning in
+  uncertain rdf knowledge bases with soft and hard rules.
+\newblock In: Workshop on Very Large Data Search (VLDS) at VLDB (2012)
+
+\bibitem{NebBer12}
+Nebot, V., Berlanga, R.: {Finding association rules in semantic web data}.
+\newblock Knowl.-Based Syst. \textbf{25}(1) (2012)
+
+\bibitem{nickel:factorizing}
+Nickel, M., Tresp, V., Kriegel, H.P.: Factorizing yago: scalable machine
+  learning for linked data.
+\newblock In: WWW (2012)
+
+\bibitem{NoyMus00}
+Noy, N.F., Musen, M.A.: {PROMPT: Algorithm and Tool for Automated Ontology
+  Merging and Alignment}.
+\newblock In: AAAI/IAAI. AAAI Press (2000)
+
+\bibitem{markovlogic}
+Richardson, M., Domingos, P.: Markov logic networks.
+\newblock Machine Learning \textbf{62}(1-2) (2006)
+
+\bibitem{SchEtzWel10}
+Schoenmackers, S., Etzioni, O., Weld, D.S., Davis, J.: {Learning first-order
+  Horn clauses from web text}.
+\newblock In: EMNLP (2010)
+
+\bibitem{paris}
+Suchanek, F.M., Abiteboul, S., Senellart, P.: {PARIS: Probabilistic Alignment
+  of Relations, Instances, and Schema}.
+\newblock PVLDB \textbf{5}(3) (2011)
+
+\bibitem{SucKasWei07}
+Suchanek, F.M., Kasneci, G., Weikum, G.: Yago: a core of semantic knowledge.
+\newblock In: WWW (2007)
+
+\bibitem{TanKumSri02}
+Tan, P.N., Kumar, V., Srivastava, J.: {Selecting the right interestingness
+  measure for association patterns}.
+\newblock In: KDD (2002)
+
+\bibitem{freebase}
+Technologies, M.: The freebase project.
+\newblock \url{http://freebase.com}
+
+\bibitem{VoeNie11}
+V\"{o}lker, J., Niepert, M.: {Statistical schema induction}.
+\newblock In: ESWC (2011)
+
+\bibitem{rdf}
+{Word Wide Web Consortium}: {RDF Primer (W3C Recommendation 2004-02-10)}.
+\newblock \url{http://www.w3.org/TR/rdf-primer/} (2004)
+
+\bibitem{quickfoil}
+Zeng, Q., Patel, J., Page, D.: {QuickFOIL: Scalable Inductive Logic
+  Programming}.
+\newblock In: VLDB (2014)
+
+\bibitem{Ziawasch2013a}
+Ziawasch~Abedjan, F.N.: Synonym analysis for predicate expansion.
+\newblock In: ESWC (2013)
+
+\end{thebibliography}

@@ -1,0 +1,113 @@
+% !TEX root = main.tex
+Recent advances in information extraction have led to the creation of large knowledge bases (KBs).
+These KBs contain facts such as
+% \comment{Fabian}{It is a subclassof fact, no?}
+% \comment{Chris}{hmm ok, but people will have to think. What first came into my mind is that this is a rule} \comment{Luis: }{This is a minor issue anyway,
+% but I think it is good to provide A-box as well as T-box examples to illustrate what KB normally contain.},
+ ``London is the capital of the United Kingdom", ``Elvis was born in Tupelo'', or ``Every singer is a person".
+Some of the most prominent projects in this direction are NELL~\cite{carlson-aaai}, YAGO~\cite{SucKasWei07}, DBpedia~\cite{dbpedia}, and Freebase \cite{freebase}. %\footnote{\label{freebase}\url{http://freebase.com}}.
+These KBs provide information about a great variety of entities, such as people, countries, rivers, cities, universities, movies, animals, etc.
+The KBs know, e.g., who was born where, which actor acted in which movie, or which city is located in which country. Today's KBs contain millions of entities and hundreds of millions of facts.
+
+These KBs have been constructed by mining the Web for information.
+In recent years, however, the KBs have become so large that they can themselves be mined for information.
+It is possible to find \emph{rules} in the KBs that describe common correlations in the data. For example, we can mine the rule
+\indented{
+\emph{livesIn}$(h,p)$ $\wedge$ \emph{marriedTo}$(h,w) \Rightarrow$ \emph{livesIn}$(w,p)$}
+This rule captures the fact that, very often, the spouse of a person lives in the same place as the person.
+Finding such rules can serve four purposes: First, by applying such rules on the data, new facts can be derived that make the KB more complete.
+For example, if we know where Barack Obama lives, and if we know that Michelle Obama is his wife, then we can deduce (with high probability) where Michelle Obama lives.
+Second, such rules can identify potential errors in the knowledge base. If, for instance, the KB contains the statement that Michelle Obama lives in a completely different place, then maybe this statement is wrong.
+Third, the rules can be used for reasoning. Many reasoning approaches rely on other parties to provide rules (e.g., \cite{markovlogic,urdf}).
+Last, rules describing general regularities can help us understand the data better.
+We can, e.g., find out that countries often trade with countries speaking the same language, that marriage is a symmetric relationship, that musicians who influence each other often play the same instrument, and~so~on.
+
+\www{
+The goal of this paper is to mine such rules from KBs.
+We focus on RDF-style KBs in the spirit of the Semantic Web, such as YAGO \cite{SucKasWei07}, Wikidata\footnote{\url{http://www.wikidata.org}}, and DBpedia \cite{dbpedia}.
+% $^{\ref{freebase}}$, and DBpedia \cite{dbpedia}.
+These KBs provide binary relationships in the form of RDF triples \cite{rdf}. Since RDF has only positive inference rules, these KBs contain only positive statements and no negations.
+%These KBs contain only binary relationships.
+Furthermore, they
+operate under the \emph{Open World Assumption} (OWA). Under the OWA, a statement that is not contained in the KB is not necessarily false; it is just \emph{unknown}.
+This is a crucial difference to many standard database settings that operate under the \emph{Closed World Assumption} (CWA).
+Consider an example KB that does not contain the information that a particular person is married. Under the CWA we can conclude that the person is not married. Under the OWA, however, the person could be either married or single.
+}
+
+\ignore{
+Mining rules from a given dataset is a problem that has a long history. It has been studied in the context of association rule mining and inductive logic programming (ILP).
+Association rule mining~\cite{AgrImiSwa93} is well-known in the context of sales databases. It can find rules such as ``If a client bought beer and wine, then he also bought aspirin''.
+The confidence of such a rule is the ratio of cases where beer and wine was actually bought together with aspirin.
+Association rule mining inherently implements a closed world assumption: A rule that predicts new items that are not in the database has a low confidence.
+It cannot be used to (and is not intended to be used to) add new items to the database.
+}
+
+% The task of mining rules from a data set is known as inductive logic programming (ILP).
+% \www{
+% ILP approaches deduce logical rules
+% from ground facts. Yet, classical ILP systems cannot be applied to semantic KBs for two reasons: First, they usually require negative statements as counterexamples.
+% Semantic KBs, however, usually do not contain negative statements. The semantics of RDF are too weak to deduce negative evidence from the facts in a KB.\footnote{RDF has only positive rules and no disjointness constraints or similar concepts.} Because of the OWA, absent statements cannot serve as counter-evidence either.
+% Second, today's ILP systems are slow and cannot handle the huge amount of data that KBs provide. In our experiments, we ran state-of-the-art approaches on YAGO2 for a couple of days without obtaining any results.
+% }
+
+Mining rules from a data set is the central task of Inductive Logic Programming (ILP).
+\www{
+ILP approaches induce logical rules
+from ground facts. Yet, classical ILP systems cannot be applied to semantic KBs for two reasons: First, they usually require negative statements as counterexamples.
+Semantic KBs, however, usually do not contain negative statements. The semantics of RDF Schema are too weak to deduce negative evidence
+from the facts in a KB\footnote{RDF Schema has only positive rules and no disjointness constraints or similar concepts.}. Because of the OWA, absent statements cannot serve as counter-evidence either.
+Second, today's ILP systems are slow and cannot handle the huge amount of data that KBs provide.
+In our experiments, we ran state-of-the-art approaches on YAGO2 for a couple of days without obtaining any results.
+}
+
+
+With the AMIE project \cite{amie}, we have shown how to mine logical rules from KBs despite the absence of explicit counter-examples.
+The key technique was the Partial Completeness Assumption (PCA). It
+allowed AMIE to ``guess'' counterexamples for rules, and thus estimate their quality even under the OWA.
+We have shown that our approach outperformed other rule mining systems %that can also work without explicit counterexamples
+% ~\comment{Luis: }{I am not convinced about this assertion, because
+% at the end, all systems need a notion of counterexamples. Even ALEPH that claims to learn only from positive data, uses random facts as counter-evidence}
+both in terms of the quality and the quantity of the mined rules.
+AMIE could already run on KBs with up to one million statements -- a size that was beyond the reach of any previous ILP-based rule mining system.
+AMIE achieved this without any need for parameter tuning or expert input.
+%\comment{Chris}{I am still not persuaded about this one.} \comment{Fabian}{The argument is that there is no parameter that governs a trade-off between two qualities (like, e.g., some $\alpha$ has to trade off between breadth of the results and their quality; or some $\iota$ has to be chosen so as to reflect the estimated average completeness of the KB). AMIE will just run. The user can choose from the output what he likes (support>0.3), but that is a different story, because it is selection of a subset of results.}
+
+With the present paper, we develop AMIE even further.
+We present pruning strategies and approximations that allow the system to explore the search space much more efficiently.
+This allows us to find Horn rules on KBs with several millions of statements in a matter of hours or minutes.
+Such large KBs were previously out of reach even for AMIE. %, or indeed for any other rule mining system that we are aware of.
+%This was not possible at the time we developed AMIE.
+% -- in a matter of minutes.
+% With the first version of AMIE, this was out of the reach.
+%This was previously out of
+% \comment{Fabian}{is that true?}
+% \comment{Luis}{On Freebase People (8M facts) we run in an few minutes because the number of relations is small compared to DBpedia. }
+%The new system, AMIE+, can find Horn rules in the current versions of  DBpedia and YAGO -- something that was previously out of reach.
+% \comment{Fabian}{We have to avoid that reviewers think here ``But DBpedia has more than 12m facts''} \comment{Luis: }{Reformulated!}
+%DBpedia (2M entities, 12M facts) and YAGO (1.6M entities, 4M facts)\comment{Chris}{@Luis: is that YAGO, YAGO2 or YAGO2s?}
+We also show how the precision of the predictions can be increased to up to 70\% by using type information and joint reasoning.
+In addition, we provide a thorough investigation of the metrics we use,
+thus giving a more complete picture of rule mining on large-scale knowledge bases.
+
+\noindent More precisely, our contributions are as follows:
+\begin{itemize}[noitemsep,nolistsep,leftmargin=0.4cm,midpenalty=0,label=$\bullet$]
+\item A comprehensive investigation and description of the AMIE approach, including a description of our in-memory database and an evaluation of AMIE's fundamental assumption, the PCA. %the partial completeness assumption (PCA), its central assumption.
+\item A suite of optimization steps that allow a much more efficient exploration of the search space.
+\item Extensive experiments that show the competitiveness of our approach, including techniques to increase the precision of our predictions to 70\%.
+\end{itemize}
+%\comment{Chris}{rewritten. Please check.}
+% The rest of this paper is structured as follows. Section~\ref{sec:relatedWork} discusses related work and Section~\ref{sec:preliminaries} introduces preliminaries.
+% Section \ref{sec:alg} recapture the AMIE approach from \cite{amie}. In Section \ref{sec:pca}, we investigate the assumptions of AMIE.
+% Section \ref{sec:improvements} is the main part of the paper: It presents the pruning strategies that multiply the performance of AMIE.
+% Section~\ref{sec:experiments} presents our experiments before Section~\ref{sec:conclusion} concludes.
+The rest of this paper is structured as follows: Section~\ref{sec:relatedWork} discusses related work and Section~\ref{sec:preliminaries} introduces preliminaries.
+In Section~\ref{sec:pca}, we introduce the Partial Completeness Assumption (PCA) and, based on it, the PCA confidence measure.
+%We also investigate the applicability of the PCA in practice.
+Section~\ref{sec:alg} recaptures the AMIE approach from \cite{amie}, extending it by a description of our in-memory database.
+Section~\ref{sec:improvements} is the main part of the paper: It presents the pruning strategies that optimize the performance of AMIE.
+Section~\ref{sec:experiments} presents our experiments before Section~\ref{sec:conclusion} concludes.
+
+
+
+
+
