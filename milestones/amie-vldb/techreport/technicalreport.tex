@@ -89,9 +89,23 @@ The software and the data are available at \url{http://www.mpi-inf.mpg.de/depart
 \textbf{Résumé}\\
 \end{center}
 
-Aujourd’hui, les avances dans l'extraction d'informations nous ont donné de grandes bases de connaissances (BdC), qui contiennent des faits sur le monde dans un format qui peut être compris par la machine. Les techniques du
-Inductive Logic Programming (ILP) peuvent être utilisées pour trouver des règles dans ces BdC, comme par exemple la règle ``Si deux personnes sont mariées, elles vivent (d’habitude) dans la même ville''.
-ILP est un domaine mûr. En même temps, la fouille des règles dans les BdC reste difficile, car les BdC font la Open world assumption. Ceci veut dire qu’une information qui est absente ne peut pas être utilisée comme contre-exemple. Avec notre approche AMIE~\cite{amie}, nous avons montré comment on peut trouver des règles de manière efficace dans les BdC malgré l'absence des contre-exemples. Dans le rapport présent, nous montrons comment cette approche peut être étendue à des BdC encore plus grandes, avec plus de 12 million de faits. Nous expliquons également comment la précision des prédictions peut être augmentée à 70\%. Nos expérimentations montrent que notre nouvelle approche, AMIE+, s'applique à des domaines de la fouille des règles qui étaient hors de portée avant.\\
+Aujourd'hui, le progrès dans le domaine de l'extraction d'informations
+a conduit à la mise en place de grandes bases de connaissances (BdC).
+Ces dernières contiennent des faits du monde réel dans un format qui peut
+être compris par l'ordinateur. Les techniques de la programmation logique
+inductive (PLI) peuvent être utilisées pour trouver des régles d'association
+dans ces BdC, comme par exemple la règle suivante : ``Si deux personnes sont mariées,
+elles vivent (généralement) dans la même ville''.
+En dépit de la maturité de PLI, la découverte de règles dans les BdC reste difficile
+car elles sont construites sur la base de la ``Open World Assumption''. En d'autres termes, toute
+information qui est absente de la BdC ne peut pas être utilisée comme contre-exemple.
+Avec notre approche AMIE~\cite{amie}, nous avons montré comment des régles peuvent être
+découvertes de maniére efficace dans les BdC, malgré l'absence de contre-exemples. Dans le présent
+rapport, nous détaillons comment cette approche peut être améliorée pour le cas des BdC de grande taille,
+avec plus de 12 millions de faits. Nous expliquons également comment la précision
+de la prédiction peut être augmentée à 70\%. Nos experimentations montrent que notre nouvelle
+extension, AMIE+, s'étend à des domaines de la découverte de règles qui étaient hors de portée
+jusqu'à présent.\\
 
 Le logiciel et les données sont disponibles sur \url{http://www.mpi-inf.mpg.de/departments/databases-and-information-systems/research/yago-naga/amie/}.
 \end{abstract}
