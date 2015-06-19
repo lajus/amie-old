@@ -203,7 +203,79 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 		return true;
 	}
 	
-	/** returns the number of distinct pairs (var1,var2) for the query */
+	/**
+	 * It calculates the probabilistic support of a query with respect to the variables in projection atom, 
+	 * as well as the support of the "existentialized" version when one of the variables in the
+	 * projection atom has been replaced by an existential variable.
+	 * @param query
+	 * @param projection
+	 * @param varToReplace the variable in the projection query that will be replaced by a fresh variable
+	 * for the calculation of the existentialized support. 
+	 * @return An array of two doubles. The first one corresponds to the support of the query w.r.t the projection atom.
+	 * The second value is the existentialized support (both positives and negatives examples)
+	 */
+	public double[] probabilitiesOf(List<ByteString[]> query, ByteString[] projection, ByteString varToReplace) {
+		double result[] = new double[2];
+		result[0] = result[1] = 0.0;
+		ByteString[] existentializedProjection = projection.clone();
+		int replacePosition = varpos(varToReplace, existentializedProjection);
+		existentializedProjection[replacePosition] = ByteString.of("?vx"); 
+		ByteString replacedVar = projection[replacePosition];
+		
+		ByteString var1 = existentializedProjection[replacePosition == 0 ? 2 : 0];
+		ByteString var2 = existentializedProjection[replacePosition];
+		
+		List<ByteString[]> listExistential = new ArrayList<>(1);
+		listExistential.add(existentializedProjection);
+		List<ByteString[]> listProjection = new ArrayList<>(1);
+		listProjection.add(projection);
+		
+		List<ByteString[]> fullQuery = new ArrayList<>();
+		fullQuery.addAll(query);
+		fullQuery.add(projection);
+		
+		// Equivalent to iterate over all the bindings of the relation		
+		Map<ByteString, IntHashMap<ByteString>> instantiations = 
+				resultsTwoVariables(var1, var2, existentializedProjection);
+		
+		try (Instantiator insty1 = new Instantiator(query, var1);
+				Instantiator insty2 = new Instantiator(query, var2);
+				Instantiator headInsty1 = new Instantiator(listExistential, var1);
+				Instantiator headInsty2 = new Instantiator(listExistential, var2);
+				Instantiator projInsty1 = new Instantiator(listProjection, var1);
+				Instantiator projInsty2 = new Instantiator(fullQuery, replacedVar)) {
+			for (ByteString val1 : instantiations.keySet()) {
+				insty1.instantiate(val1);
+				headInsty1.instantiate(val1);
+				projInsty1.instantiate(val1);
+				for (ByteString val2 : instantiations.get(val1)) {
+					insty2.instantiate(val2);
+					headInsty2.instantiate(val2);
+					projInsty2.instantiate(replacedVar); // Restore the variable to its initial value
+					List<Double> bodyProbabilities = probabibilityOfQuery(query);
+					if (!bodyProbabilities.isEmpty()) {
+						projInsty2.instantiate(val2);
+						double headProbability = probabilityOf(existentializedProjection);
+						double pairProbability = probability(headProbability, bodyProbabilities);
+						result[1] += pairProbability;
+						if (existsBS(fullQuery)) {
+							result[0] += pairProbability;
+						}
+					}
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * It calculates the probabilistic version of support for a given query. The projection
+	 * variables are the ones occurring in the argument projection.
+	 * @param query
+	 * @param projection
+	 * @return
+	 */
 	public double probabilityOf(List<ByteString[]> query, ByteString[] projection) {
 		// First check the number of variables of the projection triple
 		int numVariables = numVariables(projection);
@@ -306,8 +378,7 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	}
 	
 	/**
-	 * Implementation of the formula for the probabilistic support of a 
-	 * fact.
+	 * Implementation of the formula for the probabilistic support of a fact.
 	 * @param projProbability
 	 * @param bodyProbabilities
 	 * @return
@@ -329,19 +400,14 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	public static void main(String args[]) throws IOException {
 		TupleIndependentFactDatabase db = new TupleIndependentFactDatabase();
 		//db.load(new File("/home/galarrag/workspace/AMIE/Data/yago2/sample-final/yago2core.10kseedsSample.decoded.compressed.notypes.tsv"));
-		db.add("<Francois>", "<livesIn>", "<Paris>", 0.9);
-		db.add("<Francois>", "<livesIn>", "<Nantes>", 0.9);
-		db.add("<Paris>", "<locatedIn>", "<France>", 1.0);
-		db.add("<Nantes>", "<locatedIn>", "<France>", 0.8);
-		db.add("<Francois>", "<livesIn>", "<France>", 0.9);
-		db.add("<Ana>", "<livesIn>", "<Gye>", 0.9);
+		/*db.add("<Ana>", "<livesIn>", "<Gye>", 0.9);
 		db.add("<Gye>", "<locatedIn>", "<Ecuador>", 0.5);
 		db.add("<Ana>", "<livesIn>", "<Ecuador>", 1.0);	
 		db.add("<Luis>", "<created>", "<Titanic>", 0.5);	
 		db.add("<Luis>", "<directed>", "<Titanic>", 0.9);
 		db.add("<Ana>", "<created>", "<Blah>", 0.77);	
 		db.add("<Ana>", "<directed>", "<Transformers>", 0.75);	
-		db.add("<Francois>", "<directed>", "<Amelie>", 0.8);	
+		db.add("<Francois>", "<directed>", "<Amelie>", 0.8);	*/
 		//List<ByteString[]> query = triples(triple(ByteString.of("<Francois>"), ByteString.of("<livesIn>"), ByteString.of("?x")),
 		//		triple(ByteString.of("?x"), ByteString.of("<locatedIn>"), ByteString.of("<France>")));
 		//List<ByteString[]> query2 = triples(triple(ByteString.of("<Francois>"), ByteString.of("<livesIn>"), ByteString.of("?x")),
@@ -351,21 +417,37 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 		List<ByteString[]> query5 = triples(triple(ByteString.of("?a"), ByteString.of("<created>"), ByteString.of("?b")));
 		//System.out.println(db.probabibilityOfQuery(query));
 		//System.out.println(db.probabibilityOfQuery(query2));
-		System.out.println(db.probabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?z"))));
+		/*System.out.println(db.probabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?z"))));
 		System.out.println(db.pcaProbabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?w")), 
 				ByteString.of("?x"), ByteString.of("?z")));
 		System.out.println(db.probabilityOf(query5, triple(ByteString.of("?a"), ByteString.of("<directed>"), ByteString.of("?b"))));
 		System.out.println(db.pcaProbabilityOf(query5, triple(ByteString.of("?a"), ByteString.of("<directed>"), ByteString.of("?x")), 
-				ByteString.of("?a"), ByteString.of("?b")));
+				ByteString.of("?a"), ByteString.of("?b")));*/
 		
-		db.add("<Francois>", "<livesIn>", "<USA>");
-		System.out.println(db.pcaProbabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?w")), 
-				ByteString.of("?x"), ByteString.of("?z")));
+		//db.add("<Francois>", "<livesIn>", "<USA>");
+		/*System.out.println(db.pcaProbabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?w")), 
+				ByteString.of("?x"), ByteString.of("?z")));*/
+		db.add("<Francois>", "<livesIn>", "<Paris>");
+		db.add("<Francois>", "<livesIn>", "<Nantes>");
+		db.add("<Paris>", "<locatedIn>", "<France>");
+		db.add("<Nantes>", "<locatedIn>", "<France>");
+		db.add("<Francois>", "<livesIn>", "<France>");
 		
 		db.add("<Diana>", "<livesIn>", "<Lyon>");
-		db.add("<Lyon>", "<isLocatedIn>", "<France>");
+		db.add("<Lyon>", "<locatedIn>", "<France>");
 		db.add("<Diana>", "<livesIn>", "<UK>");
-		System.out.println(db.pcaProbabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?w")), 
-				ByteString.of("?x"), ByteString.of("?z")));
+		
+		/*System.out.println(db.pcaProbabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?w")), 
+				ByteString.of("?x"), ByteString.of("?z")));*/
+		
+		System.out.println(Arrays.toString(db.probabilitiesOf(query3, 
+				triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?z")), 
+				ByteString.of("?z"))));
+		ByteString[] head = triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?z"));
+		List<ByteString[]> query31 = new ArrayList<ByteString[]>(query3);
+		query31.add(head);
+		System.out.println(db.countPairs(ByteString.of("?x"), ByteString.of("?z"), query31));
+		head[2] = ByteString.of("?zw");
+		System.out.println(db.countPairs(ByteString.of("?x"), ByteString.of("?z"), query31));
 	}
 }

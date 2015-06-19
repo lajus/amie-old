@@ -467,7 +467,9 @@ public class AMIE {
 				List<List<ByteString[]>> parentsOfSizeI = new ArrayList<>();
 				Query.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), queryPattern.get(0), queryPattern.size() - 2, parentsOfSizeI);
 				if (checkParentsOfDegree2) {
-					Query.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), queryPattern.get(0), queryPattern.size() - 3, parentsOfSizeI);
+					if (queryPattern.size() > 3) {
+						Query.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), queryPattern.get(0), queryPattern.size() - 3, parentsOfSizeI);
+					}
 				}
 				for (List<ByteString[]> parent : parentsOfSizeI) {
 					for (Query candidate : candidateParents) {
