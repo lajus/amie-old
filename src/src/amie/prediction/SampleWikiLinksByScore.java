@@ -14,7 +14,7 @@ import javatools.datatypes.Pair;
 import javatools.datatypes.Triple;
 import javatools.filehandlers.TSVFile;
 import amie.data.FactDatabase;
-import amie.mining.assistant.HeadVariablesImprovedMiningAssistant;
+import amie.mining.assistant.experimental.HeadVariablesImprovedMiningAssistant;
 import amie.prediction.Prediction.Metric;
 import amie.query.AMIEreader;
 import amie.query.Query;

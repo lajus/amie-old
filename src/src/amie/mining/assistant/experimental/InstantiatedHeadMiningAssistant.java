@@ -1,4 +1,4 @@
-package amie.mining.assistant;
+package amie.mining.assistant.experimental;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,6 +8,7 @@ import java.util.List;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import amie.data.FactDatabase;
+import amie.mining.assistant.HeadVariablesMiningAssistant;
 import amie.query.Query;
 
 public class InstantiatedHeadMiningAssistant extends HeadVariablesMiningAssistant {
@@ -29,13 +30,12 @@ public class InstantiatedHeadMiningAssistant extends HeadVariablesMiningAssistan
 			newEdge[1] = relation;
 			
 			int countVarPos = countAlwaysOnSubject ? 0 : findCountingVariable(newEdge);
-			ByteString countingVariable = newEdge[countVarPos];
 			List<ByteString[]> emptyList = Collections.emptyList();
 			long cardinality = source.countProjection(query.getHead(), emptyList);
 			
 			ByteString[] succedent = newEdge.clone();
 			Query candidate = new Query(succedent, cardinality);
-			candidate.setFunctionalVariable(countingVariable);
+			candidate.setFunctionalVariablePosition(countVarPos);
 			registerHeadRelation(candidate);
 			ArrayList<Query> tmpOutput = new ArrayList<>();
 			getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, tmpOutput);			
@@ -63,9 +63,11 @@ public class InstantiatedHeadMiningAssistant extends HeadVariablesMiningAssistan
 					succedent[1] = relation;
 					int countVarPos = countAlwaysOnSubject ? 0 : findCountingVariable(succedent);
 					Query candidate = new Query(succedent, cardinality);
-					candidate.setFunctionalVariable(succedent[countVarPos]);
+					candidate.setFunctionalVariablePosition(countVarPos);
 					registerHeadRelation(candidate);
-					getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, output);
+					getInstantiatedEdges(candidate, null, 
+							candidate.getLastTriplePattern(), 
+							countVarPos == 0 ? 2 : 0, minCardinality, output);
 					output.add(candidate);
 				}
 			}			
@@ -98,10 +100,7 @@ public class InstantiatedHeadMiningAssistant extends HeadVariablesMiningAssistan
 			List<ByteString[]> succedent = new ArrayList<ByteString[]>();
 			succedent.addAll(candidate.getTriples().subList(0, 1));
 			double denominator = 0.0;
-			double confidence = 0.0;
 			denominator = (double) source.countDistinct(candidate.getFunctionalVariable(), antecedent);
-			confidence = candidate.getSupport() / denominator;
-			candidate.setStdConfidence(confidence);
 			candidate.setBodySize((int)denominator);
 		} else {
 			super.calculateConfidenceMetrics(candidate);

@@ -1,9 +1,10 @@
-package amie.mining.assistant;
+package amie.mining.assistant.experimental;
 
 import java.util.List;
 
 import javatools.datatypes.ByteString;
 import amie.data.FactDatabase;
+import amie.mining.assistant.HeadVariablesMiningAssistant;
 import amie.query.Query;
 
 public class HeadVariablesImprovedMiningAssistant extends
@@ -13,7 +14,11 @@ public class HeadVariablesImprovedMiningAssistant extends
 		super(dataSource);
 	}
 
-	protected long computePCAAntecedentCount(ByteString var1, ByteString var2, Query query, List<ByteString[]> antecedent, ByteString[] existentialTriple, int nonExistentialPosition) {
+	protected long computePCAAntecedentCount(ByteString var1, 
+			ByteString var2, Query query, 
+			List<ByteString[]> antecedent, 
+			ByteString[] existentialTriple, 
+			int nonExistentialPosition) {
 		antecedent.add(existentialTriple);
 		ByteString[] typeConstraint1, typeConstraint2;
 		typeConstraint1 = new ByteString[3];
@@ -25,7 +30,7 @@ public class HeadVariablesImprovedMiningAssistant extends
 		antecedent.add(typeConstraint1);
 		antecedent.add(typeConstraint2);
 		long result = source.countPairs(var1, var2, antecedent);
-		if(result == 0){
+		if (result == 0) {
 			antecedent.remove(antecedent.size() - 1);
 			antecedent.remove(antecedent.size() - 1);
 			result = source.countPairs(var1, var2, antecedent);

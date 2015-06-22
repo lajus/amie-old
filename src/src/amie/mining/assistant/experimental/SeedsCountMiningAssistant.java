@@ -1,4 +1,4 @@
-package amie.mining.assistant;
+package amie.mining.assistant.experimental;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,6 +10,7 @@ import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Pair;
 import amie.data.FactDatabase;
+import amie.mining.assistant.MiningAssistant;
 import amie.query.Query;
 
 public class SeedsCountMiningAssistant extends MiningAssistant {
@@ -175,16 +176,15 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 				if(headExcludedRelations != null && headExcludedRelations.contains(newEdge[1]))
 					continue;
 
-				//int cardinality = relations.get(relation);
 				newEdge[1] = relation;
 				int countVarPos = countAlwaysOnSubject? 0 : findCountingVariable(newEdge);
-				query.setFunctionalVariable(newEdge[countVarPos]);
+				query.setFunctionalVariablePosition(countVarPos);
 				int cardinality = seedsCardinality(query);
 				query.setSupport(cardinality);
 				if(cardinality >= minCardinality){
 					ByteString[] succedent = newEdge.clone();					
 					Query candidate = new Query(succedent, cardinality);
-					candidate.setFunctionalVariable(succedent[countVarPos]);
+					candidate.setFunctionalVariablePosition(countVarPos);
 					registerHeadRelation(candidate);
 					if(allowConstants)
 						getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, output);
@@ -280,10 +280,8 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 		antecedent.addAll(candidate.getTriples().subList(1, candidate.getTriples().size()));
 		List<ByteString[]> succedent = new ArrayList<ByteString[]>();
 		succedent.addAll(candidate.getTriples().subList(0, 1));
-		double improvedDenominator = 0.0;
-		double denominator = 0.0;
-		double stdConfidence = 0.0;
-		double pcaConfidence = 0.0;
+		long denominator = 0;
+		long pcaDenominator = 0;
 		ByteString[] existentialTriple = succedent.get(0).clone();
 		int freeVarPos = 0;
 		
@@ -298,16 +296,10 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 
 		existentialTriple[freeVarPos] = ByteString.of("?x");
 				
-		if(antecedent.isEmpty()){
-			candidate.setStdConfidence(1.0);
-			candidate.setPcaConfidence(1.0);
-		}else{
-			//Confidence
+		if (!antecedent.isEmpty()) {			
 			try{
-				denominator = (double)source.countDistinct(candidate.getFunctionalVariable(), antecedent);
-				stdConfidence = (double)candidate.getSupport() / denominator;
-				candidate.setStdConfidence(stdConfidence);
-				candidate.setBodySize((int)denominator);
+				denominator = this.source.countDistinct(candidate.getFunctionalVariable(), antecedent);
+				candidate.setBodySize(denominator);
 			}catch(UnsupportedOperationException e){
 				
 			}
@@ -315,9 +307,8 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 			//Improved confidence: Add an existential version of the head
 			antecedent.add(existentialTriple);
 			try{
-				improvedDenominator = (double)source.countDistinct(candidate.getFunctionalVariable(), antecedent);
-				pcaConfidence = (double)candidate.getSupport() / improvedDenominator;
-				candidate.setPcaConfidence(pcaConfidence);
+				pcaDenominator = this.source.countDistinct(candidate.getFunctionalVariable(), antecedent);
+				candidate.setBodyStarSize(pcaDenominator);
 			}catch(UnsupportedOperationException e){
 				
 			}

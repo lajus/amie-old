@@ -34,17 +34,17 @@ import org.apache.commons.cli.PosixParser;
 
 import amie.data.EquivalenceChecker2;
 import amie.data.FactDatabase;
-import amie.mining.assistant.ExistentialRulesHeadVariablesMiningAssistant;
-import amie.mining.assistant.FullRelationSignatureMiningAssistant;
-import amie.mining.assistant.HeadVariablesImprovedMiningAssistant;
 import amie.mining.assistant.HeadVariablesMiningAssistant;
-import amie.mining.assistant.InstantiatedHeadMiningAssistant;
-import amie.mining.assistant.KeyMinerMiningAssistant;
 import amie.mining.assistant.MiningAssistant;
-import amie.mining.assistant.RelationSignatureMiningAssistant;
-import amie.mining.assistant.SeedsCountMiningAssistant;
-import amie.mining.assistant.TypedMiningAssistant;
-import amie.mining.assistant.WikilinksHeadVariablesMiningAssistant;
+import amie.mining.assistant.experimental.ExistentialRulesHeadVariablesMiningAssistant;
+import amie.mining.assistant.experimental.FullRelationSignatureMiningAssistant;
+import amie.mining.assistant.experimental.HeadVariablesImprovedMiningAssistant;
+import amie.mining.assistant.experimental.InstantiatedHeadMiningAssistant;
+import amie.mining.assistant.experimental.KeyMinerMiningAssistant;
+import amie.mining.assistant.experimental.RelationSignatureMiningAssistant;
+import amie.mining.assistant.experimental.SeedsCountMiningAssistant;
+import amie.mining.assistant.experimental.TypedMiningAssistant;
+import amie.mining.assistant.experimental.WikilinksHeadVariablesMiningAssistant;
 import amie.query.Query;
 
 
@@ -95,22 +95,22 @@ public class AMIE {
 	/**
 	 *  Time spent in applying the operators. 
 	 **/
-	private long specializationTime;
+	private long _specializationTime;
 			
 	/** 
 	 * Time spent in calculating confidence scores. 
 	 **/
-	private long scoringTime;
+	private long _scoringTime;
 			
 	/** 
 	 * Time spent in duplication elimination 
 	 **/
-	private long queueingAndDuplicateElimination;
+	private long _queueingAndDuplicateElimination;
 	
 	/**
 	 * Time spent in confidence approximations
 	 */
-	private long approximationTime;
+	private long _approximationTime;
 
 
 	/**
@@ -120,7 +120,7 @@ public class AMIE {
 	 * B => D, C => D. 
 	 * 
 	 */
-	private boolean checkParentsOfDegree2;
+	private boolean _checkParentsOfDegree2;
 		
 	/**
 	 * 
@@ -137,26 +137,26 @@ public class AMIE {
 		this.minHeadCoverage = threshold;
 		this.pruningMetric = metric;
 		this.nThreads = nThreads;
-		this.specializationTime = 0l;
-		this.scoringTime = 0l;
-		this.queueingAndDuplicateElimination = 0l;
-		this.approximationTime = 0l;
+		this._specializationTime = 0l;
+		this._scoringTime = 0l;
+		this._queueingAndDuplicateElimination = 0l;
+		this._approximationTime = 0l;
 	}
 	
-	public long getSpecializationTime() {
-		return specializationTime;
+	public long _getSpecializationTime() {
+		return _specializationTime;
 	}
 
-	public long getScoringTime() {
-		return scoringTime;
+	public long _getScoringTime() {
+		return _scoringTime;
 	}
 
-	public long getQueueingAndDuplicateElimination() {
-		return queueingAndDuplicateElimination;
+	public long _getQueueingAndDuplicateElimination() {
+		return _queueingAndDuplicateElimination;
 	}
 	
 	public long getApproximationTime() {
-		return approximationTime;
+		return _approximationTime;
 	}
 
 		
@@ -192,41 +192,32 @@ public class AMIE {
 			consumerThread.start();
 		}		
 		
-        if(nThreads > 1) {
-            System.out.println("Using " + nThreads + " threads");
-			//Create as many threads as available cores
-        	ArrayList<Thread> currentJobs = new ArrayList<>();
-        	ArrayList<RDFMinerJob> jobObjects = new ArrayList<>();
-        	for(int i = 0; i < nThreads; ++i){
-        		RDFMinerJob jobObject = new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter, indexedResult);
-        		Thread job = new Thread(jobObject);
-        		currentJobs.add(job);
-        		jobObjects.add(jobObject);
-        	}
-        	
-        	for(Thread job: currentJobs) {
-        		job.start();
-        	}
-        	
-        	for(Thread job: currentJobs) {
-        		job.join();
-        	}
-        	
-        	for (RDFMinerJob jobObject : jobObjects) {
-        		this.specializationTime += jobObject.getSpecializationTime();
-        		this.scoringTime += jobObject.getScoringTime();
-        		this.queueingAndDuplicateElimination += jobObject.getQueueingAndDuplicateElimination();
-        		this.approximationTime += jobObject.getApproximationTime();
-        	}
-        }else{
-        	RDFMinerJob jobObject = new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter, indexedResult);
-        	Thread job = new Thread(jobObject);
-        	job.run();
-    		this.specializationTime += jobObject.getSpecializationTime();
-    		this.scoringTime += jobObject.getScoringTime();
-    		this.queueingAndDuplicateElimination += jobObject.getQueueingAndDuplicateElimination();
-    		this.approximationTime += jobObject.getApproximationTime();    		
-        }
+        System.out.println("Using " + nThreads + " threads");
+		//Create as many threads as available cores
+    	ArrayList<Thread> currentJobs = new ArrayList<>();
+    	ArrayList<RDFMinerJob> jobObjects = new ArrayList<>();
+    	for(int i = 0; i < nThreads; ++i){
+    		RDFMinerJob jobObject = new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter, indexedResult);
+    		Thread job = new Thread(jobObject);
+    		currentJobs.add(job);
+    		jobObjects.add(jobObject);
+    	}
+    	
+    	for(Thread job: currentJobs) {
+    		job.start();
+    	}
+    	
+    	for(Thread job: currentJobs) {
+    		job.join();
+    	}
+    	
+    	// Required by the reviewers of the AMIE+ article    	
+    	for (RDFMinerJob jobObject : jobObjects) {
+    		this._specializationTime += jobObject.getSpecializationTime();
+    		this._scoringTime += jobObject.getScoringTime();
+    		this._queueingAndDuplicateElimination += jobObject.getQueueingAndDuplicateElimination();
+    		this._approximationTime += jobObject.getApproximationTime();
+    	}
 		
         if(realTime){
         	consumerObj.finish();
@@ -466,7 +457,7 @@ public class AMIE {
 				}
 				List<List<ByteString[]>> parentsOfSizeI = new ArrayList<>();
 				Query.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), queryPattern.get(0), queryPattern.size() - 2, parentsOfSizeI);
-				if (checkParentsOfDegree2) {
+				if (_checkParentsOfDegree2) {
 					if (queryPattern.size() > 3) {
 						Query.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), queryPattern.get(0), queryPattern.size() - 3, parentsOfSizeI);
 					}
@@ -1114,9 +1105,9 @@ public class AMIE {
 		}
 		
 		if (verbose) {
-			System.out.println("Specialization time: " + (miner.getSpecializationTime() / 1000.0) + "s");
-			System.out.println("Scoring time: " + (miner.getScoringTime() / 1000.0) + "s");
-			System.out.println("Queueing and duplicate elimination: " + (miner.getQueueingAndDuplicateElimination() / 1000.0) + "s");
+			System.out.println("Specialization time: " + (miner._getSpecializationTime() / 1000.0) + "s");
+			System.out.println("Scoring time: " + (miner._getScoringTime() / 1000.0) + "s");
+			System.out.println("Queueing and duplicate elimination: " + (miner._getQueueingAndDuplicateElimination() / 1000.0) + "s");
 			System.out.println("Approximation time: " + (miner.getApproximationTime() / 1000.0) + "s");
 			System.out.println(rules.size() + " rules mined.");
 		}
@@ -1127,7 +1118,7 @@ public class AMIE {
 	}
 
 	public void setCheckParentsOfDegree2(boolean b) {
-		this.checkParentsOfDegree2 = b;
+		this._checkParentsOfDegree2 = b;
 	}
 
 	/**

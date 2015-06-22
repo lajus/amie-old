@@ -2,7 +2,7 @@
  * @author lgalarra
  * @date Nov 25, 2012
  */
-package amie.mining.assistant;
+package amie.mining.assistant.experimental;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,6 +11,7 @@ import java.util.List;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import amie.data.FactDatabase;
+import amie.mining.assistant.HeadVariablesMiningAssistant;
 import amie.query.Query;
 
 /**

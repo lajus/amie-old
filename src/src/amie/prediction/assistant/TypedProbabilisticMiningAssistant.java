@@ -3,7 +3,7 @@ package amie.prediction.assistant;
 import java.util.Collection;
 
 import amie.data.FactDatabase;
-import amie.mining.assistant.TypedMiningAssistant;
+import amie.mining.assistant.experimental.TypedMiningAssistant;
 import amie.query.Query;
 
 public class TypedProbabilisticMiningAssistant extends ProbabilisticHeadVariablesMiningAssistant{

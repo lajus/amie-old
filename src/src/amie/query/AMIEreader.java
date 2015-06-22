@@ -65,7 +65,7 @@ public class AMIEreader {
 	      
 	    	query.setSupport(0);
 	    	query.setTriples(triples);
-	    	query.setFunctionalVariable(query.getHead()[0]);
+	    	query.setFunctionalVariablePosition(0);
 	    	result.add(query);
 	    }
 	    return(result);

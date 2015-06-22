@@ -69,7 +69,7 @@ public class RuleHitsEvaluator {
 			}
 			
 			ByteString[] head = q.getHead();
-			q.setFunctionalVariable(q.getHead()[Query.findFunctionalVariable(q, trainingDataset)]);
+			q.setFunctionalVariablePosition(Query.findFunctionalVariable(q, trainingDataset));
 			Object bindings = null;
 			try {
 				bindings = predictor.generateBodyBindings(q);

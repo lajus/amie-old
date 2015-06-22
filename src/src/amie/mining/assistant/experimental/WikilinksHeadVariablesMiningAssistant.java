@@ -1,4 +1,4 @@
-package amie.mining.assistant;
+package amie.mining.assistant.experimental;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,6 +8,7 @@ import java.util.List;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import amie.data.FactDatabase;
+import amie.mining.assistant.HeadVariablesMiningAssistant;
 import amie.query.Query;
 
 public class WikilinksHeadVariablesMiningAssistant extends HeadVariablesMiningAssistant {
@@ -41,7 +42,7 @@ public class WikilinksHeadVariablesMiningAssistant extends HeadVariablesMiningAs
 					succedent[1] = relation;
 					int countVarPos = countAlwaysOnSubject? 0 : findCountingVariable(succedent);
 					Query candidate = new Query(succedent, cardinality);
-					candidate.setFunctionalVariable(succedent[countVarPos]);
+					candidate.setFunctionalVariablePosition(countVarPos);
 					registerHeadRelation(candidate);
 					output.add(candidate);
 				}

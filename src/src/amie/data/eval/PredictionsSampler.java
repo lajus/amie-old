@@ -413,9 +413,9 @@ public class PredictionsSampler {
 		
 		for(Query rule: rules){
 			if(trainingSource.functionality(rule.getHead()[1]) >= trainingSource.inverseFunctionality(rule.getHead()[1]))
-				rule.setFunctionalVariable(rule.getHead()[0]);
+				rule.setFunctionalVariablePosition(0);
 			else
-				rule.setFunctionalVariable(rule.getHead()[2]);
+				rule.setFunctionalVariablePosition(2);
 		}
 		
 		PredictionsSampler pp = new PredictionsSampler(trainingSource, sampleSize);

@@ -350,7 +350,7 @@ public class MiningAssistant{
 			
 			ByteString[] succedent = newEdge.clone();
 			Query candidate = new Query(succedent, cardinality);
-			candidate.setFunctionalVariable(countingVariable);
+			candidate.setFunctionalVariablePosition(countVarPos);
 			registerHeadRelation(candidate);			
 
 			if(canAddInstantiatedAtom()) {
@@ -396,7 +396,7 @@ public class MiningAssistant{
 					}
 						
 					Query candidate = new Query(succedent, cardinality);
-					candidate.setFunctionalVariable(succedent[countVarPos]);
+					candidate.setFunctionalVariablePosition(countVarPos);
 					registerHeadRelation(candidate);					
 					if(canAddInstantiatedAtom()) {
 						getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, output);
@@ -759,7 +759,6 @@ public class MiningAssistant{
 	 */
 	protected boolean calculateConfidenceApproximationFor3Atoms(Query candidate) {
 		int[] hardQueryInfo = null;
-		double headFunctionality = source.x_functionality(candidate.getHead()[1], candidate.getFunctionalVariablePosition());		
 		hardQueryInfo = source.identifyHardQueryTypeIII(candidate.getAntecedent());
 		if(hardQueryInfo != null){
 			ByteString[] targetPatternOutput = null;
@@ -818,7 +817,6 @@ public class MiningAssistant{
 				double ratio = overlapHead * f4 * (f3 / f2);
 				ratio = (double)candidate.getSupport() / ratio;
 				candidate.setPcaEstimation(ratio);
-				candidate.setPcaEstimationOptimistic(source.x_functionality(targetPatternOutput[1], posCommonOutput) / headFunctionality);
 				if(ratio < minPcaConfidence) { 
 					if (!silent) {
 						System.err.println("Query " + candidate + " discarded by functionality heuristic with ratio " + ratio);
@@ -978,10 +976,9 @@ public class MiningAssistant{
 		List<ByteString[]> antecedent = new ArrayList<ByteString[]>();
 		antecedent.addAll(rule.getTriples().subList(1, rule.getTriples().size()));
 		ByteString[] succedent = rule.getTriples().get(0);
-		double pcaDenominator = 0.0;
-		double pcaConfidence = 0.0;
 		ByteString[] existentialTriple = succedent.clone();
 		int freeVarPos = 0;
+		long pcaDenominator = 0;
 		
 		if(FactDatabase.numVariables(existentialTriple) == 1){
 			freeVarPos = FactDatabase.firstVariablePos(existentialTriple);
@@ -993,15 +990,12 @@ public class MiningAssistant{
 		}
 
 		existentialTriple[freeVarPos] = ByteString.of("?x");
-		if(antecedent.isEmpty()){
-			rule.setPcaConfidence(1.0);
-		}else{
+		if (!antecedent.isEmpty()) {
 			//Improved confidence: Add an existential version of the head
 			antecedent.add(existentialTriple);
 			try{
-				pcaDenominator = (double)source.countDistinct(rule.getFunctionalVariable(), antecedent);
-				pcaConfidence = (double)rule.getSupport() / pcaDenominator;
-				rule.setPcaConfidence(pcaConfidence);
+				pcaDenominator = source.countDistinct(rule.getFunctionalVariable(), antecedent);
+				rule.setBodyStarSize(pcaDenominator);
 			}catch(UnsupportedOperationException e){
 				
 			}
@@ -1012,20 +1006,15 @@ public class MiningAssistant{
 	
 	public double computeStandardConfidence(Query candidate) {
 		// Calculate confidence
-		double denominator = 0.0;
-		double confidence = 0.0;		
+		long denominator = 0;
 		List<ByteString[]> antecedent = new ArrayList<ByteString[]>();
 		antecedent.addAll(candidate.getTriples().subList(1, candidate.getTriples().size()));
 				
-		if(antecedent.isEmpty()){
-			candidate.setStdConfidence(1.0);
-		}else{
+		if(!antecedent.isEmpty()) {
 			//Confidence
 			try{
-				denominator = (double) source.countDistinct(candidate.getFunctionalVariable(), antecedent);
-				confidence = (double)candidate.getSupport() / denominator;
-				candidate.setStdConfidence(confidence);
-				candidate.setBodySize((int)denominator);
+				denominator = source.countDistinct(candidate.getFunctionalVariable(), antecedent);
+				candidate.setBodySize(denominator);
 			}catch(UnsupportedOperationException e){
 				
 			}

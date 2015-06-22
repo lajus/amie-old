@@ -1,10 +1,11 @@
-package amie.mining.assistant;
+package amie.mining.assistant.experimental;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javatools.datatypes.ByteString;
 import amie.data.FactDatabase;
+import amie.mining.assistant.HeadVariablesMiningAssistant;
 import amie.query.Query;
 
 public class ExistentialRulesHeadVariablesMiningAssistant extends
@@ -21,19 +22,13 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 		antecedent.addAll(candidate.getAntecedent());
 		List<ByteString[]> succedent = new ArrayList<ByteString[]>();
 		succedent.addAll(candidate.getTriples().subList(0, 1));
-		double improvedDenominator = 0.0;
+		double pcaDenominator = 0.0;
 		double denominator = 0.0;
-		double confidence = 0.0;
-		double improvedConfidence = 0.0;
 		ByteString[] head = candidate.getHead();
 		ByteString[] existentialTriple = head.clone();
 		int freeVarPos, countVarPos;
 				
-		if(antecedent.isEmpty()){
-			candidate.setStdConfidence(1.0);
-			candidate.setPcaConfidence(1.0);
-		}else{
-			//Confidence
+		if (!antecedent.isEmpty()){
 			try{
 				if(FactDatabase.numVariables(head) == 2){
 					ByteString var1, var2;
@@ -43,8 +38,6 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 				} else {					
 					denominator = (double)source.countDistinct(candidate.getFunctionalVariable(), antecedent);
 				}				
-				confidence = (double)candidate.getSupport() / denominator;
-				candidate.setStdConfidence(confidence);
 				candidate.setBodySize((long)denominator);
 			}catch(UnsupportedOperationException e){
 				
@@ -71,24 +64,21 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 					}
 						
 					if(existentialQueryRedundant){
-						improvedConfidence = confidence;
-						improvedDenominator = denominator;
+						pcaDenominator = denominator;
 					}else{
 						if(FactDatabase.numVariables(head) == 2){
 							ByteString var1, var2;
 							var1 = head[FactDatabase.firstVariablePos(head)];
 							var2 = head[FactDatabase.secondVariablePos(head)];
-							improvedDenominator = (double)computePCAAntecedentCount(var1, var2, candidate, antecedent, existentialTriple, candidate.getFunctionalVariablePosition());
+							pcaDenominator = (double)computePCAAntecedentCount(var1, 
+									var2, candidate, antecedent, existentialTriple, candidate.getFunctionalVariablePosition());
 						}else{
 							antecedent.add(existentialTriple);
-							improvedDenominator = (double)source.countDistinct(candidate.getFunctionalVariable(), antecedent);
-						}
-						
-						improvedConfidence = (double)candidate.getSupport() / improvedDenominator;					
+							pcaDenominator = (double)source.countDistinct(candidate.getFunctionalVariable(), antecedent);
+						}			
 					}
 					
-					candidate.setPcaConfidence(improvedConfidence);	
-					candidate.setBodyStarSize((long)improvedDenominator);
+					candidate.setBodyStarSize((long)pcaDenominator);
 				}catch(UnsupportedOperationException e){
 					
 				}

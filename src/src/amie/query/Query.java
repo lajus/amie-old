@@ -32,8 +32,10 @@ public class Query{
 	 */
 	List<ByteString[]> triples;	
 
+	/******** Standard Metrics *************/
+	
 	/**
-	 * Support w.r.t some set of entities from a relation
+	 * Support normalized w.r.t to the size of the head relation
 	 */
 	double headCoverage;
 	
@@ -41,20 +43,9 @@ public class Query{
 	 * Support w.r.t the set of all subjects in the database
 	 */
 	double supportRatio;
-	
-	/**
-	 * Standard definition of confidence
-	 */
-	double stdConfidence;
-	
-	/**
-	 * Improved definition of confidence which includes an existential version of the head
-	 * for the antecedent (body) size estimation.
-	 */
-	double pcaConfidence;
 		
 	/**
-	 * Absolute number of bindings for the projection variable of the query
+	 * Absolute number of bindings of the projection variables of the query (positive examples)
 	 */
 	long support;
 	
@@ -75,20 +66,22 @@ public class Query{
 	/**
 	 * Parent query
 	 */
-	private Query parent;	
+	private Query parent;
 	
 	/**
-	 * The variable used for counting
+	 * List of parents: queries that are equivalent to the current query but contain 
+	 * a body atom less.
 	 */
-	private ByteString functionalVariable;
-
+	private List<Query> ancestors;
+	
 	/**
-	 * The position in the head used for counting
+	 * The position of the counting variable in the head atom
 	 */
 	private int functionalVariablePosition;
 	
 	/**
-	 * The number of instances of the counting variable in the antecedent
+	 * The number of instances of the counting variable in the antecedent.
+	 * (size of B in B => r(x, y))
 	 */
 	private long bodySize;
 	
@@ -96,11 +89,6 @@ public class Query{
 	 * Integer counter used to guarantee unique variable names
 	 */
 	private static int varsCount = 0;	
-	
-	/**
-	 * Information about the precision of the rule in some evaluation context
-	 */
-	int[] evaluationResult;
 
 	/**
 	 * Body - Head (whatever is false or unknown in the database)
@@ -110,72 +98,85 @@ public class Query{
 	/**
 	 * Body - Head* (existential version of the head)
 	 */
-	private long bodyStarSize;
+	private long pcaBodySize;
 	
 	/**
 	 * Highest letter used for variable names
 	 */
 	private char highestVariable;
-	/*
+	
+	/******** End of Standard Metrics *************/
+	
+	/******** AMIE+ and approximations *************/
+	
+	/**
 	 * Standard confidence theorethical upper bound for standard confidence
 	 *  
 	 */
-	private double stdConfUpperBound;
+	private double _stdConfUpperBound;
 
-	/*
+	/**
 	 * PCA confidence theorethical upper bound for PCA confidence
 	 */
-	private double pcaConfUpperBound;
+	private double _pcaConfUpperBound;
 	
 	/**
 	 * PCA confidence rough estimation for the hard cases
 	 */
-	private double pcaEstimation;
-	
-	/**
-	 * Optimistic version of the PCA estimation
-	 */
-	private double pcaEstimationOptimistic;
+	private double _pcaEstimation;
 	
 	/**
 	 * Time to run the denominator for the expression of the PCA confidence
 	 */
-	private double pcaConfidenceRunningTime;
+	private double _pcaConfidenceRunningTime;
 	
 	/**
 	 * Time to run the denominator for the expression of the standard confidence
 	 */	
-	private double confidenceRunningTime;
+	private double _confidenceRunningTime;
 	
 	/**
 	 * The rule is below an established support threshold
 	 */
-	private boolean belowMinimumSupport;
+	private boolean _belowMinimumSupport;
 
+	/**
+	 * Information about the precision of the rule in some evaluation context
+	 */
+	int[] _evaluationResult;
+	
+	/******** End of AMIE+ and approximations *************/
+	
 	/**
 	 * True is the last atom of the rule contains a variable
 	 * that binds to a single instance (a case where the AMIE algorithm would prune
 	 * the rule).
 	 */
-	private boolean containsQuasiBindings;
+	private boolean _containsQuasiBindings;
+	
+	/********** Joint Prediction **********/
+	/** This corresponds to all the fields associated to the project of prediction using rules
+	 as multiples sources of evidence **/
 	
 	/**
 	 * Probabilistic version of the support of a rule calculated
-	 * considering the probabilities of the positive examples of the rule.
+	 * considering the probabilities of the support of the rule.
 	 */
-	private double probabilisticSupport;
+	private double _probabilisticSupport;
 		
 	/**
 	 * Probabilistic version of the body size of a rule.
 	 */
-	private double probabilisticPCABodySize;
+	private double _probabilisticPCABodySize;
 	
-	/**
-	 * List of parents: queries that are equivalent to the current query except 
-	 * by one body atom.
-	 */
-	private List<Query> ancestors;
 
+	/**
+	 * It puts the arguments in an array.
+	 * @param sub
+	 * @param pred
+	 * @param obj
+	 * @return
+	 */
 	public static ByteString[] triple(ByteString sub, ByteString pred, ByteString obj){
 		ByteString[] newTriple = new ByteString[3];
 		newTriple[0] = sub;
@@ -185,7 +186,9 @@ public class Query{
 	}
 	
 	public static boolean equal(ByteString[] pattern1, ByteString pattern2[]){
-		return pattern1[0] == pattern2[0] && pattern1[1] == pattern2[1] && pattern1[2] == pattern2[2];
+		return pattern1[0] == pattern2[0] 
+				&& pattern1[1] == pattern2[1] 
+						&& pattern1[2] == pattern2[2];
 	}
 	
 	public ByteString[] fullyUnboundTriplePattern(){
@@ -216,45 +219,37 @@ public class Query{
 		headKey = null;
 		support = -1;
 		hashSupport = 0;
-		stdConfidence = -2.0;
-		pcaConfidence = -2.0;
 		parent = null;
-		functionalVariable = null; 
 		bodySize = -1;
 		highestVariable = 'a';
-		stdConfUpperBound = 0.0;
-		pcaConfUpperBound = 0.0;
-		pcaEstimation = 0.0;
-		pcaEstimationOptimistic = 0.0;
-		belowMinimumSupport = false;
-		containsQuasiBindings = false;
-		probabilisticPCABodySize = -1.0;
-		probabilisticSupport = 0.0;
+		_stdConfUpperBound = 0.0;
+		_pcaConfUpperBound = 0.0;
+		_pcaEstimation = 0.0;
+		_belowMinimumSupport = false;
+		_containsQuasiBindings = false;
+		_probabilisticPCABodySize = -1.0;
+		_probabilisticSupport = 0.0;
 		ancestors = new ArrayList<>();
 	}
 			
 
 	public Query(ByteString[] pattern, long cardinality){
 		triples = new ArrayList<>();
-		stdConfidence = -2.0;
-		pcaConfidence = -2.0;
 		support = cardinality;
 		hashSupport = cardinality;
 		parent = null;
 		triples.add(pattern);
-		functionalVariable = pattern[0];
 		functionalVariablePosition = 0;
 		bodySize = 0;
 		computeHeadKey();
 		highestVariable = (char) (pattern[2].charAt(1) + 1);
-		stdConfUpperBound = 0.0;
-		pcaConfUpperBound = 0.0;
-		pcaEstimation = 0.0;
-		pcaEstimationOptimistic = 0.0;	
-		belowMinimumSupport = false;
-		containsQuasiBindings = false;
-		probabilisticPCABodySize = -1.0;
-		probabilisticSupport = 0.0;
+		_stdConfUpperBound = 0.0;
+		_pcaConfUpperBound = 0.0;
+		_pcaEstimation = 0.0;	
+		_belowMinimumSupport = false;
+		_containsQuasiBindings = false;
+		_probabilisticPCABodySize = -1.0;
+		_probabilisticSupport = 0.0;
 		ancestors = new ArrayList<>();
 	}
 	
@@ -265,20 +260,16 @@ public class Query{
 		}
 		this.support = cardinality;
 		this.hashSupport = cardinality;
-		this.setFunctionalVariable(otherQuery.getFunctionalVariable());
 		computeHeadKey();
-		stdConfidence = -2.0;
-		pcaConfidence = -2.0;
 		parent = null;
 		bodySize = -1;
 		highestVariable = otherQuery.highestVariable;		
-		stdConfUpperBound = 0.0;
-		pcaConfUpperBound = 0.0;
-		pcaEstimation = 0.0;
-		pcaEstimationOptimistic = 0.0;
-		containsQuasiBindings = false;
-		probabilisticPCABodySize = -1.0;
-		probabilisticSupport = 0.0;
+		_stdConfUpperBound = 0.0;
+		_pcaConfUpperBound = 0.0;
+		_pcaEstimation = 0.0;
+		_containsQuasiBindings = false;
+		_probabilisticPCABodySize = -1.0;
+		_probabilisticSupport = 0.0;
 		ancestors = new ArrayList<>();
 	}
 	
@@ -320,19 +311,15 @@ public class Query{
 		
 		computeHeadKey();
 		functionalVariablePosition = 0;
-		functionalVariable = triples.get(0)[functionalVariablePosition];
-		stdConfidence = -2.0;
-		pcaConfidence = -2.0;
 		parent = null;
 		bodySize = -1;
-		stdConfUpperBound = 0.0;
-		pcaConfUpperBound = 0.0;
-		pcaEstimation = 0.0;
-		pcaEstimationOptimistic = 0.0;
+		_stdConfUpperBound = 0.0;
+		_pcaConfUpperBound = 0.0;
+		_pcaEstimation = 0.0;
 		++highestVariable;
-		containsQuasiBindings = false;
-		probabilisticPCABodySize = -1.0;
-		probabilisticSupport = 0.0;
+		_containsQuasiBindings = false;
+		_probabilisticPCABodySize = -1.0;
+		_probabilisticSupport = 0.0;
 		ancestors = new ArrayList<>();
 	}
 
@@ -476,66 +463,44 @@ public class Query{
 	 * @return the confidence
 	 */
 	public double getStdConfidence() {
-		return stdConfidence;
+		return (double) support / bodySize;
 	}
 
 	/**
 	 * @return the evaluationResult
 	 */
 	public int[] getEvaluationResult() {
-		return evaluationResult;
+		return _evaluationResult;
 	}
 
 	/**
 	 * @param evaluationResult the evaluationResult to set
 	 */
 	public void setEvaluationResult(int[] evaluationResult) {
-		this.evaluationResult = evaluationResult;
-	}
-
-	/**
-	 * @param confidence the confidence to set
-	 */
-	public void setStdConfidence(double confidence) {
-		this.stdConfidence = confidence;
+		this._evaluationResult = evaluationResult;
 	}
 
 	/**
 	 * @return the pcaConfidence
 	 */
 	public double getPcaConfidence() {
-		return pcaConfidence;
-	}
-	
-	/**
-	 * @param pcaConfidence the pcaConfidence to set
-	 */
-	public void setPcaConfidence(double improvedConfidence) {
-		this.pcaConfidence = improvedConfidence;
+		return (double) support / pcaBodySize;
 	}
 
 	public double getConfidenceRunningTime() {
-		return confidenceRunningTime;
+		return _confidenceRunningTime;
 	}
 
 	public void setConfidenceRunningTime(double confidenceRunningTime) {
-		this.confidenceRunningTime = confidenceRunningTime;
+		this._confidenceRunningTime = confidenceRunningTime;
 	}
 
 	public double getPcaConfidenceRunningTime() {
-		return pcaConfidenceRunningTime;
+		return _pcaConfidenceRunningTime;
 	}
 
 	public void setPcaConfidenceRunningTime(double pcaConfidenceRunningTime) {
-		this.pcaConfidenceRunningTime = pcaConfidenceRunningTime;
-	}
-
-	public double getPcaEstimationOptimistic() {
-		return pcaEstimationOptimistic;
-	}
-
-	public void setPcaEstimationOptimistic(double pcaEstimationOptimistic) {
-		this.pcaEstimationOptimistic = pcaEstimationOptimistic;
+		this._pcaConfidenceRunningTime = pcaConfidenceRunningTime;
 	}
 
 	/**
@@ -636,55 +601,49 @@ public class Query{
 	}
 	
 	public ByteString getFunctionalVariable(){
-		return functionalVariable;
-	}
-	
-	public int getFunctionalVariablePosition(){
-		return functionalVariablePosition;
-	}
-	
-	public int getNonFunctionalVariablePosition(){
-		return functionalVariablePosition == 0 ? 2 : 0;
+		return getHead()[functionalVariablePosition];
 	}
 	
 	public ByteString getNonFunctionalVariable(){
 		return triples.get(0)[getNonFunctionalVariablePosition()];
 	}
 	
+	public int getFunctionalVariablePosition(){
+		return functionalVariablePosition;
+	}
+	
+	public void setFunctionalVariablePosition(int functionalVariablePosition) {
+		this.functionalVariablePosition = functionalVariablePosition;
+	}
+
+	public int getNonFunctionalVariablePosition(){
+		return functionalVariablePosition == 0 ? 2 : 0;
+	}
+	
 	public double getProbabilisticSupport() {
-		return probabilisticSupport;
+		return _probabilisticSupport;
 	}
 
 	public void setProbabilisticSupport(double probabilisticSupport) {
-		this.probabilisticSupport = probabilisticSupport;
+		this._probabilisticSupport = probabilisticSupport;
 	}
 
 	public double getProbabilisticPCABodySize() {
-		return probabilisticPCABodySize;
+		return _probabilisticPCABodySize;
 	}
 
 	public void setProbabilisticPCABodySize(double probabilisticPCABodySize) {
-		this.probabilisticPCABodySize = probabilisticPCABodySize;
+		this._probabilisticPCABodySize = probabilisticPCABodySize;
 	}
 	
 	public double getProbabilisticPCAConfidence() {
-		if (this.probabilisticPCABodySize > 0.0) {
-			return this.probabilisticSupport / this.probabilisticPCABodySize;
+		if (this._probabilisticPCABodySize > 0.0) {
+			return this._probabilisticSupport / this._probabilisticPCABodySize;
 		} else {
 			return -1.0;
 		}
 	}
 
-	/**
-	 * @param functionalVariable the functionalVariable to set
-	 */
-	public void setFunctionalVariable(ByteString projectionVariable) {
-		this.functionalVariable = projectionVariable;
-		if(this.functionalVariable.equals(triples.get(0)[0]))
-			functionalVariablePosition = 0;
-		else
-			functionalVariablePosition = 2;
-	}
 
 	/**
 	 * Determines if the second argument is unifiable to the first one. Unifiable means there is a
@@ -929,7 +888,7 @@ public class Query{
 	 * @return boolean. True if the rule has PCA confidence 1.0
 	 */
 	public boolean isPerfect() {
-		return pcaConfidence == 1.0;
+		return getPcaConfidence() == 1.0;
 	}
 	
 	/**
@@ -1159,9 +1118,9 @@ public class Query{
 		strBuilder.append("\t" + getBodySize());
 		strBuilder.append("\t" + getBodyStarSize());
 		strBuilder.append("\t" + getFunctionalVariable());
-		strBuilder.append("\t" + stdConfUpperBound);
-		strBuilder.append("\t" + pcaConfUpperBound);
-		strBuilder.append("\t" + pcaEstimation);
+		strBuilder.append("\t" + _stdConfUpperBound);
+		strBuilder.append("\t" + _pcaConfUpperBound);
+		strBuilder.append("\t" + _pcaEstimation);
 		strBuilder.append("\t" + getProbabilisticPCAConfidence());		
 		strBuilder.append("\t" + getProbabilisticSupport());
 		strBuilder.append("\t" + getProbabilisticPCABodySize());
@@ -1285,31 +1244,28 @@ public class Query{
 
 	public void setBodyStarSize(long size) {
 		// TODO Auto-generated method stub
-		bodyStarSize = size;
+		pcaBodySize = size;
 	}
 	
 	public long getBodyStarSize(){
-		return bodyStarSize;
+		return pcaBodySize;
 	}
 
-	public boolean metricsCalculated() {
-		return stdConfidence != -2.0 && pcaConfidence != -2.0;
+
+	public boolean _isBelowMinimumSupport() {
+		return _belowMinimumSupport;
 	}
 
-	public boolean isBelowMinimumSupport() {
-		return belowMinimumSupport;
-	}
-
-	public void setBelowMinimumSupport(boolean belowMinimumSupport) {
-		this.belowMinimumSupport = belowMinimumSupport;
+	public void _setBelowMinimumSupport(boolean belowMinimumSupport) {
+		this._belowMinimumSupport = belowMinimumSupport;
 	}
 	
-	public boolean containsQuasiBindings() {
-		return this.containsQuasiBindings;
+	public boolean _containsQuasiBindings() {
+		return this._containsQuasiBindings;
 	}
 	
-	public void setContainsQuasibinding(boolean containsQuasiBindings) {
-		this.containsQuasiBindings = containsQuasiBindings;
+	public void _setContainsQuasibinding(boolean containsQuasiBindings) {
+		this._containsQuasiBindings = containsQuasiBindings;
 		
 	}
 
@@ -1363,30 +1319,30 @@ public class Query{
 	}
 
 	public static void printRuleHeaders() {
-		System.out.println("Rule\tSupport\tHead Coverage\tConfidence\tPCA Confidence\tPositive Examples\tBody size\tPCA Body size\tPrediction variable\tStd. Lower Bound\tPCA Lower Bound");
+		System.out.println("Rule\tHead Coverage\tStd Confidence\tPCA Confidence\tPositive Examples\tBody size\tPCA Body size\tFunctional variable\tStd. Lower Bound\tPCA Lower Bound");
 	}
 
 	public void setConfidenceUpperBound(double stdConfUpperBound) {
-		this.stdConfUpperBound = stdConfUpperBound;
+		this._stdConfUpperBound = stdConfUpperBound;
 	}
 
 	public void setPcaConfidenceUpperBound(double pcaConfUpperBound) {
 		// TODO Auto-generated method stub
-		this.pcaConfUpperBound = pcaConfUpperBound;
+		this._pcaConfUpperBound = pcaConfUpperBound;
 	}
 	
 	/**
 	 * @return the pcaEstimation
 	 */
 	public double getPcaEstimation() {
-		return pcaEstimation;
+		return _pcaEstimation;
 	}
 
 	/**
 	 * @param pcaEstimation the pcaEstimation to set
 	 */
 	public void setPcaEstimation(double pcaEstimation) {
-		this.pcaEstimation = pcaEstimation;
+		this._pcaEstimation = pcaEstimation;
 	}
 	
 	/**
@@ -1684,25 +1640,6 @@ public class Query{
 	}
 	
 	public static void main(String args[]) {
-/*		List<ByteString[]> query = FactDatabase.triples(
-				FactDatabase.triple("?a", "<soc_sec_id>", "?l"),
-				FactDatabase.triple("?b", "<soc_sec_id>", "?l"),
-				FactDatabase.triple("?a", "<surname>", "?f"), 
-				FactDatabase.triple("?b", "<surname>", "?f")
-				);
-		
-		List<List<ByteString[]>> result = new ArrayList<List<ByteString[]>>();
-
-		for (int i = 1; i <= 3; ++i) {
-			System.out.println("i = " + i);
-			getParentsOfSize(query, FactDatabase.triple("?a", "equals", "?b"), i, result);
-			for (List<ByteString[]> parent : result) {
-				System.out.print(FactDatabase.toString(parent) + ", ");
-			}
-			System.out.println();
-			result.clear();
-		}*/
-		
 		List<ByteString[]> antecedent = FactDatabase.triples(
 				FactDatabase.triple("?z3", "<surname>", "?b"),
 				FactDatabase.triple("?z1", "<rp>", "?a"),

@@ -1,10 +1,11 @@
-package amie.mining.assistant;
+package amie.mining.assistant.experimental;
 
 import java.util.List;
 
 import javatools.datatypes.ByteString;
 import amie.data.FactDatabase;
 import amie.data.SchemaUtilities;
+import amie.mining.assistant.HeadVariablesMiningAssistant;
 import amie.query.Query;
 
 public class RelationSignatureMiningAssistant extends HeadVariablesMiningAssistant {

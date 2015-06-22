@@ -32,7 +32,7 @@ public class EquivalenceRulesFilter {
 		int freeVarPos, countVarPos;
 				
 		countVarPos = source.functionality(head[1]) > source.inverseFunctionality(head[1]) ? 0 : 2;
-		candidate.setFunctionalVariable(head[countVarPos]);
+		candidate.setFunctionalVariablePosition(countVarPos);
 		if(FactDatabase.numVariables(existentialTriple) == 1){
 			freeVarPos = FactDatabase.firstVariablePos(existentialTriple) == 0 ? 2 : 0;
 		}else{

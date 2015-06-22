@@ -51,13 +51,12 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 			newEdge[1] = relation;
 			
 			int countVarPos = this.countAlwaysOnSubject? 0 : findCountingVariable(newEdge);
-			ByteString countingVariable = newEdge[countVarPos];
 			List<ByteString[]> emptyList = Collections.emptyList();
 			long cardinality = this.source.countProjection(query.getHead(), emptyList);
 			
 			ByteString[] succedent = newEdge.clone();
 			Query candidate = new Query(succedent, cardinality);
-			candidate.setFunctionalVariable(countingVariable);
+			candidate.setFunctionalVariablePosition(countVarPos);
 			registerHeadRelation(candidate);
 			ArrayList<Query> tmpOutput = new ArrayList<>();
 			if(canAddInstantiatedAtom()) {
@@ -234,7 +233,7 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 					succedent[1] = relation;
 					int countVarPos = this.countAlwaysOnSubject? 0 : findCountingVariable(succedent);
 					Query candidate = new Query(succedent, cardinality);
-					candidate.setFunctionalVariable(succedent[countVarPos]);
+					candidate.setFunctionalVariablePosition(countVarPos);
 					registerHeadRelation(candidate);
 					if(canAddInstantiatedAtom()){
 						getInstantiatedEdges(candidate, null, 
@@ -622,10 +621,7 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 		}
 
 		existentialTriple[freeVarPos] = ByteString.of("?x");
-		if(antecedent.isEmpty()){
-			rule.setPcaConfidence(1.0);
-		}else{
-			//Improved confidence: Add an existential version of the head
+		if (!antecedent.isEmpty()) {
 			antecedent.add(existentialTriple);
 			try{
 				if (noOfHeadVars == 1) {
@@ -634,7 +630,6 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 					pcaDenominator = (double)this.source.countPairs(succedent[0], succedent[2], antecedent);					
 				}
 				pcaConfidence = (double)rule.getSupport() / pcaDenominator;
-				rule.setPcaConfidence(pcaConfidence);
 				rule.setBodyStarSize((long)pcaDenominator);
 			}catch(UnsupportedOperationException e){
 				
@@ -653,24 +648,19 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 		List<ByteString[]> antecedent = new ArrayList<ByteString[]>();
 		antecedent.addAll(candidate.getAntecedent());
 		double denominator = 0.0;
-		double confidence = 0.0;
 		ByteString[] head = candidate.getHead();
 		
-		if(antecedent.isEmpty()){
-			candidate.setStdConfidence(1.0);
-		}else{
+		if (!antecedent.isEmpty()){
 			//Confidence
 			try{
 				if(FactDatabase.numVariables(head) == 2){
 					ByteString var1, var2;
 					var1 = head[FactDatabase.firstVariablePos(head)];
 					var2 = head[FactDatabase.secondVariablePos(head)];
-					denominator = (double)computeAntecedentCount(var1, var2, candidate);
+					denominator = (double) computeAntecedentCount(var1, var2, candidate);
 				} else {					
-					denominator = (double)this.source.countDistinct(candidate.getFunctionalVariable(), antecedent);
+					denominator = (double) this.source.countDistinct(candidate.getFunctionalVariable(), antecedent);
 				}				
-				confidence = (double)candidate.getSupport() / denominator;
-				candidate.setStdConfidence(confidence);
 				candidate.setBodySize((long)denominator);
 			}catch(UnsupportedOperationException e){
 				
@@ -710,9 +700,9 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 		Query q = new Query(FactDatabase.triple("?x", "<isMarriedTo>", "?y"), stdDenom);
 		if (db.functionality(ByteString.of("<isMarriedTo>")) 
 				> db.inverseFunctionality(ByteString.of("<isMarriedTo>"))) {
-			q.setFunctionalVariable(ByteString.of("?x"));
+			q.setFunctionalVariablePosition(0);
 		} else {
-			q.setFunctionalVariable(ByteString.of("?y"));			
+			q.setFunctionalVariablePosition(2);			
 		}
 		q.setSupport(db.countPairs(ByteString.of("?x"), ByteString.of("?y"), q.getTriples()));	
 		HeadVariablesMiningAssistant assistant = new HeadVariablesMiningAssistant(db);

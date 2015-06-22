@@ -61,8 +61,7 @@ public class IterativeNaivePredictor {
 			for(Query rule: rules) {
 				// Readjust the scores
 				if (i > 0) { // Only the latter iterations will contain fuzzy facts.
-					miningAssistant.computeProbabilisticCardinality(rule);
-					miningAssistant.computeProbabilisticPCAConfidence(rule);
+					miningAssistant.computeProbabilisticMetrics(rule);
 					if (rule.getProbabilisticSupport() >= DefaultSupportThreshold
 							&& rule.getProbabilisticPCAConfidence() >= confidenceThreshold) {
 						finalRules.add(rule);
@@ -86,8 +85,7 @@ public class IterativeNaivePredictor {
 						miningAssistant.computePCAConfidence(combinedRule);						
 						computeCardinalityScore(prediction, false);
 					} else {
-						miningAssistant.computeProbabilisticCardinality(combinedRule);
-						miningAssistant.computeProbabilisticPCAConfidence(combinedRule);						
+						miningAssistant.computeProbabilisticMetrics(combinedRule);
 						computeCardinalityScore(prediction, true);
 					}
 				}

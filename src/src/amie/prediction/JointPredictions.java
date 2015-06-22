@@ -38,7 +38,7 @@ public class JointPredictions {
 		PredictionsSampler predictor = new PredictionsSampler(trainingDataset);
 		for (Query q : queries) {
 			ByteString[] head = q.getHead();
-			q.setFunctionalVariable(q.getHead()[Query.findFunctionalVariable(q, trainingDataset)]);
+			q.setFunctionalVariablePosition(Query.findFunctionalVariable(q, trainingDataset));
 			assistant.computeCardinality(q);
 			assistant.computePCAConfidence(q);
 			 

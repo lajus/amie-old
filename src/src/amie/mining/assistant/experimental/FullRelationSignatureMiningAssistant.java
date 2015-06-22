@@ -1,4 +1,4 @@
-package amie.mining.assistant;
+package amie.mining.assistant.experimental;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -6,6 +6,7 @@ import java.util.List;
 
 import javatools.datatypes.ByteString;
 import amie.data.FactDatabase;
+import amie.mining.assistant.HeadVariablesMiningAssistant;
 import amie.query.Query;
 
 public class FullRelationSignatureMiningAssistant extends HeadVariablesMiningAssistant {
@@ -23,7 +24,7 @@ public class FullRelationSignatureMiningAssistant extends HeadVariablesMiningAss
 			//Initial case
 			newEdge[1] = rdfType;
 			Query candidate = new Query(newEdge, minCardinality);
-			candidate.setFunctionalVariable(newEdge[0]);
+			candidate.setFunctionalVariablePosition(0);
 			registerHeadRelation(candidate);
 			getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), 2, minCardinality, output);
 		} else if (query.getLength() == 1) {

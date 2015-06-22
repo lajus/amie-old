@@ -209,18 +209,17 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	 * projection atom has been replaced by an existential variable.
 	 * @param query
 	 * @param projection
-	 * @param varToReplace the variable in the projection query that will be replaced by a fresh variable
+	 * @param valueToReplace the value (variable or constant) in the projection atom that will be replaced by a fresh variable
 	 * for the calculation of the existentialized support. 
 	 * @return An array of two doubles. The first one corresponds to the support of the query w.r.t the projection atom.
-	 * The second value is the existentialized support (both positives and negatives examples)
+	 * The second value is the existentialized support, that is, the count of positives and negative examples.
 	 */
-	public double[] probabilitiesOf(List<ByteString[]> query, ByteString[] projection, ByteString varToReplace) {
+	public double[] probabilitiesOf(List<ByteString[]> query, ByteString[] projection, ByteString valueToReplace) {
 		double result[] = new double[2];
 		result[0] = result[1] = 0.0;
 		ByteString[] existentializedProjection = projection.clone();
-		int replacePosition = varpos(varToReplace, existentializedProjection);
+		int replacePosition = varpos(valueToReplace, existentializedProjection);
 		existentializedProjection[replacePosition] = ByteString.of("?vx"); 
-		ByteString replacedVar = projection[replacePosition];
 		
 		ByteString var1 = existentializedProjection[replacePosition == 0 ? 2 : 0];
 		
@@ -252,14 +251,20 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 				double headProbability = aggregateProbabilities(headProbabilities);
 				result[1] += probability(headProbability, bodyProbabilities);
 				// Now check how many of these bindings are positive examples
-				Set<ByteString> allExamples = selectDistinct(replacedVar, fullQuery);
-				try (Instantiator insty2 = new Instantiator(fullQuery, replacedVar);) { // Instantiator of y on the rule B => r(x, y)
-					for (ByteString example : allExamples) {
-						insty2.instantiate(example);
-						headProbability = probabilityOfFact(projection);
-						bodyProbabilities = probabibilitiesOfQuery(query);
-						result[0] += probability(headProbability, bodyProbabilities);
+				if (isVariable(valueToReplace)) {
+					Set<ByteString> allExamples = selectDistinct(valueToReplace, fullQuery);
+					try (Instantiator insty2 = new Instantiator(fullQuery, valueToReplace);) { // Instantiator of y on the rule B => r(x, y)
+						for (ByteString example : allExamples) {
+							insty2.instantiate(example);
+							headProbability = probabilityOfFact(projection);
+							bodyProbabilities = probabibilitiesOfQuery(query);
+							result[0] += probability(headProbability, bodyProbabilities);
+						}
 					}
+				} else {
+					headProbability = probabilityOfFact(projection);
+					bodyProbabilities = probabibilitiesOfQuery(query);
+					result[0] += probability(headProbability, bodyProbabilities);
 				}
 			}
 		}
@@ -339,7 +344,15 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 		return sum;
 	}
 	
-	
+	/**
+	 * It calculates the probabilistic version of the number of distinct bindings for
+	 * variables var1 and var2 in the query.
+	 * @param query
+	 * @param projection
+	 * @param var1
+	 * @param var2
+	 * @return
+	 */
 	public double pcaProbabilityOf(List<ByteString[]> query, 
 			ByteString[] projection, ByteString var1, ByteString var2) {
 		ByteString existentialVariable = null;

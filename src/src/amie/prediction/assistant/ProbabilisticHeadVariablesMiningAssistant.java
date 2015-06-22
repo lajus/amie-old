@@ -1,8 +1,5 @@
 package amie.prediction.assistant;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javatools.datatypes.ByteString;
 import amie.data.FactDatabase;
 import amie.mining.assistant.HeadVariablesMiningAssistant;
@@ -14,42 +11,27 @@ public class ProbabilisticHeadVariablesMiningAssistant extends HeadVariablesMini
 	public ProbabilisticHeadVariablesMiningAssistant(FactDatabase dataSource) {
 		super(dataSource);
 	}
-
-	/**
-	 * It computes the probabilistic version of support of the given rule.
-	 * @param rule
-	 * @return
-	 */
-	public long computeProbabilisticCardinality(Query rule) {
-		HistogramTupleIndependentProbabilisticFactDatabase db = 
-				(HistogramTupleIndependentProbabilisticFactDatabase)source;
-		double probabilisticSupport = db.probabilityOf(rule.getBody(), rule.getHead());
-		rule.setProbabilisticSupport(probabilisticSupport);
-		return (long)probabilisticSupport;
-	}
 	
 	/**
-	 * It computes the probabilistic version of the PCA for the given rule.
+	 * It calculates the probabilistic versions of support and PCA confidence for the 
+	 * given rule and stores them in the corresponding fields in the rule object
+	 * (see getProbabilisticSupport() and getProbabilisticPCAConfidence())
+	 * @param rule
 	 */
-	public double computeProbabilisticPCAConfidence(Query rule) {
-		HistogramTupleIndependentProbabilisticFactDatabase db = 
-				(HistogramTupleIndependentProbabilisticFactDatabase)source;
+	public void computeProbabilisticMetrics(Query rule) {
+		HistogramTupleIndependentProbabilisticFactDatabase kb = 
+				(HistogramTupleIndependentProbabilisticFactDatabase) this.source;
 		ByteString[] head = rule.getHead();
-		ByteString[] existentialHead = head.clone();
-		if (source.isFunctional(head[1])) {
-			existentialHead[0] = ByteString.of("?x");
+		ByteString valueToReplace = null;
+		if (!FactDatabase.isVariable(head[2]) 
+				|| this.source.isFunctional(head[1])) {
+			valueToReplace = head[0];
 		} else {
-			existentialHead[2] = ByteString.of("?x");
+			valueToReplace = head[2];
 		}
-		List<ByteString[]> bodyPCA = new ArrayList<ByteString[]>();
-		bodyPCA.add(existentialHead);
-		for (ByteString[] atom : rule.getBody()) {
-			bodyPCA.add(atom);
-		}
-		double probabilisticSupport = db.probabilityOf(rule.getBody(), head);
-		double probabilisticPCABodySize = db.probabilityOf(bodyPCA, head);
-		rule.setProbabilisticSupport(probabilisticSupport);
-		rule.setProbabilisticPCABodySize(probabilisticPCABodySize);
-		return rule.getProbabilisticPCAConfidence();
+		
+		double[] supports = kb.probabilitiesOf(rule.getBody(), head, valueToReplace);
+		rule.setProbabilisticSupport(supports[0]);
+		rule.setProbabilisticPCABodySize(supports[1]);
 	}
 }
