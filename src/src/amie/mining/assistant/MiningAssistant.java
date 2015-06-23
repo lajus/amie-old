@@ -82,7 +82,7 @@ public class MiningAssistant{
 	/**
 	 * Contains the number of triples per relation in the database
 	 */
-	protected HashMap<String, Long> headCardinalities;
+	protected HashMap<String, Double> headCardinalities;
 
 	/**
 	 * Allow constants for refinements
@@ -179,7 +179,7 @@ public class MiningAssistant{
 		this.totalObjectCount = this.source.countDistinct(rootPattern[2], triples);
 		this.typeString = ByteString.of("rdf:type");
 		this.subPropertyString = ByteString.of("rdfs:subPropertyOf");
-		this.headCardinalities = new HashMap<String, Long>();
+		this.headCardinalities = new HashMap<String, Double>();
 		ByteString[] subclassPattern = Query.fullyUnboundTriplePattern1();
 		subclassPattern[1] = subPropertyString;
 		this.subclassQuery = new Query(subclassPattern, 0);
@@ -197,7 +197,7 @@ public class MiningAssistant{
 		Collection<ByteString> relations = source.getRelations();
 		for (ByteString relation : relations) {
 			ByteString[] query = FactDatabase.triple(ByteString.of("?x"), relation, ByteString.of("?y"));
-			long relationSize = source.count(query);
+			double relationSize = source.count(query);
 			headCardinalities.put(relation.toString(), relationSize);
 		}
 	}
@@ -296,18 +296,18 @@ public class MiningAssistant{
 	}
 
 	public boolean registerHeadRelation(Query query){		
-		return headCardinalities.put(query.getHeadRelation(), new Long(query.getSupport())) == null;		
+		return headCardinalities.put(query.getHeadRelation(), new Double(query.getSupport())) == null;		
 	}
 	
 	public long getHeadCardinality(Query query){
 		return headCardinalities.get(query.getHeadRelation()).longValue();
 	}
 	
-	public long getRelationCardinality(String relation) {
+	public double getRelationCardinality(String relation) {
 		return headCardinalities.get(relation);
 	}
 	
-	public long getRelationCardinality(ByteString relation) {
+	public double getRelationCardinality(ByteString relation) {
 		return headCardinalities.get(relation.toString());
 	}
 
@@ -953,7 +953,7 @@ public class MiningAssistant{
 	 * @param rule
 	 * @return
 	 */
-	public long computeCardinality(Query rule) {
+	public double computeCardinality(Query rule) {
 		ByteString[] head = rule.getHead();
 		ByteString countVariable = null;
 		if (countAlwaysOnSubject) {
@@ -995,7 +995,7 @@ public class MiningAssistant{
 			antecedent.add(existentialTriple);
 			try{
 				pcaDenominator = source.countDistinct(rule.getFunctionalVariable(), antecedent);
-				rule.setBodyStarSize(pcaDenominator);
+				rule.setPcaBodySize(pcaDenominator);
 			}catch(UnsupportedOperationException e){
 				
 			}

@@ -31,7 +31,7 @@ public class ProbabilisticHeadVariablesMiningAssistant extends HeadVariablesMini
 		}
 		
 		double[] supports = kb.probabilitiesOf(rule.getBody(), head, valueToReplace);
-		rule.setProbabilisticSupport(supports[0]);
-		rule.setProbabilisticPCABodySize(supports[1]);
+		rule.setSupport(supports[0]);
+		rule.setPcaBodySize(supports[1]);
 	}
 }

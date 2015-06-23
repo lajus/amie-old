@@ -21,10 +21,13 @@ public class TupleIndependentFactDatabaseTest extends TestCase {
 	
 	public static TupleIndependentFactDatabase kb3;
 	
+	public static TupleIndependentFactDatabase kb4;
+	
 	static {
 		kb1 = new TupleIndependentFactDatabase();
 		kb2 = new TupleIndependentFactDatabase();
 		kb3 = new TupleIndependentFactDatabase();
+		kb4 = new TupleIndependentFactDatabase();
 		
 		kb1.add("<Francois>", "<livesIn>", "<Paris>");
 		kb1.add("<Francois>", "<livesIn>", "<Nantes>");
@@ -82,6 +85,30 @@ public class TupleIndependentFactDatabaseTest extends TestCase {
 		kb3.add("<Louis>", "<isCitizenOf>", "<France>");
 		kb3.add("<Danai>", "<isCitizenOf>", "<Greece>");
 		kb3.add("<Romain>", "<isCitizenOf>", "<France>");		
+		
+		// More examples
+		kb4.add( "<French>", "<spokenBy>", "<Louis>");
+		kb4.add("<French>", "<spokenBy>", "<Jean>");
+		kb4.add("<French>", "<spokenBy>" , "<Danai>");
+		kb4.add("<French>", "<spokenBy>", "<Romain>");
+		kb4.add("<Spanish>", "<spokenBy>", "<Jorge>");
+		kb4.add("<Kichwa>",  "<spokenBy>", "<Jorge>");
+		kb4.add("<Spanish>", "<spokenBy>", "<Paulina>");
+		kb4.add("<English>", "<spokenBy>", "<Jessica>");
+		
+		kb4.add("<Ecuador>", "<hasLanguage>", "<Spanish>");
+		kb4.add("<Mexiko>", "<hasLanguage>", "<Spanish>");
+		kb4.add("<France>", "<hasLanguage>", "<French>");
+		kb4.add("<Germany>", "<hasLanguage>", "<German>");
+		
+		kb4.add("<Louis>", "<isCitizenOf>", "<France>");
+		kb4.add("<Jean>", "<isCitizenOf>", "<France>");
+		kb4.add("<Danai>", "<isCitizenOf>", "<Greece>");
+		kb4.add("<Romain>", "<isCitizenOf>", "<France>");
+		kb4.add("<Jorge>", "<isCitizenOf>", "<Ecuador>");
+		kb4.add("<Paulina>", "<isCitizenOf>", "<Spanish>");
+		kb4.add("<Paulina>", "<isCitizenOf>", "<Mexiko>");
+		kb4.add("<Jessica>", "<isCitizenOf>", "<Ecuador>");
 	}
 	
 	public void test0() {
@@ -131,6 +158,9 @@ public class TupleIndependentFactDatabaseTest extends TestCase {
 		assertEquals(scores[0], scores[1], 0.00000001);
 	}
 	
+	/**
+	 * Test on rules in general
+	 */
 	public void test3() {	
 		List<ByteString[]> body3 = FactDatabase.triples(
 				FactDatabase.triple("?a", "<livesIn>", "?c"),
@@ -151,6 +181,9 @@ public class TupleIndependentFactDatabaseTest extends TestCase {
 		assertEquals(scores2[1], scores2[0] + 0.35, 0.00000001);
 	}
 	
+	/**
+	 * Equivalence to original formula on rules with constants
+	 */
 	public void test4() {
 		List<ByteString[]> body4 = FactDatabase.triples(
 				FactDatabase.triple("?a", "<speaks>", "<French>"));
@@ -167,6 +200,9 @@ public class TupleIndependentFactDatabaseTest extends TestCase {
 		assertEquals((double)pcaBody, scores[1], 0.00000001);
 	}
 	
+	/**
+	 * Test on rules with constants.
+	 */
 	public void test5() {
 		List<ByteString[]> body5 = FactDatabase.triples(
 				FactDatabase.triple("?a", "<speaks>", "<French>"));
@@ -191,5 +227,22 @@ public class TupleIndependentFactDatabaseTest extends TestCase {
 		
 		assertEquals(scores1[0] + 0.64 + 0.64, scores2[0], 0.00000001);
 		assertEquals(scores1[1] + 0.64 + 0.768, scores2[1], 0.00000001);
+	}
+	
+	public void test6() {
+		List<ByteString[]> body6 = FactDatabase.triples(
+				FactDatabase.triple("?a", "<isCitizenOf>", "?b"),
+				FactDatabase.triple("?b", "<hasLanguage>", "?c"));
+		
+		ByteString[] head6 = FactDatabase.triple("?c", "<spokenBy>", "?a");
+		List<ByteString[]> rule6 = new ArrayList<ByteString[]>();
+		rule6.add(head6);
+		rule6.addAll(body6);
+		double scores[] = kb4.probabilitiesOf(body6, head6, ByteString.of("?c"));
+		long support = kb4.countPairs(ByteString.of("?a"), ByteString.of("?c"), rule6);
+		head6[0] = ByteString.of("?y");
+		long pcaBody = kb4.countPairs(ByteString.of("?a"), ByteString.of("?c"), rule6);
+		assertEquals((double)support, scores[0], 0.00000001);
+		assertEquals((double)pcaBody, scores[1], 0.00000001);
 	}
 }

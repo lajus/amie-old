@@ -575,7 +575,7 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 		return result;		
 	}
 
-	public long computeCardinality(Query rule) {
+	public double computeCardinality(Query rule) {
 		if (rule.isEmpty()) {
 			rule.setSupport(0l);
 			rule.setHeadCoverage(0.0);
@@ -588,7 +588,7 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 				rule.setSupport(this.source.countDistinct(rule.getFunctionalVariable(), rule.getTriples()));
 			}
 			rule.setSupportRatio((double) rule.getSupport() / this.source.size());
-			Long relationSize = this.headCardinalities.get(head[1].toString());
+			Double relationSize = this.headCardinalities.get(head[1].toString());
 			if (relationSize != null) {
 				rule.setHeadCoverage(rule.getSupport() / relationSize.doubleValue());
 			}
@@ -630,7 +630,7 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 					pcaDenominator = (double)this.source.countPairs(succedent[0], succedent[2], antecedent);					
 				}
 				pcaConfidence = (double)rule.getSupport() / pcaDenominator;
-				rule.setBodyStarSize((long)pcaDenominator);
+				rule.setPcaBodySize((long)pcaDenominator);
 			}catch(UnsupportedOperationException e){
 				
 			}

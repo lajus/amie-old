@@ -47,7 +47,7 @@ public class Query{
 	/**
 	 * Absolute number of bindings of the projection variables of the query (positive examples)
 	 */
-	long support;
+	double support;
 	
 	/**
 	 * In AMIE the cardinality may change when the rule is enhanced with "special" atoms
@@ -98,7 +98,7 @@ public class Query{
 	/**
 	 * Body - Head* (existential version of the head)
 	 */
-	private long pcaBodySize;
+	private double pcaBodySize;
 	
 	/**
 	 * Highest letter used for variable names
@@ -423,7 +423,7 @@ public class Query{
 	/**
 	 * @return the headBodyCount
 	 */
-	public long getSupport() {
+	public double getSupport() {
 		return support;
 	}
 	
@@ -438,7 +438,7 @@ public class Query{
 	/**
 	 * @param headBodyCount the headBodyCount to set
 	 */
-	public void setSupport(long cardinality) {
+	public void setSupport(double cardinality) {
 		this.support = cardinality;
 	}
 
@@ -484,7 +484,7 @@ public class Query{
 	 * @return the pcaConfidence
 	 */
 	public double getPcaConfidence() {
-		return (double) support / pcaBodySize;
+		return support / pcaBodySize;
 	}
 
 	public double getConfidenceRunningTime() {
@@ -1116,7 +1116,7 @@ public class Query{
 		strBuilder.append("\t" + df.format(getPcaConfidence()));
 		strBuilder.append("\t" + getSupport());		
 		strBuilder.append("\t" + getBodySize());
-		strBuilder.append("\t" + getBodyStarSize());
+		strBuilder.append("\t" + getPcaBodySize());
 		strBuilder.append("\t" + getFunctionalVariable());
 		strBuilder.append("\t" + _stdConfUpperBound);
 		strBuilder.append("\t" + _pcaConfUpperBound);
@@ -1139,7 +1139,7 @@ public class Query{
 		strBuilder.append("\t" + df.format(getPcaConfidence()));
 		strBuilder.append("\t" + getSupport());		
 		strBuilder.append("\t" + getBodySize());
-		strBuilder.append("\t" + getBodyStarSize());
+		strBuilder.append("\t" + getPcaBodySize());
 		strBuilder.append("\t" + getFunctionalVariable());
 
 		return strBuilder.toString();
@@ -1242,12 +1242,11 @@ public class Query{
 		return bodyMinusHeadSize;
 	}
 
-	public void setBodyStarSize(long size) {
-		// TODO Auto-generated method stub
+	public void setPcaBodySize(double size) {
 		pcaBodySize = size;
 	}
 	
-	public long getBodyStarSize(){
+	public double getPcaBodySize(){
 		return pcaBodySize;
 	}
 

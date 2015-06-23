@@ -74,50 +74,48 @@ public class KeyMinerMiningAssistant extends HeadVariablesMiningAssistant {
 		}
 		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();			
-		// This loop applies only to positions 0 and 2
-		for(int joinPosition = 0; joinPosition <= 2; joinPosition += 2){			
-			ByteString[] newEdge1 = newEdge.clone();
-			ByteString[] newEdge2 = newEdge.clone();
+		int joinPosition = 0;
+		ByteString[] newEdge1 = newEdge.clone();
+		ByteString[] newEdge2 = newEdge.clone();
+		
+		newEdge1[joinPosition] = joinVariables.get(0);
+		newEdge2[joinPosition] = joinVariables.get(1);
+		query.getTriples().add(newEdge1);
+		IntHashMap<ByteString> promisingRelations = this.source.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge1[1]);
+		query.getTriples().remove(nPatterns);
+		
+		for(ByteString relation: promisingRelations){
+			int cardinality = promisingRelations.get(relation);
 			
-			newEdge1[joinPosition] = joinVariables.get(0);
-			newEdge2[joinPosition] = joinVariables.get(1);
-			query.getTriples().add(newEdge1);
-			IntHashMap<ByteString> promisingRelations = this.source.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge1[1]);
-			query.getTriples().remove(nPatterns);
+			if (cardinality < minCardinality) {
+				continue;
+			}			
 			
-			for(ByteString relation: promisingRelations){
-				int cardinality = promisingRelations.get(relation);
-				
-				if (cardinality < minCardinality) {
-					continue;
-				}			
-				
-				// Language bias test
-				if (query.cardinalityForRelation(relation) >= recursivityLimit) {
-					continue;
-				}
-				
-				if (bodyExcludedRelations != null 
-						&& bodyExcludedRelations.contains(relation)) {
-					continue;
-				}
-				
-				if (bodyTargetRelations != null 
-						&& !bodyTargetRelations.contains(relation)) {
-					continue;
-				}
-				
-				newEdge1[1] = relation;
-				newEdge2[1] = relation;
-				
-				Query candidate = query.addEdges(newEdge1, newEdge2);
-				computeCardinality(candidate);
-				if (candidate.getSupport() < minCardinality) {
-					continue;
-				}
-				candidate.setParent(query);	
-				output.add(candidate);
+			// Language bias test
+			if (query.cardinalityForRelation(relation) >= recursivityLimit) {
+				continue;
 			}
+			
+			if (bodyExcludedRelations != null 
+					&& bodyExcludedRelations.contains(relation)) {
+				continue;
+			}
+			
+			if (bodyTargetRelations != null 
+					&& !bodyTargetRelations.contains(relation)) {
+				continue;
+			}
+			
+			newEdge1[1] = relation;
+			newEdge2[1] = relation;
+			
+			Query candidate = query.addEdges(newEdge1, newEdge2);
+			computeCardinality(candidate);
+			if (candidate.getSupport() < minCardinality) {
+				continue;
+			}
+			candidate.setParent(query);	
+			output.add(candidate);
 		}
 	}
 }

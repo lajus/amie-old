@@ -308,7 +308,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 			antecedent.add(existentialTriple);
 			try{
 				pcaDenominator = this.source.countDistinct(candidate.getFunctionalVariable(), antecedent);
-				candidate.setBodyStarSize(pcaDenominator);
+				candidate.setPcaBodySize(pcaDenominator);
 			}catch(UnsupportedOperationException e){
 				
 			}

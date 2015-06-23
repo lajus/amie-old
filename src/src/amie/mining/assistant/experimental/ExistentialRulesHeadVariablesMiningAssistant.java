@@ -78,7 +78,7 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 						}			
 					}
 					
-					candidate.setBodyStarSize((long)pcaDenominator);
+					candidate.setPcaBodySize((long)pcaDenominator);
 				}catch(UnsupportedOperationException e){
 					
 				}

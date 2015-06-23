@@ -236,35 +236,49 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 		fullExistQuery.addAll(query);
 		fullExistQuery.add(existentializedProjection);
 		
-		// Iterate over the bindings of one variable in the relation		
-		Set<ByteString> entities = selectDistinct(var1, fullExistQuery);
-		
-		try (Instantiator insty1 = new Instantiator(query, var1); // Instantiator of x on the body B of the rule B => r(x, y)
-				Instantiator headExistInsty1 = new Instantiator(listExistential, var1); // Instantiator of x on the existentialized head r(x, y')
-				Instantiator headInst1 = new Instantiator(listProjection, var1); ) { // Instantiator of x on the original head atom r(x, y)  
-			for (ByteString val1 : entities) {
-				insty1.instantiate(val1);
-				headExistInsty1.instantiate(val1);
-				headInst1.instantiate(val1);
-				List<Double> bodyProbabilities = probabibilitiesOfQuery(query); // Body probability
-				List<Double> headProbabilities = probabibilitiesOfQuery(listExistential);
-				double headProbability = aggregateProbabilities(headProbabilities);
-				result[1] += probability(headProbability, bodyProbabilities);
-				// Now check how many of these bindings are positive examples
-				if (isVariable(valueToReplace)) {
-					Set<ByteString> allExamples = selectDistinct(valueToReplace, fullQuery);
-					try (Instantiator insty2 = new Instantiator(fullQuery, valueToReplace);) { // Instantiator of y on the rule B => r(x, y)
-						for (ByteString example : allExamples) {
-							insty2.instantiate(example);
-							headProbability = probabilityOfFact(projection);
-							bodyProbabilities = probabibilitiesOfQuery(query);
-							result[0] += probability(headProbability, bodyProbabilities);
-						}
-					}
-				} else {
+		if (numVariables(projection) == 1) {
+			// Iterate over the bindings of one variable in the relation		
+			Set<ByteString> entities = selectDistinct(var1, fullExistQuery);		
+			try (Instantiator insty1 = new Instantiator(query, var1); // Instantiator of x on the body B of the rule B => r(x, y)
+					Instantiator headExistInsty1 = new Instantiator(listExistential, var1); // Instantiator of x on the existentialized head r(x, y')
+					Instantiator headInst1 = new Instantiator(listProjection, var1); ) { // Instantiator of x on the original head atom r(x, y)  
+				for (ByteString val1 : entities) {
+					insty1.instantiate(val1);
+					headExistInsty1.instantiate(val1);
+					headInst1.instantiate(val1);
+					List<Double> bodyProbabilities = probabibilitiesOfQuery(query); // Body probability
+					List<Double> headProbabilities = probabibilitiesOfQuery(listExistential);
+					// For the denominator
+					double headProbability = aggregateProbabilities(headProbabilities);
+					result[1] += probability(headProbability, bodyProbabilities);					
+					// For the numerator
 					headProbability = probabilityOfFact(projection);
-					bodyProbabilities = probabibilitiesOfQuery(query);
 					result[0] += probability(headProbability, bodyProbabilities);
+				}
+			}
+		} else {
+			Map<ByteString, IntHashMap<ByteString>> entities = selectDistinct(var1, valueToReplace, fullExistQuery);
+			try (Instantiator insty1 = new Instantiator(query, var1); // Instantiator of x on the body B of the rule B => r(x, y)
+					Instantiator insty2 = new Instantiator(query, valueToReplace); // Instantiator of y on the body B of the rule B => r(x, y)
+					Instantiator headExistInsty1 = new Instantiator(listExistential, var1); // Instantiator of x on the existentialized head r(x, y')
+					Instantiator headInst1 = new Instantiator(listProjection, var1); // Instantiator of x on the original head atom r(x, y)
+					Instantiator headInst2 = new Instantiator(listProjection, valueToReplace)) { // Instantiator of y on the original head atom r(x, y)  
+				for (ByteString val1 : entities.keySet()) {
+					insty1.instantiate(val1);
+					headExistInsty1.instantiate(val1);
+					headInst1.instantiate(val1);
+					IntHashMap<ByteString> objects = entities.get(val1);
+					for (ByteString val2 : objects) {
+						headInst2.instantiate(val2);
+						insty2.instantiate(val2);
+						List<Double> bodyProbabilities = probabibilitiesOfQuery(query); // Body probability
+						List<Double> headProbabilities = probabibilitiesOfQuery(listExistential);						
+						// For the denominator
+						double headProbability = aggregateProbabilities(headProbabilities);
+						result[1] += probability(headProbability, bodyProbabilities);					
+						headProbability = probabilityOfFact(projection);
+						result[0] += probability(headProbability, bodyProbabilities);
+					}
 				}
 			}
 		}
@@ -279,17 +293,12 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	 * @return
 	 */
 	private double aggregateProbabilities(List<Double> probabilities) {
-		double total = 0.0;
-		
-		//double total = 1.0;
+		double total = 1.0;
 		for (Double prob : probabilities) {
-			total += prob.doubleValue();
-			//total *= (1.0 - prob.doubleValue());
+			total *= (1.0 - prob.doubleValue());
 		}
 		
-		//return 1.0 - total;
-		return total;
-
+		return 1.0 - total;
 	}
 
 	/**

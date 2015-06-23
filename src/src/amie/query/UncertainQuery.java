@@ -60,7 +60,7 @@ public class UncertainQuery extends Query {
 		strBuilder.append("\t" + df.format(getPcaConfidence()));
 		strBuilder.append("\t" + getSupport());		
 		strBuilder.append("\t" + getBodySize());
-		strBuilder.append("\t" + getBodyStarSize());
+		strBuilder.append("\t" + getPcaBodySize());
 		strBuilder.append("\t" + getFunctionalVariable());
 
 		return strBuilder.toString();

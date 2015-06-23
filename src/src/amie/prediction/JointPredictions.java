@@ -16,6 +16,7 @@ import amie.data.FactDatabase;
 import amie.data.eval.Evaluator;
 import amie.data.eval.PredictionsSampler;
 import amie.mining.assistant.HeadVariablesMiningAssistant;
+import amie.prediction.assistant.ProbabilisticHeadVariablesMiningAssistant;
 import amie.query.AMIEreader;
 import amie.query.Query;
 import amie.utils.Utils;
@@ -95,10 +96,12 @@ public class JointPredictions {
 	 * @param queries
 	 * @param trainingDataset
 	 * @param targetDataset
+	 * @param miningAssistant 
 	 * @return
 	 */
 	public static List<Prediction> getPredictions(List<Query> queries, 
-			FactDatabase trainingDataset, FactDatabase targetDataset, boolean notInTraining) {
+			FactDatabase trainingDataset, FactDatabase targetDataset, 
+			ProbabilisticHeadVariablesMiningAssistant miningAssistant, boolean notInTraining) {
 		List<Prediction> result = new ArrayList<>();
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions =
 				findPredictionsForRules(queries, trainingDataset, targetDataset, notInTraining);
@@ -115,7 +118,29 @@ public class JointPredictions {
 				prediction.setHitInTraining(true);
 			}
 			
-			result.add(prediction);
+			// First calculate the confidence of the combined rule
+			/*Query combinedRule = prediction.getJointRule();
+			
+			if (combinedRule != prediction.getRules().get(0)) {
+				if (i == 0) {
+					miningAssistant.computeCardinality(combinedRule);
+					miningAssistant.computePCAConfidence(combinedRule);						
+					computeCardinalityScore(prediction, false);
+				} else {
+					miningAssistant.computeProbabilisticMetrics(combinedRule);
+					computeCardinalityScore(prediction, true);
+				}
+			}
+			
+			double finalConfidence = prediction.getFullScore();
+			if (finalConfidence >= confidenceThreshold) {
+				++addedPredictions;
+				resultingPredictions.add(prediction);
+				prediction.setIterationId(i + 1);
+				ByteString[] triple = prediction.getTriple();
+				trainingDb.add(triple[0], triple[1], triple[2], finalConfidence);
+			
+			result.add(prediction);*/
 		}
 		
 		return result;
@@ -163,92 +188,12 @@ public class JointPredictions {
 		
 		return result;
 	}
-
-
-	public static void main(String[] args) throws IOException {
-		if(args.length < 3){
-			System.err.println("JointPredictions <inputfile> <trainingDb> <targetDb> <not-in-training>");
-			System.exit(1);
-		}
-		
-		File inputFile = new File(args[0]);		
-		FactDatabase trainingDataset = new FactDatabase();
-		FactDatabase targetDataset = new FactDatabase();		
-		TSVFile tsvFile = new TSVFile(inputFile);
-		
-		IntHashMap<Integer> hitsInTargetHistogram = new IntHashMap<>();
-		IntHashMap<Integer> hitsInTargetNotInSourceHistogram = new IntHashMap<>();
-		IntHashMap<Integer> predictionsHistogram = new IntHashMap<>();
-		
-		int rawHitsInTargetNotInTraining = 0;
-		int hitsInTarget = 0;
-		int rawHitsInTarget = 0;
-		int rawHitsInTraining = 0;
-		int hitsInTraining = 0;
-		int hitsInTargetNotInTraining = 0;
-		
-		// Load the data
-		trainingDataset.load(new File(args[1]));
-		targetDataset.load(new File(args[2]));
-		
-		List<Query> queries = new ArrayList<>();
-		boolean notInTraining = Boolean.parseBoolean(args[3]);
-		
-		// Parse the rules
-		for(List<String> record: tsvFile) {
-			Query q = AMIEreader.rule(record.get(0));
-			if(q == null) {
-				continue;
-			}
-			queries.add(q);			
-		}
-		tsvFile.close();
-		
-		List<Prediction> predictions = getPredictions(queries, trainingDataset, targetDataset, notInTraining);
-
-		
-		for (Prediction prediction : predictions) {
-			predictionsHistogram.increase(prediction.getRules().size());
-			
-			if(prediction.isHitInTarget()) { 
-				++hitsInTarget;
-				rawHitsInTarget += prediction.getRules().size();
-				hitsInTargetHistogram.increase(prediction.getRules().size());
-			}
-			
-			if(prediction.isHitInTraining()) {
-				++hitsInTraining;
-				rawHitsInTraining += prediction.getRules().size();
-			} else {
-				if (prediction.isHitInTarget()) {
-					++hitsInTargetNotInTraining;
-					rawHitsInTargetNotInTraining += prediction.getRules().size();
-					hitsInTargetNotInSourceHistogram.increase(prediction.getRules().size());
-				}
-			}
-			
-			System.out.println(prediction);
-		}
-		
-		System.out.println("Total unique predictions\tTotal Hits in target"
-				+ "\tTotal unique hits in target\tTotal hits on training"
-				+ "\tTotal unique hits in training\tTotal hits in target not in training"
-				+ "\tTotal unique hits in target not in training");
-		System.out.println(predictions.size() + 
-				"\t" + rawHitsInTarget + "\t" + hitsInTarget + 
-				"\t" + rawHitsInTraining + "\t" + hitsInTraining + 
-				"\t" + rawHitsInTargetNotInTraining + "\t" + hitsInTargetNotInTraining);
-		
-		System.out.println("Predictions histogram");
-		Utils.printHistogram(predictionsHistogram);
-		
-		System.out.println("Hits in target histogram");
-		Utils.printHistogram(hitsInTargetHistogram);
-		
-		System.out.println("Hits In target but not in training histogram");
-		Utils.printHistogram(hitsInTargetNotInSourceHistogram);
-	}
-
+	/**
+	 * Add a pair triple/query to a map.
+	 * @param predictions
+	 * @param prediction
+	 * @param q
+	 */
 	private static void add2Map(
 			Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions,
 			Triple<ByteString, ByteString, ByteString> prediction, Query q) {
@@ -261,4 +206,7 @@ public class JointPredictions {
 		queries.add(q);
 	}
 
+	public static void main(String[] args) throws IOException {
+
+	}
 }

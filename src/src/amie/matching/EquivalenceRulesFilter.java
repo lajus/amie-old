@@ -54,7 +54,7 @@ public class EquivalenceRulesFilter {
 				candidate.setBodySize((int)denominator);
 				antecedent.add(existentialTriple);
 				improvedDenominator = source.countPairs(var1, var2, antecedent);
-				candidate.setBodyStarSize((int)improvedDenominator);
+				candidate.setPcaBodySize((int)improvedDenominator);
 			}else if(FactDatabase.numVariables(head) == 1){
 				ByteString var = head[FactDatabase.firstVariablePos(head)];				
 				numerator = source.countDistinct(var, candidate.getTriples());
@@ -63,7 +63,7 @@ public class EquivalenceRulesFilter {
 				improvedDenominator = source.countDistinct(var, antecedent);				
 				candidate.setSupport((int)numerator);
 				candidate.setBodySize((int)denominator);
-				candidate.setBodyStarSize((int)improvedDenominator);
+				candidate.setPcaBodySize((int)improvedDenominator);
 			}
 		}catch(UnsupportedOperationException e){
 			
@@ -151,8 +151,8 @@ public class EquivalenceRulesFilter {
 					calculateMetrics(source, rules.get(j));
 					intersection = calculateIntersection(source, rules.get(i));
 					union = calculateUnion(source, rules.get(i));
-					double pcaConf1 = (double)rules.get(i).getSupport() / (double)rules.get(i).getBodyStarSize();
-					double pcaConf2 = (double)rules.get(j).getSupport() / (double)rules.get(j).getBodyStarSize();
+					double pcaConf1 = (double)rules.get(i).getSupport() / (double)rules.get(i).getPcaBodySize();
+					double pcaConf2 = (double)rules.get(j).getSupport() / (double)rules.get(j).getPcaBodySize();
 					System.out.println(FactDatabase.toString(rules.get(i).getHead()) + " <=> " + FactDatabase.toString(rules.get(i).getBody().get(0)) + "\t" + intersection  + "\t" + union + "\t" + pcaConf1 + "\t" + pcaConf2);
 					//System.out.println(FactDatabase.toString(rules.get(i).getHead()) + " <=> " + FactDatabase.toString(rules.get(i).getBody().get(0)));					
 					break;
