@@ -53,7 +53,9 @@ public class TupleIndependentFactDatabaseTest extends TestCase {
 		kb1.add("<Francois>", "<isCitizenOf>", "<France>");
 		
 		kb1.add("<Antoine>", "<isCitizenOf>", "<France>");
-		
+
+		kb1.add("<Danai>", "<isCitizenOf>", "<France>");		
+
 		kb1.add("<Danai>", "<isCitizenOf>", "<Greece>");
 		
 		// Probabilistic triples

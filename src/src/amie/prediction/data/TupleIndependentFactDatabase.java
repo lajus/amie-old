@@ -279,12 +279,17 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	 * @return
 	 */
 	private double aggregateProbabilities(List<Double> probabilities) {
-		double total = 1.0;
+		double total = 0.0;
+		
+		//double total = 1.0;
 		for (Double prob : probabilities) {
-			total *= (1.0 - prob.doubleValue());
+			total += prob.doubleValue();
+			//total *= (1.0 - prob.doubleValue());
 		}
 		
-		return 1.0 - total;
+		//return 1.0 - total;
+		return total;
+
 	}
 
 	/**

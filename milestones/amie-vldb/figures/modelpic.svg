@@ -12,7 +12,7 @@
    viewBox="0 0 1024 768"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.3.1 r"
+   inkscape:version="0.48.4 r9939"
    width="100%"
    height="100%"
    sodipodi:docname="modelpic.svg">
@@ -24,6 +24,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -36,15 +37,15 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1366"
-     inkscape:window-height="718"
+     inkscape:window-width="1855"
+     inkscape:window-height="1056"
      id="namedview60"
      showgrid="false"
      inkscape:zoom="0.86915208"
      inkscape:cx="297.59618"
      inkscape:cy="581.77194"
-     inkscape:window-x="0"
-     inkscape:window-y="25"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg2" />
   <defs
@@ -74,6 +75,7 @@
     </font-face-uri>
   </font-face-src>
 </font-face>
+
 &gt;
     <marker
    id="mblack"
@@ -154,7 +156,10 @@
      stroke="blue"
      stroke-width="3"
      id="ellipse26"
-     style="stroke:#000000;stroke-opacity:1" />
+     style="stroke:#000000;stroke-opacity:1"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90" />
   <text
      fill="blue"
      font-family="Fabiana, sans-serif"
@@ -163,7 +168,10 @@
      y="47"
      id="text28"
      style="fill:#000000;fill-opacity:1;-inkscape-font-specification:DejaVu Sans Oblique;font-family:DejaVu Sans;font-weight:normal;font-style:oblique;font-stretch:normal;font-variant:normal;font-size:25px;text-anchor:start;text-align:start;writing-mode:lr;line-height:125%"
-     sodipodi:linespacing="125%">Predictions</text>
+     sodipodi:linespacing="125%"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90">Predictions</text>
   <text
      fill="blue"
      font-family="Fabiana, sans-serif"
@@ -171,7 +179,10 @@
      x="359"
      y="125"
      id="text30"
-     style="fill:#000000;fill-opacity:1">A</text>
+     style="fill:#000000;fill-opacity:1"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90">A</text>
   <text
      fill="blue"
      font-family="Fabiana, sans-serif"
@@ -179,7 +190,10 @@
      x="504"
      y="126"
      id="text32"
-     style="fill:#000000;fill-opacity:1">B</text>
+     style="fill:#000000;fill-opacity:1"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90">B</text>
   <text
      fill="blue"
      font-family="Fabiana, sans-serif"
@@ -187,7 +201,10 @@
      x="361"
      y="237"
      id="text34"
-     style="fill:#000000;fill-opacity:1">C</text>
+     style="fill:#000000;fill-opacity:1"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90">C</text>
   <text
      fill="blue"
      font-family="Fabiana, sans-serif"
@@ -195,63 +212,90 @@
      x="507"
      y="234"
      id="text36"
-     style="fill:#000000;fill-opacity:1">D</text>
+     style="fill:#000000;fill-opacity:1"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90">D</text>
   <text
      fill="black"
      font-family="Fabiana, sans-serif"
      font-size="30"
      x="40"
      y="30"
-     id="text38">KBtrue</text>
+     id="text38"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90">KBtrue</text>
   <text
      fill="black"
      font-family="Fabiana, sans-serif"
      font-size="30"
      x="40"
      y="335"
-     id="text40">KBfalse</text>
+     id="text40"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90">KBfalse</text>
   <text
      fill="black"
      font-family="Fabiana, sans-serif"
      font-size="30"
      x="700"
      y="30"
-     id="text42">NEWtrue</text>
+     id="text42"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90">NEWtrue</text>
   <text
      fill="black"
      font-family="Fabiana, sans-serif"
      font-size="30"
      x="700"
      y="335"
-     id="text44">NEWfalse</text>
+     id="text44"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90">NEWfalse</text>
   <text
      fill="black"
      font-family="Fabiana, sans-serif"
      font-size="30"
      x="920"
      y="92"
-     id="text46">true</text>
+     id="text46"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90">true</text>
   <text
      fill="black"
      font-family="Fabiana, sans-serif"
      font-size="30"
      x="920"
      y="262"
-     id="text48">false</text>
+     id="text48"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90">false</text>
   <text
      fill="black"
      font-family="Fabiana, sans-serif"
      font-size="30"
      x="54"
      y="390"
-     id="text50">known to KB</text>
+     id="text50"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90">known to KB</text>
   <text
      fill="black"
      font-family="Fabiana, sans-serif"
      font-size="30"
      x="473"
      y="390"
-     id="text52">unknown to KB</text>
+     id="text52"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90">unknown to KB</text>
   <rect
      fill="none"
      height="350"
@@ -260,7 +304,10 @@
      width="860"
      x="30"
      y="2"
-     id="rect54" />
+     id="rect54"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90" />
   <line
      stroke="black"
      stroke-width="3"
@@ -268,7 +315,10 @@
      x2="1020"
      y1="175"
      y2="175"
-     id="line56" />
+     id="line56"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90" />
   <line
      stroke="black"
      stroke-width="3"
@@ -276,5 +326,8 @@
      x2="445"
      y1="3"
      y2="420"
-     id="line58" />
+     id="line58"
+     inkscape:export-filename="/home/luis/Documents/ontologies/amie/milestones/amie-vldb/figures/model.png"
+     inkscape:export-xdpi="90"
+     inkscape:export-ydpi="90" />
 </svg>

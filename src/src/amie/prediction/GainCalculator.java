@@ -25,7 +25,7 @@ public class GainCalculator {
 					continue;
 				}*/
 				rule.setSupport(Long.parseLong(line.get(5)));
-				rule.setPcaConfidence(Double.parseDouble(line.get(4)));
+//				rule.setPcaConfidence(Double.parseDouble(line.get(4)));
 				rules.add(rule);
 			}
 		}
