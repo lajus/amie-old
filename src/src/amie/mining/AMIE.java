@@ -1117,8 +1117,8 @@ public class AMIE {
 		Announce.done("Total time " + NumberFormatter.formatMS(miningTime + sourcesLoadingTime));
 	}
 
-	public void setCheckParentsOfDegree2(boolean b) {
-		this._checkParentsOfDegree2 = b;
+	public void setCheckParentsOfDegree2(boolean booleanVal) {
+		this._checkParentsOfDegree2 = booleanVal;
 	}
 
 	/**

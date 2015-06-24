@@ -55,6 +55,11 @@ public class IterativeNaivePredictor {
 		this.testingDb = testing;
 		this.pcaConfidenceThreshold = DefaultPCAConfidenceThreshold;
 		this.allowTypes = allowTypes;
+		if (allowTypes) {
+			miningAssistant = new TypedProbabilisticMiningAssistant(trainingDb);
+		} else {
+			miningAssistant = new ProbabilisticHeadVariablesMiningAssistant(trainingDb);
+		}
 	}
 
 	
@@ -68,7 +73,8 @@ public class IterativeNaivePredictor {
 
 	private List<Prediction> predict(int numberIterations, boolean onlyHits) throws Exception {
 		List<Prediction> resultingPredictions = new ArrayList<>();
-		AMIE amieMiner = AMIE.getLossyInstance(trainingDb, pcaConfidenceThreshold, DefaultSupportThreshold);
+		//AMIE amieMiner = AMIE.getLossyInstance(trainingDb, pcaConfidenceThreshold, DefaultSupportThreshold);
+		AMIE amieMiner = AMIE.getLossyVanillaSettingInstance(trainingDb, pcaConfidenceThreshold);
 		if (onlyHits) {
 			System.out.println("Including only hits");
 		}
@@ -78,22 +84,25 @@ public class IterativeNaivePredictor {
 			long startTime = System.currentTimeMillis();
 			List<Query> rules = amieMiner.mine(false, Collections.EMPTY_LIST);
 			System.out.println("Rule mining took " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
-			
+			System.out.println(rules.size() + " rules found");
 			// Build the uncertain version of the rules
 			List<Query> finalRules = new ArrayList<Query>();
 			for(Query rule: rules) {
 				if (i > 0) { 
 					// Override the support and the PCA confidence to store the
 					// probabilistic version
-					miningAssistant.computeProbabilisticMetrics(rule);
-					if (rule.getProbabilisticSupport() >= DefaultSupportThreshold
-							&& rule.getProbabilisticPCAConfidence() >= pcaConfidenceThreshold) {
+					miningAssistant.computeProbabilisticMetrics(rule);					
+					if (rule.getSupport() >= DefaultSupportThreshold
+							&& rule.getPcaConfidence() >= pcaConfidenceThreshold) {
 						finalRules.add(rule);
 						System.out.println(rule.getFullRuleString());
 					}
+				} else {
+					finalRules.add(rule);					
 				}
 			}
-			System.out.println(rules.size() + " rules found");
+			
+			System.out.println(finalRules.size() + " used to fire predictions");
 			
 			// Get the predictions
 			int newPredictions = getPredictions(finalRules, true, resultingPredictions, i);
