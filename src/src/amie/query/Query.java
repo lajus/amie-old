@@ -159,15 +159,9 @@ public class Query{
 	 as multiples sources of evidence **/
 	
 	/**
-	 * Probabilistic version of the support of a rule calculated
-	 * considering the probabilities of the support of the rule.
+	 * A unique integer identifier for rules.
 	 */
-	private double _probabilisticSupport;
-		
-	/**
-	 * Probabilistic version of the body size of a rule.
-	 */
-	private double _probabilisticPCABodySize;
+	private int id;
 	
 
 	/**
@@ -227,8 +221,6 @@ public class Query{
 		_pcaEstimation = 0.0;
 		_belowMinimumSupport = false;
 		_containsQuasiBindings = false;
-		_probabilisticPCABodySize = -1.0;
-		_probabilisticSupport = 0.0;
 		ancestors = new ArrayList<>();
 	}
 			
@@ -248,8 +240,6 @@ public class Query{
 		_pcaEstimation = 0.0;	
 		_belowMinimumSupport = false;
 		_containsQuasiBindings = false;
-		_probabilisticPCABodySize = -1.0;
-		_probabilisticSupport = 0.0;
 		ancestors = new ArrayList<>();
 	}
 	
@@ -268,8 +258,6 @@ public class Query{
 		_pcaConfUpperBound = 0.0;
 		_pcaEstimation = 0.0;
 		_containsQuasiBindings = false;
-		_probabilisticPCABodySize = -1.0;
-		_probabilisticSupport = 0.0;
 		ancestors = new ArrayList<>();
 	}
 	
@@ -318,8 +306,6 @@ public class Query{
 		_pcaEstimation = 0.0;
 		++highestVariable;
 		_containsQuasiBindings = false;
-		_probabilisticPCABodySize = -1.0;
-		_probabilisticSupport = 0.0;
 		ancestors = new ArrayList<>();
 	}
 
@@ -502,6 +488,14 @@ public class Query{
 	public void setPcaConfidenceRunningTime(double pcaConfidenceRunningTime) {
 		this._pcaConfidenceRunningTime = pcaConfidenceRunningTime;
 	}
+	
+	public int getId() {
+		return this.id;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	/**
 	 * Returns the last triple pattern added to this rule.
@@ -618,30 +612,6 @@ public class Query{
 
 	public int getNonFunctionalVariablePosition(){
 		return functionalVariablePosition == 0 ? 2 : 0;
-	}
-	
-	public double getProbabilisticSupport() {
-		return _probabilisticSupport;
-	}
-
-	public void setProbabilisticSupport(double probabilisticSupport) {
-		this._probabilisticSupport = probabilisticSupport;
-	}
-
-	public double getProbabilisticPCABodySize() {
-		return _probabilisticPCABodySize;
-	}
-
-	public void setProbabilisticPCABodySize(double probabilisticPCABodySize) {
-		this._probabilisticPCABodySize = probabilisticPCABodySize;
-	}
-	
-	public double getProbabilisticPCAConfidence() {
-		if (this._probabilisticPCABodySize > 0.0) {
-			return this._probabilisticSupport / this._probabilisticPCABodySize;
-		} else {
-			return -1.0;
-		}
 	}
 
 
@@ -1121,9 +1091,6 @@ public class Query{
 		strBuilder.append("\t" + _stdConfUpperBound);
 		strBuilder.append("\t" + _pcaConfUpperBound);
 		strBuilder.append("\t" + _pcaEstimation);
-		strBuilder.append("\t" + getProbabilisticPCAConfidence());		
-		strBuilder.append("\t" + getProbabilisticSupport());
-		strBuilder.append("\t" + getProbabilisticPCABodySize());
 
 		return strBuilder.toString();
 	}

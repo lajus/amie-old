@@ -23,7 +23,7 @@ public class Prediction {
 	 * The rule consisting of the intersection of all the rules
 	 * that make the prediction.
 	 */
-	private Query combinedRule;
+	private Query jointRule;
 	
 	/**
 	 * 1 - (Conf(R1) * Conf(R2) ... Conf(Rn))
@@ -60,7 +60,7 @@ public class Prediction {
 		rules = new ArrayList<>();
 		naiveConfidence = Double.NEGATIVE_INFINITY;
 		cardinalityScore = 1.0;
-		combinedRule = null;
+		jointRule = null;
 		setIterationId(-1);
 	}
 	
@@ -70,7 +70,7 @@ public class Prediction {
 		rules = new ArrayList<>();
 		naiveConfidence = Double.NEGATIVE_INFINITY;
 		cardinalityScore = 1.0;
-		combinedRule = null;
+		jointRule = null;
 		setIterationId(-1);
 	}
 	
@@ -133,6 +133,10 @@ public class Prediction {
 	public double getFullScore() {
 		return getConfidence() * getCardinalityScore();
 	}
+	
+	public void setJointRule(Query rule) {
+		this.jointRule = rule;
+	}
 
 	/**
 	 * Returns the combined rule constructed by merging the antecedents of 
@@ -146,20 +150,21 @@ public class Prediction {
 			return rules.get(0);
 		}
 		
-		if (combinedRule == null) {
-			combinedRule = Query.combineRules(rules);
+		if (this.jointRule == null) {
+			this.jointRule = 
+					Query.combineRules(rules);
 		}
 		
-		return combinedRule;
+		return this.jointRule;
 	}
 	
 	public double getConfidence() {
 		Query jointRule = getJointRule();
 		if (Prediction.metric == Metric.PCAConfidence) {
-			if (jointRule.getProbabilisticPCAConfidence() < 0.0)
+			if (jointRule.getPcaConfidence() < 0.0)
 				return jointRule.getPcaConfidence();
 			else 
-				return jointRule.getProbabilisticPCAConfidence();
+				return jointRule.getPcaConfidence();
 		} else {
 			return getJointRule().getStdConfidence();
 		}

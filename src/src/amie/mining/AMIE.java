@@ -1147,13 +1147,13 @@ public class AMIE {
 				Runtime.getRuntime().availableProcessors());
 	}
 	
-	public static AMIE getLossyVanillaSettingInstance(FactDatabase db, double minPCAConfidence) {
+	public static AMIE getLossyVanillaSettingInstance(FactDatabase db, double minPCAConfidence, int startSupport) {
 		HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(db);
 		miningAssistant.setMinPcaConfidence(minPCAConfidence);
 		miningAssistant.setEnabledConfidenceUpperBounds(true);
 		miningAssistant.setEnabledFunctionalityHeuristic(true);
 		return new AMIE(miningAssistant, 
-				100, // Do not look at relations smaller than 100 facts 
+				startSupport, // Do not look at relations smaller than 100 facts 
 				0.01, // Head coverage 1%
 				Metric.HeadCoverage,
 				Runtime.getRuntime().availableProcessors());

@@ -29,7 +29,7 @@ public class IterativeNaivePredictor {
 		
 	public static final double DefaultPCAConfidenceThreshold = 0.4;
 	
-	public static final int DefaultSupportThreshold = 100;
+	public static final int DefaultSupportThreshold = 10;
 	
 	private double pcaConfidenceThreshold;
 	
@@ -74,7 +74,7 @@ public class IterativeNaivePredictor {
 	private List<Prediction> predict(int numberIterations, boolean onlyHits) throws Exception {
 		List<Prediction> resultingPredictions = new ArrayList<>();
 		//AMIE amieMiner = AMIE.getLossyInstance(trainingDb, pcaConfidenceThreshold, DefaultSupportThreshold);
-		AMIE amieMiner = AMIE.getLossyVanillaSettingInstance(trainingDb, pcaConfidenceThreshold);
+		AMIE amieMiner = AMIE.getLossyVanillaSettingInstance(trainingDb, pcaConfidenceThreshold, DefaultSupportThreshold);
 		if (onlyHits) {
 			System.out.println("Including only hits");
 		}
@@ -87,17 +87,21 @@ public class IterativeNaivePredictor {
 			System.out.println(rules.size() + " rules found");
 			// Build the uncertain version of the rules
 			List<Query> finalRules = new ArrayList<Query>();
-			for(Query rule: rules) {
+			int ruleId = 1; // We will assign each rule a unique identifier for hashing purposes.
+			for (Query rule: rules) {
 				if (i > 0) { 
 					// Override the support and the PCA confidence to store the
 					// probabilistic version
 					miningAssistant.computeProbabilisticMetrics(rule);					
 					if (rule.getSupport() >= DefaultSupportThreshold
 							&& rule.getPcaConfidence() >= pcaConfidenceThreshold) {
+						rule.setId(ruleId); // Assign an integer identifier for hashing purposes
+						++ruleId;
 						finalRules.add(rule);
-						System.out.println(rule.getFullRuleString());
 					}
 				} else {
+					rule.setId(ruleId); // Assign an integer identifier for hashing purposes
+					++ruleId;
 					finalRules.add(rule);					
 				}
 			}
@@ -111,7 +115,7 @@ public class IterativeNaivePredictor {
 				break;
 			}
 		}
-		
+		System.out.println("Iterations are over");
 		PredictionsComparator predictionsCmp = new PredictionsComparator();
 		Collections.sort(resultingPredictions, predictionsCmp);
 		return resultingPredictions;
@@ -219,22 +223,28 @@ public class IterativeNaivePredictor {
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions =
 				calculatePredictions2RulesMap(queries, notInTraining);
 		int count = 0;
+		// We keep a map with the combined rules in order to avoid combining rules
+		// multiple times.
+		Map<List<Integer>, Query> combinedRulesMap = new HashMap<List<Integer>, Query>();
 		
 		for (Triple<ByteString, ByteString, ByteString> t : predictions.keySet()) {
-			Prediction prediction = new Prediction(t);
-			prediction.getRules().addAll(predictions.get(t));
-			ByteString triple[] = prediction.getTriple();
-			int eval = Evaluator.evaluate(triple, testingDb, trainingDb);
-			if(eval == 0) { 
-				prediction.setHitInTarget(true);
+			Prediction prediction = new Prediction(t);			
+			List<Query> rules = predictions.get(t);
+			List<Integer> ruleIds = new ArrayList<Integer>();
+			for (Query rule : rules) {
+				ruleIds.add(rule.getId());
+				prediction.getRules().add(rule);
 			}
-			
-			if(trainingDb.count(triple) > 0) {
-				prediction.setHitInTraining(true);
+			// Avoid recomputing joint rules for each prediction (there can be many)
+			Collections.sort(ruleIds);
+			Query combinedRule = combinedRulesMap.get(ruleIds);
+			if (combinedRule != null) {
+				prediction.setJointRule(combinedRule);
+			} else {
+				combinedRule = prediction.getJointRule();
+				combinedRulesMap.put(ruleIds, combinedRule);
 			}
-			
-			// First calculate the confidence of the combined rule
-			Query combinedRule = prediction.getJointRule();
+			combinedRule = prediction.getJointRule();
 			
 			if (combinedRule != prediction.getRules().get(0)) {
 				if (iteration == 0) {
@@ -246,6 +256,17 @@ public class IterativeNaivePredictor {
 					computeCardinalityScore(prediction, true);
 				}
 			}
+			
+			ByteString triple[] = prediction.getTriple();
+			int eval = Evaluator.evaluate(triple, trainingDb, testingDb);
+			if(eval == 0) { 
+				prediction.setHitInTarget(true);
+			}
+			
+			if(trainingDb.count(triple) > 0) {
+				prediction.setHitInTraining(true);
+			}
+			
 			
 			double finalConfidence = prediction.getFullScore();
 			if (finalConfidence >= pcaConfidenceThreshold) {
