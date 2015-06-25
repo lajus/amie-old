@@ -7,15 +7,18 @@ package amie.mining.assistant.experimental;
 
 import amie.data.FactDatabase;
 import amie.query.Query;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 
@@ -61,14 +64,15 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                     List<int[]> conditionalSubsets = telecom.util.collections.Collections.subsetsUpToSize(subsetIndexes.length, subsetIndexes.length - 1);
                     for (int[] conditionalSubset : conditionalSubsets) {
                         for (int instantiatedPropertyIndex : conditionalSubset) {
-                            ByteString instantiatedProperty = nonKey.get(conditionalSubset[instantiatedPropertyIndex]);
+                            ByteString instantiatedProperty = nonKey.get(instantiatedPropertyIndex);
                             ByteString[] atom = new ByteString[3];
                             atom[0] = head[0];
                             atom[1] = instantiatedProperty;
                             atom[2] = ByteString.of("?www");
                             query.getTriples().add(atom);
                             IntHashMap<ByteString> constants = this.source.countProjectionBindings(head, query.getBody(), atom[2]);
-                            System.out.println("constants:"+constants);
+                            query.getTriples().remove(query.getTriples().size() - 1);
+                            System.out.println("constants for atom " + Arrays.toString(atom)  + ": "+ constants);
                         }
                     }
                 }
