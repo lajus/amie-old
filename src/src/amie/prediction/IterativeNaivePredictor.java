@@ -15,7 +15,6 @@ import amie.data.FactDatabase;
 import amie.data.eval.Evaluator;
 import amie.data.eval.PredictionsSampler;
 import amie.mining.AMIE;
-import amie.mining.assistant.DefaultMiningAssistant;
 import amie.prediction.assistant.ProbabilisticHeadVariablesMiningAssistant;
 import amie.prediction.assistant.TypedProbabilisticMiningAssistant;
 import amie.prediction.data.HistogramTupleIndependentProbabilisticFactDatabase;
@@ -29,9 +28,13 @@ public class IterativeNaivePredictor {
 		
 	public static final double DefaultPCAConfidenceThreshold = 0.4;
 	
-	public static final int DefaultSupportThreshold = 10;
+	public static final int DefaultInitialSupportThreshold = 10;
+	
+	public static final double DefaultHeadCoverageThreshold = 0.01;
 	
 	private double pcaConfidenceThreshold;
+	
+	private double headCoverageThreshold;
 	
 	public boolean allowTypes;
 	
@@ -41,6 +44,7 @@ public class IterativeNaivePredictor {
 			boolean allowTypes) {
 		this.trainingDb = training;
 		this.pcaConfidenceThreshold = DefaultPCAConfidenceThreshold;
+		this.headCoverageThreshold = DefaultHeadCoverageThreshold;
 		this.allowTypes = allowTypes;
 		if (allowTypes) {
 			miningAssistant = new TypedProbabilisticMiningAssistant(trainingDb);
@@ -54,6 +58,7 @@ public class IterativeNaivePredictor {
 		this.trainingDb = training;
 		this.testingDb = testing;
 		this.pcaConfidenceThreshold = DefaultPCAConfidenceThreshold;
+		this.headCoverageThreshold = DefaultHeadCoverageThreshold;
 		this.allowTypes = allowTypes;
 		if (allowTypes) {
 			miningAssistant = new TypedProbabilisticMiningAssistant(trainingDb);
@@ -71,10 +76,18 @@ public class IterativeNaivePredictor {
 		this.pcaConfidenceThreshold = pcaConfidenceThreshold;
 	}
 
+	public double getHeadCoverageThreshold() {
+		return headCoverageThreshold;
+	}
+
+	public void setHeadCoverageThreshold(double headCoverageThreshold) {
+		this.headCoverageThreshold = headCoverageThreshold;
+	}
+
 	private List<Prediction> predict(int numberIterations, boolean onlyHits) throws Exception {
 		List<Prediction> resultingPredictions = new ArrayList<>();
 		//AMIE amieMiner = AMIE.getLossyInstance(trainingDb, pcaConfidenceThreshold, DefaultSupportThreshold);
-		AMIE amieMiner = AMIE.getLossyVanillaSettingInstance(trainingDb, pcaConfidenceThreshold, DefaultSupportThreshold);
+		AMIE amieMiner = AMIE.getLossyVanillaSettingInstance(trainingDb, pcaConfidenceThreshold, DefaultInitialSupportThreshold);
 		if (onlyHits) {
 			System.out.println("Including only hits");
 		}
@@ -93,7 +106,7 @@ public class IterativeNaivePredictor {
 					// Override the support and the PCA confidence to store the
 					// probabilistic version
 					miningAssistant.computeProbabilisticMetrics(rule);					
-					if (rule.getSupport() >= DefaultSupportThreshold
+					if (rule.getSupport() >= DefaultInitialSupportThreshold
 							&& rule.getPcaConfidence() >= pcaConfidenceThreshold) {
 						rule.setId(ruleId); // Assign an integer identifier for hashing purposes
 						++ruleId;
@@ -151,17 +164,11 @@ public class IterativeNaivePredictor {
 	 */
 	private Map<Triple<ByteString, ByteString, ByteString>, List<Query>> 
 	calculatePredictions2RulesMap(List<Query> queries, boolean notInTraining) {
-		
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions = new HashMap<>();
-		DefaultMiningAssistant assistant = new DefaultMiningAssistant(trainingDb);
 		PredictionsSampler predictor = new PredictionsSampler(trainingDb);
 		
 		for (Query q : queries) {
 			ByteString[] head = q.getHead();
-			q.setFunctionalVariablePosition(Query.findFunctionalVariable(q, trainingDb));
-			assistant.computeCardinality(q);
-			assistant.computePCAConfidence(q);
-			 
 			Object bindings = null;
 			try {
 				if (notInTraining) {
