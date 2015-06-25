@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import javatools.datatypes.ByteString;
+import javatools.datatypes.IntHashMap;
 
 /**
  *
@@ -52,42 +53,26 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
 
     @Override
     public void getDanglingEdges(Query query, int minCardinality, Collection<Query> output) {
+        ByteString[] head = query.getHead();
         for (List<ByteString> nonKey : nonKeys) {
-            int nonKeySize = nonKey.size();
-            HashSet<HashSet<ByteString>> subsets = new HashSet<>();
-            System.out.println("nonKey:"+nonKey);
-            for (int size = 2; size <= nonKeySize; size++) {
-                System.out.println("size:"+size);
-                for (int i = 0; i <= nonKeySize - size; i++) {
-                    System.out.println("i:"+i);
-                    for (int j = i + 1; j <= nonKeySize-size+1; j++) {
-                        System.out.println("j:"+j);
-                        HashSet<ByteString> subset = new HashSet<>();
-                        subset.add(nonKey.get(i));
-                        for (int k = j; k < j+size-1; k++) {
-                            subset.add(nonKey.get(k));
+            List<int[]> subsets = telecom.util.collections.Collections.subsetsUpToSize(5, 2);
+            for (int[] subsetIndexes : subsets) {
+                for (int i = 0; i < subsetIndexes.length; i++) {
+                    List<int[]> conditionalSubsets = telecom.util.collections.Collections.subsetsUpToSize(subsetIndexes.length, subsetIndexes.length - 1);
+                    for (int[] conditionalSubset : conditionalSubsets) {
+                        for (int instantiatedPropertyIndex : conditionalSubset) {
+                            ByteString instantiatedProperty = nonKey.get(conditionalSubset[instantiatedPropertyIndex]);
+                            ByteString[] atom = new ByteString[3];
+                            atom[0] = head[0];
+                            atom[1] = instantiatedProperty;
+                            atom[2] = ByteString.of("?www");
+                            query.getTriples().add(atom);
+                            IntHashMap<ByteString> constants = this.source.countProjectionBindings(head, query.getBody(), atom[2]);
+                            System.out.println("constants:"+constants);
                         }
-                        System.out.println("subSet:" + subset);
                     }
                 }
             }
-
-//            for (int size = 2; size <= nonKeySize; size++) {
-//                for (int i = 0; i < nonKey.size(); i++) {
-//                    ByteString property = nonKey.get(i);
-//                    HashSet<ByteString> subset = new HashSet<>();
-//                    subset.add(property);
-//                    for (int j = i + 1; j <= Math.min(i + size, nonKeySize); j++) {//
-//                        System.out.println("i:" + i + " j:" + j);
-//                        subset.add(nonKey.get(j));
-//                        System.out.println("subset:" + subset);
-//                    }
-//                    subsets.add(subset);
-//                    System.out.println("subSets:" + subsets);
-//                }
-//
-//            }
-//            System.out.println("nonKey:" + nonKey + "  subsets:" + subsets);
         }
     }
 }
