@@ -21,14 +21,14 @@ import amie.query.Query;
  * @author galarrag
  *
  */
-public class HeadVariablesMiningAssistant extends MiningAssistant{
+public class DefaultMiningAssistant extends MiningAssistant{
 	/**
 	 * Store counts for hard queries
 	 */
 	protected Map<Pair<ByteString, Boolean>, Long> hardQueries;
 	
 	
-	public HeadVariablesMiningAssistant(FactDatabase dataSource) {
+	public DefaultMiningAssistant(FactDatabase dataSource) {
 		super(dataSource);
 		this.hardQueries = Collections.synchronizedMap(new HashMap<Pair<ByteString, Boolean>, Long>());
 		// TODO Auto-generated constructor stub
@@ -705,7 +705,7 @@ public class HeadVariablesMiningAssistant extends MiningAssistant{
 			q.setFunctionalVariablePosition(2);			
 		}
 		q.setSupport(db.countPairs(ByteString.of("?x"), ByteString.of("?y"), q.getTriples()));	
-		HeadVariablesMiningAssistant assistant = new HeadVariablesMiningAssistant(db);
+		DefaultMiningAssistant assistant = new DefaultMiningAssistant(db);
 		assistant.setEnabledFunctionalityHeuristic(true);
 		timeStamp1 = System.currentTimeMillis();
 		assistant.calculateConfidenceBoundsAndApproximations(q);
