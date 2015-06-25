@@ -15,7 +15,7 @@ import javatools.filehandlers.TSVFile;
 import amie.data.FactDatabase;
 import amie.data.eval.Evaluator;
 import amie.data.eval.PredictionsSampler;
-import amie.mining.assistant.HeadVariablesMiningAssistant;
+import amie.mining.assistant.DefaultMiningAssistant;
 import amie.prediction.assistant.ProbabilisticHeadVariablesMiningAssistant;
 import amie.query.AMIEreader;
 import amie.query.Query;
@@ -35,7 +35,7 @@ public class JointPredictions {
 	static Map<Triple<ByteString, ByteString, ByteString>, List<Query>> findPredictionsForRules(List<Query> queries, 
 			FactDatabase trainingDataset, FactDatabase targetDataset, boolean notInTraining) {
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions = new HashMap<>();
-		HeadVariablesMiningAssistant assistant = new HeadVariablesMiningAssistant(trainingDataset);
+		DefaultMiningAssistant assistant = new DefaultMiningAssistant(trainingDataset);
 		PredictionsSampler predictor = new PredictionsSampler(trainingDataset);
 		for (Query q : queries) {
 			ByteString[] head = q.getHead();

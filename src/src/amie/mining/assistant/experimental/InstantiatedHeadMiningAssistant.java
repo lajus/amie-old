@@ -8,10 +8,10 @@ import java.util.List;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import amie.data.FactDatabase;
-import amie.mining.assistant.HeadVariablesMiningAssistant;
+import amie.mining.assistant.DefaultMiningAssistant;
 import amie.query.Query;
 
-public class InstantiatedHeadMiningAssistant extends HeadVariablesMiningAssistant {
+public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 
 	public InstantiatedHeadMiningAssistant(FactDatabase dataSource) {
 		super(dataSource);

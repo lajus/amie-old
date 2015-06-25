@@ -8,7 +8,7 @@ import java.util.List;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import amie.data.FactDatabase;
-import amie.mining.assistant.HeadVariablesMiningAssistant;
+import amie.mining.assistant.DefaultMiningAssistant;
 import amie.query.Query;
 
 /**
@@ -18,7 +18,7 @@ import amie.query.Query;
  * @author galarrag
  *
  */
-public class KeyMinerMiningAssistant extends HeadVariablesMiningAssistant {
+public class KeyMinerMiningAssistant extends DefaultMiningAssistant {
 
 	public KeyMinerMiningAssistant(FactDatabase dataSource) {
 		super(dataSource);

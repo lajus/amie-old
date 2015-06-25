@@ -11,14 +11,14 @@ import java.util.List;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import amie.data.FactDatabase;
-import amie.mining.assistant.HeadVariablesMiningAssistant;
+import amie.mining.assistant.DefaultMiningAssistant;
 import amie.query.Query;
 
 /**
  * @author lgalarra
  *
  */
-public class TypedMiningAssistant extends HeadVariablesMiningAssistant {
+public class TypedMiningAssistant extends DefaultMiningAssistant {
 
 	/**
 	 * @param dataSource

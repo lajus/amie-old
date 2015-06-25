@@ -6,10 +6,10 @@ import java.util.List;
 
 import javatools.datatypes.ByteString;
 import amie.data.FactDatabase;
-import amie.mining.assistant.HeadVariablesMiningAssistant;
+import amie.mining.assistant.DefaultMiningAssistant;
 import amie.query.Query;
 
-public class FullRelationSignatureMiningAssistant extends HeadVariablesMiningAssistant {
+public class FullRelationSignatureMiningAssistant extends DefaultMiningAssistant {
 
 	public FullRelationSignatureMiningAssistant(FactDatabase dataSource) {
 		super(dataSource);

@@ -15,7 +15,7 @@ import amie.data.FactDatabase;
 import amie.data.eval.Evaluator;
 import amie.data.eval.PredictionsSampler;
 import amie.mining.AMIE;
-import amie.mining.assistant.HeadVariablesMiningAssistant;
+import amie.mining.assistant.DefaultMiningAssistant;
 import amie.prediction.assistant.ProbabilisticHeadVariablesMiningAssistant;
 import amie.prediction.assistant.TypedProbabilisticMiningAssistant;
 import amie.prediction.data.HistogramTupleIndependentProbabilisticFactDatabase;
@@ -153,7 +153,7 @@ public class IterativeNaivePredictor {
 	calculatePredictions2RulesMap(List<Query> queries, boolean notInTraining) {
 		
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions = new HashMap<>();
-		HeadVariablesMiningAssistant assistant = new HeadVariablesMiningAssistant(trainingDb);
+		DefaultMiningAssistant assistant = new DefaultMiningAssistant(trainingDb);
 		PredictionsSampler predictor = new PredictionsSampler(trainingDb);
 		
 		for (Query q : queries) {

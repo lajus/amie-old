@@ -5,10 +5,10 @@ import java.util.List;
 import javatools.datatypes.ByteString;
 import amie.data.FactDatabase;
 import amie.data.SchemaUtilities;
-import amie.mining.assistant.HeadVariablesMiningAssistant;
+import amie.mining.assistant.DefaultMiningAssistant;
 import amie.query.Query;
 
-public class RelationSignatureMiningAssistant extends HeadVariablesMiningAssistant {
+public class RelationSignatureMiningAssistant extends DefaultMiningAssistant {
 	/**
 	 * @param dataSource
 	 */

@@ -2,11 +2,11 @@ package amie.prediction.assistant;
 
 import javatools.datatypes.ByteString;
 import amie.data.FactDatabase;
-import amie.mining.assistant.HeadVariablesMiningAssistant;
+import amie.mining.assistant.DefaultMiningAssistant;
 import amie.prediction.data.HistogramTupleIndependentProbabilisticFactDatabase;
 import amie.query.Query;
 
-public class ProbabilisticHeadVariablesMiningAssistant extends HeadVariablesMiningAssistant {
+public class ProbabilisticHeadVariablesMiningAssistant extends DefaultMiningAssistant {
 
 	public ProbabilisticHeadVariablesMiningAssistant(FactDatabase dataSource) {
 		super(dataSource);

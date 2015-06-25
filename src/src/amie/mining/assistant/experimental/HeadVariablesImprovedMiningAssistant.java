@@ -4,11 +4,11 @@ import java.util.List;
 
 import javatools.datatypes.ByteString;
 import amie.data.FactDatabase;
-import amie.mining.assistant.HeadVariablesMiningAssistant;
+import amie.mining.assistant.DefaultMiningAssistant;
 import amie.query.Query;
 
 public class HeadVariablesImprovedMiningAssistant extends
-		HeadVariablesMiningAssistant {
+		DefaultMiningAssistant {
 
 	public HeadVariablesImprovedMiningAssistant(FactDatabase dataSource) {
 		super(dataSource);

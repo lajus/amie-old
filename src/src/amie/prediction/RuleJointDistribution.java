@@ -14,7 +14,7 @@ import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Triple;
 import amie.data.FactDatabase;
 import amie.data.eval.PredictionsSampler;
-import amie.mining.assistant.HeadVariablesMiningAssistant;
+import amie.mining.assistant.DefaultMiningAssistant;
 import amie.query.Query;
 
 public class RuleJointDistribution {
@@ -133,7 +133,7 @@ public class RuleJointDistribution {
 	 */
 	public Query getCombinedRule(List<Query> rules) {
 		Query combinedRule = Query.combineRules(rules);
-		HeadVariablesMiningAssistant assistant = new HeadVariablesMiningAssistant(dataSource);
+		DefaultMiningAssistant assistant = new DefaultMiningAssistant(dataSource);
 		assistant.computeCardinality(combinedRule);
 		assistant.computeStandardConfidence(combinedRule);
 		assistant.computePCAConfidence(combinedRule);
@@ -199,7 +199,7 @@ public class RuleJointDistribution {
 		Map<BitSet, Double> joinDistribution = distribution.getJointDistribution(r1, r2, true);
 		distribution.printDistribution(joinDistribution, Arrays.asList("R1", "R2", "P(R1 ^ R2)"));
 		distribution.printMarginals(joinDistribution, Arrays.asList("R1", "R2", "P(R1 ^ R2)"));
-		HeadVariablesMiningAssistant assistant = new HeadVariablesMiningAssistant(db);
+		DefaultMiningAssistant assistant = new DefaultMiningAssistant(db);
 		assistant.computeCardinality(r1);
 		assistant.computeCardinality(r2);
 		assistant.computeStandardConfidence(r1);

@@ -5,11 +5,11 @@ import java.util.List;
 
 import javatools.datatypes.ByteString;
 import amie.data.FactDatabase;
-import amie.mining.assistant.HeadVariablesMiningAssistant;
+import amie.mining.assistant.DefaultMiningAssistant;
 import amie.query.Query;
 
 public class ExistentialRulesHeadVariablesMiningAssistant extends
-		HeadVariablesMiningAssistant {
+		DefaultMiningAssistant {
 
 	public ExistentialRulesHeadVariablesMiningAssistant(FactDatabase dataSource) {
 		super(dataSource);
