@@ -5,22 +5,19 @@
  */
 package amie.mining.assistant.experimental;
 
-import amie.data.FactDatabase;
-import amie.query.Query;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
+import amie.data.FactDatabase;
+import amie.query.Query;
 
 /**
  *

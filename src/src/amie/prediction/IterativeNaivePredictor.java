@@ -285,7 +285,7 @@ public class IterativeNaivePredictor {
 				double finalConfidence = prediction.getFullScore();
 				if (finalConfidence >= pcaConfidenceThreshold) {
 					prediction.setIterationId(iteration);
-					synchronized (prediction) {
+					synchronized (result) {
 						result.add(prediction);	
 					}
 				}
@@ -324,9 +324,11 @@ public class IterativeNaivePredictor {
 			threads[i].join();
 		}
 		
-		for (Prediction p : result) {
-			ByteString[] t = p.getTriple();
-			trainingDb.add(t[0], t[1], t[2], p.getFullScore());
+		int k = 0;
+		for (Prediction prediction : result) {
+			ByteString[] t = prediction.getTriple();
+			k++;
+			trainingDb.add(t[0], t[1], t[2], prediction.getFullScore());
 		}
 		
 		System.out.println((System.currentTimeMillis() - timeStamp1) + " to calculate the scores for predictions");
