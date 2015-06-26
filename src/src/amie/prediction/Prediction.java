@@ -146,13 +146,8 @@ public class Prediction {
 	 * @return
 	 */
 	public Query getJointRule() {
-		if (rules.size() == 1) {
-			return rules.get(0);
-		}
-		
 		if (this.jointRule == null) {
-			this.jointRule = 
-					Query.combineRules(rules);
+			this.jointRule = Query.combineRules(rules);
 		}
 		
 		return this.jointRule;

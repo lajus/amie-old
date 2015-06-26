@@ -17,8 +17,9 @@ public class HistogramTupleIndependentProbabilisticFactDatabase extends TupleInd
 	
 	private Map<ByteString, Long> sums = new HashMap<>();
 	
-	protected void load(File f) throws IOException {
-		super.load(f);
+	@Override
+	public void load(File... files) throws IOException {
+		super.load(files);
 		// Construct the histogram tables
 		for (ByteString relation : predicateSize) {
 			IntHashMap<Integer> counts;

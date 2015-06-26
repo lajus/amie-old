@@ -113,17 +113,17 @@ public class Query{
 	 * Standard confidence theorethical upper bound for standard confidence
 	 *  
 	 */
-	private double _stdConfUpperBound;
+	private double _stdConfidenceUpperBound;
 
 	/**
 	 * PCA confidence theorethical upper bound for PCA confidence
 	 */
-	private double _pcaConfUpperBound;
+	private double _pcaConfidenceUpperBound;
 	
 	/**
 	 * PCA confidence rough estimation for the hard cases
 	 */
-	private double _pcaEstimation;
+	private double _pcaConfidenceEstimation;
 	
 	/**
 	 * Time to run the denominator for the expression of the PCA confidence
@@ -216,47 +216,50 @@ public class Query{
 		parent = null;
 		bodySize = -1;
 		highestVariable = 'a';
-		_stdConfUpperBound = 0.0;
-		_pcaConfUpperBound = 0.0;
-		_pcaEstimation = 0.0;
+		_stdConfidenceUpperBound = 0.0;
+		_pcaConfidenceUpperBound = 0.0;
+		_pcaConfidenceEstimation = 0.0;
 		_belowMinimumSupport = false;
 		_containsQuasiBindings = false;
 		ancestors = new ArrayList<>();
 	}
 			
 
-	public Query(ByteString[] pattern, long cardinality){
+	public Query(ByteString[] pattern, double cardinality){
 		triples = new ArrayList<>();
 		support = cardinality;
-		hashSupport = cardinality;
+		hashSupport = (int) cardinality;
 		parent = null;
 		triples.add(pattern);
 		functionalVariablePosition = 0;
 		bodySize = 0;
 		computeHeadKey();
 		highestVariable = (char) (pattern[2].charAt(1) + 1);
-		_stdConfUpperBound = 0.0;
-		_pcaConfUpperBound = 0.0;
-		_pcaEstimation = 0.0;	
+		_stdConfidenceUpperBound = 0.0;
+		_pcaConfidenceUpperBound = 0.0;
+		_pcaConfidenceEstimation = 0.0;	
 		_belowMinimumSupport = false;
 		_containsQuasiBindings = false;
 		ancestors = new ArrayList<>();
 	}
 	
-	public Query(Query otherQuery, int cardinality){
+	public Query(Query otherQuery, double cardinality){
 		triples = new ArrayList<>();
 		for(ByteString[] sequence: otherQuery.triples){
 			triples.add(sequence.clone());
 		}
 		this.support = cardinality;
-		this.hashSupport = cardinality;
+		this.hashSupport = (int) cardinality;
+		this.pcaBodySize = otherQuery.pcaBodySize;
+		this.bodySize = otherQuery.bodySize;
+		this.bodyMinusHeadSize = otherQuery.bodyMinusHeadSize;
 		computeHeadKey();
 		parent = null;
 		bodySize = -1;
 		highestVariable = otherQuery.highestVariable;		
-		_stdConfUpperBound = 0.0;
-		_pcaConfUpperBound = 0.0;
-		_pcaEstimation = 0.0;
+		_stdConfidenceUpperBound = 0.0;
+		_pcaConfidenceUpperBound = 0.0;
+		_pcaConfidenceEstimation = 0.0;
 		_containsQuasiBindings = false;
 		ancestors = new ArrayList<>();
 	}
@@ -301,9 +304,9 @@ public class Query{
 		functionalVariablePosition = 0;
 		parent = null;
 		bodySize = -1;
-		_stdConfUpperBound = 0.0;
-		_pcaConfUpperBound = 0.0;
-		_pcaEstimation = 0.0;
+		_stdConfidenceUpperBound = 0.0;
+		_pcaConfidenceUpperBound = 0.0;
+		_pcaConfidenceEstimation = 0.0;
 		++highestVariable;
 		_containsQuasiBindings = false;
 		ancestors = new ArrayList<>();
@@ -552,7 +555,9 @@ public class Query{
 	 */
 	public static boolean isGroundAtom(ByteString[] pattern) {
 		// TODO Auto-generated method stub
-		return !FactDatabase.isVariable(pattern[0]) && !FactDatabase.isVariable(pattern[1]) && !FactDatabase.isVariable(pattern[2]);
+		return !FactDatabase.isVariable(pattern[0]) 
+				&& !FactDatabase.isVariable(pattern[1]) 
+				&& !FactDatabase.isVariable(pattern[2]);
 	}
 
 	/**
@@ -1080,7 +1085,6 @@ public class Query{
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append(getRuleString());
 		
-		strBuilder.append("\t" + df.format(getSupportRatio()) );
 		strBuilder.append("\t" + df.format(getHeadCoverage()));
 		strBuilder.append("\t" + df.format(getStdConfidence()));
 		strBuilder.append("\t" + df.format(getPcaConfidence()));
@@ -1088,9 +1092,9 @@ public class Query{
 		strBuilder.append("\t" + getBodySize());
 		strBuilder.append("\t" + getPcaBodySize());
 		strBuilder.append("\t" + getFunctionalVariable());
-		strBuilder.append("\t" + _stdConfUpperBound);
-		strBuilder.append("\t" + _pcaConfUpperBound);
-		strBuilder.append("\t" + _pcaEstimation);
+		strBuilder.append("\t" + _stdConfidenceUpperBound);
+		strBuilder.append("\t" + _pcaConfidenceUpperBound);
+		strBuilder.append("\t" + _pcaConfidenceEstimation);
 
 		return strBuilder.toString();
 	}
@@ -1100,7 +1104,6 @@ public class Query{
 		StringBuilder strBuilder = new StringBuilder();
 		strBuilder.append(getRuleString());
 		
-		strBuilder.append("\t" + df.format(getSupportRatio()) );
 		strBuilder.append("\t" + df.format(getHeadCoverage()));
 		strBuilder.append("\t" + df.format(getStdConfidence()));
 		strBuilder.append("\t" + df.format(getPcaConfidence()));
@@ -1289,26 +1292,26 @@ public class Query{
 	}
 
 	public void setConfidenceUpperBound(double stdConfUpperBound) {
-		this._stdConfUpperBound = stdConfUpperBound;
+		this._stdConfidenceUpperBound = stdConfUpperBound;
 	}
 
 	public void setPcaConfidenceUpperBound(double pcaConfUpperBound) {
 		// TODO Auto-generated method stub
-		this._pcaConfUpperBound = pcaConfUpperBound;
+		this._pcaConfidenceUpperBound = pcaConfUpperBound;
 	}
 	
 	/**
 	 * @return the pcaEstimation
 	 */
 	public double getPcaEstimation() {
-		return _pcaEstimation;
+		return _pcaConfidenceEstimation;
 	}
 
 	/**
 	 * @param pcaEstimation the pcaEstimation to set
 	 */
 	public void setPcaEstimation(double pcaEstimation) {
-		this._pcaEstimation = pcaEstimation;
+		this._pcaConfidenceEstimation = pcaEstimation;
 	}
 	
 	/**
@@ -1496,6 +1499,10 @@ public class Query{
 	 * @return
 	 */
 	public static Query combineRules(List<Query> rules) {
+		if (rules.size() == 1) {
+			return new Query(rules.get(0), rules.get(0).getSupport());
+		}
+		
 		// Look for the most specific head
 		Query canonicalHeadRule = rules.get(0);
 		for (int i = 0; i < rules.size(); ++i) {

@@ -4,8 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import javatools.datatypes.ByteString;
@@ -122,9 +124,9 @@ public class IterativeNaivePredictor {
 			System.out.println(finalRules.size() + " used to fire predictions");
 			
 			// Get the predictions
-			int newPredictions = getPredictions(finalRules, true, resultingPredictions, i);
-			System.out.println(newPredictions + " new predictions");			
-			if (newPredictions == 0) {
+			getPredictions(finalRules, true, resultingPredictions, i);
+			System.out.println(resultingPredictions.size() + " new predictions");			
+			if (resultingPredictions.size() == 0) {
 				break;
 			}
 		}
@@ -216,6 +218,81 @@ public class IterativeNaivePredictor {
 		return predictions;
 	}
 	
+	class PredictionsBuilder implements Runnable {
+		private Map<Triple<ByteString, ByteString, ByteString>, List<Query>> items;
+		private List<Prediction> result;
+		private int iteration;
+		
+		public PredictionsBuilder(Map<Triple<ByteString, ByteString, ByteString>, List<Query>> items,
+				List<Prediction> result, Map<List<Integer>, Query> combinedRulesMap, int iteration) {
+			this.items = items;			
+			this.result = result;
+			this.iteration = iteration;
+		}
+		
+		@Override
+		public void run() {
+			Map<List<Integer>, Query> combinedRulesMap = new HashMap<List<Integer>, Query>();
+			while (true) {
+				Triple<ByteString, ByteString, ByteString> nextTriple = null;
+				List<Query> rules = null;
+				synchronized (items) {
+					Iterator<Triple<ByteString, ByteString, ByteString>> it = items.keySet().iterator();
+					try {
+						nextTriple = it.next();
+						rules = items.get(nextTriple);
+						items.remove(nextTriple);
+					} catch (NoSuchElementException e) {
+						return;
+					}
+				}
+				Prediction prediction = new Prediction(nextTriple);		
+				List<Integer> ruleIds = new ArrayList<Integer>();
+				for (Query rule : rules) {
+					ruleIds.add(rule.getId());
+					prediction.getRules().add(rule);
+				}
+				// Avoid recomputing joint rules for each prediction (there can be many)
+				Collections.sort(ruleIds);
+				
+				Query combinedRule = combinedRulesMap.get(ruleIds);
+				if (combinedRule != null) {
+					prediction.setJointRule(combinedRule);
+				} else {
+					combinedRule = prediction.getJointRule();
+					combinedRulesMap.put(ruleIds, combinedRule);
+					if (iteration == 0) {
+						miningAssistant.computeCardinality(combinedRule);
+						miningAssistant.computePCAConfidence(combinedRule);
+					} else {
+						miningAssistant.computeProbabilisticMetrics(combinedRule);
+					}
+				}	
+				combinedRule = prediction.getJointRule();				
+				computeCardinalityScore(prediction);
+				
+				ByteString triple[] = prediction.getTriple();
+				int eval = Evaluator.evaluate(triple, trainingDb, testingDb);
+				if(eval == 0) { 
+					prediction.setHitInTarget(true);
+				}
+				
+				if(trainingDb.count(triple) > 0) {
+					prediction.setHitInTraining(true);
+				}
+				
+				
+				double finalConfidence = prediction.getFullScore();
+				if (finalConfidence >= pcaConfidenceThreshold) {
+					prediction.setIterationId(iteration);
+					synchronized (prediction) {
+						result.add(prediction);	
+					}
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Returns the list of all the predictions made by the given rules on the training dataset.
 	 * The correctness of the predictions is verified in the target dataset. 
@@ -223,76 +300,43 @@ public class IterativeNaivePredictor {
 	 * @param trainingDataset
 	 * @param targetDataset
 	 * @return int
+	 * @throws InterruptedException 
 	 */
-	private int getPredictions(List<Query> queries, 
+	private void getPredictions(List<Query> queries, 
 			boolean notInTraining, List<Prediction> result, 
-			int iteration) {
+			int iteration) throws InterruptedException {
+		long timeStamp1 = System.currentTimeMillis();
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions =
 				calculatePredictions2RulesMap(queries, notInTraining);
-		int count = 0;
+		System.out.println((System.currentTimeMillis() - timeStamp1) + " milliseconds for calculatePredictions2RulesMap");
+		System.out.println(predictions.size() + " predictions from the KB");
 		// We keep a map with the combined rules in order to avoid combining rules
 		// multiple times.
 		Map<List<Integer>, Query> combinedRulesMap = new HashMap<List<Integer>, Query>();
-		
-		for (Triple<ByteString, ByteString, ByteString> t : predictions.keySet()) {
-			Prediction prediction = new Prediction(t);			
-			List<Query> rules = predictions.get(t);
-			List<Integer> ruleIds = new ArrayList<Integer>();
-			for (Query rule : rules) {
-				ruleIds.add(rule.getId());
-				prediction.getRules().add(rule);
-			}
-			// Avoid recomputing joint rules for each prediction (there can be many)
-			Collections.sort(ruleIds);
-			Query combinedRule = combinedRulesMap.get(ruleIds);
-			if (combinedRule != null) {
-				prediction.setJointRule(combinedRule);
-			} else {
-				combinedRule = prediction.getJointRule();
-				combinedRulesMap.put(ruleIds, combinedRule);
-			}
-			combinedRule = prediction.getJointRule();
-			
-			if (combinedRule != prediction.getRules().get(0)) {
-				if (iteration == 0) {
-					miningAssistant.computeCardinality(combinedRule);
-					miningAssistant.computePCAConfidence(combinedRule);						
-					computeCardinalityScore(prediction, false);
-				} else {
-					miningAssistant.computeProbabilisticMetrics(combinedRule);
-					computeCardinalityScore(prediction, true);
-				}
-			}
-			
-			ByteString triple[] = prediction.getTriple();
-			int eval = Evaluator.evaluate(triple, trainingDb, testingDb);
-			if(eval == 0) { 
-				prediction.setHitInTarget(true);
-			}
-			
-			if(trainingDb.count(triple) > 0) {
-				prediction.setHitInTraining(true);
-			}
-			
-			
-			double finalConfidence = prediction.getFullScore();
-			if (finalConfidence >= pcaConfidenceThreshold) {
-				prediction.setIterationId(iteration);
-				ByteString[] tripleArray = prediction.getTriple();
-				trainingDb.add(tripleArray[0], tripleArray[1], tripleArray[2], finalConfidence);
-				result.add(prediction);
-				++count;
-			}
+		timeStamp1 = System.currentTimeMillis();
+		Thread[] threads = new Thread[Runtime.getRuntime().availableProcessors()];
+		for (int i = 0; i < threads.length; ++i) {
+			threads[i] = new Thread(new PredictionsBuilder(predictions, result, combinedRulesMap, iteration));
+			threads[i].start();
 		}
 		
-		return count;
+		for (int i = 0; i < threads.length; ++i) {
+			threads[i].join();
+		}
+		
+		for (Prediction p : result) {
+			ByteString[] t = p.getTriple();
+			trainingDb.add(t[0], t[1], t[2], p.getFullScore());
+		}
+		
+		System.out.println((System.currentTimeMillis() - timeStamp1) + " to calculate the scores for predictions");
 	}
 	
 	/**
 	 * For a given prediction, it computes the probability that meets soft cardinality constraints.
 	 * @param prediction
 	 */
-	private void computeCardinalityScore(Prediction prediction, boolean probabilistic) {
+	private void computeCardinalityScore(Prediction prediction) {
 		// Take the most functional side of the prediction
 		ByteString relation = prediction.getTriple()[1];
 		long cardinality = 0;
