@@ -73,7 +73,7 @@ public class AMIE {
     /**
      * Support threshold for relations.
      */
-    private int minInitialSupport;
+    private double minInitialSupport;
 
     /**
      * Head coverage threshold for refinements
@@ -178,13 +178,12 @@ public class AMIE {
         Condition resultsCondVar = resultsLock.newCondition();
         AtomicInteger sharedCounter = new AtomicInteger(0);
 
-        Query rootQuery = new Query();
         Collection<Query> seedsPool = new LinkedHashSet<>();
         // Queue initialization
         if (seeds == null || seeds.isEmpty()) {
-            assistant.getDanglingEdges(rootQuery, minInitialSupport, seedsPool);
+            assistant.getInitialAtoms(minInitialSupport, seedsPool);
         } else {
-            assistant.getInitialDanglingEdgesFromSeeds(rootQuery, seeds, minInitialSupport, seedsPool);
+            assistant.getInitialAtomsFromSeeds(seeds, minInitialSupport, seedsPool);
         }
 
         if (realTime) {
@@ -212,7 +211,7 @@ public class AMIE {
             job.join();
         }
 
-        // Required by the reviewers of the AMIE+ article    	
+        // Required by the reviewers of the AMIE+ article. Timing collection   	
         for (RDFMinerJob jobObject : jobObjects) {
             this._specializationTime += jobObject.getSpecializationTime();
             this._scoringTime += jobObject.getScoringTime();
@@ -393,12 +392,13 @@ public class AMIE {
                         furtherRefined = !currentRule.isPerfect();
                     }
 
+                    // If so specialize it
                     if (furtherRefined) {
                         long timeStamp1 = System.currentTimeMillis();
-                        int minCount = getCountThreshold(currentRule);
+                        double threshold = getCountThreshold(currentRule);
                         List<Query> temporalOutput = new ArrayList<Query>();
-                        assistant.getCloseCircleEdges(currentRule, minCount, temporalOutput);
-                        assistant.getDanglingEdges(currentRule, minCount, temporalOutput);
+                        assistant.getCloseCircleEdges(currentRule, threshold, temporalOutput);
+                        assistant.getDanglingEdges(currentRule, threshold, temporalOutput);
                         long timeStamp2 = System.currentTimeMillis();
                         this.specializationTime += (timeStamp2 - timeStamp1);
                         synchronized (queryPool) {
@@ -480,12 +480,12 @@ public class AMIE {
             }
         }
 
-        private int getCountThreshold(Query query) {
+        private double getCountThreshold(Query query) {
             switch (pruningMetric) {
                 case Support:
-                    return (int) minHeadCoverage;
+                    return minHeadCoverage;
                 case HeadCoverage:
-                    return (int) Math.ceil((minHeadCoverage * (double) assistant.getHeadCardinality(query)));
+                    return Math.ceil((minHeadCoverage * (double) assistant.getHeadCardinality(query)));
                 default:
                     return 0;
             }
@@ -1132,12 +1132,12 @@ public class AMIE {
             System.out.println("Scoring time: " + (miner._getScoringTime() / 1000.0) + "s");
             System.out.println("Queueing and duplicate elimination: " + (miner._getQueueingAndDuplicateElimination() / 1000.0) + "s");
             System.out.println("Approximation time: " + (miner.getApproximationTime() / 1000.0) + "s");
-            System.out.println(rules.size() + " rules mined.");
         }
 
         long miningTime = System.currentTimeMillis() - time;
         System.out.println("Mining done in " + NumberFormatter.formatMS(miningTime));
         Announce.done("Total time " + NumberFormatter.formatMS(miningTime + sourcesLoadingTime));
+        System.out.println(rules.size() + " rules mined.");
     }
 
     public void setCheckParentsOfDegree2(boolean booleanVal) {

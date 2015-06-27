@@ -31,12 +31,13 @@ public class MiningAssistant{
 	/**
 	 * Factory object to instantiate query components
 	 */
-	protected FactDatabase source;
+	protected FactDatabase kb;
 	
 	/**
-	 * Exclusively used for schema information
+	 * Exclusively used for schema information, such as subclass and sub-property
+	 * relations or relation signatures.
 	 */
-	protected FactDatabase schemaSource;
+	protected FactDatabase kbSchema;
 	
 	/**
 	 * Number of different objects in the underlying dataset
@@ -167,7 +168,7 @@ public class MiningAssistant{
 	 * @param dataSource
 	 */
 	public MiningAssistant(FactDatabase dataSource) {
-		this.source = dataSource;
+		this.kb = dataSource;
 		this.minStdConfidence = 0.0;
 		this.minPcaConfidence = 0.0;
 		this.maxDepth = 3;
@@ -175,8 +176,8 @@ public class MiningAssistant{
 		ByteString[] rootPattern = Query.fullyUnboundTriplePattern1();
 		List<ByteString[]> triples = new ArrayList<ByteString[]>();
 		triples.add(rootPattern);
-		this.totalSubjectCount = this.source.countDistinct(rootPattern[0], triples);
-		this.totalObjectCount = this.source.countDistinct(rootPattern[2], triples);
+		this.totalSubjectCount = this.kb.countDistinct(rootPattern[0], triples);
+		this.totalObjectCount = this.kb.countDistinct(rootPattern[2], triples);
 		this.typeString = ByteString.of("rdf:type");
 		this.subPropertyString = ByteString.of("rdfs:subPropertyOf");
 		this.headCardinalities = new HashMap<String, Double>();
@@ -194,10 +195,10 @@ public class MiningAssistant{
 	}	
 	
 	private void buildRelationsDictionary() {
-		Collection<ByteString> relations = source.getRelations();
+		Collection<ByteString> relations = kb.getRelations();
 		for (ByteString relation : relations) {
 			ByteString[] query = FactDatabase.triple(ByteString.of("?x"), relation, ByteString.of("?y"));
-			double relationSize = source.count(query);
+			double relationSize = kb.count(query);
 			headCardinalities.put(relation.toString(), relationSize);
 		}
 	}
@@ -287,12 +288,12 @@ public class MiningAssistant{
 	}
 	
 	public FactDatabase getSchemaSource(){
-		return schemaSource;
+		return kbSchema;
 	}
 	
 	public void setSchemaSource(FactDatabase schemaSource) {
 		// TODO Auto-generated method stub
-		this.schemaSource = schemaSource;
+		this.kbSchema = schemaSource;
 	}
 
 	public boolean registerHeadRelation(Query query){		
@@ -315,38 +316,37 @@ public class MiningAssistant{
 		ByteString[] lastPattern = subclassQuery.getTriples().get(0);
 		ByteString tmpVar = lastPattern[2];
 		lastPattern[2] = className;		
-		Set<ByteString> result = source.selectDistinct(lastPattern[0], subclassQuery.getTriples());
+		Set<ByteString> result = kb.selectDistinct(lastPattern[0], subclassQuery.getTriples());
 		lastPattern[2] = tmpVar;
 		return result;
 	}
-	
+	/**
+	 * Returns true if the assistant configuration allows the addition of instantiated atom, i.e., atoms
+	 * where one of the arguments has a constant.
+	 * @return
+	 */
 	protected boolean canAddInstantiatedAtom() {
 		return allowConstants || enforceConstants;
 	}
 	
 	/**
-	 * Returns a list of one-atom queries using the head relations provided in the collection 
-	 * "relations".
-	 * @param query
+	 * Returns a list of one-atom queries using the head relations provided in the collection relations.
 	 * @param relations
-	 * @param minCardinality
-	 * @param output
+	 * @param minSupportThreshold
+	 * @param output The results of the method are added directly to this collection.
 	 */
-	public void getInitialDanglingEdgesFromSeeds(Query query, Collection<ByteString> relations, int minCardinality, Collection<Query> output) {
-		//The query must be empty
-		if(!query.isEmpty()){
-			throw new IllegalArgumentException("Expected an empty query");
-		}
+	public void getInitialAtomsFromSeeds(Collection<ByteString> relations, double minSupportThreshold, Collection<Query> output) {
+		Query emptyQuery = new Query();
 		
-		ByteString[] newEdge = query.fullyUnboundTriplePattern();		
-		query.getTriples().add(newEdge);
+		ByteString[] newEdge = emptyQuery.fullyUnboundTriplePattern();		
+		emptyQuery.getTriples().add(newEdge);
 		
 		for(ByteString relation: relations){
 			newEdge[1] = relation;
 			
 			int countVarPos = countAlwaysOnSubject? 0 : findCountingVariable(newEdge);
 			ByteString countingVariable = newEdge[countVarPos];
-			long cardinality = source.countDistinct(countingVariable, query.getTriples());
+			long cardinality = kb.countDistinct(countingVariable, emptyQuery.getTriples());
 			
 			ByteString[] succedent = newEdge.clone();
 			Query candidate = new Query(succedent, cardinality);
@@ -354,127 +354,138 @@ public class MiningAssistant{
 			registerHeadRelation(candidate);			
 
 			if(canAddInstantiatedAtom()) {
-				getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, output);
+				getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
 			}
 			
 			if (!enforceConstants) {
 				output.add(candidate);
 			}
 		}
+		emptyQuery.getTriples().remove(0);
+	}
+	
+	/**
+	 * Returns a list of one-atom queries using the relations from the KB
+	 * @param query
+	 * @param minSupportThreshold
+	 * @param output
+	 */
+	public void getInitialAtoms(double minSupportThreshold, Collection<Query> output) {
+		Query query = new Query();
+		ByteString[] newEdge = query.fullyUnboundTriplePattern();
+		query.getTriples().add(newEdge);
+		IntHashMap<ByteString> relations = kb.frequentBindingsOf(newEdge[1], newEdge[0], query.getTriples());
+		for(ByteString relation: relations){
+			if(headExcludedRelations != null && headExcludedRelations.contains(newEdge[1]))
+				continue;
+			
+			
+			long cardinality = relations.get(relation);
+			if(cardinality >= minSupportThreshold){
+				ByteString[] succedent = newEdge.clone();
+				succedent[1] = relation;
+				int countVarPos = countAlwaysOnSubject? 0 : findCountingVariable(succedent);
+				
+				if(!succedent[countVarPos].equals(succedent[0])){
+					//Recalculate the cardinality
+					cardinality = kb.countDistinct(succedent[countVarPos], FactDatabase.triples(succedent));
+					if(cardinality < minSupportThreshold)
+						continue;
+				}
+					
+				Query candidate = new Query(succedent, cardinality);
+				candidate.setFunctionalVariablePosition(countVarPos);
+				registerHeadRelation(candidate);					
+				if(canAddInstantiatedAtom()) {
+					getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
+				}
+				
+				if (!enforceConstants) {
+					output.add(candidate);
+				}
+			}
+		}			
 		query.getTriples().remove(0);
+		
 	}
 
 	/**
-	 * Returns all candidates obtained by adding a new triple pattern to the query
+	 * Returns all candidates obtained by adding a new dangling atom to the query. A dangling atom joins with the
+	 * query and one variable and introduces a fresh variable not seen in the query.
 	 * @param query
-	 * @param minCardinality
+	 * @param minSupportThreshold
 	 * @return
 	 */
-	public void getDanglingEdges(Query query, int minCardinality, Collection<Query> output){		
+	public void getDanglingEdges(Query query, double minSupportThreshold, Collection<Query> output){		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
+		if (query.isEmpty()) {
+			throw new IllegalArgumentException("This method expects a non-empty query");
+		}
+		//General case
+		if(!testLength(query))
+			return;
 		
-		if(query.isEmpty()){
-			//Initial case
-			query.getTriples().add(newEdge);
-			IntHashMap<ByteString> relations = source.frequentBindingsOf(newEdge[1], newEdge[0], query.getTriples());
-			for(ByteString relation: relations){
-				if(headExcludedRelations != null && headExcludedRelations.contains(newEdge[1]))
-					continue;
-				
-				
-				long cardinality = relations.get(relation);
-				if(cardinality >= minCardinality){
-					ByteString[] succedent = newEdge.clone();
-					succedent[1] = relation;
-					int countVarPos = countAlwaysOnSubject? 0 : findCountingVariable(succedent);
-					
-					if(!succedent[countVarPos].equals(succedent[0])){
-						//Recalculate the cardinality
-						cardinality = source.countDistinct(succedent[countVarPos], FactDatabase.triples(succedent));
-						if(cardinality < minCardinality)
-							continue;
-					}
-						
-					Query candidate = new Query(succedent, cardinality);
-					candidate.setFunctionalVariablePosition(countVarPos);
-					registerHeadRelation(candidate);					
-					if(canAddInstantiatedAtom()) {
-						getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, output);
-					}
-					
-					if (!enforceConstants) {
-						output.add(candidate);
-					}
+		if (exploitMaxLengthOption) {
+			if(query.getRealLength() == maxDepth - 1){
+				if(!query.getOpenVariables().isEmpty() && !allowConstants){
+					return;
 				}
-			}			
-			query.getTriples().remove(0);
+			}
+		}
+		
+		List<ByteString> joinVariables = null;
+		
+		//Then do it for all values
+		if(query.isClosed()){
+			joinVariables = query.getVariables();
 		}else{
-			//General case
-			if(!testLength(query))
-				return;
-			
-			if (exploitMaxLengthOption) {
-				if(query.getRealLength() == maxDepth - 1){
-					if(!query.getOpenVariables().isEmpty() && !allowConstants){
-						return;
-					}
-				}
-			}
-			
-			List<ByteString> joinVariables = null;
-			
-			//Then do it for all values
-			if(query.isClosed()){
-				joinVariables = query.getVariables();
-			}else{
-				joinVariables = query.getOpenVariables();
-			}
+			joinVariables = query.getOpenVariables();
+		}
 
-			int nPatterns = query.getTriples().size();
-			ByteString originalRelationVariable = newEdge[1];		
+		int nPatterns = query.getTriples().size();
+		ByteString originalRelationVariable = newEdge[1];		
+		
+		for(int joinPosition = 0; joinPosition <= 2; joinPosition += 2){
+			ByteString originalFreshVariable = newEdge[joinPosition];
 			
-			for(int joinPosition = 0; joinPosition <= 2; joinPosition += 2){
-				ByteString originalFreshVariable = newEdge[joinPosition];
+			for(ByteString joinVariable: joinVariables){					
+				newEdge[joinPosition] = joinVariable;
+				query.getTriples().add(newEdge);
+				IntHashMap<ByteString> promisingRelations = kb.frequentBindingsOf(newEdge[1], query.getFunctionalVariable(), query.getTriples());
+				query.getTriples().remove(nPatterns);
 				
-				for(ByteString joinVariable: joinVariables){					
-					newEdge[joinPosition] = joinVariable;
-					query.getTriples().add(newEdge);
-					IntHashMap<ByteString> promisingRelations = source.frequentBindingsOf(newEdge[1], query.getFunctionalVariable(), query.getTriples());
-					query.getTriples().remove(nPatterns);
-					
-					int danglingPosition = (joinPosition == 0 ? 2 : 0);
-					boolean boundHead = !FactDatabase.isVariable(query.getTriples().get(0)[danglingPosition]);
-					for(ByteString relation: promisingRelations){
-						if(bodyExcludedRelations != null && bodyExcludedRelations.contains(relation))
-							continue;
-						//Here we still have to make a redundancy check						
-						int cardinality = promisingRelations.get(relation);
-						if(cardinality >= minCardinality){
-							newEdge[1] = relation;
-							Query candidate = query.addEdge(newEdge, cardinality, newEdge[joinPosition], newEdge[danglingPosition]);
-							if(candidate.containsUnifiablePatterns()){
-								//Verify whether dangling variable unifies to a single value (I do not like this hack)
-								if(boundHead && source.countDistinct(newEdge[danglingPosition], candidate.getTriples()) < 2)
-									continue;
-							}
-							
-							candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
-							candidate.setSupportRatio((double)candidate.getSupport() / (double)getTotalCount(candidate));
-							candidate.setParent(query);							
-							if(canAddInstantiatedAtom()) {
-								getInstantiatedEdges(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minCardinality, output);
-							}
-							
-							if (!enforceConstants) {
-								output.add(candidate);
-							}
+				int danglingPosition = (joinPosition == 0 ? 2 : 0);
+				boolean boundHead = !FactDatabase.isVariable(query.getTriples().get(0)[danglingPosition]);
+				for(ByteString relation: promisingRelations){
+					if(bodyExcludedRelations != null && bodyExcludedRelations.contains(relation))
+						continue;
+					//Here we still have to make a redundancy check						
+					int cardinality = promisingRelations.get(relation);
+					if(cardinality >= minSupportThreshold){
+						newEdge[1] = relation;
+						Query candidate = query.addEdge(newEdge, cardinality, newEdge[joinPosition], newEdge[danglingPosition]);
+						if(candidate.containsUnifiablePatterns()){
+							//Verify whether dangling variable unifies to a single value (I do not like this hack)
+							if(boundHead && kb.countDistinct(newEdge[danglingPosition], candidate.getTriples()) < 2)
+								continue;
+						}
+						
+						candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
+						candidate.setSupportRatio((double)candidate.getSupport() / (double)getTotalCount(candidate));
+						candidate.setParent(query);							
+						if(canAddInstantiatedAtom()) {
+							getInstantiatedEdges(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minSupportThreshold, output);
+						}
+						
+						if (!enforceConstants) {
+							output.add(candidate);
 						}
 					}
-					
-					newEdge[1] = originalRelationVariable;
 				}
-				newEdge[joinPosition] = originalFreshVariable;
+				
+				newEdge[1] = originalRelationVariable;
 			}
+			newEdge[joinPosition] = originalFreshVariable;
 		}
 	}
 
@@ -487,8 +498,8 @@ public class MiningAssistant{
 		if(nVars == 1){
 			return FactDatabase.firstVariablePos(head);
 		}else{
-			double functionality = source.functionality(head[1]);
-			double inverseFunctionality = source.inverseFunctionality(head[1]);
+			double functionality = kb.functionality(head[1]);
+			double inverseFunctionality = kb.inverseFunctionality(head[1]);
 			if(functionality >= inverseFunctionality){
 				return 0;
 			}else{
@@ -510,11 +521,11 @@ public class MiningAssistant{
 	/**
 	 * Returns all candidates obtained by binding two values
 	 * @param currentNode
-	 * @param minCardinality
+	 * @param minSupportThreshold
 	 * @param omittedVariables
 	 * @return
 	 */
-	public void getCloseCircleEdges(Query query, int minCardinality, Collection<Query> output){
+	public void getCloseCircleEdges(Query query, double minSupportThreshold, Collection<Query> output){
 		if (enforceConstants) {
 			return;
 		}
@@ -557,7 +568,7 @@ public class MiningAssistant{
 						newEdge[closeCirclePosition] = variable;
 						
 						query.getTriples().add(newEdge);
-						IntHashMap<ByteString> promisingRelations = source.frequentBindingsOf(newEdge[1], query.getFunctionalVariable(), query.getTriples());
+						IntHashMap<ByteString> promisingRelations = kb.frequentBindingsOf(newEdge[1], query.getFunctionalVariable(), query.getTriples());
 						query.getTriples().remove(nPatterns);
 						
 						for(ByteString relation: promisingRelations){
@@ -567,7 +578,7 @@ public class MiningAssistant{
 							//Here we still have to make a redundancy check
 							int cardinality = promisingRelations.get(relation);
 							newEdge[1] = relation;
-							if(cardinality >= minCardinality){										
+							if(cardinality >= minSupportThreshold){										
 								Query candidate = query.closeCircle(newEdge, cardinality);
 								if(!candidate.isRedundantRecursive()){
 									candidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate.getHeadRelation()));
@@ -633,7 +644,7 @@ public class MiningAssistant{
 		}
 		
 		int[] hardQueryInfo = null;
-		hardQueryInfo = source.identifyHardQueryTypeI(candidate.getAntecedent());
+		hardQueryInfo = kb.identifyHardQueryTypeI(candidate.getAntecedent());
 		if(hardQueryInfo != null){
 			double pcaConfUpperBound = getPcaConfidenceUpperBound(candidate);			
 			if(pcaConfUpperBound < this.minPcaConfidence){
@@ -684,7 +695,7 @@ public class MiningAssistant{
 		int[] joinInformation = Query.joinPositions(path.get(0), candidate.getHead());
 		// If r1 is not functional or it is not joining from the subject, we replace it with the corresponding inverse relation.
 		boolean relationRewritten = joinInformation[0] != 0;		
-		double funr1 = this.source.functionality(r1, relationRewritten);
+		double funr1 = this.kb.functionality(r1, relationRewritten);
 		double overlap = 0.0;
 		overlap = computeOverlap(joinInformation, r1, rh);
 		// The first part of the formula
@@ -700,10 +711,10 @@ public class MiningAssistant{
 			// Inverse r_{i-1} if it is not functional or it joins from the subject.
 			boolean rewriteRi = joinInformation[1] != 0;
 			double rng = 0.0;
-			double funri = this.source.functionality(ri, rewriteRi);
-			double ifunri = this.source.inverseFunctionality(ri, rewriteRi);
+			double funri = this.kb.functionality(ri, rewriteRi);
+			double ifunri = this.kb.inverseFunctionality(ri, rewriteRi);
 			
-			rng = this.source.relationColumnSize(ri_1, joinInformation[0]);
+			rng = this.kb.relationColumnSize(ri_1, joinInformation[0]);
 			//System.out.println("|range(" + ri_1 + " (" + rewriteRi_1 + ")" + ")| = " + rng);
 			
 			overlap = computeOverlap(joinInformation, ri_1, ri);
@@ -738,13 +749,13 @@ public class MiningAssistant{
 	 */
 	private double computeOverlap(int[] jinfo, ByteString r1, ByteString r2) {
 		if (jinfo[0] == 0 && jinfo[1] == 0) {
-			return this.source.overlap(r1, r2, FactDatabase.SUBJECT2SUBJECT);
+			return this.kb.overlap(r1, r2, FactDatabase.SUBJECT2SUBJECT);
 		} else if (jinfo[0] == 2 && jinfo[1] == 2) {
-			return this.source.overlap(r1, r2, FactDatabase.OBJECT2OBJECT);
+			return this.kb.overlap(r1, r2, FactDatabase.OBJECT2OBJECT);
 		} else if (jinfo[0] == 0 && jinfo[1] == 2) {
-			return this.source.overlap(r1, r2, FactDatabase.SUBJECT2OBJECT);
+			return this.kb.overlap(r1, r2, FactDatabase.SUBJECT2OBJECT);
 		} else if (jinfo[0] == 2 && jinfo[1] == 0) {
-			return this.source.overlap(r2, r1, FactDatabase.SUBJECT2OBJECT);
+			return this.kb.overlap(r2, r1, FactDatabase.SUBJECT2OBJECT);
 		} else {
 			return 0.0;
 		}
@@ -759,7 +770,7 @@ public class MiningAssistant{
 	 */
 	protected boolean calculateConfidenceApproximationFor3Atoms(Query candidate) {
 		int[] hardQueryInfo = null;
-		hardQueryInfo = source.identifyHardQueryTypeIII(candidate.getAntecedent());
+		hardQueryInfo = kb.identifyHardQueryTypeIII(candidate.getAntecedent());
 		if(hardQueryInfo != null){
 			ByteString[] targetPatternOutput = null;
 			ByteString[] targetPatternInput = null; //Atom with the projection variable
@@ -782,17 +793,17 @@ public class MiningAssistant{
 			
 			//Many to many case
 			if (targetPatternOutput != null) {						
-				double f1 = source.x_functionality(targetPatternInput[1], posCommonInput == 0 ? 2 : 0);
-				double f2 = source.x_functionality(targetPatternOutput[1], posCommonOutput);
-				double f3 = source.x_functionality(targetPatternOutput[1], posCommonOutput == 0 ? 2 : 0); //Duplicate elimination term
-				double nentities = source.relationColumnSize(targetPatternInput[1], posCommonInput);
+				double f1 = kb.x_functionality(targetPatternInput[1], posCommonInput == 0 ? 2 : 0);
+				double f2 = kb.x_functionality(targetPatternOutput[1], posCommonOutput);
+				double f3 = kb.x_functionality(targetPatternOutput[1], posCommonOutput == 0 ? 2 : 0); //Duplicate elimination term
+				double nentities = kb.relationColumnSize(targetPatternInput[1], posCommonInput);
 				double overlap;
 				if(posCommonInput == posCommonOutput)
-					overlap = source.overlap(targetPatternInput[1], targetPatternOutput[1], posCommonInput + posCommonOutput);
+					overlap = kb.overlap(targetPatternInput[1], targetPatternOutput[1], posCommonInput + posCommonOutput);
 				else if(posCommonInput < posCommonOutput)
-					overlap = source.overlap(targetPatternInput[1], targetPatternOutput[1], posCommonOutput);
+					overlap = kb.overlap(targetPatternInput[1], targetPatternOutput[1], posCommonOutput);
 				else
-					overlap = source.overlap(targetPatternOutput[1], targetPatternInput[1], posCommonInput);
+					overlap = kb.overlap(targetPatternOutput[1], targetPatternInput[1], posCommonInput);
 				
 				double overlapHead;
 				int posInput = posCommonInput == 0 ? 2 : 0;
@@ -802,14 +813,14 @@ public class MiningAssistant{
 					ByteString[] newHead = candidate.getHead().clone();
 					newHead[candidate.getNonFunctionalVariablePosition()] = ByteString.of("?s");
 					existentialAntecedent.add(newHead);
-					overlapHead = source.countDistinct(candidate.getFunctionalVariable(), existentialAntecedent);							
+					overlapHead = kb.countDistinct(candidate.getFunctionalVariable(), existentialAntecedent);							
 				} else {
 					if(posInput == candidate.getFunctionalVariablePosition()){
-						overlapHead = source.overlap(targetPatternInput[1], candidate.getHead()[1], posInput + candidate.getFunctionalVariablePosition());
+						overlapHead = kb.overlap(targetPatternInput[1], candidate.getHead()[1], posInput + candidate.getFunctionalVariablePosition());
 					}else if(posInput < candidate.getFunctionalVariablePosition()){
-						overlapHead = source.overlap(targetPatternInput[1], candidate.getHead()[1], candidate.getFunctionalVariablePosition());							
+						overlapHead = kb.overlap(targetPatternInput[1], candidate.getHead()[1], candidate.getFunctionalVariablePosition());							
 					}else{
-						overlapHead = source.overlap(candidate.getHead()[1], targetPatternInput[1], posInput);							
+						overlapHead = kb.overlap(candidate.getHead()[1], targetPatternInput[1], posInput);							
 					}
 				}
 				
@@ -872,7 +883,7 @@ public class MiningAssistant{
 	}
 
 	private double getPcaConfidenceUpperBound(Query query) {
-		int[] hardCaseInfo = source.identifyHardQueryTypeI(query.getAntecedent());
+		int[] hardCaseInfo = kb.identifyHardQueryTypeI(query.getAntecedent());
 		ByteString projVariable = query.getFunctionalVariable();
 		//ByteString commonVariable = query.getAntecedent().get(hardCaseInfo[2])[hardCaseInfo[0]];
 		int freeVarPosition = query.getFunctionalVariablePosition() == 0 ? 2 : 0;
@@ -900,12 +911,12 @@ public class MiningAssistant{
 			}
 		}
 		
-		double denominator = source.countDistinct(projVariable, easyQuery);
+		double denominator = kb.countDistinct(projVariable, easyQuery);
 		return query.getSupport() / denominator;
 	}
 
 	private double getConfidenceUpperBound(Query query) {
-		int[] hardCaseInfo = source.identifyHardQueryTypeI(query.getAntecedent());
+		int[] hardCaseInfo = kb.identifyHardQueryTypeI(query.getAntecedent());
 		double denominator = 0.0;
 		ByteString[] triple = new ByteString[3];
 		triple[0] = ByteString.of("?x");
@@ -914,28 +925,28 @@ public class MiningAssistant{
 		
 		if(hardCaseInfo[0] == 2){
 			// Case r(y, z) r(x, z)
-			denominator = source.countDistinct(ByteString.of("?x"), FactDatabase.triples(triple));
+			denominator = kb.countDistinct(ByteString.of("?x"), FactDatabase.triples(triple));
 		}else{
 			// Case r(z, y) r(z, x)
-			denominator = source.countDistinct(ByteString.of("?y"), FactDatabase.triples(triple));
+			denominator = kb.countDistinct(ByteString.of("?y"), FactDatabase.triples(triple));
 		}
 		
 		return query.getSupport() / denominator;
 	}
 
 	protected void getInstantiatedEdges(Query query, Query originalQuery, 
-			ByteString[] danglingEdge, int danglingPosition, int minCardinality, Collection<Query> output) {
-		IntHashMap<ByteString> constants = source.frequentBindingsOf(danglingEdge[danglingPosition], query.getFunctionalVariable(), query.getTriples());
+			ByteString[] danglingEdge, int danglingPosition, double minSupportThreshold, Collection<Query> output) {
+		IntHashMap<ByteString> constants = kb.frequentBindingsOf(danglingEdge[danglingPosition], query.getFunctionalVariable(), query.getTriples());
 		for(ByteString constant: constants){
 			int cardinality = constants.get(constant);
-			if(cardinality >= minCardinality){
+			if(cardinality >= minSupportThreshold){
 				ByteString[] lastPatternCopy = query.getLastTriplePattern().clone();
 				lastPatternCopy[danglingPosition] = constant;
-				long cardLastEdge = source.count(lastPatternCopy);
+				long cardLastEdge = kb.count(lastPatternCopy);
 				if(cardLastEdge < 2)
 					continue;
 				
-				Query candidate = query.unify(danglingPosition, constant, cardinality);
+				Query candidate = query.instantiateConstant(danglingPosition, constant, cardinality);
 
 				if(candidate.getRedundantAtoms().isEmpty()){
 					candidate.setHeadCoverage((double)cardinality / headCardinalities.get(candidate.getHeadRelation()));
@@ -961,8 +972,8 @@ public class MiningAssistant{
 		} else {
 			countVariable = rule.getFunctionalVariable();
 		}
-		rule.setSupport(source.countDistinct(countVariable, rule.getTriples()));
-		rule.setSupportRatio((double) rule.getSupport() / source.size());
+		rule.setSupport(kb.countDistinct(countVariable, rule.getTriples()));
+		rule.setSupportRatio((double) rule.getSupport() / kb.size());
 		return rule.getSupport();
 	}
 	
@@ -994,7 +1005,7 @@ public class MiningAssistant{
 			//Improved confidence: Add an existential version of the head
 			antecedent.add(existentialTriple);
 			try{
-				pcaDenominator = source.countDistinct(rule.getFunctionalVariable(), antecedent);
+				pcaDenominator = kb.countDistinct(rule.getFunctionalVariable(), antecedent);
 				rule.setPcaBodySize(pcaDenominator);
 			}catch(UnsupportedOperationException e){
 				
@@ -1013,7 +1024,7 @@ public class MiningAssistant{
 		if(!antecedent.isEmpty()) {
 			//Confidence
 			try{
-				denominator = source.countDistinct(candidate.getFunctionalVariable(), antecedent);
+				denominator = kb.countDistinct(candidate.getFunctionalVariable(), antecedent);
 				candidate.setBodySize(denominator);
 			}catch(UnsupportedOperationException e){
 				
@@ -1092,7 +1103,7 @@ public class MiningAssistant{
 
 	public long getFactsCount() {
 		// TODO Auto-generated method stub
-		return source.size();
+		return kb.size();
 	}
 
 	/**

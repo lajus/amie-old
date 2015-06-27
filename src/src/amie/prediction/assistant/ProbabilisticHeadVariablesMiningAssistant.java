@@ -20,11 +20,11 @@ public class ProbabilisticHeadVariablesMiningAssistant extends DefaultMiningAssi
 	 */
 	public void computeProbabilisticMetrics(Query rule) {
 		HistogramTupleIndependentProbabilisticFactDatabase kb = 
-				(HistogramTupleIndependentProbabilisticFactDatabase) this.source;
+				(HistogramTupleIndependentProbabilisticFactDatabase) this.kb;
 		ByteString[] head = rule.getHead();
 		ByteString valueToReplace = null;
 		if (!FactDatabase.isVariable(head[2]) 
-				|| this.source.isFunctional(head[1])) {
+				|| this.kb.isFunctional(head[1])) {
 			valueToReplace = head[0];
 		} else {
 			valueToReplace = head[2];

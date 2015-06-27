@@ -324,10 +324,8 @@ public class IterativeNaivePredictor {
 			threads[i].join();
 		}
 		
-		int k = 0;
 		for (Prediction prediction : result) {
 			ByteString[] t = prediction.getTriple();
-			k++;
 			trainingDb.add(t[0], t[1], t[2], prediction.getFullScore());
 		}
 		

@@ -36,7 +36,7 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 					var2 = head[FactDatabase.secondVariablePos(head)];
 					denominator = (double)computeAntecedentCount(var1, var2, candidate);
 				} else {					
-					denominator = (double)source.countDistinct(candidate.getFunctionalVariable(), antecedent);
+					denominator = (double)kb.countDistinct(candidate.getFunctionalVariable(), antecedent);
 				}				
 				candidate.setBodySize((long)denominator);
 			}catch(UnsupportedOperationException e){
@@ -74,7 +74,7 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 									var2, candidate, antecedent, existentialTriple, candidate.getFunctionalVariablePosition());
 						}else{
 							antecedent.add(existentialTriple);
-							pcaDenominator = (double)source.countDistinct(candidate.getFunctionalVariable(), antecedent);
+							pcaDenominator = (double)kb.countDistinct(candidate.getFunctionalVariable(), antecedent);
 						}			
 					}
 					

@@ -16,7 +16,9 @@ public class Prediction {
 	
 	private boolean hitInTraining;
 	
-	// The rules that infer the prediction
+	/**
+	 * The rules that infer the prediction
+	 */
 	private List<Query> rules;
 	
 	/**

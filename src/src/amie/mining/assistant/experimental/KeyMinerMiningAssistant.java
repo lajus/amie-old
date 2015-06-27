@@ -29,18 +29,15 @@ public class KeyMinerMiningAssistant extends DefaultMiningAssistant {
 	 * We enforce always an equals relation on the head, no matter if the user provides
 	 * seeds relations.
 	 */
-	public void getInitialDanglingEdgesFromSeeds(Query query, Collection<ByteString> relations, int minCardinality, Collection<Query> output) {
-		if(!query.isEmpty()){
-			throw new IllegalArgumentException("Expected an empty query");
-		}
+	public void getInitialAtomsFromSeeds(Collection<ByteString> seedsRelations, double minSupportThreshold, Collection<Query> output) {
 		Collection<ByteString> equalsRelation = Arrays.asList(FactDatabase.EQUALSbs);
-		super.getInitialDanglingEdgesFromSeeds(query, equalsRelation, minCardinality, output);
+		super.getInitialAtomsFromSeeds(equalsRelation, minSupportThreshold, output);
 	}
 	
 	@Override
-	public void getDanglingEdges(Query query, int minCardinality, Collection<Query> output) {		
+	public void getDanglingEdges(Query query, double minCardinality, Collection<Query> output) {		
 		if (query.isEmpty()) {
-			getInitialDanglingEdgesFromSeeds(query, Collections.EMPTY_LIST, minCardinality, output);
+			getInitialAtomsFromSeeds(Collections.EMPTY_LIST, minCardinality, output);
 			return;
 		}
 		// Do nothing as getCloseCircleEdges takes care of building rules for keys.
@@ -50,12 +47,12 @@ public class KeyMinerMiningAssistant extends DefaultMiningAssistant {
 	 * Returns all candidates obtained by adding a composite closing edge of the form
 	 * r(x, z), r(y, z) where x, y are the head variables of the rule sent as argument.
 	 * @param currentNode
-	 * @param minCardinality
+	 * @param minSupportThreshold
 	 * @param omittedVariables
 	 * @return
 	 */
 	@Override
-	public void getCloseCircleEdges(Query query, int minCardinality, Collection<Query> output) {
+	public void getCloseCircleEdges(Query query, double minSupportThreshold, Collection<Query> output) {
 		if (this.enforceConstants) {
 			return;
 		}
@@ -81,13 +78,13 @@ public class KeyMinerMiningAssistant extends DefaultMiningAssistant {
 		newEdge1[joinPosition] = joinVariables.get(0);
 		newEdge2[joinPosition] = joinVariables.get(1);
 		query.getTriples().add(newEdge1);
-		IntHashMap<ByteString> promisingRelations = this.source.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge1[1]);
+		IntHashMap<ByteString> promisingRelations = this.kb.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge1[1]);
 		query.getTriples().remove(nPatterns);
 		
 		for(ByteString relation: promisingRelations){
 			int cardinality = promisingRelations.get(relation);
 			
-			if (cardinality < minCardinality) {
+			if (cardinality < minSupportThreshold) {
 				continue;
 			}			
 			
@@ -111,7 +108,7 @@ public class KeyMinerMiningAssistant extends DefaultMiningAssistant {
 			
 			Query candidate = query.addEdges(newEdge1, newEdge2);
 			computeCardinality(candidate);
-			if (candidate.getSupport() < minCardinality) {
+			if (candidate.getSupport() < minSupportThreshold) {
 				continue;
 			}
 			candidate.setParent(query);	

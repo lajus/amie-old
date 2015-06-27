@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javatools.administrative.Announce;
 import javatools.datatypes.ByteString;
@@ -116,16 +117,18 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	 * @param var
 	 * @return Probability for each binding of the select variable
 	 */
-	protected List<Double> probabibilitiesOfQuery(List<ByteString[]> query, ByteString var) {
+	protected double[] probabibilitiesOfQuery(List<ByteString[]> query, ByteString var) {
 		Set<ByteString> bindings = selectDistinct(var, query);
-		List<Double> results = new ArrayList<Double>();
+		double[] results = new double[bindings.size()];
 		try (Instantiator insty = new Instantiator(query, var)) {
+			int k = 0;
 			for (ByteString inst : bindings) {
 				double result = 1.0;
 				for (ByteString[] atom : insty.instantiate(inst)) {
 					result *= probabilityOfFact(atom);
 				}
-				results.add(result);
+				results[k] = result;
+				++k;
 			}
 		}
 		
@@ -133,17 +136,21 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	}
 	
 	/**
-	 * Returns the probabilities for all the bindings of the given query.
+	 * Returns the probabilities for all the bindings of the given query. 
 	 * @param query
 	 * @param var
-	 * @return Probability for each binding of the select variable
+	 * @return Probability for each binding of the select variable as an array of doubles, or null
+	 * if the variable does not have any bindings.
 	 */
-	protected List<Double> probabibilitiesOfQuery(List<ByteString[]> query) {
+	protected double[] probabibilitiesOfQuery(List<ByteString[]> query) {
 		// Count the number of variables
-		List<Double> result = new ArrayList<Double>();
+		double[] result = null;
 		if (!containsVariables(query)) {
+			result = new double[query.size()];
+			int k = 0;
 			for (ByteString[] atom : query) {
-				result.add(probabilityOfFact(atom));
+				result[k] = probabilityOfFact(atom);
+				++k;
 			}
 			return result;
 		}
@@ -156,9 +163,24 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 		Set<ByteString> bindings = selectDistinct(pivotVariable, query);
 		
 		try (Instantiator insty = new Instantiator(query, pivotVariable)) {
+			double tmp[][] = new double[bindings.size()][];
+			int k = 0;
+			int totalSize = 0;
 			for (ByteString inst : bindings) {
-				result.addAll(probabibilitiesOfQuery(insty.instantiate(inst)));
+				tmp[k] = probabibilitiesOfQuery(insty.instantiate(inst));
+				totalSize += tmp[k].length;
+				++k;
 			}
+			if (totalSize > 0) {
+				result = new double[totalSize];
+				k = 0;
+				for (int i = 0; i < tmp.length; ++i) {
+					for (int j = 0; j < tmp[i].length; ++j, ++k) {
+						result[k] = tmp[i][j];
+					}
+				}
+			}
+			
 		}
 	
 		return result;
@@ -246,8 +268,8 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 					insty1.instantiate(val1);
 					headExistInsty1.instantiate(val1);
 					headInst1.instantiate(val1);
-					List<Double> bodyProbabilities = probabibilitiesOfQuery(query); // Body probability
-					List<Double> headProbabilities = probabibilitiesOfQuery(listExistential);
+					double[] bodyProbabilities = probabibilitiesOfQuery(query); // Body probability
+					double[] headProbabilities = probabibilitiesOfQuery(listExistential);
 					// For the denominator
 					double headProbability = aggregateProbabilities(headProbabilities);
 					result[1] += probability(headProbability, bodyProbabilities);					
@@ -271,8 +293,8 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 					for (ByteString val2 : objects) {
 						headInst2.instantiate(val2);
 						insty2.instantiate(val2);
-						List<Double> bodyProbabilities = probabibilitiesOfQuery(query); // Body probability
-						List<Double> headProbabilities = probabibilitiesOfQuery(listExistential);						
+						double[] bodyProbabilities = probabibilitiesOfQuery(query); // Body probability
+						double[] headProbabilities = probabibilitiesOfQuery(listExistential);						
 						// For the denominator
 						double headProbability = aggregateProbabilities(headProbabilities);
 						result[1] += probability(headProbability, bodyProbabilities);					
@@ -292,10 +314,10 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	 * @param headProbabilities
 	 * @return
 	 */
-	private double aggregateProbabilities(List<Double> probabilities) {
+	private double aggregateProbabilities(double[] probabilities) {
 		double total = 1.0;
-		for (Double prob : probabilities) {
-			total *= (1.0 - prob.doubleValue());
+		for (double prob : probabilities) {
+			total *= (1.0 - prob);
 		}
 		
 		return 1.0 - total;
@@ -318,8 +340,8 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 			try (Instantiator insty = new Instantiator(query, var)) {
 				for (ByteString inst : resultsOneVariable(projection)) {
 					double projProbability = probabilityOfFact(projection);
-					List<Double> bodyProbabilities = probabibilitiesOfQuery(insty.instantiate(inst));
-					if (!bodyProbabilities.isEmpty()) {
+					double[] bodyProbabilities = probabibilitiesOfQuery(insty.instantiate(inst));
+					if (bodyProbabilities != null) {
 						sum += probability(projProbability, bodyProbabilities);
 					}
 				}
@@ -341,9 +363,9 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 					insty1.instantiate(val1);
 					for (ByteString val2 : instantiations.get(val1)) {
 						insty2.instantiate(val2);
-						List<Double> bodyProbabilities = 
+						double[] bodyProbabilities = 
 								probabibilitiesOfQuery(query);
-						if (!bodyProbabilities.isEmpty()) {
+						if (bodyProbabilities != null) {
 							head.first = val1;
 							head.third = val2;
 							double headProbability = probabilityOfFact(head);
@@ -395,7 +417,7 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 				h1inst.instantiate(valCommon);
 				for (ByteString valExistentialized : bindings.get(valCommon)) {
 					b2inst.instantiate(valExistentialized);			
-					List<Double> bodyProbabilities = probabibilitiesOfQuery(query);
+					double[] bodyProbabilities = probabibilitiesOfQuery(query);
 					double headProbability = 1.0;
 					Set<ByteString> examples = selectDistinct(existentialVariable, projectionList);
 					try (Instantiator h2inst = new Instantiator(projectionList, existentialVariable)) {
@@ -423,9 +445,9 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	 * @param bodyProbabilities
 	 * @return
 	 */
-	private double probability(double projProbability, List<Double> bodyProbabilities) {
+	private double probability(double projProbability, double[] bodyProbabilities) {
 		double bodyProbability = 1.0;
-		for (Double val : bodyProbabilities) {
+		for (double val : bodyProbabilities) {
 			bodyProbability *= (1.0 - val);
 		}
 		bodyProbability = 1.0 - bodyProbability;
@@ -486,8 +508,8 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 		ByteString[] head = triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?z"));
 		List<ByteString[]> query31 = new ArrayList<ByteString[]>(query3);
 		query31.add(head);
-		System.out.println(db.countPairs(ByteString.of("?x"), ByteString.of("?z"), query31));
+		System.out.println(db.countDistinctPairs(ByteString.of("?x"), ByteString.of("?z"), query31));
 		head[2] = ByteString.of("?zw");
-		System.out.println(db.countPairs(ByteString.of("?x"), ByteString.of("?z"), query31));
+		System.out.println(db.countDistinctPairs(ByteString.of("?x"), ByteString.of("?z"), query31));
 	}
 }

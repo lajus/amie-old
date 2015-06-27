@@ -1666,7 +1666,7 @@ public class FactDatabase {
 	/** returns the number of distinct pairs (var1,var2) for the query */
 	public long countPairs(CharSequence var1, CharSequence var2,
 			List<ByteString[]> query) {
-		return (countPairs(compress(var1), compress(var2), triples(query)));
+		return (countDistinctPairs(compress(var1), compress(var2), triples(query)));
 	}
 
 	/**
@@ -1778,7 +1778,7 @@ public class FactDatabase {
 
 		// Heuristic
 		if (predicateSize.get(targetRelation) < 50000)
-			return countPairs(var1, var2, query);
+			return countDistinctPairs(var1, var2, query);
 
 		long duplicatesEstimate, duplicatesCard;
 		double duplicatesFactor;
@@ -1823,7 +1823,7 @@ public class FactDatabase {
 		// Heuristic
 		if (predicateSize.get(targetRelation) < 50000) {
 			subquery.add(existentialTriple);
-			result = countPairs(var1, var2, subquery);
+			result = countDistinctPairs(var1, var2, subquery);
 			return result;
 		}
 
@@ -1858,7 +1858,7 @@ public class FactDatabase {
 	}
 
 	/** returns the number of distinct pairs (var1,var2) for the query */
-	public long countPairs(ByteString var1, ByteString var2,
+	public long countDistinctPairs(ByteString var1, ByteString var2,
 			List<ByteString[]> query) {
 		// Go for the standard plan
 		long result = 0;
@@ -2195,7 +2195,7 @@ public class FactDatabase {
 		  
 		
 		 D.p("Number of wikilinks: " + d.count(triple(ByteString.of("?a"), ByteString.of("<linksTo>"), ByteString.of("?b"))));
-		 D.p("Number of semantified wikilinks: " + d.countPairs(ByteString.of("?a"), ByteString.of("?b"),
+		 D.p("Number of semantified wikilinks: " + d.countDistinctPairs(ByteString.of("?a"), ByteString.of("?b"),
 				  triples(
 						  triple(ByteString.of("?a"), ByteString.of("<linksTo>"), ByteString.of("?b")), 
 						  triple(ByteString.of("?a"), ByteString.of("?p"), ByteString.of("?b")),

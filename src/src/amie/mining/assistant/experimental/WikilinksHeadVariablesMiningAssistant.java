@@ -19,13 +19,14 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 		super(dataSource);
 	}
 	
-	public void getDanglingEdges(Query query, int minCardinality, Collection<Query> output) {		
+	@Override
+	public void getDanglingEdges(Query query, double minCardinality, Collection<Query> output) {		
 		if(query.isEmpty()){
 			//Initial case
 			ByteString[] newEdge = query.fullyUnboundTriplePattern();
 			query.getTriples().add(newEdge);
 			List<ByteString[]> emptyList = Collections.emptyList();
-			IntHashMap<ByteString> relations = source.countProjectionBindings(query.getHead(), emptyList, newEdge[1]);
+			IntHashMap<ByteString> relations = kb.countProjectionBindings(query.getHead(), emptyList, newEdge[1]);
 			for(ByteString relation: relations){
 				// Language bias test
 				if (query.cardinalityForRelation(relation) >= recursivityLimit) {
@@ -57,7 +58,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 		}
 	}
 	
-	public void getSpecializationCandidates(Query query, int minCardinality, Collection<Query> output){
+	public void getSpecializationCandidates(Query query, double minSupportThreshold, Collection<Query> output){
 		List<Query> tmpCandidates = new ArrayList<Query>();
 		ByteString[] head = query.getHead();
 		
@@ -67,11 +68,11 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 			newEdge[0] = head[0];
 			newEdge[1] = typeString;				
 			query.getTriples().add(newEdge);
-			IntHashMap<ByteString> subjectTypes = source.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[2]);
+			IntHashMap<ByteString> subjectTypes = kb.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[2]);
 			if(!subjectTypes.isEmpty()){
 				for(ByteString type: subjectTypes){
 					int cardinality = subjectTypes.get(type);
-					if(cardinality >= minCardinality){
+					if(cardinality >= minSupportThreshold){
 						Query newCandidate = new Query(query, cardinality);
 						newCandidate.getLastTriplePattern()[2] = type;
 						tmpCandidates.add(newCandidate);
@@ -89,13 +90,13 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 				newEdge[0] = head[2];
 				newEdge[1] = typeString;
 				candidate.getTriples().add(newEdge);
-				IntHashMap<ByteString> objectTypes = source.countProjectionBindings(candidate.getHead(), candidate.getAntecedent(), newEdge[2]);
+				IntHashMap<ByteString> objectTypes = kb.countProjectionBindings(candidate.getHead(), candidate.getAntecedent(), newEdge[2]);
 				for(ByteString type: objectTypes){
 					int cardinality = objectTypes.get(type);
-					if(cardinality >= minCardinality){
+					if(cardinality >= minSupportThreshold){
 						Query newCandidate = new Query(candidate, cardinality);
 						newCandidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(newCandidate.getHeadRelation()));
-						newCandidate.setSupportRatio((double)cardinality / (double)source.size());
+						newCandidate.setSupportRatio((double)cardinality / (double)kb.size());
 						newCandidate.setParent(query);
 						newCandidate.getLastTriplePattern()[2] = type;
 						newCandidate.setParent(query);
@@ -112,7 +113,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 		}
 	}
 	
-	public void getCloseCircleEdges(Query query, int minCardinality, Collection<Query> output) {
+	public void getCloseCircleEdges(Query query, double minSupportThreshold, Collection<Query> output) {
 		int length = query.getLengthWithoutTypesAndLinksTo(typeString, ByteString.of(wikiLinkProperty));
 		ByteString[] head = query.getHead();
 		if (length == maxDepth - 1) {
@@ -134,11 +135,11 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 			List<ByteString[]> queryAtoms = new ArrayList<>();
 			queryAtoms.addAll(query.getTriples());
 			queryAtoms.add(newEdge);
-			long cardinality = source.countPairs(head[0], head[2], queryAtoms);
-			if (cardinality >= minCardinality) {
+			long cardinality = kb.countDistinctPairs(head[0], head[2], queryAtoms);
+			if (cardinality >= minSupportThreshold) {
 				Query candidate1 = query.closeCircle(newEdge, (int)cardinality);
 				candidate1.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate1.getHeadRelation()));
-				candidate1.setSupportRatio((double)cardinality / (double)source.size());
+				candidate1.setSupportRatio((double)cardinality / (double)kb.size());
 				candidate1.setParent(query);			
 				output.add(candidate1);	
 			}
@@ -146,17 +147,17 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 			ByteString tmp = newEdge[0];
 			newEdge[0] = newEdge[2];
 			newEdge[2] = tmp;
-			cardinality = source.countPairs(head[0], head[2], queryAtoms);
-			if (cardinality >= minCardinality) {
+			cardinality = kb.countDistinctPairs(head[0], head[2], queryAtoms);
+			if (cardinality >= minSupportThreshold) {
 				Query candidate2 = query.closeCircle(newEdge, (int)cardinality);
 				candidate2.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate2.getHeadRelation()));
-				candidate2.setSupportRatio((double)cardinality / (double)source.size());
+				candidate2.setSupportRatio((double)cardinality / (double)kb.size());
 				candidate2.setParent(query);			
 				output.add(candidate2);	
 			}
 		}
 			
-		super.getCloseCircleEdges(query, minCardinality, output);
+		super.getCloseCircleEdges(query, minSupportThreshold, output);
 	}
 
 	protected boolean testLength(Query candidate){

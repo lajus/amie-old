@@ -33,7 +33,7 @@ public class TypedMiningAssistant extends DefaultMiningAssistant {
 	 * @param minCardinality
 	 * @return
 	 */
-	public void getDanglingEdges(Query query, int minCardinality, Collection<Query> output){		
+	public void getDanglingEdges(Query query, double minCardinality, Collection<Query> output){		
 		if(query.getRealLength() == 1){
 			//Add the types at the beginning of the query.
 			getSpecializationCandidates(query, minCardinality, output);
@@ -42,7 +42,7 @@ public class TypedMiningAssistant extends DefaultMiningAssistant {
 		}
 	}
 		
-	public void getSpecializationCandidates(Query query, int minCardinality, Collection<Query> output) {
+	public void getSpecializationCandidates(Query query, double minSupportThreshold, Collection<Query> output) {
 		List<Query> tmpCandidates = new ArrayList<Query>();
 		ByteString[] head = query.getHead();
 		
@@ -52,11 +52,11 @@ public class TypedMiningAssistant extends DefaultMiningAssistant {
 			newEdge[0] = head[0];
 			newEdge[1] = typeString;				
 			query.getTriples().add(newEdge);
-			IntHashMap<ByteString> subjectTypes = source.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[2]);
+			IntHashMap<ByteString> subjectTypes = kb.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[2]);
 			if(!subjectTypes.isEmpty()){
 				for(ByteString type: subjectTypes){
 					int cardinality = subjectTypes.get(type);
-					if(cardinality >= minCardinality){
+					if(cardinality >= minSupportThreshold){
 						Query newCandidate = new Query(query, cardinality);
 						newCandidate.getLastTriplePattern()[2] = type;
 						tmpCandidates.add(newCandidate);
@@ -74,11 +74,11 @@ public class TypedMiningAssistant extends DefaultMiningAssistant {
 				newEdge[0] = head[2];
 				newEdge[1] = typeString;
 				candidate.getTriples().add(newEdge);
-				IntHashMap<ByteString> objectTypes = source.countProjectionBindings(candidate.getHead(), candidate.getAntecedent(), newEdge[2]);
+				IntHashMap<ByteString> objectTypes = kb.countProjectionBindings(candidate.getHead(), candidate.getAntecedent(), newEdge[2]);
 				if(!objectTypes.isEmpty()){
 					for(ByteString type: objectTypes){
 						int cardinality = objectTypes.get(type);
-						if(cardinality >= minCardinality){
+						if(cardinality >= minSupportThreshold){
 							Query newCandidate = new Query(candidate, cardinality);
 							newCandidate.getLastTriplePattern()[2] = type;
 							newCandidate.setParent(query);

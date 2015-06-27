@@ -16,7 +16,7 @@ public class FullRelationSignatureMiningAssistant extends DefaultMiningAssistant
 		bodyExcludedRelations = Arrays.asList(ByteString.of("<rdf:type>"));
 	}
 	
-	public void getDanglingEdges(Query query, int minCardinality, Collection<Query> output) {		
+	public void getDanglingEdges(Query query, double minCardinality, Collection<Query> output) {		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		ByteString rdfType = ByteString.of("rdf:type");
 		
@@ -28,7 +28,7 @@ public class FullRelationSignatureMiningAssistant extends DefaultMiningAssistant
 			registerHeadRelation(candidate);
 			getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), 2, minCardinality, output);
 		} else if (query.getLength() == 1) {
-			addDanglingEdge(query, newEdge, minCardinality, output);
+			getDanglingEdges(query, newEdge, minCardinality, output);
 		} else if (query.getLength() == 2) {
 			List<ByteString> variables = query.getOpenVariables();
 			// There must be one
@@ -39,7 +39,7 @@ public class FullRelationSignatureMiningAssistant extends DefaultMiningAssistant
 		}
 	}
 	
-	public void getCloseCircleEdges(Query query, int minCardinality, Collection<Query> output) {
+	public void getCloseCircleEdges(Query query, double minSupportThreshold, Collection<Query> output) {
 		return;
 	}
 }

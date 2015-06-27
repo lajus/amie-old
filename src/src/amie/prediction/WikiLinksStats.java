@@ -64,7 +64,7 @@ public class WikiLinksStats {
 		db.load(files);
 
 		List<ByteString[]> noLinksquery = getNoLinksQuery(null, null);
-		System.out.println("Semantified links " +  db.countPairs(subjectVar, objectVar, noLinksquery));
+		System.out.println("Semantified links " +  db.countDistinctPairs(subjectVar, objectVar, noLinksquery));
 		System.out.println("Total links " +  db.count(FactDatabase.triple(subjectVar, ByteString.of("<linksTo>") , objectVar)));
 		
 /*		

@@ -29,11 +29,11 @@ public class HeadVariablesImprovedMiningAssistant extends
 		typeConstraint2[0] = existentialTriple[nonExistentialPosition].equals(var1) ? var2 : var1;
 		antecedent.add(typeConstraint1);
 		antecedent.add(typeConstraint2);
-		long result = source.countPairs(var1, var2, antecedent);
+		long result = kb.countDistinctPairs(var1, var2, antecedent);
 		if (result == 0) {
 			antecedent.remove(antecedent.size() - 1);
 			antecedent.remove(antecedent.size() - 1);
-			result = source.countPairs(var1, var2, antecedent);
+			result = kb.countDistinctPairs(var1, var2, antecedent);
 		}
 		return result;
 	}

@@ -44,11 +44,11 @@ public class RuleBodySizeEvaluator {
 			long nObjects = db.countDistinct(ByteString.of(head[2]), FactDatabase.triples(head));
 			ByteString tmp = head[0];
 			head[0] = ByteString.of("?x");
-			long a = db.countPairs(tmp, head[2], q.getTriples());
+			long a = db.countDistinctPairs(tmp, head[2], q.getTriples());
 			head[0] = tmp;
 			tmp = head[2];
 			head[2] = ByteString.of("?x");
-			long b = db.countPairs(head[0], tmp, q.getTriples());
+			long b = db.countDistinctPairs(head[0], tmp, q.getTriples());
 			System.out.println(q.getRuleString() + "\t" + result[0] + "\t" + result[1] + "\t" + nSubjects + "\t" + nObjects + "\t" + a + "\t" + b);
 		}
 		

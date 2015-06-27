@@ -209,38 +209,39 @@ public class Query{
 	}
 	
 	public Query(){
-		triples = new ArrayList<>();
-		headKey = null;
-		support = -1;
-		hashSupport = 0;
-		parent = null;
-		bodySize = -1;
-		highestVariable = 'a';
-		_stdConfidenceUpperBound = 0.0;
-		_pcaConfidenceUpperBound = 0.0;
-		_pcaConfidenceEstimation = 0.0;
-		_belowMinimumSupport = false;
-		_containsQuasiBindings = false;
-		ancestors = new ArrayList<>();
+		this.triples = new ArrayList<>();
+		this.headKey = null;
+		this.support = -1;
+		this.hashSupport = 0;
+		this.parent = null;
+		this.bodySize = -1;
+		this.highestVariable = 'a';
+		this.pcaBodySize = 0.0;
+		this._stdConfidenceUpperBound = 0.0;
+		this._pcaConfidenceUpperBound = 0.0;
+		this._pcaConfidenceEstimation = 0.0;
+		this._belowMinimumSupport = false;
+		this._containsQuasiBindings = false;
+		this.ancestors = new ArrayList<>();
 	}
 			
 
 	public Query(ByteString[] pattern, double cardinality){
-		triples = new ArrayList<>();
-		support = cardinality;
-		hashSupport = (int) cardinality;
-		parent = null;
-		triples.add(pattern);
-		functionalVariablePosition = 0;
-		bodySize = 0;
+		this.triples = new ArrayList<>();
+		this.support = cardinality;
+		this.hashSupport = (int) cardinality;
+		this.parent = null;
+		this.triples.add(pattern);
+		this.functionalVariablePosition = 0;
+		this.bodySize = 0;
 		computeHeadKey();
-		highestVariable = (char) (pattern[2].charAt(1) + 1);
-		_stdConfidenceUpperBound = 0.0;
-		_pcaConfidenceUpperBound = 0.0;
-		_pcaConfidenceEstimation = 0.0;	
-		_belowMinimumSupport = false;
-		_containsQuasiBindings = false;
-		ancestors = new ArrayList<>();
+		this.highestVariable = (char) (pattern[2].charAt(1) + 1);
+		this._stdConfidenceUpperBound = 0.0;
+		this._pcaConfidenceUpperBound = 0.0;
+		this._pcaConfidenceEstimation = 0.0;	
+		this._belowMinimumSupport = false;
+		this._containsQuasiBindings = false;
+		this.ancestors = new ArrayList<>();
 	}
 	
 	public Query(Query otherQuery, double cardinality){
@@ -253,15 +254,16 @@ public class Query{
 		this.pcaBodySize = otherQuery.pcaBodySize;
 		this.bodySize = otherQuery.bodySize;
 		this.bodyMinusHeadSize = otherQuery.bodyMinusHeadSize;
+		this.functionalVariablePosition = otherQuery.functionalVariablePosition;
 		computeHeadKey();
-		parent = null;
-		bodySize = -1;
-		highestVariable = otherQuery.highestVariable;		
-		_stdConfidenceUpperBound = 0.0;
-		_pcaConfidenceUpperBound = 0.0;
-		_pcaConfidenceEstimation = 0.0;
-		_containsQuasiBindings = false;
-		ancestors = new ArrayList<>();
+		this.parent = null;
+		this.bodySize = -1;
+		this.highestVariable = otherQuery.highestVariable;		
+		this._stdConfidenceUpperBound = 0.0;
+		this._pcaConfidenceUpperBound = 0.0;
+		this._pcaConfidenceEstimation = 0.0;
+		this._containsQuasiBindings = false;
+		this.ancestors = new ArrayList<>();
 	}
 	
 	public Query(ByteString[] head, List<ByteString[]> body) {
@@ -571,7 +573,8 @@ public class Query{
 		List<ByteString[]> redundantAtoms = new ArrayList<ByteString[]>();
 		for(ByteString[] pattern: triples){
 			if(pattern != newAtom){
-				if(isUnifiable(pattern, newAtom) || isUnifiable(newAtom, pattern)){
+				if(isUnifiable(pattern, newAtom) 
+						|| isUnifiable(newAtom, pattern)){
 					redundantAtoms.add(pattern);
 				}
 			}
@@ -972,7 +975,7 @@ public class Query{
 		return newQuery;		
 	}
 	
-	public Query addEdge(ByteString[] newEdge, int cardinality) {
+	public Query addEdge(ByteString[] newEdge, double cardinality) {
 		Query newQuery = new Query(this, cardinality);
 		ByteString[] copyNewEdge = newEdge.clone();
 		newQuery.triples.add(copyNewEdge);
@@ -988,7 +991,8 @@ public class Query{
 	
 	/**
 	 * The alternative hash code for the parents of the rule. The alternative hash code
-	 * if a small variante of the hashCode method that disregards the support of the rule.
+	 * if a small variant of the hashCode method that does not use 
+	 * the support of the rule.
 	 * @return
 	 */
 	public int alternativeParentHashCode() {
@@ -1035,6 +1039,19 @@ public class Query{
 		}
 		
 		return EquivalenceChecker2.equal(triples, other.triples);
+	}
+	
+	public static void printRuleBasicHeaders() {
+		System.out.println("Rule\tHead Coverage\tStd Confidence\t"
+				+ "PCA Confidence\tPositive Examples\tBody size\tPCA Body size\t"
+				+ "Functional variable");
+	}
+	
+	public static void printRuleHeaders() {
+		System.out.println("Rule\tHead Coverage\tStd Confidence\t"
+				+ "PCA Confidence\tPositive Examples\tBody size\tPCA Body size\t"
+				+ "Functional variable\tStd. Lower Bound\tPCA Lower Bound\t"
+				+ "PCA Conf estimation");
 	}
 	
 	public String getRuleString(){
@@ -1136,7 +1153,15 @@ public class Query{
 		return builder.toString();
 	}
 
-	public Query unify(int danglingPosition, ByteString constant, int cardinality) {
+	/**
+	 * Returns a new query where the variable at the dangling position of the last atom
+	 * has been unified to the provided constant.
+	 * @param danglingPosition
+	 * @param constant
+	 * @param cardinality
+	 * @return
+	 */
+	public Query instantiateConstant(int danglingPosition, ByteString constant, double cardinality) {
 		Query newQuery = new Query(this, cardinality);
 		ByteString[] lastNewPattern = newQuery.getLastTriplePattern();
 		lastNewPattern[danglingPosition] = constant;
@@ -1285,10 +1310,6 @@ public class Query{
 		ByteString[] head = q.getHead();
 		if(FactDatabase.numVariables(head) == 1) return FactDatabase.firstVariablePos(head); 
 		return d.functionality(head[1]) > d.inverseFunctionality(head[1]) ? 0 : 2;
-	}
-
-	public static void printRuleHeaders() {
-		System.out.println("Rule\tHead Coverage\tStd Confidence\tPCA Confidence\tPositive Examples\tBody size\tPCA Body size\tFunctional variable\tStd. Lower Bound\tPCA Lower Bound");
 	}
 
 	public void setConfidenceUpperBound(double stdConfUpperBound) {

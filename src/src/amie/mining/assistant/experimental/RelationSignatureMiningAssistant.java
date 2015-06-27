@@ -28,7 +28,7 @@ public class RelationSignatureMiningAssistant extends DefaultMiningAssistant {
 		//Add the schema information to the rule
 		ByteString domain, range, relation;
 		relation = candidate.getHead()[1];
-		domain = SchemaUtilities.getRelationDomain(source, relation);
+		domain = SchemaUtilities.getRelationDomain(kb, relation);
 		if(domain != null){
 			ByteString[] domainTriple = new ByteString[3];
 			domainTriple[0] = candidate.getHead()[0];
@@ -38,7 +38,7 @@ public class RelationSignatureMiningAssistant extends DefaultMiningAssistant {
 			queryChanged = true;
 		}
 		
-		range = SchemaUtilities.getRelationRange(source, relation);
+		range = SchemaUtilities.getRelationRange(kb, relation);
 		if(range != null){
 			ByteString[] rangeTriple = new ByteString[3];
 			rangeTriple[0] = candidate.getHead()[2];
@@ -69,9 +69,9 @@ public class RelationSignatureMiningAssistant extends DefaultMiningAssistant {
 	}
 
 	private void recalculateSupport(Query candidate) {
-		long cardinality = source.countProjection(candidate.getHead(), candidate.getAntecedent());
+		long cardinality = kb.countProjection(candidate.getHead(), candidate.getAntecedent());
 		candidate.setSupport(cardinality);
 		candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
-		candidate.setSupportRatio((double)candidate.getSupport() / (double)source.size());
+		candidate.setSupportRatio((double)candidate.getSupport() / (double)kb.size());
 	}
 }

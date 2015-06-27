@@ -63,7 +63,7 @@ public class FactDatabaseTest {
 		long t1, t2;
 		List<ByteString[]> q52 = FactDatabase.triples(FactDatabase.triple("?a","<dbo:subregion>","?b"), FactDatabase.triple("?k", "<dbo:location>", "?a"), FactDatabase.triple("?b","<dbo:country>","?k"));		
 		t1 = System.currentTimeMillis();
-		long result = source.countPairs(ByteString.of("?a"), ByteString.of("?b"), q52);
+		long result = source.countDistinctPairs(ByteString.of("?a"), ByteString.of("?b"), q52);
 		t2 = System.currentTimeMillis();
 		System.out.println("Result " + result + ", Running time: " + (((double)(t2 - t1)) / 1000) + " seconds");
 	}

@@ -48,12 +48,12 @@ public class EquivalenceRulesFilter {
 				var1 = head[FactDatabase.firstVariablePos(head)];
 				var2 = head[FactDatabase.secondVariablePos(head)];
 				
-				numerator = source.countPairs(var1, var2, candidate.getTriples());
-				denominator = source.countPairs(var1, var2, antecedent);
+				numerator = source.countDistinctPairs(var1, var2, candidate.getTriples());
+				denominator = source.countDistinctPairs(var1, var2, antecedent);
 				candidate.setSupport((int)numerator);
 				candidate.setBodySize((int)denominator);
 				antecedent.add(existentialTriple);
-				improvedDenominator = source.countPairs(var1, var2, antecedent);
+				improvedDenominator = source.countDistinctPairs(var1, var2, antecedent);
 				candidate.setPcaBodySize((int)improvedDenominator);
 			}else if(FactDatabase.numVariables(head) == 1){
 				ByteString var = head[FactDatabase.firstVariablePos(head)];				
@@ -73,7 +73,7 @@ public class EquivalenceRulesFilter {
 	public static long calculateIntersection(FactDatabase source, Query rule){
 		ByteString[] head = rule.getHead();
 		if(FactDatabase.numVariables(head) == 2)
-			return source.countPairs(head[0], head[2], rule.getTriples());
+			return source.countDistinctPairs(head[0], head[2], rule.getTriples());
 		else
 			return source.countDistinct(head[FactDatabase.firstVariablePos(head)], rule.getTriples());
 	}

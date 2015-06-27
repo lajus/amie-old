@@ -120,9 +120,9 @@ public class TupleIndependentFactDatabaseTest extends TestCase {
 		rule0.add(head0);
 		rule0.addAll(body0);
 		double scores[] = kb1.probabilitiesOf(body0, head0, ByteString.of("?b"));
-		long support = kb1.countPairs(ByteString.of("?a"), ByteString.of("?b"), rule0);
+		long support = kb1.countDistinctPairs(ByteString.of("?a"), ByteString.of("?b"), rule0);
 		head0[2] = ByteString.of("?y");
-		long pcaBody = kb1.countPairs(ByteString.of("?a"), ByteString.of("?b"), rule0);
+		long pcaBody = kb1.countDistinctPairs(ByteString.of("?a"), ByteString.of("?b"), rule0);
 		assertEquals((double)support, scores[0], 0.00000001);
 		assertEquals((double)pcaBody, scores[1], 0.00000001);
 	}
@@ -137,9 +137,9 @@ public class TupleIndependentFactDatabaseTest extends TestCase {
 		rule1.add(head1);
 		rule1.addAll(body1);
 		double scores[] = kb1.probabilitiesOf(body1, head1, ByteString.of("?b"));
-		long support = kb1.countPairs(ByteString.of("?a"), ByteString.of("?b"), rule1);
+		long support = kb1.countDistinctPairs(ByteString.of("?a"), ByteString.of("?b"), rule1);
 		head1[2] = ByteString.of("?y");
-		long pcaBody = kb1.countPairs(ByteString.of("?a"), ByteString.of("?b"), rule1);
+		long pcaBody = kb1.countDistinctPairs(ByteString.of("?a"), ByteString.of("?b"), rule1);
 		assertEquals((double)support, scores[0], 0.00000001);
 		assertEquals((double)pcaBody, scores[1], 0.00000001);
 	}
@@ -239,9 +239,9 @@ public class TupleIndependentFactDatabaseTest extends TestCase {
 		rule6.add(head6);
 		rule6.addAll(body6);
 		double scores[] = kb4.probabilitiesOf(body6, head6, ByteString.of("?c"));
-		long support = kb4.countPairs(ByteString.of("?a"), ByteString.of("?c"), rule6);
+		long support = kb4.countDistinctPairs(ByteString.of("?a"), ByteString.of("?c"), rule6);
 		head6[0] = ByteString.of("?y");
-		long pcaBody = kb4.countPairs(ByteString.of("?a"), ByteString.of("?c"), rule6);
+		long pcaBody = kb4.countDistinctPairs(ByteString.of("?a"), ByteString.of("?c"), rule6);
 		assertEquals((double)support, scores[0], 0.00000001);
 		assertEquals((double)pcaBody, scores[1], 0.00000001);
 	}
