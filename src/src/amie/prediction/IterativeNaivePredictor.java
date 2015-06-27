@@ -95,6 +95,7 @@ public class IterativeNaivePredictor {
 		}
 		for (int i = 0; i < numberIterations; ++i) {
 			System.out.println("Inference round #" + (i + 1));
+			List<Prediction> predictionsAtIterationI = new ArrayList<>();
 			// Mine rules using AMIE
 			long startTime = System.currentTimeMillis();
 			List<Query> rules = amieMiner.mine(false, Collections.EMPTY_LIST);
@@ -124,9 +125,10 @@ public class IterativeNaivePredictor {
 			System.out.println(finalRules.size() + " used to fire predictions");
 			
 			// Get the predictions
-			getPredictions(finalRules, true, resultingPredictions, i);
-			System.out.println(resultingPredictions.size() + " new predictions");			
-			if (resultingPredictions.size() == 0) {
+			getPredictions(finalRules, true, i, predictionsAtIterationI);
+			System.out.println(predictionsAtIterationI.size() + " new predictions");			
+			resultingPredictions.addAll(predictionsAtIterationI);
+			if (predictionsAtIterationI.size() == 0) {
 				break;
 			}
 		}
@@ -281,7 +283,6 @@ public class IterativeNaivePredictor {
 					prediction.setHitInTraining(true);
 				}
 				
-				
 				double finalConfidence = prediction.getFullScore();
 				if (finalConfidence >= pcaConfidenceThreshold) {
 					prediction.setIterationId(iteration);
@@ -303,8 +304,8 @@ public class IterativeNaivePredictor {
 	 * @throws InterruptedException 
 	 */
 	private void getPredictions(List<Query> queries, 
-			boolean notInTraining, List<Prediction> result, 
-			int iteration) throws InterruptedException {
+			boolean notInTraining, int iteration, 
+			List<Prediction> output) throws InterruptedException {
 		long timeStamp1 = System.currentTimeMillis();
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions =
 				calculatePredictions2RulesMap(queries, notInTraining);
@@ -316,7 +317,7 @@ public class IterativeNaivePredictor {
 		timeStamp1 = System.currentTimeMillis();
 		Thread[] threads = new Thread[Runtime.getRuntime().availableProcessors()];
 		for (int i = 0; i < threads.length; ++i) {
-			threads[i] = new Thread(new PredictionsBuilder(predictions, result, combinedRulesMap, iteration));
+			threads[i] = new Thread(new PredictionsBuilder(predictions, output, combinedRulesMap, iteration));
 			threads[i].start();
 		}
 		
@@ -324,7 +325,7 @@ public class IterativeNaivePredictor {
 			threads[i].join();
 		}
 		
-		for (Prediction prediction : result) {
+		for (Prediction prediction : output) {
 			ByteString[] t = prediction.getTriple();
 			trainingDb.add(t[0], t[1], t[2], prediction.getFullScore());
 		}

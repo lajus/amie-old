@@ -563,7 +563,14 @@ public class DefaultMiningAssistant extends MiningAssistant{
 		return rewrittenQuery;
 	}
 
-	protected long computeAntecedentCount(ByteString var1, ByteString var2, Query query){
+	/**
+	 * Returns the number of distinct bindings of the given variables in the body of the rule.
+	 * @param var1
+	 * @param var2
+	 * @param query
+	 * @return
+	 */
+	protected long computeBodySize(ByteString var1, ByteString var2, Query query){
 		long t1 = System.currentTimeMillis();		
 		long result = this.kb.countDistinctPairs(var1, var2, query.getAntecedent());
 		long t2 = System.currentTimeMillis();	
@@ -574,7 +581,17 @@ public class DefaultMiningAssistant extends MiningAssistant{
 		return result;
 	}
 	
-	protected long computePCAAntecedentCount(ByteString var1, ByteString var2, Query query, List<ByteString[]> antecedent, ByteString[] existentialTriple, int nonExistentialPosition) {		
+	/**
+	 * Returns the denominator of the PCA confidence expression for the antecedent of a rule.
+	 * @param var1
+	 * @param var2
+	 * @param query
+	 * @param antecedent
+	 * @param existentialTriple
+	 * @param nonExistentialPosition
+	 * @return
+	 */
+	protected double computePcaBodySize(ByteString var1, ByteString var2, Query query, List<ByteString[]> antecedent, ByteString[] existentialTriple, int nonExistentialPosition) {		
 		antecedent.add(existentialTriple);
 		long t1 = System.currentTimeMillis();
 		long result = this.kb.countDistinctPairs(var1, var2, antecedent);
@@ -586,6 +603,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 		return result;		
 	}
 
+	@Override
 	public double computeCardinality(Query rule) {
 		if (rule.isEmpty()) {
 			rule.setSupport(0l);
@@ -666,7 +684,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 					ByteString var1, var2;
 					var1 = head[FactDatabase.firstVariablePos(head)];
 					var2 = head[FactDatabase.secondVariablePos(head)];
-					denominator = (double) computeAntecedentCount(var1, var2, candidate);
+					denominator = (double) computeBodySize(var1, var2, candidate);
 				} else {					
 					denominator = (double) this.kb.countDistinct(candidate.getFunctionalVariable(), antecedent);
 				}				

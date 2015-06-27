@@ -67,9 +67,7 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 					Query candidate = new Query(succedent, cardinality);
 					candidate.setFunctionalVariablePosition(countVarPos);
 					registerHeadRelation(candidate);
-					getInstantiatedEdges(candidate, null, 
-							candidate.getLastTriplePattern(), 
-							countVarPos == 0 ? 2 : 0, minCardinality, output);
+					getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, output);
 					output.add(candidate);
 				}
 			}			

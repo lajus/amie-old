@@ -156,124 +156,123 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 		subjects.retainAll(allSubjects);
 		return subjects.size();
 	}
+	
+	@Override
+	public void getInitialAtoms(double minSupportThreshold, Collection<Query> output) {
+		Query query = new Query();
+		ByteString[] newEdge = query.fullyUnboundTriplePattern();
+		query.getTriples().add(newEdge);
+		IntHashMap<ByteString> relations = 
+				kb.frequentBindingsOf(newEdge[1], newEdge[0], query.getTriples());
+		for (ByteString relation: relations) {
+			if(headExcludedRelations != null && headExcludedRelations.contains(newEdge[1]))
+				continue;
 
-	/**
-	 * Returns all candidates obtained by adding a new triple pattern to the query
-	 * @param query
-	 * @param minCardinality
-	 * @return
-	 */
+			newEdge[1] = relation;
+			int countVarPos = countAlwaysOnSubject? 0 : findCountingVariable(newEdge);
+			query.setFunctionalVariablePosition(countVarPos);
+			double cardinality = (double) seedsCardinality(query);
+			query.setSupport(cardinality);
+			if(cardinality >= minSupportThreshold) {
+				ByteString[] succedent = newEdge.clone();					
+				Query candidate = new Query(succedent, cardinality);
+				candidate.setFunctionalVariablePosition(countVarPos);
+				registerHeadRelation(candidate);
+				if(allowConstants)
+					getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
+				
+				output.add(candidate);
+			}
+			query.getTriples().remove(0);
+		}
+		
+	}
+
+	@Override
 	public void getDanglingEdges(Query query, double minCardinality, Collection<Query> output){		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		List<ByteString> openVariables = query.getOpenVariables();
 		
-		if(query.isEmpty()){
-			//Initial case
-			query.getTriples().add(newEdge);
-			IntHashMap<ByteString> relations = 
-					kb.frequentBindingsOf(newEdge[1], newEdge[0], query.getTriples());
-			for(ByteString relation: relations){
-				if(headExcludedRelations != null && headExcludedRelations.contains(newEdge[1]))
-					continue;
-
-				newEdge[1] = relation;
-				int countVarPos = countAlwaysOnSubject? 0 : findCountingVariable(newEdge);
-				query.setFunctionalVariablePosition(countVarPos);
-				int cardinality = seedsCardinality(query);
-				query.setSupport(cardinality);
-				if(cardinality >= minCardinality){
-					ByteString[] succedent = newEdge.clone();					
-					Query candidate = new Query(succedent, cardinality);
-					candidate.setFunctionalVariablePosition(countVarPos);
-					registerHeadRelation(candidate);
-					if(allowConstants)
-						getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, output);
-					
-					output.add(candidate);
+		//General case
+		if(!testLength(query))
+			return;
+		
+		//General case
+		if(query.getLength() == maxDepth - 1) {
+			if (this.exploitMaxLengthOption) {
+				if(!openVariables.isEmpty() 
+						&& !this.allowConstants 
+						&& !this.enforceConstants) {
+					return;
 				}
-			}			
-			query.getTriples().remove(0);
+			}
+		}
+		
+		List<ByteString> joinVariables = null;
+		
+		//Then do it for all values
+		if(query.isClosed()){
+			joinVariables = query.getVariables();
 		}else{
-			//General case
-			if(!testLength(query))
-				return;
-			
-			//General case
-			if(query.getLength() == maxDepth - 1) {
-				if (this.exploitMaxLengthOption) {
-					if(!openVariables.isEmpty() 
-							&& !this.allowConstants 
-							&& !this.enforceConstants) {
-						return;
-					}
-				}
-			}
-			
-			List<ByteString> joinVariables = null;
-			
-			//Then do it for all values
-			if(query.isClosed()){
-				joinVariables = query.getVariables();
-			}else{
-				joinVariables = query.getOpenVariables();
-			}
+			joinVariables = query.getOpenVariables();
+		}
 
-			int nPatterns = query.getTriples().size();
-			ByteString originalRelationVariable = newEdge[1];		
+		int nPatterns = query.getTriples().size();
+		ByteString originalRelationVariable = newEdge[1];		
+		
+		for(int joinPosition = 0; joinPosition <= 2; joinPosition += 2){
+			ByteString originalFreshVariable = newEdge[joinPosition];
 			
-			for(int joinPosition = 0; joinPosition <= 2; joinPosition += 2){
-				ByteString originalFreshVariable = newEdge[joinPosition];
+			for(ByteString joinVariable: joinVariables){					
+				newEdge[joinPosition] = joinVariable;
+				query.getTriples().add(newEdge);
+				IntHashMap<ByteString> promisingRelations = kb.frequentBindingsOf(newEdge[1], query.getFunctionalVariable(), query.getTriples());
+				query.getTriples().remove(nPatterns);
 				
-				for(ByteString joinVariable: joinVariables){					
-					newEdge[joinPosition] = joinVariable;
+				int danglingPosition = (joinPosition == 0 ? 2 : 0);
+				boolean boundHead = !FactDatabase.isVariable(query.getTriples().get(0)[danglingPosition]);
+				for(ByteString relation: promisingRelations){
+					if(bodyExcludedRelations != null && bodyExcludedRelations.contains(relation))
+						continue;
+					//Here we still have to make a redundancy check		
+					newEdge[1] = relation;
 					query.getTriples().add(newEdge);
-					IntHashMap<ByteString> promisingRelations = kb.frequentBindingsOf(newEdge[1], query.getFunctionalVariable(), query.getTriples());
-					query.getTriples().remove(nPatterns);
-					
-					int danglingPosition = (joinPosition == 0 ? 2 : 0);
-					boolean boundHead = !FactDatabase.isVariable(query.getTriples().get(0)[danglingPosition]);
-					for(ByteString relation: promisingRelations){
-						if(bodyExcludedRelations != null && bodyExcludedRelations.contains(relation))
-							continue;
-						//Here we still have to make a redundancy check		
-						newEdge[1] = relation;
-						query.getTriples().add(newEdge);
-						int cardinality = seedsCardinality(query);
-						query.getTriples().remove(nPatterns);						
-						if(cardinality >= minCardinality){
-							Query candidate = query.addEdge(newEdge, cardinality, newEdge[joinPosition], newEdge[danglingPosition]);
-							if(candidate.containsUnifiablePatterns()){
-								//Verify whether dangling variable unifies to a single value (I do not like this hack)
-								if(boundHead && kb.countDistinct(newEdge[danglingPosition], candidate.getTriples()) < 2)
-									continue;
-							}
-							
-							candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
-							candidate.setSupportRatio((double)candidate.getSupport() / (double)getTotalCount(candidate));
-							candidate.setParent(query);
-							if (canAddInstantiatedAtom()) {
-								// Pruning by maximum length for the \mathcal{O}_E operator.
-								if (this.exploitMaxLengthOption) {
-									if (query.getRealLength() < this.maxDepth - 1 
-											|| openVariables.size() < 2) {
-										getInstantiatedEdges(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minCardinality, output);
-									}
-								} else {
-									getInstantiatedEdges(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minCardinality, output);							
-								}
-							}
-							
-							output.add(candidate);
+					int cardinality = seedsCardinality(query);
+					query.getTriples().remove(nPatterns);						
+					if(cardinality >= minCardinality){
+						Query candidate = query.addEdge(newEdge, cardinality, newEdge[joinPosition], newEdge[danglingPosition]);
+						if(candidate.containsUnifiablePatterns()){
+							//Verify whether dangling variable unifies to a single value (I do not like this hack)
+							if(boundHead && kb.countDistinct(newEdge[danglingPosition], candidate.getTriples()) < 2)
+								continue;
 						}
+						
+						candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
+						candidate.setSupportRatio((double)candidate.getSupport() / (double)getTotalCount(candidate));
+						candidate.setParent(query);
+						if (canAddInstantiatedAtom()) {
+							// Pruning by maximum length for the \mathcal{O}_E operator.
+							if (this.exploitMaxLengthOption) {
+								if (query.getRealLength() < this.maxDepth - 1 
+										|| openVariables.size() < 2) {
+									getInstantiatedEdges(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minCardinality, output);
+								}
+							} else {
+								getInstantiatedEdges(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minCardinality, output);							
+							}
+						}
+						
+						output.add(candidate);
 					}
-					
-					newEdge[1] = originalRelationVariable;
 				}
-				newEdge[joinPosition] = originalFreshVariable;
+				
+				newEdge[1] = originalRelationVariable;
 			}
+			newEdge[joinPosition] = originalFreshVariable;
 		}
 	}
 	
+	@Override
 	public void calculateConfidenceMetrics(Query candidate) {		
 		// TODO Auto-generated method stub
 		List<ByteString[]> antecedent = new ArrayList<ByteString[]>();

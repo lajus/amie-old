@@ -14,7 +14,7 @@ public class HeadVariablesImprovedMiningAssistant extends
 		super(dataSource);
 	}
 
-	protected long computePCAAntecedentCount(ByteString var1, 
+	protected double computePcaBodySize(ByteString var1, 
 			ByteString var2, Query query, 
 			List<ByteString[]> antecedent, 
 			ByteString[] existentialTriple, 
@@ -35,6 +35,6 @@ public class HeadVariablesImprovedMiningAssistant extends
 			antecedent.remove(antecedent.size() - 1);
 			result = kb.countDistinctPairs(var1, var2, antecedent);
 		}
-		return result;
+		return (double) result;
 	}
 }
