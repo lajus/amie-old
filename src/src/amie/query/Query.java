@@ -988,6 +988,7 @@ public class Query{
 		return newQuery;		
 	}
 	
+
 	public Query addAtom(ByteString[] newAtom, double cardinality) {
 		Query newQuery = new Query(this, cardinality);
 		ByteString[] copyNewEdge = newAtom.clone();
