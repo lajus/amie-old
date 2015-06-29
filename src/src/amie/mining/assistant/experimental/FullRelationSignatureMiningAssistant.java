@@ -26,7 +26,7 @@ public class FullRelationSignatureMiningAssistant extends DefaultMiningAssistant
 			Query candidate = new Query(newEdge, minCardinality);
 			candidate.setFunctionalVariablePosition(0);
 			registerHeadRelation(candidate);
-			getInstantiatedAtoms(candidate, null, newEdge, 2, minCardinality, output);
+			getInstantiatedAtoms(candidate, null, 0, 2, minCardinality, output);
 		} else if (query.getLength() == 1) {
 			getDanglingAtoms(query, newEdge, minCardinality, output);
 		} else if (query.getLength() == 2) {
@@ -35,7 +35,7 @@ public class FullRelationSignatureMiningAssistant extends DefaultMiningAssistant
 			newEdge[0] = variables.get(0);
 			newEdge[1] = rdfType;
 			Query candidate = query.addAtom(newEdge, minCardinality);
-			getInstantiatedAtoms(candidate, candidate, newEdge, 2, minCardinality, output);
+			getInstantiatedAtoms(candidate, candidate, 0, 2, minCardinality, output);
 		}
 	}
 	

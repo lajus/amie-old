@@ -40,7 +40,7 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 			candidate.setFunctionalVariablePosition(countVarPos);
 			registerHeadRelation(candidate);
 			ArrayList<Query> tmpOutput = new ArrayList<>();
-			getInstantiatedAtoms(candidate, null, query.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, tmpOutput);			
+			getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minCardinality, tmpOutput);			
 			output.addAll(tmpOutput);
 		}
 		
@@ -69,7 +69,7 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 					Query candidate = new Query(succedent, cardinality);
 					candidate.setFunctionalVariablePosition(countVarPos);
 					registerHeadRelation(candidate);
-					getInstantiatedAtoms(candidate, null, query.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
+					getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
 					output.add(candidate);
 				}
 			}			
@@ -99,7 +99,7 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 					Query candidate = new Query(succedent, cardinality);
 					candidate.setFunctionalVariablePosition(countVarPos);
 					registerHeadRelation(candidate);
-					getInstantiatedAtoms(candidate, null, query.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, output);
+					getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minCardinality, output);
 					output.add(candidate);
 				}
 			}			

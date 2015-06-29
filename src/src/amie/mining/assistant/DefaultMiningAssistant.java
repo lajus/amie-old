@@ -61,8 +61,8 @@ public class DefaultMiningAssistant extends MiningAssistant{
 			candidate.setFunctionalVariablePosition(countVarPos);
 			registerHeadRelation(candidate);
 			ArrayList<Query> tmpOutput = new ArrayList<>();
-			if(canAddInstantiatedAtoms()) {
-				getInstantiatedAtoms(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, tmpOutput);			
+			if(canAddInstantiatedAtoms() && !relation.equals(FactDatabase.EQUALSbs)) {
+				getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minCardinality, tmpOutput);			
 				output.addAll(tmpOutput);
 			}
 			
@@ -102,10 +102,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 				candidate.setFunctionalVariablePosition(countVarPos);
 				registerHeadRelation(candidate);
 				if(canAddInstantiatedAtoms()){
-					getInstantiatedAtoms(candidate, null, 
-							candidate.getLastTriplePattern(), 
-							countVarPos == 0 ? 2 : 0, 
-									minSupportThreshold, output);
+					getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
 				}
 				
 				if (!this.enforceConstants) {
@@ -194,13 +191,13 @@ public class DefaultMiningAssistant extends MiningAssistant{
 								promisingRelations = kb.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[1]);
 								long t2 = System.currentTimeMillis();
 								if((t2 - t1) > 20000 && !silent)
-									System.out.println("countProjectionBindings var=" + newEdge[1] + " "  + query + " has taken " + (t2 - t1) + " ms");
+									System.err.println("countProjectionBindings var=" + newEdge[1] + " "  + query + " has taken " + (t2 - t1) + " ms");
 							}else{
 								long t1 = System.currentTimeMillis();
 								promisingRelations = kb.countProjectionBindings(rewrittenQuery.getHead(), rewrittenQuery.getAntecedent(), newEdge[1]);
 								long t2 = System.currentTimeMillis();
 								if((t2 - t1) > 20000 && !silent)
-									System.out.println("countProjectionBindings on rewritten query var=" + newEdge[1] + " "  + rewrittenQuery + " has taken " + (t2 - t1) + " ms");						
+									System.err.println("countProjectionBindings on rewritten query var=" + newEdge[1] + " "  + rewrittenQuery + " has taken " + (t2 - t1) + " ms");						
 							}
 						} else {
 							promisingRelations = this.kb.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[1]);
@@ -316,14 +313,14 @@ public class DefaultMiningAssistant extends MiningAssistant{
 					promisingRelations = this.kb.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[1]);
 					long t2 = System.currentTimeMillis();
 					if((t2 - t1) > 20000 && !silent) {
-						System.out.println("countProjectionBindings var=" + newEdge[1] + " "  + query + " has taken " + (t2 - t1) + " ms");
+						System.err.println("countProjectionBindings var=" + newEdge[1] + " "  + query + " has taken " + (t2 - t1) + " ms");
 					}
 				}else{
 					long t1 = System.currentTimeMillis();
 					promisingRelations = this.kb.countProjectionBindings(rewrittenQuery.getHead(), rewrittenQuery.getAntecedent(), newEdge[1]);
 					long t2 = System.currentTimeMillis();
 					if((t2 - t1) > 20000 && !silent)
-					System.out.println("countProjectionBindings on rewritten query var=" + newEdge[1] + " "  + rewrittenQuery + " has taken " + (t2 - t1) + " ms");						
+					System.err.println("countProjectionBindings on rewritten query var=" + newEdge[1] + " "  + rewrittenQuery + " has taken " + (t2 - t1) + " ms");						
 				}
 				
 				query.getTriples().remove(nPatterns);					
@@ -395,10 +392,10 @@ public class DefaultMiningAssistant extends MiningAssistant{
 						if (this.exploitMaxLengthOption) {
 							if (query.getRealLength() < this.maxDepth - 1 
 									|| openVariables.size() < 2) {
-								getInstantiatedEdges(candidate, candidate, nPatterns, danglingPosition, minSupportThreshold, output);	
+								getInstantiatedAtoms(candidate, candidate, nPatterns, danglingPosition, minSupportThreshold, output);	
 							}
 						} else {
-							getInstantiatedEdges(candidate, candidate, nPatterns, danglingPosition, minSupportThreshold, output);							
+							getInstantiatedAtoms(candidate, candidate, nPatterns, danglingPosition, minSupportThreshold, output);							
 						}
 					}
 					
@@ -456,10 +453,11 @@ public class DefaultMiningAssistant extends MiningAssistant{
 	 * @param minSupportThreshold
 	 * @param output
 	 */
-	protected void getInstantiatedEdges(Query query, Query originalQuery, int bindingTriplePos, int danglingPosition, double minSupportThreshold, Collection<Query> output) {
+	protected void getInstantiatedAtoms(Query query, Query originalQuery, 
+			int bindingTriplePos, int danglingPosition, double minSupportThreshold, Collection<Query> output) {
 		ByteString[] danglingEdge = query.getTriples().get(bindingTriplePos);
 		Query rewrittenQuery = null;
-		if (this.enableQueryRewriting) {
+		if (!query.isEmpty() && this.enableQueryRewriting) {
 			rewrittenQuery = rewriteProjectionQuery(query, bindingTriplePos, danglingPosition == 0 ? 2 : 0);
 		}
 		
@@ -469,13 +467,13 @@ public class DefaultMiningAssistant extends MiningAssistant{
 			constants = this.kb.countProjectionBindings(rewrittenQuery.getHead(), rewrittenQuery.getAntecedent(), danglingEdge[danglingPosition]);
 			long t2 = System.currentTimeMillis();
 			if((t2 - t1) > 20000 && !silent)
-				System.out.println("countProjectionBindings var=" + danglingEdge[danglingPosition] + " in " + query + " (rewritten to " + rewrittenQuery + ") has taken " + (t2 - t1) + " ms");						
+				System.err.println("countProjectionBindings var=" + danglingEdge[danglingPosition] + " in " + query + " (rewritten to " + rewrittenQuery + ") has taken " + (t2 - t1) + " ms");						
 		}else{
 			long t1 = System.currentTimeMillis();		
 			constants = this.kb.countProjectionBindings(query.getHead(), query.getAntecedent(), danglingEdge[danglingPosition]);
 			long t2 = System.currentTimeMillis();
 			if((t2 - t1) > 20000 && !silent)
-				System.out.println("countProjectionBindings var=" + danglingEdge[danglingPosition] + " in " + query + " has taken " + (t2 - t1) + " ms");			
+				System.err.println("countProjectionBindings var=" + danglingEdge[danglingPosition] + " in " + query + " has taken " + (t2 - t1) + " ms");			
 		}
 		
 		int joinPosition = (danglingPosition == 0 ? 2 : 0);
@@ -487,10 +485,13 @@ public class DefaultMiningAssistant extends MiningAssistant{
 				assert(FactDatabase.isVariable(targetEdge[joinPosition]));
 				
 				Query candidate = query.instantiateConstant(bindingTriplePos, danglingPosition, constant, cardinality);				
+				// Do this checking only for non-empty queries
 				//If the new edge does not contribute with anything
-				long cardLastEdge = this.kb.countDistinct(targetEdge[joinPosition], candidate.getTriples());
-				if(cardLastEdge < 2)
-					continue;
+				if (!query.isEmpty()) {
+					long cardLastEdge = this.kb.countDistinct(targetEdge[joinPosition], candidate.getTriples());
+					if(cardLastEdge < 2)
+						continue;
+				}
 				
 				if(candidate.getRedundantAtoms().isEmpty()){
 					candidate.setHeadCoverage((double)cardinality / headCardinalities.get(candidate.getHeadRelation()));

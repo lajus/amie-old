@@ -353,8 +353,8 @@ public class MiningAssistant{
 			candidate.setFunctionalVariablePosition(countVarPos);
 			registerHeadRelation(candidate);			
 
-			if(canAddInstantiatedAtoms()) {
-				getInstantiatedAtoms(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
+			if(canAddInstantiatedAtoms() && !relation.equals(FactDatabase.EQUALSbs)) {
+				getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
 			}
 			
 			if (!enforceConstants) {
@@ -397,7 +397,7 @@ public class MiningAssistant{
 				candidate.setFunctionalVariablePosition(countVarPos);
 				registerHeadRelation(candidate);					
 				if(canAddInstantiatedAtoms()) {
-					getInstantiatedAtoms(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
+					getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
 				}
 				
 				if (!enforceConstants) {
@@ -474,7 +474,7 @@ public class MiningAssistant{
 						candidate.setSupportRatio((double)candidate.getSupport() / (double)getTotalCount(candidate));
 						candidate.setParent(query);							
 						if(canAddInstantiatedAtoms()) {
-							getInstantiatedAtoms(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minSupportThreshold, output);
+							getInstantiatedAtoms(candidate, candidate, 0, danglingPosition, minSupportThreshold, output);
 						}
 						
 						if (!enforceConstants) {
@@ -842,7 +842,7 @@ public class MiningAssistant{
 
 	/**
 	 * It checks whether a rule satisfies the confidence thresholds and the
-	 * skyline heuristic: the strategy that avoids outputing rules that do not
+	 * sky-line heuristic: the strategy that avoids outputting rules that do not
 	 * improve the confidence w.r.t their parents.
 	 * @param candidate
 	 * @return
@@ -934,24 +934,31 @@ public class MiningAssistant{
 		return query.getSupport() / denominator;
 	}
 
-	protected void getInstantiatedAtoms(Query query, Query originalQuery, 
-			ByteString[] danglingEdge, int danglingPosition, double minSupportThreshold, Collection<Query> output) {
-		IntHashMap<ByteString> constants = kb.frequentBindingsOf(danglingEdge[danglingPosition], query.getFunctionalVariable(), query.getTriples());
+	/**
+	 * It returns all the refinements of queryWithDanglingEdge where the fresh variable in the dangling
+	 * atom has been bound to all the constants that keep the query above the support threshold.
+	 * @param queryWithDanglingEdge
+	 * @param parentQuery
+	 * @param danglingAtomPosition
+	 * @param danglingPositionInEdge
+	 * @param minSupportThreshold
+	 * @param output
+	 */
+	protected void getInstantiatedAtoms(Query queryWithDanglingEdge, Query parentQuery, 
+			int danglingAtomPosition, int danglingPositionInEdge, double minSupportThreshold, Collection<Query> output) {
+		ByteString[] danglingEdge = queryWithDanglingEdge.getTriples().get(danglingAtomPosition);
+		IntHashMap<ByteString> constants = kb.frequentBindingsOf(danglingEdge[danglingPositionInEdge], queryWithDanglingEdge.getFunctionalVariable(), queryWithDanglingEdge.getTriples());
 		for(ByteString constant: constants){
 			int cardinality = constants.get(constant);
 			if(cardinality >= minSupportThreshold){
-				ByteString[] lastPatternCopy = query.getLastTriplePattern().clone();
-				lastPatternCopy[danglingPosition] = constant;
-				long cardLastEdge = kb.count(lastPatternCopy);
-				if(cardLastEdge < 2)
-					continue;
-				
-				Query candidate = query.instantiateConstant(danglingPosition, constant, cardinality);
+				ByteString[] lastPatternCopy = queryWithDanglingEdge.getLastTriplePattern().clone();
+				lastPatternCopy[danglingPositionInEdge] = constant;
+				Query candidate = queryWithDanglingEdge.instantiateConstant(danglingPositionInEdge, constant, cardinality);
 
 				if(candidate.getRedundantAtoms().isEmpty()){
 					candidate.setHeadCoverage((double)cardinality / headCardinalities.get(candidate.getHeadRelation()));
 					candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
-					candidate.setParent(originalQuery);					
+					candidate.setParent(parentQuery);					
 					output.add(candidate);
 				}
 			}
