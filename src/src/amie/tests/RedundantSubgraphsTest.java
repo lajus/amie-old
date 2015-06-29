@@ -15,47 +15,47 @@ public class RedundantSubgraphsTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		q1 = new Query(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?b")), 0);
-		q1 = q1.closeCircle(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?b")), 0);
-		q1 = q1.addEdge(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?e")), 0, ByteString.of("?a"), ByteString.of("?e"));				
-		q1 = q1.closeCircle(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?e")), 0);
-		q1 = q1.addEdge(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?f")), 0, ByteString.of("?a"), ByteString.of("?f"));				
-		q1 = q1.closeCircle(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?f")), 0);				
+		q1 = q1.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?b")), 0);
+		q1 = q1.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?e")), 0, ByteString.of("?a"), ByteString.of("?e"));				
+		q1 = q1.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?e")), 0);
+		q1 = q1.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?f")), 0, ByteString.of("?a"), ByteString.of("?f"));				
+		q1 = q1.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?f")), 0);				
 		
 		q2 = new Query(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?x")), 0);
-		q2 = q2.addEdge(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?m")), 0, ByteString.of("?a"), ByteString.of("?m"));
-		q2 = q2.closeCircle(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?x")), 0);				
-		q2 = q2.closeCircle(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?m")), 0);
+		q2 = q2.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?m")), 0, ByteString.of("?a"), ByteString.of("?m"));
+		q2 = q2.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?x")), 0);				
+		q2 = q2.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?m")), 0);
 
 		q3 = new Query(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?x")), 0);
-		q3 = q3.addEdge(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?m")), 0, ByteString.of("?a"), ByteString.of("?m"));
-		q3 = q3.closeCircle(FactDatabase.triple(ByteString.of("?x"), ByteString.of("r3"), ByteString.of("?m")), 0);
+		q3 = q3.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?m")), 0, ByteString.of("?a"), ByteString.of("?m"));
+		q3 = q3.addAtom(FactDatabase.triple(ByteString.of("?x"), ByteString.of("r3"), ByteString.of("?m")), 0);
 		
 		q4 = new Query(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?b")), 0);
-		q4 = q4.closeCircle(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?b")), 0);
-		q4 = q4.addEdge(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?e")), 0, ByteString.of("?a"), ByteString.of("?e"));				
-		q4 = q4.closeCircle(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?e")), 0);
-		q4 = q4.addEdge(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?f")), 0, ByteString.of("?a"), ByteString.of("?f"));				
-		q4 = q4.closeCircle(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r3"), ByteString.of("?f")), 0);		
+		q4 = q4.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?b")), 0);
+		q4 = q4.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?e")), 0, ByteString.of("?a"), ByteString.of("?e"));				
+		q4 = q4.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?e")), 0);
+		q4 = q4.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?f")), 0, ByteString.of("?a"), ByteString.of("?f"));				
+		q4 = q4.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r3"), ByteString.of("?f")), 0);		
 		
 		q5 = new Query(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?b")), 0);
-		q5 = q5.addEdge(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?c")), 0, ByteString.of("?a"), ByteString.of("?c"));				
-		q5 = q5.addEdge(FactDatabase.triple(ByteString.of("?d"), ByteString.of("r1"), ByteString.of("?b")), 0, ByteString.of("?b"), ByteString.of("?d"));				
-		q5 = q5.closeCircle(FactDatabase.triple(ByteString.of("?d"), ByteString.of("r2"), ByteString.of("?c")), 0);
+		q5 = q5.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?c")), 0, ByteString.of("?a"), ByteString.of("?c"));				
+		q5 = q5.addAtom(FactDatabase.triple(ByteString.of("?d"), ByteString.of("r1"), ByteString.of("?b")), 0, ByteString.of("?b"), ByteString.of("?d"));				
+		q5 = q5.addAtom(FactDatabase.triple(ByteString.of("?d"), ByteString.of("r2"), ByteString.of("?c")), 0);
 		
 		q6 = new Query(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?b")), 0);
-		q6 = q6.addEdge(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?x")), 0, ByteString.of("?a"), ByteString.of("?x"));				
-		q6 = q6.closeCircle(FactDatabase.triple(ByteString.of("?b"), ByteString.of("r2"), ByteString.of("?a")), 0);				
-		q6 = q6.closeCircle(FactDatabase.triple(ByteString.of("?x"), ByteString.of("r2"), ByteString.of("?a")), 0);				
+		q6 = q6.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?x")), 0, ByteString.of("?a"), ByteString.of("?x"));				
+		q6 = q6.addAtom(FactDatabase.triple(ByteString.of("?b"), ByteString.of("r2"), ByteString.of("?a")), 0);				
+		q6 = q6.addAtom(FactDatabase.triple(ByteString.of("?x"), ByteString.of("r2"), ByteString.of("?a")), 0);				
 		
 		q7 = new Query(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?b")), 0);
-		q7 = q7.addEdge(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?x")), 0, ByteString.of("?a"), ByteString.of("?x"));				
-		q7 = q7.closeCircle(FactDatabase.triple(ByteString.of("?b"), ByteString.of("r2"), ByteString.of("?a")), 0);				
-		q7 = q7.closeCircle(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?x")), 0);				
+		q7 = q7.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?x")), 0, ByteString.of("?a"), ByteString.of("?x"));				
+		q7 = q7.addAtom(FactDatabase.triple(ByteString.of("?b"), ByteString.of("r2"), ByteString.of("?a")), 0);				
+		q7 = q7.addAtom(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r2"), ByteString.of("?x")), 0);				
 
 		q8 = new Query(FactDatabase.triple(ByteString.of("?a"), ByteString.of("r1"), ByteString.of("?b")), 0);
-		q8 = q8.addEdge(FactDatabase.triple(ByteString.of("?b"), ByteString.of("r2"), ByteString.of("?x")), 0, ByteString.of("?b"), ByteString.of("?x"));				
-		q8 = q8.addEdge(FactDatabase.triple(ByteString.of("?x"), ByteString.of("r1"), ByteString.of("?c")), 0, ByteString.of("?x"), ByteString.of("?c"));				
-		q8 = q8.closeCircle(FactDatabase.triple(ByteString.of("?c"), ByteString.of("r2"), ByteString.of("?a")), 0);	
+		q8 = q8.addAtom(FactDatabase.triple(ByteString.of("?b"), ByteString.of("r2"), ByteString.of("?x")), 0, ByteString.of("?b"), ByteString.of("?x"));				
+		q8 = q8.addAtom(FactDatabase.triple(ByteString.of("?x"), ByteString.of("r1"), ByteString.of("?c")), 0, ByteString.of("?x"), ByteString.of("?c"));				
+		q8 = q8.addAtom(FactDatabase.triple(ByteString.of("?c"), ByteString.of("r2"), ByteString.of("?a")), 0);	
 		
 		super.setUp();
 	}

@@ -20,7 +20,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 	}
 	
 	@Override
-	public void getDanglingEdges(Query query, double minCardinality, Collection<Query> output) {		
+	public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output) {		
 		if(query.isEmpty()){
 			//Initial case
 			ByteString[] newEdge = query.fullyUnboundTriplePattern();
@@ -50,7 +50,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 			}			
 			query.getTriples().remove(0);
 		}else{
-			super.getDanglingEdges(query, minCardinality, output);
+			super.getDanglingAtoms(query, minCardinality, output);
 			if(query.isClosed() && !query.containsRelation(ByteString.of(wikiLinkProperty)) && !query.containsRelation(typeString)){
 				//Add the types when the query is long enough
 				getSpecializationCandidates(query, minCardinality, output);
@@ -113,7 +113,8 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 		}
 	}
 	
-	public void getCloseCircleEdges(Query query, double minSupportThreshold, Collection<Query> output) {
+	@Override
+	public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output) {
 		int length = query.getLengthWithoutTypesAndLinksTo(typeString, ByteString.of(wikiLinkProperty));
 		ByteString[] head = query.getHead();
 		if (length == maxDepth - 1) {
@@ -137,7 +138,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 			queryAtoms.add(newEdge);
 			long cardinality = kb.countDistinctPairs(head[0], head[2], queryAtoms);
 			if (cardinality >= minSupportThreshold) {
-				Query candidate1 = query.closeCircle(newEdge, (int)cardinality);
+				Query candidate1 = query.addAtom(newEdge, (int)cardinality);
 				candidate1.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate1.getHeadRelation()));
 				candidate1.setSupportRatio((double)cardinality / (double)kb.size());
 				candidate1.setParent(query);			
@@ -149,7 +150,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 			newEdge[2] = tmp;
 			cardinality = kb.countDistinctPairs(head[0], head[2], queryAtoms);
 			if (cardinality >= minSupportThreshold) {
-				Query candidate2 = query.closeCircle(newEdge, (int)cardinality);
+				Query candidate2 = query.addAtom(newEdge, (int)cardinality);
 				candidate2.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate2.getHeadRelation()));
 				candidate2.setSupportRatio((double)cardinality / (double)kb.size());
 				candidate2.setParent(query);			
@@ -157,7 +158,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 			}
 		}
 			
-		super.getCloseCircleEdges(query, minSupportThreshold, output);
+		super.getClosingAtoms(query, minSupportThreshold, output);
 	}
 
 	protected boolean testLength(Query candidate){

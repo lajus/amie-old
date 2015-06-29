@@ -35,7 +35,7 @@ public class KeyMinerMiningAssistant extends DefaultMiningAssistant {
 	}
 	
 	@Override
-	public void getDanglingEdges(Query query, double minCardinality, Collection<Query> output) {		
+	public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output) {		
 		if (query.isEmpty()) {
 			getInitialAtomsFromSeeds(Collections.EMPTY_LIST, minCardinality, output);
 			return;
@@ -52,7 +52,7 @@ public class KeyMinerMiningAssistant extends DefaultMiningAssistant {
 	 * @return
 	 */
 	@Override
-	public void getCloseCircleEdges(Query query, double minSupportThreshold, Collection<Query> output) {
+	public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output) {
 		if (this.enforceConstants) {
 			return;
 		}

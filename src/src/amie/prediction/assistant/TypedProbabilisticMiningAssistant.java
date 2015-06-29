@@ -18,8 +18,8 @@ public class TypedProbabilisticMiningAssistant extends ProbabilisticHeadVariable
 	/**
 	 * 
 	 */
-	public void getDanglingEdges(Query query, double minCardinality, Collection<Query> output){	
-		super.getDanglingEdges(query, minCardinality, output);
+	public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output){	
+		super.getDanglingAtoms(query, minCardinality, output);
 	}
 	
 	/**

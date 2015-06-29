@@ -33,7 +33,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 		return subjectSchemaCount;
 	}
 
-	protected void getInstantiatedEdges(Query query, Query originalQuery, ByteString[] danglingEdge, int danglingPosition, double minSupportThreshold, Collection<Query> output) {
+	protected void getInstantiatedAtoms(Query query, Query originalQuery, ByteString[] danglingEdge, int danglingPosition, double minSupportThreshold, Collection<Query> output) {
 		IntHashMap<ByteString> constants = kb.frequentBindingsOf(danglingEdge[danglingPosition], query.getFunctionalVariable(), query.getTriples());
 		for(ByteString constant: constants){
 			ByteString tmp = danglingEdge[danglingPosition];
@@ -65,7 +65,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 	 * @param omittedVariables
 	 * @return
 	 */
-	public void getCloseCircleEdges(Query query, double minSupportThreshold, Collection<Query> output){		
+	public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output){		
 		int nPatterns = query.getTriples().size();
 
 		if(query.isEmpty())
@@ -132,7 +132,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 							int cardinality = seedsCardinality(query);
 							query.getTriples().remove(nPatterns);
 							if(cardinality >= minSupportThreshold){										
-								Query candidate = query.closeCircle(newEdge, cardinality);
+								Query candidate = query.addAtom(newEdge, cardinality);
 								if(!candidate.isRedundantRecursive()){
 									candidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate.getHeadRelation()));
 									candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
@@ -179,7 +179,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 				candidate.setFunctionalVariablePosition(countVarPos);
 				registerHeadRelation(candidate);
 				if(allowConstants)
-					getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
+					getInstantiatedAtoms(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
 				
 				output.add(candidate);
 			}
@@ -189,7 +189,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 	}
 
 	@Override
-	public void getDanglingEdges(Query query, double minCardinality, Collection<Query> output){		
+	public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output){		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		List<ByteString> openVariables = query.getOpenVariables();
 		
@@ -240,7 +240,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 					int cardinality = seedsCardinality(query);
 					query.getTriples().remove(nPatterns);						
 					if(cardinality >= minCardinality){
-						Query candidate = query.addEdge(newEdge, cardinality, newEdge[joinPosition], newEdge[danglingPosition]);
+						Query candidate = query.addAtom(newEdge, cardinality, newEdge[joinPosition], newEdge[danglingPosition]);
 						if(candidate.containsUnifiablePatterns()){
 							//Verify whether dangling variable unifies to a single value (I do not like this hack)
 							if(boundHead && kb.countDistinct(newEdge[danglingPosition], candidate.getTriples()) < 2)
@@ -250,15 +250,15 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 						candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
 						candidate.setSupportRatio((double)candidate.getSupport() / (double)getTotalCount(candidate));
 						candidate.setParent(query);
-						if (canAddInstantiatedAtom()) {
+						if (canAddInstantiatedAtoms()) {
 							// Pruning by maximum length for the \mathcal{O}_E operator.
 							if (this.exploitMaxLengthOption) {
 								if (query.getRealLength() < this.maxDepth - 1 
 										|| openVariables.size() < 2) {
-									getInstantiatedEdges(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minCardinality, output);
+									getInstantiatedAtoms(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minCardinality, output);
 								}
 							} else {
-								getInstantiatedEdges(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minCardinality, output);							
+								getInstantiatedAtoms(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minCardinality, output);							
 							}
 						}
 						

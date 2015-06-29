@@ -397,8 +397,8 @@ public class AMIE {
                         long timeStamp1 = System.currentTimeMillis();
                         double threshold = getCountThreshold(currentRule);
                         List<Query> temporalOutput = new ArrayList<Query>();
-                        assistant.getCloseCircleEdges(currentRule, threshold, temporalOutput);
-                        assistant.getDanglingEdges(currentRule, threshold, temporalOutput);
+                        assistant.getClosingAtoms(currentRule, threshold, temporalOutput);
+                        assistant.getDanglingAtoms(currentRule, threshold, temporalOutput);
                         long timeStamp2 = System.currentTimeMillis();
                         this.specializationTime += (timeStamp2 - timeStamp1);
                         synchronized (queryPool) {

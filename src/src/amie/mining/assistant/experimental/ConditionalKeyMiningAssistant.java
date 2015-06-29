@@ -47,7 +47,7 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
     }
 
     @Override
-    public void getCloseCircleEdges(Query query, double minSupportThreshold, Collection<Query> output) {
+    public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output) {
         int querySize = query.getLength();
         ByteString[] head = query.getHead();
         for (List<ByteString> nonKey : nonKeys) {
@@ -78,7 +78,7 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
     }
 
     @Override
-    public void getDanglingEdges(Query query, double minCardinality, Collection<Query> output) {
+    public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output) {
         int querySize = query.getLength();
         ByteString[] head = query.getHead();
         for (List<ByteString> nonKey : nonKeys) {
@@ -95,7 +95,7 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                     int support = constants.get(constant);
                     if (support >= minCardinality) {
                         atom1[2] = constant;
-                        Query newQuery = query.addEdge(atom1, support);
+                        Query newQuery = query.addAtom(atom1, support);
                         output.add(newQuery);
                     }
                 }

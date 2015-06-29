@@ -33,12 +33,12 @@ public class TypedMiningAssistant extends DefaultMiningAssistant {
 	 * @param minCardinality
 	 * @return
 	 */
-	public void getDanglingEdges(Query query, double minCardinality, Collection<Query> output){		
+	public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output){		
 		if(query.getRealLength() == 1){
 			//Add the types at the beginning of the query.
 			getSpecializationCandidates(query, minCardinality, output);
 		} else {
-			super.getDanglingEdges(query, minCardinality, output);	
+			super.getDanglingAtoms(query, minCardinality, output);	
 		}
 	}
 		

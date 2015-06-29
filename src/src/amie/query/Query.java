@@ -519,20 +519,33 @@ public class Query{
 	 * @return
 	 */
 	public ByteString[] getLastRealTriplePattern() {
-		if (triples.isEmpty()) {
+		int index = getLastRealTriplePatternIndex();
+		if (index == -1) {
 			return null;
 		} else {
-			int i = triples.size() - 1;
+			return triples.get(index);
+		}
+	}
+	
+	/**
+	 * Return the index of the last triple pattern which is not the a pseudo-atom.
+	 * @return
+	 */
+	public int getLastRealTriplePatternIndex() {
+		if (triples.isEmpty()) {
+			return -1;
+		} else {
+			int index = triples.size() - 1;
 			ByteString[] last = null;
-			while (i >= 0){
-				last = triples.get(i);
+			while (index >= 0){
+				last = triples.get(index);
 				if(!last[1].equals(FactDatabase.DIFFERENTFROMbs)) {
 					break;
 				}
-				--i;
+				--index;
 			}
 
-			return last;
+			return index;
 		}
 	}
 	
@@ -960,33 +973,26 @@ public class Query{
 	/**
 	 * Returns a new rule that contains all the atoms of the current rule plus
 	 * the atom provided as argument.
-	 * @param newEdge The new atom.
+	 * @param newAtom The new atom.
 	 * @param cardinality The support of the new rule.
 	 * @param joinedVariable The position of the common variable w.r.t to the rule in the new atom, 
 	 * i.e., 0 if the new atoms joins on the subject or 2 if it joins on the object. 
 	 * @param danglingVariable The position of the fresh variable in the new atom.
 	 * @return
 	 */
-	public Query addEdge(ByteString[] newEdge, 
+	public Query addAtom(ByteString[] newAtom, 
 			int cardinality, ByteString joinedVariable, ByteString danglingVariable) {
 		Query newQuery = new Query(this, cardinality);
-		ByteString[] copyNewEdge = newEdge.clone();
+		ByteString[] copyNewEdge = newAtom.clone();
 		newQuery.triples.add(copyNewEdge);
 		return newQuery;		
 	}
 	
-	public Query addEdge(ByteString[] newEdge, double cardinality) {
+	public Query addAtom(ByteString[] newAtom, double cardinality) {
 		Query newQuery = new Query(this, cardinality);
-		ByteString[] copyNewEdge = newEdge.clone();
+		ByteString[] copyNewEdge = newAtom.clone();
 		newQuery.triples.add(copyNewEdge);
 		return newQuery;		
-	}
-
-	public Query closeCircle(ByteString[] newEdge, int cardinality) {
-		Query newQuery = new Query(this, cardinality);
-		ByteString[] copyNewEdge = newEdge.clone();
-		newQuery.triples.add(copyNewEdge);
-		return newQuery;
 	}
 	
 	/**
@@ -1178,7 +1184,7 @@ public class Query{
 	 * @param cardinality
 	 * @return
 	 */
-	public Query unify(int triplePos, int danglingPosition, ByteString constant, int cardinality) {
+	public Query instantiateConstant(int triplePos, int danglingPosition, ByteString constant, double cardinality) {
 		Query newQuery = new Query(this, cardinality);
 		ByteString[] targetEdge = newQuery.getTriples().get(triplePos);
 		targetEdge[danglingPosition] = constant;

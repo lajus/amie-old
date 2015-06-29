@@ -325,7 +325,7 @@ public class MiningAssistant{
 	 * where one of the arguments has a constant.
 	 * @return
 	 */
-	protected boolean canAddInstantiatedAtom() {
+	protected boolean canAddInstantiatedAtoms() {
 		return allowConstants || enforceConstants;
 	}
 	
@@ -353,8 +353,8 @@ public class MiningAssistant{
 			candidate.setFunctionalVariablePosition(countVarPos);
 			registerHeadRelation(candidate);			
 
-			if(canAddInstantiatedAtom()) {
-				getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
+			if(canAddInstantiatedAtoms()) {
+				getInstantiatedAtoms(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
 			}
 			
 			if (!enforceConstants) {
@@ -396,8 +396,8 @@ public class MiningAssistant{
 				Query candidate = new Query(succedent, cardinality);
 				candidate.setFunctionalVariablePosition(countVarPos);
 				registerHeadRelation(candidate);					
-				if(canAddInstantiatedAtom()) {
-					getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
+				if(canAddInstantiatedAtoms()) {
+					getInstantiatedAtoms(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
 				}
 				
 				if (!enforceConstants) {
@@ -416,7 +416,7 @@ public class MiningAssistant{
 	 * @param minSupportThreshold
 	 * @return
 	 */
-	public void getDanglingEdges(Query query, double minSupportThreshold, Collection<Query> output){		
+	public void getDanglingAtoms(Query query, double minSupportThreshold, Collection<Query> output){		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		if (query.isEmpty()) {
 			throw new IllegalArgumentException("This method expects a non-empty query");
@@ -463,7 +463,7 @@ public class MiningAssistant{
 					int cardinality = promisingRelations.get(relation);
 					if(cardinality >= minSupportThreshold){
 						newEdge[1] = relation;
-						Query candidate = query.addEdge(newEdge, cardinality, newEdge[joinPosition], newEdge[danglingPosition]);
+						Query candidate = query.addAtom(newEdge, cardinality);
 						if(candidate.containsUnifiablePatterns()){
 							//Verify whether dangling variable unifies to a single value (I do not like this hack)
 							if(boundHead && kb.countDistinct(newEdge[danglingPosition], candidate.getTriples()) < 2)
@@ -473,8 +473,8 @@ public class MiningAssistant{
 						candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
 						candidate.setSupportRatio((double)candidate.getSupport() / (double)getTotalCount(candidate));
 						candidate.setParent(query);							
-						if(canAddInstantiatedAtom()) {
-							getInstantiatedEdges(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minSupportThreshold, output);
+						if(canAddInstantiatedAtoms()) {
+							getInstantiatedAtoms(candidate, candidate, candidate.getLastTriplePattern(), danglingPosition, minSupportThreshold, output);
 						}
 						
 						if (!enforceConstants) {
@@ -525,7 +525,7 @@ public class MiningAssistant{
 	 * @param omittedVariables
 	 * @return
 	 */
-	public void getCloseCircleEdges(Query query, double minSupportThreshold, Collection<Query> output){
+	public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output){
 		if (enforceConstants) {
 			return;
 		}
@@ -579,7 +579,7 @@ public class MiningAssistant{
 							int cardinality = promisingRelations.get(relation);
 							newEdge[1] = relation;
 							if(cardinality >= minSupportThreshold){										
-								Query candidate = query.closeCircle(newEdge, cardinality);
+								Query candidate = query.addAtom(newEdge, cardinality);
 								if(!candidate.isRedundantRecursive()){
 									candidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate.getHeadRelation()));
 									candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
@@ -934,7 +934,7 @@ public class MiningAssistant{
 		return query.getSupport() / denominator;
 	}
 
-	protected void getInstantiatedEdges(Query query, Query originalQuery, 
+	protected void getInstantiatedAtoms(Query query, Query originalQuery, 
 			ByteString[] danglingEdge, int danglingPosition, double minSupportThreshold, Collection<Query> output) {
 		IntHashMap<ByteString> constants = kb.frequentBindingsOf(danglingEdge[danglingPosition], query.getFunctionalVariable(), query.getTriples());
 		for(ByteString constant: constants){

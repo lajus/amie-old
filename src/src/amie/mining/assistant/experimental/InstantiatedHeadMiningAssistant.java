@@ -40,14 +40,46 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 			candidate.setFunctionalVariablePosition(countVarPos);
 			registerHeadRelation(candidate);
 			ArrayList<Query> tmpOutput = new ArrayList<>();
-			getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, tmpOutput);			
+			getInstantiatedAtoms(candidate, null, query.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, tmpOutput);			
 			output.addAll(tmpOutput);
 		}
 		
 		query.getTriples().remove(0);		
 	}
 	
-	public void getDanglingEdges(Query query, double minCardinality, Collection<Query> output) {
+	@Override
+	public void getInitialAtoms(double minSupportThreshold, Collection<Query> output) {
+		Query query = new Query();
+		ByteString[] newEdge = query.fullyUnboundTriplePattern();
+		
+		if(query.isEmpty()) {
+			//Initial case
+			query.getTriples().add(newEdge);
+			List<ByteString[]> emptyList = Collections.emptyList();
+			IntHashMap<ByteString> relations = kb.countProjectionBindings(query.getHead(), emptyList, newEdge[1]);
+			for(ByteString relation : relations){
+				if(headExcludedRelations != null && headExcludedRelations.contains(relation))
+					continue;
+				
+				int cardinality = relations.get(relation);
+				if (cardinality >= minSupportThreshold) {
+					ByteString[] succedent = newEdge.clone();
+					succedent[1] = relation;
+					int countVarPos = countAlwaysOnSubject ? 0 : findCountingVariable(succedent);
+					Query candidate = new Query(succedent, cardinality);
+					candidate.setFunctionalVariablePosition(countVarPos);
+					registerHeadRelation(candidate);
+					getInstantiatedAtoms(candidate, null, query.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
+					output.add(candidate);
+				}
+			}			
+			query.getTriples().remove(0);
+		}
+		
+	}
+	
+	@Override
+	public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output) {
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		
 		if(query.isEmpty()) {
@@ -67,7 +99,7 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 					Query candidate = new Query(succedent, cardinality);
 					candidate.setFunctionalVariablePosition(countVarPos);
 					registerHeadRelation(candidate);
-					getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, output);
+					getInstantiatedAtoms(candidate, null, query.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, output);
 					output.add(candidate);
 				}
 			}			
@@ -86,7 +118,7 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 				}
 			}
 			
-			getDanglingEdges(query, newEdge, minCardinality, output);
+			getDanglingAtoms(query, newEdge, minCardinality, output);
 		}
 	}
 	

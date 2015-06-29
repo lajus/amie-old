@@ -61,8 +61,8 @@ public class DefaultMiningAssistant extends MiningAssistant{
 			candidate.setFunctionalVariablePosition(countVarPos);
 			registerHeadRelation(candidate);
 			ArrayList<Query> tmpOutput = new ArrayList<>();
-			if(canAddInstantiatedAtom()) {
-				getInstantiatedEdges(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, tmpOutput);			
+			if(canAddInstantiatedAtoms()) {
+				getInstantiatedAtoms(candidate, null, candidate.getLastTriplePattern(), countVarPos == 0 ? 2 : 0, minCardinality, tmpOutput);			
 				output.addAll(tmpOutput);
 			}
 			
@@ -101,8 +101,8 @@ public class DefaultMiningAssistant extends MiningAssistant{
 				Query candidate = new Query(succedent, cardinality);
 				candidate.setFunctionalVariablePosition(countVarPos);
 				registerHeadRelation(candidate);
-				if(canAddInstantiatedAtom()){
-					getInstantiatedEdges(candidate, null, 
+				if(canAddInstantiatedAtoms()){
+					getInstantiatedAtoms(candidate, null, 
 							candidate.getLastTriplePattern(), 
 							countVarPos == 0 ? 2 : 0, 
 									minSupportThreshold, output);
@@ -125,7 +125,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 	 * @param omittedVariables
 	 * @return
 	 */
-	public void getCloseCircleEdges(Query query, double minSupportThreshold, Collection<Query> output) {
+	public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output) {
 		if (this.enforceConstants) {
 			return;
 		}
@@ -230,7 +230,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 							
 							//Here we still have to make a redundancy check							
 							newEdge[1] = relation;
-							Query candidate = query.closeCircle(newEdge, cardinality);
+							Query candidate = query.addAtom(newEdge, cardinality);
 							if(!candidate.isRedundantRecursive()){
 								candidate.setHeadCoverage((double)cardinality / (double)this.headCardinalities.get(candidate.getHeadRelation()));
 								candidate.setSupportRatio((double)cardinality / (double)this.kb.size());
@@ -253,7 +253,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 	 * @param minCardinality
 	 * @return
 	 */
-	public void getDanglingEdges(Query query, double minCardinality, Collection<Query> output) {		
+	public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output) {		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		
 		if (query.isEmpty()) {
@@ -275,7 +275,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 			}
 		}
 		
-		getDanglingEdges(query, newEdge, minCardinality, output);
+		getDanglingAtoms(query, newEdge, minCardinality, output);
 	}
 	
 	/**
@@ -286,7 +286,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 	 * @param minSupportThreshold Minimum support threshold.
 	 * @param output
 	 */
-	protected void getDanglingEdges(Query query, ByteString[] edge, double minSupportThreshold, Collection<Query> output) {
+	protected void getDanglingAtoms(Query query, ByteString[] edge, double minSupportThreshold, Collection<Query> output) {
 		List<ByteString> joinVariables = null;
 		List<ByteString> openVariables = query.getOpenVariables();
 		
@@ -359,10 +359,10 @@ public class DefaultMiningAssistant extends MiningAssistant{
 					if(containsHardCase(query, newEdge))
 						continue;
 					
-					Query candidate = query.addEdge(newEdge, cardinality, newEdge[joinPosition], newEdge[danglingPosition]);
+					Query candidate = query.addAtom(newEdge, cardinality);
 					List<ByteString[]> recursiveAtoms = candidate.getRedundantAtoms();
 					if(!recursiveAtoms.isEmpty()){
-						if(canAddInstantiatedAtom()){
+						if(canAddInstantiatedAtoms()){
 							for(ByteString[] triple: recursiveAtoms){										
 								if(!FactDatabase.isVariable(triple[danglingPosition])){
 									candidate.getTriples().add(
@@ -390,7 +390,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 					candidate.setHeadCoverage((double)candidate.getSupport() / this.headCardinalities.get(candidate.getHeadRelation()));
 					candidate.setSupportRatio((double)candidate.getSupport() / (double)this.kb.size());
 					candidate.setParent(query);		
-					if (canAddInstantiatedAtom()) {
+					if (canAddInstantiatedAtoms()) {
 						// Pruning by maximum length for the \mathcal{O}_E operator.
 						if (this.exploitMaxLengthOption) {
 							if (query.getRealLength() < this.maxDepth - 1 
@@ -486,7 +486,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 				targetEdge[danglingPosition] = constant;
 				assert(FactDatabase.isVariable(targetEdge[joinPosition]));
 				
-				Query candidate = query.unify(bindingTriplePos, danglingPosition, constant, cardinality);				
+				Query candidate = query.instantiateConstant(bindingTriplePos, danglingPosition, constant, cardinality);				
 				//If the new edge does not contribute with anything
 				long cardLastEdge = this.kb.countDistinct(targetEdge[joinPosition], candidate.getTriples());
 				if(cardLastEdge < 2)
