@@ -385,7 +385,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 					}
 					
 					candidate.setHeadCoverage(candidate.getSupport() / this.headCardinalities.get(candidate.getHeadRelation()));
-					candidate.setSupportRatio(candidate.getSupport() / (double)this.kb.size());
+					candidate.setSupportRatio(candidate.getSupport() / this.kb.size());
 					candidate.setParent(query);		
 					if (canAddInstantiatedAtoms()) {
 						// Pruning by maximum length for the \mathcal{O}_E operator.
