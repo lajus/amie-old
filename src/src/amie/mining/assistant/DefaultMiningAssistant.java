@@ -717,27 +717,5 @@ public class DefaultMiningAssistant extends MiningAssistant{
 		System.out.println("Results Std: " + db.countDistinctPairs(ByteString.of("?a"), ByteString.of("?b"), pcaDenom.subList(1,  pcaDenom.size() - 1)));
 		System.out.println("Results PCA: " + db.countDistinctPairs(ByteString.of("?a"), ByteString.of("?b"), pcaDenom));
 		System.out.println("PCA denom: " + ((System.currentTimeMillis() - timeStamp1) / 1000.0) + " seconds");
-		
-/*		List<ByteString[]> stdDenom = FactDatabase.triples(
-				FactDatabase.triple("?x", "<directed>", "?z"),
-				FactDatabase.triple("?y", "<actedIn>", "?z")
-				);
-		timeStamp1 = System.currentTimeMillis();
-		System.out.println("Results : " + db.countDistinctPairs(ByteString.of("?x"), ByteString.of("?y"), stdDenom));
-		System.out.println("Std-conf denom: " + ((System.currentTimeMillis() - timeStamp1) / 1000.0) + " seconds");
-		
-		Query q = new Query(FactDatabase.triple("?x", "<isMarriedTo>", "?y"), stdDenom);
-		if (db.functionality(ByteString.of("<isMarriedTo>")) 
-				> db.inverseFunctionality(ByteString.of("<isMarriedTo>"))) {
-			q.setFunctionalVariablePosition(0);
-		} else {
-			q.setFunctionalVariablePosition(2);			
-		}
-		q.setSupport(db.countDistinctPairs(ByteString.of("?x"), ByteString.of("?y"), q.getTriples()));	
-		DefaultMiningAssistant assistant = new DefaultMiningAssistant(db);
-		assistant.setEnabledFunctionalityHeuristic(true);
-		timeStamp1 = System.currentTimeMillis();
-		assistant.calculateConfidenceBoundsAndApproximations(q);
-		System.out.println("Calculating approximation: " + ((System.currentTimeMillis() - timeStamp1) / 1000.0) + " seconds");*/
 	}
 }

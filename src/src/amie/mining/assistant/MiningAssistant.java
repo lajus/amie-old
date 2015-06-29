@@ -598,6 +598,40 @@ public class MiningAssistant{
 	}
 	
 	/**
+	 * Returns all candidates obtained by instantiating the dangling variable of the last added
+	 * triple pattern.
+	 * @param query
+	 * @param minSupportThreshold
+	 * @param danglingEdges 
+	 * @param output
+	 */
+	public void getInstantiatedAtoms(Query query, double minSupportThreshold, Collection<Query> danglingEdges, Collection<Query> output) {
+		if (!canAddInstantiatedAtoms()) {
+			return;
+		}
+		
+		List<ByteString> queryFreshVariables = query.getOpenVariables();
+		if (this.exploitMaxLengthOption || query.getRealLength() < this.maxDepth - 1 || queryFreshVariables.size() < 2) {	
+			for (Query candidate : danglingEdges) {
+				// Find the dangling position of the query
+				int lastTriplePatternIndex = candidate.getLastRealTriplePatternIndex();
+				ByteString[] lastTriplePattern = candidate.getTriples().get(lastTriplePatternIndex);
+				
+				List<ByteString> candidateFreshVariables = candidate.getOpenVariables();
+				int danglingPosition = 0;
+				if (candidateFreshVariables.contains(lastTriplePattern[0])) {
+					danglingPosition = 0;
+				} else if (candidateFreshVariables.contains(lastTriplePattern[2])) {
+					danglingPosition = 2;
+				} else {
+					throw new IllegalArgumentException("The query " + query.getRuleString() + " does not contain fresh variables in the last triple pattern.");
+				}
+				getInstantiatedAtoms(candidate, query, lastTriplePatternIndex, danglingPosition, minSupportThreshold, output);
+			}
+		}
+	}
+	
+	/**
 	 * Check whether the rule meets the length criteria stored in the assiatant object
 	 * @param candidate
 	 * @return
