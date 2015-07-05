@@ -386,8 +386,9 @@ public class DefaultMiningAssistant extends MiningAssistant{
 					
 					candidate.setHeadCoverage(candidate.getSupport() / this.headCardinalities.get(candidate.getHeadRelation()));
 					candidate.setSupportRatio(candidate.getSupport() / this.kb.size());
-					candidate.setParent(query);		
-					if (canAddInstantiatedAtoms()) {
+					candidate.setParent(query);	
+					output.add(candidate);
+					/*if (canAddInstantiatedAtoms()) {
 						// Pruning by maximum length for the \mathcal{O}_E operator.
 						if (this.exploitMaxLengthOption) {
 							if (query.getRealLength() < this.maxDepth - 1 
@@ -397,12 +398,12 @@ public class DefaultMiningAssistant extends MiningAssistant{
 						} else {
 							getInstantiatedAtoms(candidate, candidate, nPatterns, danglingPosition, minSupportThreshold, output);							
 						}
-					}
+					}*/
 					
-					if (!this.enforceConstants) {
+/*					if (!this.enforceConstants) {
 						// If this rule will not be refined anyway.
 						if (candidate.getRealLength() == this.maxDepth 
-								&& !candidate.isClosed()) {
+								&& !candidate.isClosed() ) {
 							continue;
 						}
 						// If the assistant has been told to avoid atoms of the form type(x, y)
@@ -411,7 +412,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 							continue;
 						}
 						output.add(candidate);
-					}
+					}*/
 				}
 			}
 		}
@@ -447,13 +448,13 @@ public class DefaultMiningAssistant extends MiningAssistant{
 	 * output all the derived rules where "w" is bound to a constant that keeps the whole
 	 * pattern above the minCardinality threshold.
 	 * @param query
-	 * @param originalQuery
+	 * @param parentQuery
 	 * @param bindingTriplePos
 	 * @param danglingPosition
 	 * @param minSupportThreshold
 	 * @param output
 	 */
-	protected void getInstantiatedAtoms(Query query, Query originalQuery, 
+	protected void getInstantiatedAtoms(Query query, Query parentQuery, 
 			int bindingTriplePos, int danglingPosition, double minSupportThreshold, Collection<Query> output) {
 		ByteString[] danglingEdge = query.getTriples().get(bindingTriplePos);
 		Query rewrittenQuery = null;
@@ -496,7 +497,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 				if(candidate.getRedundantAtoms().isEmpty()){
 					candidate.setHeadCoverage((double)cardinality / headCardinalities.get(candidate.getHeadRelation()));
 					candidate.setSupportRatio((double)cardinality / (double)kb.size());
-					candidate.setParent(originalQuery);
+					candidate.setParent(parentQuery);
 					output.add(candidate);
 				}
 			}

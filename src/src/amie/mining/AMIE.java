@@ -393,7 +393,7 @@ public class AMIE {
                     }
 
                     // If so specialize it
-                    if (furtherRefined) {
+                    /**if (furtherRefined) {
                         long timeStamp1 = System.currentTimeMillis();
                         double threshold = getCountThreshold(currentRule);
                         List<Query> temporalOutput = new ArrayList<Query>();
@@ -404,6 +404,33 @@ public class AMIE {
                         synchronized (queryPool) {
                             timeStamp1 = System.currentTimeMillis();
                             queryPool.addAll(temporalOutput);
+                            timeStamp2 = System.currentTimeMillis();
+                            this.queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
+                        }
+                    }*/
+                    
+                    // If so specialize it
+                    if (furtherRefined) {
+                        long timeStamp1 = System.currentTimeMillis();
+                        double threshold = getCountThreshold(currentRule);
+                        List<Query> temporalOutput = new ArrayList<Query>();
+                        List<Query> temporalOutputDanglingEdges = new ArrayList<Query>();
+                        
+                        // Application of the mining operators
+                        assistant.getClosingAtoms(currentRule, threshold, temporalOutput);
+                        assistant.getDanglingAtoms(currentRule, threshold, temporalOutputDanglingEdges);
+                        assistant.getInstantiatedAtoms(currentRule, threshold, temporalOutputDanglingEdges, temporalOutput);
+                        long timeStamp2 = System.currentTimeMillis();
+                        this.specializationTime += (timeStamp2 - timeStamp1);
+                        // Addition of the specializations to the queue
+                        synchronized (queryPool) {
+                            timeStamp1 = System.currentTimeMillis();
+                            queryPool.addAll(temporalOutput);
+                        	// This part of the code, check please!
+                            if (currentRule.getRealLength() < assistant.getMaxDepth() - 1) {
+                            	queryPool.addAll(temporalOutputDanglingEdges);
+                        	}
+                            
                             timeStamp2 = System.currentTimeMillis();
                             this.queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
                         }

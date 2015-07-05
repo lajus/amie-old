@@ -315,7 +315,7 @@ public class IterativeNaivePredictor {
 		// multiple times.
 		Map<List<Integer>, Query> combinedRulesMap = new HashMap<List<Integer>, Query>();
 		timeStamp1 = System.currentTimeMillis();
-		Thread[] threads = new Thread[Runtime.getRuntime().availableProcessors()];
+		Thread[] threads = new Thread[2];
 		for (int i = 0; i < threads.length; ++i) {
 			threads[i] = new Thread(new PredictionsBuilder(predictions, output, combinedRulesMap, iteration));
 			threads[i].start();

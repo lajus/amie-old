@@ -472,11 +472,7 @@ public class MiningAssistant{
 						
 						candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
 						candidate.setSupportRatio((double)candidate.getSupport() / (double)getTotalCount(candidate));
-						candidate.setParent(query);							
-						if(canAddInstantiatedAtoms()) {
-							getInstantiatedAtoms(candidate, candidate, 0, danglingPosition, minSupportThreshold, output);
-						}
-						
+						candidate.setParent(query);
 						if (!enforceConstants) {
 							output.add(candidate);
 						}
@@ -611,7 +607,9 @@ public class MiningAssistant{
 		}
 		
 		List<ByteString> queryFreshVariables = query.getOpenVariables();
-		if (this.exploitMaxLengthOption || query.getRealLength() < this.maxDepth - 1 || queryFreshVariables.size() < 2) {	
+		if (this.exploitMaxLengthOption 
+				|| query.getRealLength() < this.maxDepth - 1 
+				|| queryFreshVariables.size() < 2) {	
 			for (Query candidate : danglingEdges) {
 				// Find the dangling position of the query
 				int lastTriplePatternIndex = candidate.getLastRealTriplePatternIndex();
@@ -626,7 +624,7 @@ public class MiningAssistant{
 				} else {
 					throw new IllegalArgumentException("The query " + query.getRuleString() + " does not contain fresh variables in the last triple pattern.");
 				}
-				getInstantiatedAtoms(candidate, query, lastTriplePatternIndex, danglingPosition, minSupportThreshold, output);
+				getInstantiatedAtoms(candidate, candidate, lastTriplePatternIndex, danglingPosition, minSupportThreshold, output);
 			}
 		}
 	}
