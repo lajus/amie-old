@@ -225,6 +225,26 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	}
 	
 	/**
+	 * It calculates the probabilistic size of a relation, by adding up the probabilities of all 
+	 * the triples of the relation.
+	 * @param relation
+	 * @return
+	 */
+	public double probabilisticSize(ByteString relation) {
+		Map<ByteString, IntHashMap<ByteString>> subjects = predicate2subject2object.get(relation);
+		double size = 0.0;
+		ByteString fact[] = new ByteString[]{null, relation, null};
+		for (ByteString subject : subjects.keySet()) {
+			fact[0] = subject;
+			for (ByteString object : subjects.get(subject)) {
+				fact[2] = object;
+				size += probabilityOfFact(fact);
+			}
+		}
+		return size;
+	}
+	
+	/**
 	 * It calculates the probabilistic support of a query with respect to the variables in projection atom, 
 	 * as well as the support of the "existentialized" version when one of the variables in the
 	 * projection atom has been replaced by an existential variable.

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javatools.datatypes.ByteString;
+import junit.framework.TestCase;
 import amie.data.FactDatabase;
 import amie.prediction.data.TupleIndependentFactDatabase;
-import junit.framework.TestCase;
 
 /**
  * Test cases for the probabilistic version of the support and the PCA
@@ -142,6 +142,7 @@ public class TupleIndependentFactDatabaseTest extends TestCase {
 		long pcaBody = kb1.countDistinctPairs(ByteString.of("?a"), ByteString.of("?b"), rule1);
 		assertEquals((double)support, scores[0], 0.00000001);
 		assertEquals((double)pcaBody, scores[1], 0.00000001);
+		assertEquals(4.0, kb1.probabilisticSize(ByteString.of("<isCitizenOf>")));
 	}
 	
 	public void test2() {
@@ -156,6 +157,7 @@ public class TupleIndependentFactDatabaseTest extends TestCase {
 		double scores[] = kb2.probabilitiesOf(body2, head2, ByteString.of("?b"));
 		assertEquals(0.575, scores[0], 0.00000001);
 		assertEquals(scores[0], scores[1], 0.00000001);
+		assertEquals(1.9, kb2.probabilisticSize(ByteString.of("<livesIn>")));
 	}
 	
 	/**

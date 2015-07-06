@@ -63,6 +63,17 @@ public class AMIE {
      *
      */
     private static final double DEFAULT_HEAD_COVERAGE = 0.01;
+    
+    /**
+     * The default minimum size for a relation to be used as a head relation
+     */
+    private static final int DEFAULT_INITIAL_SUPPORT = 100;
+    
+    /**
+     * The default support threshold
+     */
+    private static final int DEFAULT_SUPPORT = 100;
+
 
     /**
      * It implements all the operators defined for the mining process: ADD-EDGE,
@@ -391,23 +402,6 @@ public class AMIE {
                     if (assistant.isEnablePerfectRules()) {
                         furtherRefined = !currentRule.isPerfect();
                     }
-
-                    // If so specialize it
-                    /**if (furtherRefined) {
-                        long timeStamp1 = System.currentTimeMillis();
-                        double threshold = getCountThreshold(currentRule);
-                        List<Query> temporalOutput = new ArrayList<Query>();
-                        assistant.getClosingAtoms(currentRule, threshold, temporalOutput);
-                        assistant.getDanglingAtoms(currentRule, threshold, temporalOutput);
-                        long timeStamp2 = System.currentTimeMillis();
-                        this.specializationTime += (timeStamp2 - timeStamp1);
-                        synchronized (queryPool) {
-                            timeStamp1 = System.currentTimeMillis();
-                            queryPool.addAll(temporalOutput);
-                            timeStamp2 = System.currentTimeMillis();
-                            this.queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
-                        }
-                    }*/
                     
                     // If so specialize it
                     if (furtherRefined) {
@@ -545,8 +539,8 @@ public class AMIE {
         CommandLine cli = null;
         double minStdConf = 0.0;
         double minPCAConf = DEFAULT_PCA_CONFIDENCE;
-        int minSup = 100;
-        int minInitialSup = 100;
+        int minSup = DEFAULT_SUPPORT;
+        int minInitialSup = DEFAULT_INITIAL_SUPPORT;
         double minHeadCover = DEFAULT_HEAD_COVERAGE;
         int maxDepth = 3;
         int recursivityLimit = 3;
@@ -633,7 +627,7 @@ public class AMIE {
                 .withDescription("Maximum number of atoms in the antecedent and succedent of rules. Default: 3")
                 .create("maxad");
 
-        Option maxImprovedConfOpt = OptionBuilder.withArgName("min-pca-confidence")
+        Option pcaConfThresholdOpt = OptionBuilder.withArgName("min-pca-confidence")
                 .hasArg()
                 .withDescription("Minimum PCA confidence threshold. This value is not used for pruning, only for filtering of the results. Default: 0.0")
                 .create("minpca");
@@ -660,7 +654,7 @@ public class AMIE {
                 .withDescription("Preferred number of cores. Round down to the actual number of cores in the system if a higher value is provided.")
                 .create("nc");
 
-        Option stdConfidenceOpt = OptionBuilder.withArgName("min-std-confidence")
+        Option stdConfThresholdOpt = OptionBuilder.withArgName("min-std-confidence")
                 .hasArg()
                 .withDescription("Minimum standard confidence threshold. This value is not used for pruning, only for filtering of the results. Default: 0.0")
                 .create("minc");
@@ -716,7 +710,7 @@ public class AMIE {
                 .withDescription("path to the file containing the nonkeys for the conditional key mining")
                 .hasArg()
                 .create("nkf");
-        options.addOption(stdConfidenceOpt);
+        options.addOption(stdConfThresholdOpt);
         options.addOption(supportOpt);
         options.addOption(initialSupportOpt);
         options.addOption(headCoverageOpt);
@@ -725,7 +719,7 @@ public class AMIE {
         options.addOption(bodyExcludedOpt);
         options.addOption(headExcludedOpt);
         options.addOption(maxDepthOpt);
-        options.addOption(maxImprovedConfOpt);
+        options.addOption(pcaConfThresholdOpt);
         options.addOption(headTargetRelationsOpt);
         options.addOption(bodyTargetRelationsOpt);
         options.addOption(allowConstantsOpt);
@@ -781,6 +775,19 @@ public class AMIE {
                 minSup = Integer.parseInt(minSupportStr);
             } catch (NumberFormatException e) {
                 System.err.println("The option -mins (support threshold) requires an integer as argument");
+                System.err.println("AMIE+ [OPTIONS] <.tsv INPUT FILES>");
+                formatter.printHelp("AMIE+", options);
+                System.exit(1);
+            }
+        }
+        
+
+        if (cli.hasOption("minis")) {
+            String minInitialSupportStr = cli.getOptionValue("minis");
+            try {
+                minInitialSup = Integer.parseInt(minInitialSupportStr);	
+            } catch (NumberFormatException e) {
+            	System.err.println("The option -minis (initial support threshold) requires an integer as argument");
                 System.err.println("AMIE+ [OPTIONS] <.tsv INPUT FILES>");
                 formatter.printHelp("AMIE+", options);
                 System.exit(1);
@@ -938,6 +945,7 @@ public class AMIE {
             schemaSource = new FactDatabase();
             schemaSource.load(schemaFiles);
         }
+        
 
         if (cli.hasOption("pm")) {
             switch (cli.getOptionValue("pm")) {
@@ -950,21 +958,11 @@ public class AMIE {
                 default:
                     metric = Metric.HeadCoverage;
                     System.err.println("Using " + metric + " as pruning metric with threshold " + minHeadCover);
-                    minMetricValue = minHeadCover;
-                    if (cli.hasOption("minis")) {
-                        String minInitialSupportStr = cli.getOptionValue("minis");
-                        minInitialSup = Integer.parseInt(minInitialSupportStr);
-                    }
                     break;
             }
         } else {
             System.out.println("Using " + metric + " as pruning metric with minimum threshold " + minHeadCover);
             minMetricValue = minHeadCover;
-            minInitialSup = minSup;
-            if (cli.hasOption("minis")) {
-                String minInitialSupportStr = cli.getOptionValue("minis");
-                minInitialSup = Integer.parseInt(minInitialSupportStr);
-            }
         }
 
         if (cli.hasOption("bias")) {
@@ -1204,7 +1202,7 @@ public class AMIE {
         miningAssistant.setEnabledFunctionalityHeuristic(true);
         return new AMIE(miningAssistant,
                 startSupport, // Do not look at relations smaller than 100 facts 
-                0.01, // Head coverage 1%
+                DEFAULT_HEAD_COVERAGE, // Head coverage 1%
                 Metric.HeadCoverage,
                 Runtime.getRuntime().availableProcessors());
     }
