@@ -16,7 +16,7 @@ import amie.data.FactDatabase;
 import amie.data.eval.Evaluator;
 import amie.data.eval.PredictionsSampler;
 import amie.mining.assistant.DefaultMiningAssistant;
-import amie.prediction.assistant.ProbabilisticHeadVariablesMiningAssistant;
+import amie.prediction.assistant.ProbabilisticDefaultMiningAssistant;
 import amie.query.AMIEreader;
 import amie.query.Query;
 import amie.utils.Utils;
@@ -101,7 +101,7 @@ public class JointPredictions {
 	 */
 	public static List<Prediction> getPredictions(List<Query> queries, 
 			FactDatabase trainingDataset, FactDatabase targetDataset, 
-			ProbabilisticHeadVariablesMiningAssistant miningAssistant, boolean notInTraining) {
+			ProbabilisticDefaultMiningAssistant miningAssistant, boolean notInTraining) {
 		List<Prediction> result = new ArrayList<>();
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions =
 				findPredictionsForRules(queries, trainingDataset, targetDataset, notInTraining);

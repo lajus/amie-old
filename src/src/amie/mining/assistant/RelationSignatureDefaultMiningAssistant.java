@@ -1,22 +1,29 @@
-package amie.mining.assistant.experimental;
+package amie.mining.assistant;
 
 import java.util.List;
 
 import javatools.datatypes.ByteString;
 import amie.data.FactDatabase;
 import amie.data.SchemaUtilities;
-import amie.mining.assistant.DefaultMiningAssistant;
 import amie.query.Query;
 
-public class RelationSignatureMiningAssistant extends DefaultMiningAssistant {
+/**
+ * This class overrides the default mining asssistant enforcing type constraints on the 
+ * head variables of rules. The type constraints correspond to the domain and ranges of 
+ * the head relation, that is, it mines rules of the form B ^ is(x, D) ^ is(y, R) => rh(x, y)
+ * where D and R are the domain and ranges of relation rh.
+ * @author luis
+ *
+ */
+public class RelationSignatureDefaultMiningAssistant extends DefaultMiningAssistant {
 	/**
 	 * @param dataSource
 	 */
-	public RelationSignatureMiningAssistant(FactDatabase dataSource) {
+	public RelationSignatureDefaultMiningAssistant(FactDatabase dataSource) {
 		super(dataSource);
-		// TODO Auto-generated constructor stub
 	}
 	
+	@Override
 	public boolean testConfidenceThresholds(Query candidate) {
 		boolean addIt = true;
 		boolean queryChanged = false;
@@ -68,6 +75,10 @@ public class RelationSignatureMiningAssistant extends DefaultMiningAssistant {
 		return addIt;
 	}
 
+	/**
+	 * It recalculates the support of a rule after it has been enhanced with type constraints.
+	 * @param candidate
+	 */
 	private void recalculateSupport(Query candidate) {
 		long cardinality = kb.countProjection(candidate.getHead(), candidate.getAntecedent());
 		candidate.setSupport(cardinality);

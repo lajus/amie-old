@@ -35,15 +35,15 @@ import amie.data.EquivalenceChecker2;
 import amie.data.FactDatabase;
 import amie.mining.assistant.DefaultMiningAssistant;
 import amie.mining.assistant.MiningAssistant;
+import amie.mining.assistant.RelationSignatureDefaultMiningAssistant;
 import amie.mining.assistant.experimental.ConditionalKeyMiningAssistant;
 import amie.mining.assistant.experimental.ExistentialRulesHeadVariablesMiningAssistant;
 import amie.mining.assistant.experimental.FullRelationSignatureMiningAssistant;
 import amie.mining.assistant.experimental.HeadVariablesImprovedMiningAssistant;
 import amie.mining.assistant.experimental.InstantiatedHeadMiningAssistant;
 import amie.mining.assistant.experimental.KeyMinerMiningAssistant;
-import amie.mining.assistant.experimental.RelationSignatureMiningAssistant;
 import amie.mining.assistant.experimental.SeedsCountMiningAssistant;
-import amie.mining.assistant.experimental.TypedMiningAssistant;
+import amie.mining.assistant.experimental.TypedDefaultMiningAssistant;
 import amie.mining.assistant.experimental.WikilinksHeadVariablesMiningAssistant;
 import amie.query.Query;
 
@@ -153,8 +153,20 @@ public class AMIE {
         this._queueingAndDuplicateElimination = 0l;
         this._approximationTime = 0l;
     }
+    
+    public MiningAssistant getAssistant() {
+    	return assistant;
+    }
 
-    public long _getSpecializationTime() {
+    public Metric getPruningMetric() {
+		return pruningMetric;
+	}
+
+	public void setPruningMetric(Metric pruningMetric) {
+		this.pruningMetric = pruningMetric;
+	}
+
+	public long _getSpecializationTime() {
         return _specializationTime;
     }
 
@@ -551,7 +563,6 @@ public class AMIE {
         boolean enableConfidenceUpperBounds = true;
         boolean enableFunctionalityHeuristic = true;
         boolean verbose = false;
-        boolean pcaOptimistic = false;
         boolean enforceConstants = false;
         boolean avoidUnboundTypeAtoms = true;
         // = Requested by the reviewers of AMIE+ ==
@@ -667,10 +678,6 @@ public class AMIE {
                 .withDescription("Enable functionality heuristic to identify potential low confident rules for pruning.")
                 .create("optimfh");
 
-        Option optimisticApproxOp = OptionBuilder.withArgName("optim-func-heuristic-optimistic")
-                .withDescription("Optimistic approximation for functionality heuristic.")
-                .create("optimistic");
-
         Option verboseOp = OptionBuilder.withArgName("verbose")
                 .withDescription("Maximal verbosity")
                 .create("verbose");
@@ -730,7 +737,6 @@ public class AMIE {
         options.addOption(confidenceBoundsOp);
         options.addOption(verboseOp);
         options.addOption(funcHeuristicOp);
-        options.addOption(optimisticApproxOp);
         options.addOption(recursivityLimitOpt);
         options.addOption(avoidUnboundTypeAtomsOpt);
         options.addOption(doNotExploitMaxLengthOp);
@@ -901,7 +907,6 @@ public class AMIE {
             }
         }
 
-        pcaOptimistic = cli.hasOption("optimistic");
         avoidUnboundTypeAtoms = cli.hasOption("auta");
         exploitMaxLengthForRuntime = !cli.hasOption("deml");
         enableQueryRewriting = !cli.hasOption("dqrw");
@@ -1013,11 +1018,11 @@ public class AMIE {
                 System.out.println("Default mining assistant that defines support by counting support on both head variables");
                 break;
             case "signatured":
-                mineAssistant = new RelationSignatureMiningAssistant(dataSource);
+                mineAssistant = new RelationSignatureDefaultMiningAssistant(dataSource);
                 System.out.println("Counting on both head variables and using relation signatures (domain and range types) [EXPERIMENTAL]");
                 break;
             case "typed":
-                mineAssistant = new TypedMiningAssistant(dataSource);
+                mineAssistant = new TypedDefaultMiningAssistant(dataSource);
                 System.out.println("Counting on both head variables and using all available data types [EXPERIMENTAL]");
                 break;
             case "headVarsImproved":
@@ -1076,12 +1081,12 @@ public class AMIE {
             minPCAConf = DEFAULT_PCA_CONFIDENCE;
         }
 
-        mineAssistant.setSchemaSource(schemaSource);
+        mineAssistant.setKbSchema(schemaSource);
         mineAssistant.setEnabledConfidenceUpperBounds(enableConfidenceUpperBounds);
         mineAssistant.setEnabledFunctionalityHeuristic(enableFunctionalityHeuristic);
         mineAssistant.setMaxDepth(maxDepth);
-        mineAssistant.setMinStdConfidence(minStdConf);
-        mineAssistant.setMinPcaConfidence(minPCAConf);
+        mineAssistant.setStdConfidenceThreshold(minStdConf);
+        mineAssistant.setPcaConfidenceThreshold(minPCAConf);
         mineAssistant.setAllowConstants(allowConstants);
         mineAssistant.setEnforceConstants(enforceConstants);
         mineAssistant.setBodyExcludedRelations(bodyExcludedRelations);
@@ -1089,7 +1094,6 @@ public class AMIE {
         mineAssistant.setTargetBodyRelations(bodyTargetRelations);
         mineAssistant.setCountAlwaysOnSubject(countAlwaysOnSubject);
         mineAssistant.setSilent(verbose);
-        mineAssistant.setPcaOptimistic(pcaOptimistic);
         mineAssistant.setRecursivityLimit(recursivityLimit);
         mineAssistant.setAvoidUnboundTypeAtoms(avoidUnboundTypeAtoms);
         mineAssistant.setExploitMaxLengthOption(exploitMaxLengthForRuntime);
@@ -1187,7 +1191,7 @@ public class AMIE {
 
     public static AMIE getVanillaSettingInstance(FactDatabase db, double minPCAConfidence) {
         HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(db);
-        miningAssistant.setMinPcaConfidence(minPCAConfidence);
+        miningAssistant.setPcaConfidenceThreshold(minPCAConfidence);
         return new AMIE(miningAssistant,
                 100, // Do not look at relations smaller than 100 facts 
                 0.01, // Head coverage 1%
@@ -1197,7 +1201,7 @@ public class AMIE {
 
     public static AMIE getLossyVanillaSettingInstance(FactDatabase db, double minPCAConfidence, int startSupport) {
         HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(db);
-        miningAssistant.setMinPcaConfidence(minPCAConfidence);
+        miningAssistant.setPcaConfidenceThreshold(minPCAConfidence);
         miningAssistant.setEnabledConfidenceUpperBounds(true);
         miningAssistant.setEnabledFunctionalityHeuristic(true);
         return new AMIE(miningAssistant,
@@ -1209,7 +1213,7 @@ public class AMIE {
 
     public static AMIE getLossyInstance(FactDatabase db, double minPCAConfidence, int minSupport) {
         HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(db);
-        miningAssistant.setMinPcaConfidence(minPCAConfidence);
+        miningAssistant.setPcaConfidenceThreshold(minPCAConfidence);
         miningAssistant.setEnabledConfidenceUpperBounds(true);
         miningAssistant.setEnabledFunctionalityHeuristic(true);
         return new AMIE(miningAssistant,

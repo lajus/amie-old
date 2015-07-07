@@ -6,9 +6,9 @@ import amie.mining.assistant.DefaultMiningAssistant;
 import amie.prediction.data.HistogramTupleIndependentProbabilisticFactDatabase;
 import amie.query.Query;
 
-public class ProbabilisticHeadVariablesMiningAssistant extends DefaultMiningAssistant {
+public class ProbabilisticDefaultMiningAssistant extends DefaultMiningAssistant {
 
-	public ProbabilisticHeadVariablesMiningAssistant(FactDatabase dataSource) {
+	public ProbabilisticDefaultMiningAssistant(FactDatabase dataSource) {
 		super(dataSource);
 	}
 	

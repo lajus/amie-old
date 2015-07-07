@@ -129,12 +129,7 @@ public class MiningAssistant{
 	 * If true, the assistant will output minimal debug information
 	 */
 	protected boolean silent;
-	
-	/**
-	 * If true, use an optimistic approach to estimate PCA confidence
-	 */
-	protected boolean pcaOptimistic;
-	
+		
 	/**
 	 * If true, the assistant will never add atoms of the form type(x, y), i.e., it will always bind 
 	 * the second argument to a type.
@@ -186,7 +181,6 @@ public class MiningAssistant{
 		this.subclassQuery = new Query(subclassPattern, 0);
 		this.countAlwaysOnSubject = false;
 		this.silent = true;
-		this.pcaOptimistic = false;
 		this.exploitMaxLengthOption = true;
 		this.enableQueryRewriting = true;
 		this.confidenceMetric = ConfidenceMetric.PCAConfidence;
@@ -253,45 +247,44 @@ public class MiningAssistant{
 	}
 
 	/**
-	 * @return the pcaOptimistic
-	 */
-	public boolean isPcaOptimistic() {
-		return pcaOptimistic;
-	}
-
-	/**
-	 * @param pcaOptimistic the pcaOptimistic to set
-	 */
-	public void setPcaOptimistic(boolean pcaOptimistic) {
-		this.pcaOptimistic = pcaOptimistic;
-	}
-
-	/**
 	 * @return the minPcaConfidence
 	 */
-	public double getMinImprovedConfidence() {
+	public double getPcaConfidenceThreshold() {
 		return minPcaConfidence;
 	}
 
 	/**
 	 * @param minPcaConfidence the minPcaConfidence to set
 	 */
-	public void setMinPcaConfidence(double minImprovedConfidence) {
-		this.minPcaConfidence = minImprovedConfidence;
+	public void setPcaConfidenceThreshold(double minConfidence) {
+		this.minPcaConfidence = minConfidence;
 	}
 
 	/**
 	 * @param minStdConfidence the minStdConfidence to set
 	 */
-	public void setMinStdConfidence(double minConfidence) {
+	public void setStdConfidenceThreshold(double minConfidence) {
 		this.minStdConfidence = minConfidence;
 	}
 	
-	public FactDatabase getSchemaSource(){
+	/**
+	 * It returns the training dataset from which rules atoms are added
+	 * @return
+	 */
+	public FactDatabase getKb() {
+		return kb;
+	}
+	
+	/**
+	 * It returns the KB containing the schema information (subclass and subproperty relationships,
+	 * domains and ranges for relation, etc.) about the training dataset.
+	 * @return
+	 */
+	public FactDatabase getKbSchema(){
 		return kbSchema;
 	}
 	
-	public void setSchemaSource(FactDatabase schemaSource) {
+	public void setKbSchema(FactDatabase schemaSource) {
 		// TODO Auto-generated method stub
 		this.kbSchema = schemaSource;
 	}
@@ -328,6 +321,7 @@ public class MiningAssistant{
 	protected boolean canAddInstantiatedAtoms() {
 		return allowConstants || enforceConstants;
 	}
+	
 	
 	/**
 	 * Returns a list of one-atom queries using the head relations provided in the collection relations.
@@ -719,8 +713,6 @@ public class MiningAssistant{
 		double denominator = 1.0;
 		// If the approximation is applicable, let's reorder the atoms in the canonical way
 		List<ByteString[]> path = candidate.getCanonicalPath();
-		//System.out.println("======================");
-		//System.out.println("Rule " + candidate.getRuleString());
 		// Let's calculate the first term.
 		ByteString r1 = path.get(0)[1];
 		ByteString rh = candidate.getHead()[1];
@@ -732,8 +724,6 @@ public class MiningAssistant{
 		overlap = computeOverlap(joinInformation, r1, rh);
 		// The first part of the formula
 		denominator = denominator * (overlap / funr1);
-		//System.out.println("overlap(" + r1 + ", " + rh + ") = " + overlap);
-		//System.out.println("fun(" + r1 + " (" + relationRewritten + ")" + ") = " + funr1);
 		
 		// Now iterate
 		for (int i = 1; i < path.size(); ++i) {
@@ -747,17 +737,11 @@ public class MiningAssistant{
 			double ifunri = this.kb.inverseFunctionality(ri, rewriteRi);
 			
 			rng = this.kb.relationColumnSize(ri_1, joinInformation[0]);
-			//System.out.println("|range(" + ri_1 + " (" + rewriteRi_1 + ")" + ")| = " + rng);
 			
 			overlap = computeOverlap(joinInformation, ri_1, ri);
-			//System.out.println(Arrays.toString(joinInformation) + " overlap(" + ri_1 + ", " + ri + ") = " + overlap);
-			//System.out.println("fun(" + ri + "("+ rewriteRi +")" + ") = " + funri);
-			//System.out.println("ifun(" + ri + "("+ rewriteRi +")" + ") = " + ifunri);			
 			double term = (overlap * ifunri) / (rng * funri); 
 			denominator = denominator * term;
 		}
-		//System.out.println("denom=" + denominator);
-		//System.out.println("======================");
 		
 		double estimatedPCA = (double)candidate.getSupport() / denominator;
 		candidate.setPcaEstimation(estimatedPCA);
@@ -839,21 +823,12 @@ public class MiningAssistant{
 				
 				double overlapHead;
 				int posInput = posCommonInput == 0 ? 2 : 0;
-				if (pcaOptimistic) {
-					//Run the body query on a single variable
-					List<ByteString[]> existentialAntecedent = new ArrayList<ByteString[]>(candidate.getAntecedent());
-					ByteString[] newHead = candidate.getHead().clone();
-					newHead[candidate.getNonFunctionalVariablePosition()] = ByteString.of("?s");
-					existentialAntecedent.add(newHead);
-					overlapHead = kb.countDistinct(candidate.getFunctionalVariable(), existentialAntecedent);							
-				} else {
-					if(posInput == candidate.getFunctionalVariablePosition()){
-						overlapHead = kb.overlap(targetPatternInput[1], candidate.getHead()[1], posInput + candidate.getFunctionalVariablePosition());
-					}else if(posInput < candidate.getFunctionalVariablePosition()){
-						overlapHead = kb.overlap(targetPatternInput[1], candidate.getHead()[1], candidate.getFunctionalVariablePosition());							
-					}else{
-						overlapHead = kb.overlap(candidate.getHead()[1], targetPatternInput[1], posInput);							
-					}
+				if(posInput == candidate.getFunctionalVariablePosition()){
+					overlapHead = kb.overlap(targetPatternInput[1], candidate.getHead()[1], posInput + candidate.getFunctionalVariablePosition());
+				}else if(posInput < candidate.getFunctionalVariablePosition()){
+					overlapHead = kb.overlap(targetPatternInput[1], candidate.getHead()[1], candidate.getFunctionalVariablePosition());							
+				}else{
+					overlapHead = kb.overlap(candidate.getHead()[1], targetPatternInput[1], posInput);							
 				}
 				
 				double f4 = (1 / f1) * (overlap / nentities);
@@ -914,12 +889,18 @@ public class MiningAssistant{
 		return addIt;
 	}
 
-	private double getPcaConfidenceUpperBound(Query query) {
-		int[] hardCaseInfo = kb.identifyHardQueryTypeI(query.getAntecedent());
-		ByteString projVariable = query.getFunctionalVariable();
+	/**
+	 * Given a rule of the form r(x, z) r(y, z) => rh(x, y), it calculates
+	 * a loose upper bound on its PCA confidence.
+	 * @param rule
+	 * @return
+	 */
+	private double getPcaConfidenceUpperBound(Query rule) {
+		int[] hardCaseInfo = kb.identifyHardQueryTypeI(rule.getAntecedent());
+		ByteString projVariable = rule.getFunctionalVariable();
 		//ByteString commonVariable = query.getAntecedent().get(hardCaseInfo[2])[hardCaseInfo[0]];
-		int freeVarPosition = query.getFunctionalVariablePosition() == 0 ? 2 : 0;
-		List<ByteString[]> easyQuery = new ArrayList<ByteString[]>(query.getAntecedent());
+		int freeVarPosition = rule.getFunctionalVariablePosition() == 0 ? 2 : 0;
+		List<ByteString[]> easyQuery = new ArrayList<ByteString[]>(rule.getAntecedent());
 		
 		//Remove the pattern that does not have the projection variable
 		ByteString[] pattern1 = easyQuery.get(hardCaseInfo[2]);
@@ -936,15 +917,15 @@ public class MiningAssistant{
 		
 		//Add the existential triple only if it is not redundant
 		if(remained != null){
-			if(!remained[1].equals(query.getHead()[1]) || hardCaseInfo[1] != query.getFunctionalVariablePosition()){
-				ByteString[] existentialTriple = query.getHead().clone();
+			if(!remained[1].equals(rule.getHead()[1]) || hardCaseInfo[1] != rule.getFunctionalVariablePosition()){
+				ByteString[] existentialTriple = rule.getHead().clone();
 				existentialTriple[freeVarPosition] = ByteString.of("?z");
 				easyQuery.add(existentialTriple);
 			}
 		}
 		
 		double denominator = kb.countDistinct(projVariable, easyQuery);
-		return query.getSupport() / denominator;
+		return rule.getSupport() / denominator;
 	}
 
 	private double getConfidenceUpperBound(Query query) {

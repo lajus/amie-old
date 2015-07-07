@@ -15,15 +15,18 @@ import amie.mining.assistant.DefaultMiningAssistant;
 import amie.query.Query;
 
 /**
+ * This class overrides the default mining assistant and adds to the rule
+ * all possible types constraints on the head variables, that is, it mines
+ * rules of the form B ^ is(x, C) ^ is(y, C') => rh(x, y).
  * @author lgalarra
  *
  */
-public class TypedMiningAssistant extends DefaultMiningAssistant {
+public class TypedDefaultMiningAssistant extends DefaultMiningAssistant {
 
 	/**
 	 * @param dataSource
 	 */
-	public TypedMiningAssistant(FactDatabase dataSource) {
+	public TypedDefaultMiningAssistant(FactDatabase dataSource) {
 		super(dataSource);
 	}
 		

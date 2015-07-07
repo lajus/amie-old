@@ -13,7 +13,7 @@ import java.util.Set;
 import javatools.datatypes.ByteString;
 
 /**
- * Set of commonly used functions
+ * Set of commonly used functions.
  * 
  * @author lgalarra
  *

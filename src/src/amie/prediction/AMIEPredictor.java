@@ -10,6 +10,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import javatools.datatypes.ByteString;
+import javatools.datatypes.IntHashMap;
+import javatools.datatypes.Triple;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -19,26 +23,25 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-import javatools.datatypes.ByteString;
-import javatools.datatypes.IntHashMap;
-import javatools.datatypes.Triple;
 import amie.data.FactDatabase;
 import amie.data.eval.Evaluator;
 import amie.data.eval.PredictionsSampler;
 import amie.mining.AMIE;
 import amie.mining.Metric;
-import amie.prediction.assistant.ProbabilisticHeadVariablesMiningAssistant;
-import amie.prediction.assistant.TypedProbabilisticMiningAssistant;
+import amie.mining.assistant.DefaultMiningAssistant;
+import amie.mining.assistant.MiningAssistant;
+import amie.mining.assistant.RelationSignatureDefaultMiningAssistant;
+import amie.prediction.assistant.ProbabilisticDefaultMiningAssistant;
 import amie.prediction.data.HistogramTupleIndependentProbabilisticFactDatabase;
 import amie.query.Query;
 import amie.utils.Utils;
 
-public class IterativeNaivePredictor {
-	private HistogramTupleIndependentProbabilisticFactDatabase trainingDb;
+public class AMIEPredictor {
+	private HistogramTupleIndependentProbabilisticFactDatabase trainingKb;
 	
-	private FactDatabase testingDb;
+	private FactDatabase testingKb;
 	
-	private AMIE amieMiner;
+	private AMIE ruleMiner;
 
 	public static final double DefaultPCAConfidenceThreshold = 0.4;
 	
@@ -50,39 +53,27 @@ public class IterativeNaivePredictor {
 	
 	private double pcaConfidenceThreshold;
 	
-	private double headCoverageThreshold;
+	private Metric pruningMetric;
 	
-	public boolean allowTypes;
+	private double pruningThreshold;	
+		
+	private ProbabilisticDefaultMiningAssistant miningAssistant;
 	
-	private ProbabilisticHeadVariablesMiningAssistant miningAssistant;
-	
-	public IterativeNaivePredictor(HistogramTupleIndependentProbabilisticFactDatabase training, 
-			boolean allowTypes) {
-		this.trainingDb = training;
-		this.pcaConfidenceThreshold = DefaultPCAConfidenceThreshold;
-		this.headCoverageThreshold = DefaultHeadCoverageThreshold;
-		this.allowTypes = allowTypes;
-		if (allowTypes) {
-			miningAssistant = new TypedProbabilisticMiningAssistant(trainingDb);
-		} else {
-			miningAssistant = new ProbabilisticHeadVariablesMiningAssistant(trainingDb);
-		}
+	public AMIEPredictor(AMIE miner) {
+		this.miningAssistant = (ProbabilisticDefaultMiningAssistant) miner.getAssistant();
+		this.trainingKb = (HistogramTupleIndependentProbabilisticFactDatabase) this.miningAssistant.getKb();
+		this.pcaConfidenceThreshold = this.miningAssistant.getPcaConfidenceThreshold();
+		this.pruningMetric = miner.getPruningMetric();
+		this.ruleMiner = miner;
 	}
 	
-	public IterativeNaivePredictor(HistogramTupleIndependentProbabilisticFactDatabase training, 
-			FactDatabase testing, boolean allowTypes) {
-		this.trainingDb = training;
-		this.testingDb = testing;
-		this.pcaConfidenceThreshold = DefaultPCAConfidenceThreshold;
-		this.headCoverageThreshold = DefaultHeadCoverageThreshold;
-		this.allowTypes = allowTypes;
-		if (allowTypes) {
-			miningAssistant = new TypedProbabilisticMiningAssistant(trainingDb);
-		} else {
-			miningAssistant = new ProbabilisticHeadVariablesMiningAssistant(trainingDb);
-		}
+	public AMIEPredictor(AMIE miner, FactDatabase testing) {
+		this.miningAssistant = (ProbabilisticDefaultMiningAssistant) miner.getAssistant();
+		this.trainingKb = (HistogramTupleIndependentProbabilisticFactDatabase) this.miningAssistant.getKb();
+		this.pcaConfidenceThreshold = this.miningAssistant.getPcaConfidenceThreshold();
+		this.pruningMetric = miner.getPruningMetric();
+		this.testingKb = testing;
 	}
-
 	
 	public double getPcaConfidenceThreshold() {
 		return pcaConfidenceThreshold;
@@ -92,20 +83,20 @@ public class IterativeNaivePredictor {
 		this.pcaConfidenceThreshold = pcaConfidenceThreshold;
 	}
 
-	public double getHeadCoverageThreshold() {
-		return headCoverageThreshold;
+	public double getPruningThreshold() {
+		return pruningThreshold;
 	}
 
 	public void setHeadCoverageThreshold(double headCoverageThreshold) {
-		this.headCoverageThreshold = headCoverageThreshold;
+		this.pruningThreshold = headCoverageThreshold;
 	}
 	
-	public AMIE getAmieMiner() {
-		return amieMiner;
+	public AMIE getRuleMiner() {
+		return ruleMiner;
 	}
 
-	public void setAmieMiner(AMIE amieMiner) {
-		this.amieMiner = amieMiner;
+	public void setRuleMiner(AMIE amieMiner) {
+		this.ruleMiner = amieMiner;
 	}
 
 	/**
@@ -125,7 +116,7 @@ public class IterativeNaivePredictor {
 			List<Prediction> predictionsAtIterationI = new ArrayList<>();
 			// Mine rules using AMIE
 			long startTime = System.currentTimeMillis();
-			List<Query> rules = amieMiner.mine(false, Collections.EMPTY_LIST);
+			List<Query> rules = ruleMiner.mine(false, Collections.EMPTY_LIST);
 			System.out.println("Rule mining took " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
 			System.out.println(rules.size() + " rules found");
 			// Build the uncertain version of the rules
@@ -136,10 +127,13 @@ public class IterativeNaivePredictor {
 					// Override the support and the PCA confidence to store the
 					// probabilistic version
 					miningAssistant.computeProbabilisticMetrics(rule);					
-					if (rule.getHeadCoverage() < DefaultHeadCoverageThreshold
-							|| rule.getPcaConfidence() < pcaConfidenceThreshold) {
-						continue;
+					boolean pruningCondition = false;
+					if (this.pruningMetric == Metric.HeadCoverage) {
+						pruningCondition = rule.getHeadCoverage() < this.pruningThreshold;
+					} else if (this.pruningMetric == Metric.Support) {
+						pruningCondition = rule.getSupport() < this.pruningThreshold;
 					}
+					pruningCondition = pruningCondition || rule.getPcaConfidence() < this.pcaConfidenceThreshold;
 				}
 				rule.setId(ruleId); // Assign an integer identifier for hashing purposes
 				++ruleId;
@@ -156,7 +150,7 @@ public class IterativeNaivePredictor {
 				break;
 			}
 		}
-		System.out.println("Iterations are over");
+		System.out.println("The inference is done. Sorting prediction by probabilistic score.");
 		PredictionsComparator predictionsCmp = new PredictionsComparator();
 		Collections.sort(resultingPredictions, predictionsCmp);
 		return resultingPredictions;
@@ -193,7 +187,7 @@ public class IterativeNaivePredictor {
 	private Map<Triple<ByteString, ByteString, ByteString>, List<Query>> 
 	calculatePredictions2RulesMap(List<Query> queries, boolean notInTraining) {
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions = new HashMap<>();
-		PredictionsSampler predictor = new PredictionsSampler(trainingDb);
+		PredictionsSampler predictor = new PredictionsSampler(trainingKb);
 		
 		for (Query q : queries) {
 			ByteString[] head = q.getHead();
@@ -298,12 +292,12 @@ public class IterativeNaivePredictor {
 				computeCardinalityScore(prediction);
 				
 				ByteString triple[] = prediction.getTriple();
-				int eval = Evaluator.evaluate(triple, trainingDb, testingDb);
+				int eval = Evaluator.evaluate(triple, trainingKb, testingKb);
 				if(eval == 0) { 
 					prediction.setHitInTarget(true);
 				}
 				
-				if(trainingDb.count(triple) > 0) {
+				if(trainingKb.count(triple) > 0) {
 					prediction.setHitInTraining(true);
 				}
 				
@@ -351,7 +345,7 @@ public class IterativeNaivePredictor {
 		
 		for (Prediction prediction : output) {
 			ByteString[] t = prediction.getTriple();
-			trainingDb.add(t[0], t[1], t[2], prediction.getFullScore());
+			trainingKb.add(t[0], t[1], t[2], prediction.getFullScore());
 		}
 		
 		System.out.println((System.currentTimeMillis() - timeStamp1) + " milliseconds to calculate the scores for predictions");
@@ -365,17 +359,17 @@ public class IterativeNaivePredictor {
 		// Take the most functional side of the prediction
 		ByteString relation = prediction.getTriple()[1];
 		long cardinality = 0;
-		if (trainingDb.functionality(relation) > trainingDb.inverseFunctionality(relation)) {
+		if (trainingKb.functionality(relation) > trainingKb.inverseFunctionality(relation)) {
 			ByteString subject = prediction.getTriple()[0];
 			List<ByteString[]> query = FactDatabase.triples(FactDatabase.triple(subject, relation, ByteString.of("?x")));
-			cardinality = trainingDb.countDistinct(ByteString.of("?x"), query);
+			cardinality = trainingKb.countDistinct(ByteString.of("?x"), query);
 		} else {
 			ByteString object = prediction.getTriple()[2];
 			List<ByteString[]> query = FactDatabase.triples(FactDatabase.triple(ByteString.of("?x"), relation, object));
-			cardinality = trainingDb.countDistinct(ByteString.of("?x"), query);
+			cardinality = trainingKb.countDistinct(ByteString.of("?x"), query);
 		}
 		
-		double functionalityScore = trainingDb.probabilityOfCardinalityGreaterThan(relation, (int)cardinality);
+		double functionalityScore = trainingKb.probabilityOfCardinalityGreaterThan(relation, (int)cardinality);
 		prediction.setCardinalityScore(functionalityScore);		
 	}
 
@@ -434,6 +428,19 @@ public class IterativeNaivePredictor {
         		.withDescription("Number of iterations")
         		.create("ni");
         
+        Option nCoresEvaluationOption = OptionBuilder.withArgName("number-cores-evaluation")
+        		.hasArg()
+        		.withDescription("Number of cores used to calculate the scores of predictions in each iteration. "
+        				+ "A high number may cause memory exhaustion. A low number may slow down the process."
+        				+ "Default value: 1")
+        		.create("nce");
+        
+        Option enableTypesOption = OptionBuilder.withArgName("enable-types")
+        		.withDescription("It enforces type constraints in the head variables of rules, that is,"
+        				+ "it generates rules of the form B ^ type(x, C) ^ type(y, C') => rh(x, y)")
+        		.create("et");
+        
+        
         options.addOption(supportOpt);
         options.addOption(initialSupportOpt);
         options.addOption(headCoverageOpt);
@@ -441,6 +448,8 @@ public class IterativeNaivePredictor {
         options.addOption(pcaConfThresholdOpt);
         options.addOption(testingKBOption);
         options.addOption(iterationsOption);
+        options.addOption(nCoresEvaluationOption);
+        options.addOption(enableTypesOption);
         
         try {
             cli = parser.parse(options, args);
@@ -465,11 +474,6 @@ public class IterativeNaivePredictor {
         	inputFilesArray[i] = new File(inputFileArgs[i]);
         }
 		training.load(inputFilesArray);
-		
-		if (args.length < 4) {
-			System.err.println("IterativeNaivePredictor <trainingDb> <testingDb> <n-iterations> <onlyHitsInTest> [confidenceThreshold = 0] [allowTypes = false]");
-			System.exit(1);
-		}
 		
 		if (cli.hasOption("tkb")) {
 			String[] testingFileArgs = cli.getOptionValue("tkb").split(":");
@@ -532,21 +536,36 @@ public class IterativeNaivePredictor {
             minInitialSupport = minSupport;
         }
 		
-		if (args.length > 5) {
-			allowTypes = Boolean.parseBoolean(args[5]);
+		if (cli.hasOption("et")) {
+			try {
+				allowTypes = Boolean.parseBoolean(cli.getOptionValue("et"));
+			} catch (NumberFormatException e) {
+				System.err.println("The argument et (enable types) expects a boolean value.");
+				formatter.printHelp("AMIEPredictor", options);
+				System.exit(1);
+			}			
 		}
 		
-		try {
-			numberOfIterations = Integer.parseInt(args[2]);
-		} catch(NumberFormatException e) {
+		if (cli.hasOption("ni")) {
+			try {
+				numberOfIterations = Integer.parseInt(cli.getOptionValue("ni"));
+			} catch (NumberFormatException e) {
+				System.err.println("The argument ni (number of iterations) expects a positive number.");
+				formatter.printHelp("AMIEPredictor", options);
+				System.exit(1);
+			}
 			
 		}
-		
-		addOnlyVerifiedPredictions = Boolean.parseBoolean(args[3]);
-		
-		IterativeNaivePredictor predictor = 
-				new IterativeNaivePredictor(training, testing, allowTypes);
-		predictor.setPcaConfidenceThreshold(confidenceThreshold);
+				
+        MiningAssistant assistant = null;
+        if (allowTypes) {
+        	assistant = new RelationSignatureDefaultMiningAssistant(training);
+        } else {
+        	assistant = new DefaultMiningAssistant(training);
+        }
+        assistant.setPcaConfidenceThreshold(confidenceThreshold);
+        AMIE miner = new AMIE(assistant, minInitialSupport, minMetricValue, metric, Runtime.getRuntime().availableProcessors());
+		AMIEPredictor predictor = new AMIEPredictor(miner);
 		predictions = predictor.predict(numberOfIterations, addOnlyVerifiedPredictions);
 		
 		IntHashMap<Integer> hitsInTargetHistogram = new IntHashMap<>();
