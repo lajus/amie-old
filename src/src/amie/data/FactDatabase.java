@@ -133,16 +133,28 @@ public class FactDatabase {
 
 	/** Adds a fact */
 	public boolean add(CharSequence... fact) {
-		return (add(compress(fact[0]), compress(fact[1]), compress(fact[2])));
+		if (fact.length == 3) {
+			return (add(compress(fact[0]), compress(fact[1]), compress(fact[2])));
+		} else if (fact.length == 4) {
+			return (add(compress(fact[1]), compress(fact[2]), compress(fact[3])));
+		} else {
+			throw new IllegalArgumentException("Incorrect fact: " + Arrays.toString(fact));
+		}
+			
 	}
 
 	public boolean add(ByteString... fact) {
-		return add(fact[0], fact[1], fact[2]);
+		if (fact.length == 3) {
+			return add(fact[0], fact[1], fact[2]);
+		} else if (fact.length == 4) {
+			return add(fact[1], fact[2], fact[3]);
+		} else {
+			throw new IllegalArgumentException("Incorrect fact: " + Arrays.toString(fact));
+		}
 	}
 
 	/** Adds a fact */
-	protected boolean add(ByteString subject, ByteString predicate,
-			ByteString object) {
+	protected boolean add(ByteString subject, ByteString predicate, ByteString object) {
 		if (!add(subject, predicate, object, subject2predicate2object))
 			return (false);
 		add(predicate, object, subject, predicate2object2subject);

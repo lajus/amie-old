@@ -2,6 +2,7 @@ package amie.prediction;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -487,6 +488,7 @@ public class AMIEPredictor {
         File[] inputFilesArray = new File[inputFileArgs.length];
 		for (int i = 0; i < inputFileArgs.length; ++i) {
         	inputFilesArray[i] = new File(inputFileArgs[i]);
+        	//training.load(inputFilesArray[i]);
         }
 		training.load(inputFilesArray);
 		
@@ -551,15 +553,7 @@ public class AMIEPredictor {
             minInitialSupport = minSupport;
         }
 		
-		if (cli.hasOption("et")) {
-			try {
-				allowTypes = Boolean.parseBoolean(cli.getOptionValue("et"));
-			} catch (NumberFormatException e) {
-				System.err.println("The argument et (enable types) expects a boolean value.");
-				formatter.printHelp("AMIEPredictor", options);
-				System.exit(1);
-			}			
-		}
+		allowTypes = cli.hasOption("et");
 		
 		if (cli.hasOption("ni")) {
 			try {
@@ -586,6 +580,10 @@ public class AMIEPredictor {
         MiningAssistant assistant = null;
         if (allowTypes) {
         	assistant = new RelationSignatureDefaultMiningAssistant(training);
+    		List<ByteString> excludedRelationsSignatured = Arrays.asList(ByteString.of("rdf:type"), 
+    				ByteString.of("rdfs:domain"), ByteString.of("rdfs:range"));
+    		assistant.setHeadExcludedRelations(excludedRelationsSignatured);
+    		assistant.setBodyExcludedRelations(excludedRelationsSignatured);
         } else {
         	assistant = new DefaultMiningAssistant(training);
         }

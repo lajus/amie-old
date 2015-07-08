@@ -99,6 +99,7 @@ public class TypedDefaultMiningAssistant extends DefaultMiningAssistant {
 		}
 	}
 
+	@Override
 	protected boolean testLength(Query candidate) {
 		return candidate.getLengthWithoutTypes(typeString) < maxDepth;
 	}

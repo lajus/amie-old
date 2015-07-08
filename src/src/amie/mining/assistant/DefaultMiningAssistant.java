@@ -76,42 +76,12 @@ public class DefaultMiningAssistant extends MiningAssistant{
 	
 	@Override
 	public void getInitialAtoms(double minSupportThreshold, Collection<Query> output) {
-		Query query = new Query();
-		ByteString[] newEdge = query.fullyUnboundTriplePattern();
-		//Initial case
-		query.getTriples().add(newEdge);
+		List<ByteString[]> newEdgeList = new ArrayList<ByteString[]>(1);
+		ByteString[] newEdge = new ByteString[]{ByteString.of("?x"), ByteString.of("?y"), ByteString.of("?z")};
+		newEdgeList.add(newEdge);
 		List<ByteString[]> emptyList = Collections.emptyList();
-		IntHashMap<ByteString> relations = this.kb.countProjectionBindings(query.getHead(), emptyList, newEdge[1]);
-		for(ByteString relation: relations){
-			// Language bias test
-			if (query.cardinalityForRelation(relation) >= this.recursivityLimit) {
-				continue;
-			}
-			
-			if (this.headExcludedRelations != null 
-					&& this.headExcludedRelations.contains(relation)) {
-				continue;
-			}
-			
-			double cardinality = relations.get(relation);
-			if(cardinality >= minSupportThreshold){
-				ByteString[] succedent = newEdge.clone();
-				succedent[1] = relation;
-				int countVarPos = this.countAlwaysOnSubject? 0 : findCountingVariable(succedent);
-				Query candidate = new Query(succedent, cardinality);
-				candidate.setFunctionalVariablePosition(countVarPos);
-				registerHeadRelation(candidate);
-				if(canAddInstantiatedAtoms()){
-					getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
-				}
-				
-				if (!this.enforceConstants) {
-					output.add(candidate);
-				}
-			}
-		}			
-		query.getTriples().remove(0);
-		
+		IntHashMap<ByteString> relations = this.kb.countProjectionBindings(newEdge, emptyList, newEdge[1]);
+		buildInitialQueries(relations, minSupportThreshold, output);		
 	}
 
 	

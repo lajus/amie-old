@@ -5,6 +5,7 @@ import java.util.List;
 import javatools.datatypes.ByteString;
 import amie.data.FactDatabase;
 import amie.data.Utilities;
+import amie.mining.ConfidenceMetric;
 import amie.query.Query;
 
 /**
@@ -25,10 +26,9 @@ public class RelationSignatureDefaultMiningAssistant extends DefaultMiningAssist
 	
 	@Override
 	public boolean testConfidenceThresholds(Query candidate) {
-		boolean addIt = true;
 		boolean queryChanged = false;
 		
-		if(!candidate.isClosed()){
+		if (!candidate.isClosed()){
 			return false;
 		}
 		
@@ -55,24 +55,12 @@ public class RelationSignatureDefaultMiningAssistant extends DefaultMiningAssist
 			queryChanged = true;
 		}
 		
-		if(queryChanged)
-			recalculateSupport(candidate);
-		
-		calculateConfidenceMetrics(candidate);
-		if(candidate.getStdConfidence() >= minStdConfidence && candidate.getPcaConfidence() >= minPcaConfidence){
-			//Now check the confidence with respect to its ancestors
-			List<Query> ancestors = candidate.getAncestors();			
-			for(int i = ancestors.size() - 2; i >= 0; --i){
-				if(ancestors.get(i).isClosed() && (candidate.getStdConfidence() <= ancestors.get(i).getStdConfidence() || candidate.getPcaConfidence() <= ancestors.get(i).getPcaConfidence())){
-					addIt = false;
-					break;
-				}
-			}
-		}else{
-			return false;
+		if (queryChanged) {
+			recalculateSupport(candidate);		
+			calculateConfidenceMetrics(candidate);
 		}
 		
-		return addIt;
+		return super.testConfidenceThresholds(candidate);
 	}
 
 	/**

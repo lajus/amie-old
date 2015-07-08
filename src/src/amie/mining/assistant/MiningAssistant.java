@@ -335,7 +335,7 @@ public class MiningAssistant{
 		ByteString[] newEdge = emptyQuery.fullyUnboundTriplePattern();		
 		emptyQuery.getTriples().add(newEdge);
 		
-		for(ByteString relation: relations){
+		for (ByteString relation: relations) {
 			newEdge[1] = relation;
 			
 			int countVarPos = countAlwaysOnSubject? 0 : findCountingVariable(newEdge);
@@ -365,42 +365,47 @@ public class MiningAssistant{
 	 * @param output
 	 */
 	public void getInitialAtoms(double minSupportThreshold, Collection<Query> output) {
+		List<ByteString[]> newEdgeList = new ArrayList<ByteString[]>(1);
+		ByteString[] newEdge = new ByteString[]{ByteString.of("?x"), ByteString.of("?y"), ByteString.of("?z")};
+		newEdgeList.add(newEdge);
+		IntHashMap<ByteString> relations = kb.frequentBindingsOf(newEdge[1], newEdge[0], newEdgeList);
+		buildInitialQueries(relations, minSupportThreshold, output);
+	}
+	
+	/**
+	 * Given a list of relations with their corresponding support (one assistant could use the number of pairs,
+	 * another could use the number of subjects), it adds to the output one query per relation, where the relation
+	 * appears as the head and unique atom of the rule. Only relations with support above the threshold are considered.
+	 * @param relations
+	 * @param minSupportThreshold
+	 * @param output
+	 */
+	protected void buildInitialQueries(IntHashMap<ByteString> relations, double minSupportThreshold, Collection<Query> output) {
 		Query query = new Query();
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
-		query.getTriples().add(newEdge);
-		IntHashMap<ByteString> relations = kb.frequentBindingsOf(newEdge[1], newEdge[0], query.getTriples());
 		for(ByteString relation: relations){
-			if(headExcludedRelations != null && headExcludedRelations.contains(newEdge[1]))
+			if (this.headExcludedRelations != null 
+					&& this.headExcludedRelations.contains(relation)) {
 				continue;
+			}
 			
-			
-			long cardinality = relations.get(relation);
+			double cardinality = relations.get(relation);
 			if(cardinality >= minSupportThreshold){
 				ByteString[] succedent = newEdge.clone();
 				succedent[1] = relation;
-				int countVarPos = countAlwaysOnSubject? 0 : findCountingVariable(succedent);
-				
-				if(!succedent[countVarPos].equals(succedent[0])){
-					//Recalculate the cardinality
-					cardinality = kb.countDistinct(succedent[countVarPos], FactDatabase.triples(succedent));
-					if(cardinality < minSupportThreshold)
-						continue;
-				}
-					
+				int countVarPos = this.countAlwaysOnSubject? 0 : findCountingVariable(succedent);
 				Query candidate = new Query(succedent, cardinality);
 				candidate.setFunctionalVariablePosition(countVarPos);
-				registerHeadRelation(candidate);					
-				if(canAddInstantiatedAtoms()) {
+				registerHeadRelation(candidate);
+				if(canAddInstantiatedAtoms() && !relation.equals(FactDatabase.EQUALSbs)){
 					getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
 				}
 				
-				if (!enforceConstants) {
+				if (!this.enforceConstants) {
 					output.add(candidate);
 				}
 			}
 		}			
-		query.getTriples().remove(0);
-		
 	}
 
 	/**

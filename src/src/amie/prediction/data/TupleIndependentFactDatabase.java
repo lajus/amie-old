@@ -40,7 +40,9 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 		boolean returnVal = super.add(subject, predicate, object);
 		Triple<ByteString, ByteString, ByteString> triple = 
 				new Triple<ByteString, ByteString, ByteString>(subject, predicate, object);	
-		probabilities.put(triple, probability);
+		synchronized (probabilities) {
+			probabilities.put(triple, probability);	
+		}
 		return returnVal;
 	}
 	
@@ -313,12 +315,14 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 						headInst2.instantiate(val2);
 						insty2.instantiate(val2);
 						double[] bodyProbabilities = probabibilitiesOfQuery(query); // Body probability
-						double[] headProbabilities = probabibilitiesOfQuery(listExistential);						
-						// For the denominator
-						double headProbability = aggregateProbabilities(headProbabilities);
-						result[1] += probability(headProbability, bodyProbabilities);					
-						headProbability = probabilityOfFact(projection);
-						result[0] += probability(headProbability, bodyProbabilities);
+						if (bodyProbabilities != null) {
+							double[] headProbabilities = probabibilitiesOfQuery(listExistential);						
+							// For the denominator
+							double headProbability = aggregateProbabilities(headProbabilities);
+							result[1] += probability(headProbability, bodyProbabilities);					
+							headProbability = probabilityOfFact(projection);
+							result[0] += probability(headProbability, bodyProbabilities);
+						}
 					}
 				}
 			}

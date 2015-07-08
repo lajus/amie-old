@@ -1019,7 +1019,11 @@ public class AMIE {
                 break;
             case "signatured":
                 mineAssistant = new RelationSignatureDefaultMiningAssistant(dataSource);
-                System.out.println("Counting on both head variables and using relation signatures (domain and range types) [EXPERIMENTAL]");
+        		List<ByteString> excludedRelationsSignatured = Arrays.asList(ByteString.of("rdf:type"), 
+        				ByteString.of("rdfs:domain"), ByteString.of("rdfs:range"));
+        		bodyExcludedRelations = excludedRelationsSignatured;
+        		headExcludedRelations = excludedRelationsSignatured;                
+                System.out.println("Counting on both head variables and using relation signatures (domain and range types) [EXPERIMENTAL]");                
                 break;
             case "typed":
                 mineAssistant = new TypedDefaultMiningAssistant(dataSource);
@@ -1039,8 +1043,9 @@ public class AMIE {
                 break;
             case "wikilinks":
                 mineAssistant = new WikilinksHeadVariablesMiningAssistant(dataSource);
-                headExcludedRelations = Arrays.asList(ByteString.of(WikilinksHeadVariablesMiningAssistant.wikiLinkProperty), ByteString.of("rdf:type"));
-                bodyExcludedRelations = Arrays.asList(ByteString.of(WikilinksHeadVariablesMiningAssistant.wikiLinkProperty), ByteString.of("rdf:type"));
+                List<ByteString> excludedRelationsWikilinks = Arrays.asList(ByteString.of(WikilinksHeadVariablesMiningAssistant.wikiLinkProperty), ByteString.of("rdf:type"));
+                headExcludedRelations = excludedRelationsWikilinks;
+                bodyExcludedRelations = excludedRelationsWikilinks;
                 System.out.println("Rules of the form .... linksTo(x, y) type(x, C) type(y, C') => r(x, y)");
                 break;
             case "existential":
@@ -1093,7 +1098,6 @@ public class AMIE {
         mineAssistant.setHeadExcludedRelations(headExcludedRelations);
         mineAssistant.setTargetBodyRelations(bodyTargetRelations);
         mineAssistant.setCountAlwaysOnSubject(countAlwaysOnSubject);
-        mineAssistant.setSilent(verbose);
         mineAssistant.setRecursivityLimit(recursivityLimit);
         mineAssistant.setAvoidUnboundTypeAtoms(avoidUnboundTypeAtoms);
         mineAssistant.setExploitMaxLengthOption(exploitMaxLengthForRuntime);

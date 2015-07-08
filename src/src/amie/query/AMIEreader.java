@@ -23,7 +23,7 @@ public class AMIEreader {
 	public static Query rule(String s) {	
 		Pair<List<ByteString[]>, ByteString[]> rulePair = FactDatabase.rule(s);
 		if(rulePair == null) return null;
-		Query resultRule = new Query(rulePair.second, rulePair.first);
+		Query resultRule = new Query(rulePair.second, rulePair.first, 0);
 		return resultRule;
 	}	
   

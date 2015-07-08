@@ -180,14 +180,9 @@ public class RuleJointDistribution {
 		List<ByteString[]> triples2 = FactDatabase.triples(FactDatabase.triple("?a", "<livesIn>", "?c"), FactDatabase.triple("?c", "<isLocatedIn>", "?e"));
 		ByteString[] head2 = FactDatabase.triple("?a", "<isCitizenOf>", "?e");
 		
-/*		List<ByteString[]> triples1 = FactDatabase.triples(FactDatabase.triple("?a", "<dealsWith>", "?b"));
-		ByteString[] head1 = FactDatabase.triple("?b", "<dealsWith>", "?a");
 		
-		List<ByteString[]> triples2 = FactDatabase.triples(FactDatabase.triple("<United_Kingdom>", "<dealsWith>", "?a"));
-		ByteString[] head2 = FactDatabase.triple("?a", "<dealsWith>", "<United_Kingdom>");*/
-		
-		Query r1 = new Query(head1, triples1);
-		Query r2 = new Query(head2, triples2);
+		Query r1 = new Query(head1, triples1, 0.0);
+		Query r2 = new Query(head2, triples2, 0.0);
 		List<Query> rules = Arrays.asList(r1, r2);
 		
 		FactDatabase db = new FactDatabase();
@@ -195,19 +190,6 @@ public class RuleJointDistribution {
 		RuleJointDistribution distribution = new RuleJointDistribution(db);
 		Query r12 = distribution.getCombinedRule(rules);
 		System.out.println(r12.getBasicRuleString());
-/*		
-		Map<BitSet, Double> joinDistribution = distribution.getJointDistribution(r1, r2, true);
-		distribution.printDistribution(joinDistribution, Arrays.asList("R1", "R2", "P(R1 ^ R2)"));
-		distribution.printMarginals(joinDistribution, Arrays.asList("R1", "R2", "P(R1 ^ R2)"));
-		DefaultMiningAssistant assistant = new DefaultMiningAssistant(db);
-		assistant.computeCardinality(r1);
-		assistant.computeCardinality(r2);
-		assistant.computeStandardConfidence(r1);
-		assistant.computeStandardConfidence(r2);
-		assistant.computePCAConfidence(r1);
-		assistant.computePCAConfidence(r2);
-		System.out.println(r1.getRuleFullString());
-		System.out.println(r2.getRuleFullString());		*/
 		
 	}
 }

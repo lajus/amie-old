@@ -266,15 +266,15 @@ public class Query{
 		this.ancestors = new ArrayList<>();
 	}
 	
-	public Query(ByteString[] head, List<ByteString[]> body) {
+	public Query(ByteString[] head, List<ByteString[]> body, double cardinality) {
 		triples = new ArrayList<ByteString[]>();
 		triples.add(head.clone());
 		IntHashMap<ByteString> varsHistogram = new IntHashMap<>();
-		highestVariable = 96; // The ascii code before lowercase 'a'
+		this.highestVariable = 96; // The ascii code before lowercase 'a'
 		if (FactDatabase.isVariable(head[0])) {
 			varsHistogram.increase(head[0]);
 			if (head[0].charAt(1) > highestVariable) {
-				highestVariable = head[0].charAt(1);				
+				this.highestVariable = head[0].charAt(1);				
 			}
 		}
 			
@@ -282,7 +282,7 @@ public class Query{
 		if (FactDatabase.isVariable(head[2])) {
 			varsHistogram.increase(head[2]);	
 			if (head[2].charAt(1) > highestVariable) {
-				highestVariable = head[2].charAt(1);
+				this.highestVariable = head[2].charAt(1);
 			}
 		}
 				
@@ -291,27 +291,29 @@ public class Query{
 			if (FactDatabase.isVariable(atom[0])) {
 				varsHistogram.increase(atom[0]);
 				if(atom[0].charAt(1) > highestVariable) {
-					highestVariable = atom[0].charAt(1);
+					this.highestVariable = atom[0].charAt(1);
 				}
 			}
 			if (FactDatabase.isVariable(atom[2])) {
 				varsHistogram.increase(atom[2]);
 				if (atom[2].charAt(1) > highestVariable) {
-					highestVariable = atom[2].charAt(1);
+					this.highestVariable = atom[2].charAt(1);
 				}	
 			}			
 		}
 		
 		computeHeadKey();
-		functionalVariablePosition = 0;
-		parent = null;
-		bodySize = -1;
-		_stdConfidenceUpperBound = 0.0;
-		_pcaConfidenceUpperBound = 0.0;
-		_pcaConfidenceEstimation = 0.0;
+		this.support = cardinality;
+		this.hashSupport = (int) cardinality;
+		this.functionalVariablePosition = 0;
+		this.parent = null;
+		this.bodySize = -1;
+		this._stdConfidenceUpperBound = 0.0;
+		this._pcaConfidenceUpperBound = 0.0;
+		this._pcaConfidenceEstimation = 0.0;
 		++highestVariable;
-		_containsQuasiBindings = false;
-		ancestors = new ArrayList<>();
+		this._containsQuasiBindings = false;
+		this.ancestors = new ArrayList<>();
 	}
 
 	/**
@@ -896,11 +898,19 @@ public class Query{
 	}
 	
 	/**
-	 * Returns the rule's head relation.
+	 * Returns the rule's head relation as a String
 	 * @return
 	 */
 	public String getHeadRelation() {
 		return triples.get(0)[1].toString();
+	}
+	
+	/**
+	 * Returns the rule's head relation as ByteString.
+	 * @return
+	 */
+	public ByteString getHeadRelationBS() {
+		return triples.get(0)[1];
 	}
 	
 	/**
@@ -926,6 +936,25 @@ public class Query{
 		
 		return length;
 	}
+	
+	/**
+	 * Returns the number of atoms of the rule that are neither pseudo-atoms
+	 * nor type constraints.
+	 * Pseudo-atoms contain the Database keywords "DIFFERENTFROM"
+	 * @return
+	 */
+	public int getRealLengthWithoutTypes(ByteString typeString) {
+		int length = 0;
+		for (ByteString[] triple : triples) {
+			if (!triple[1].equals(FactDatabase.DIFFERENTFROMbs) 
+					&& (!triple[1].equals(typeString) || FactDatabase.isVariable(triple[2]))  
+			   ) {
+				++length;
+			}
+		}
+		return length;
+	}
+	
 	/**
 	 * Returns the number of atoms of the rule that are not type constraints
 	 * of the form rdf:type(?x, C) where C is a class, i.e., Person.
@@ -1567,7 +1596,7 @@ public class Query{
 			commonAntecendent.addAll(antecedentClone);
 		}
 		
-		Query resultRule = new Query(canonicalHead, commonAntecendent);
+		Query resultRule = new Query(canonicalHead, commonAntecendent, 0.0);
 		return resultRule;
 	}
 
@@ -1649,7 +1678,7 @@ public class Query{
 				);
 		
 		ByteString[] head = FactDatabase.triple("?a", "<rh>", "?b");
-		Query query = new Query(head, antecedent);
+		Query query = new Query(head, antecedent, 0.0);
 		System.out.println(query.containsSinglePath());
 		List<ByteString[]> path = query.getCanonicalPath();
 		System.out.println(FactDatabase.toString(path));
@@ -1662,7 +1691,7 @@ public class Query{
 				);
 		
 		ByteString[] head2 = FactDatabase.triple("?a", "<rh>", "?b");
-		Query query2 = new Query(head2, antecedent2);
+		Query query2 = new Query(head2, antecedent2, 0.0);
 		System.out.println(query2.containsSinglePath());
 	}
 
