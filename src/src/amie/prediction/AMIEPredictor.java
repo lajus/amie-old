@@ -75,6 +75,7 @@ public class AMIEPredictor {
 		this.trainingKb = (HistogramTupleIndependentProbabilisticFactDatabase) this.miningAssistant.getKb();
 		this.pcaConfidenceThreshold = this.miningAssistant.getPcaConfidenceThreshold();
 		this.pruningMetric = miner.getPruningMetric();
+		this.ruleMiner = miner;
 		this.testingKb = testing;
 		this.numberOfCoresEvaluation = 1;
 	}
