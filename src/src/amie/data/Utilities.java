@@ -18,7 +18,7 @@ import javatools.datatypes.ByteString;
  * @author lgalarra
  *
  */
-public class SchemaUtilities {
+public class Utilities {
 
 	public static ByteString getRelationDomain(FactDatabase source, ByteString relation){
 		List<ByteString[]> query = FactDatabase.triples(FactDatabase.triple(relation, "rdfs:domain", "?x"));

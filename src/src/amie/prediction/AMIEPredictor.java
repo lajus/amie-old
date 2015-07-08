@@ -31,8 +31,8 @@ import amie.mining.Metric;
 import amie.mining.assistant.DefaultMiningAssistant;
 import amie.mining.assistant.MiningAssistant;
 import amie.mining.assistant.RelationSignatureDefaultMiningAssistant;
-import amie.prediction.assistant.ProbabilisticDefaultMiningAssistant;
 import amie.prediction.data.HistogramTupleIndependentProbabilisticFactDatabase;
+import amie.prediction.data.TupleIndependentFactDatabase;
 import amie.query.Query;
 import amie.utils.Utils;
 
@@ -55,24 +55,28 @@ public class AMIEPredictor {
 	
 	private Metric pruningMetric;
 	
-	private double pruningThreshold;	
+	private double pruningThreshold;
+	
+	private int numberOfCoresEvaluation;
 		
-	private ProbabilisticDefaultMiningAssistant miningAssistant;
+	private MiningAssistant miningAssistant;
 	
 	public AMIEPredictor(AMIE miner) {
-		this.miningAssistant = (ProbabilisticDefaultMiningAssistant) miner.getAssistant();
+		this.miningAssistant = miner.getAssistant();
 		this.trainingKb = (HistogramTupleIndependentProbabilisticFactDatabase) this.miningAssistant.getKb();
 		this.pcaConfidenceThreshold = this.miningAssistant.getPcaConfidenceThreshold();
 		this.pruningMetric = miner.getPruningMetric();
 		this.ruleMiner = miner;
+		this.numberOfCoresEvaluation = 1;
 	}
 	
 	public AMIEPredictor(AMIE miner, FactDatabase testing) {
-		this.miningAssistant = (ProbabilisticDefaultMiningAssistant) miner.getAssistant();
+		this.miningAssistant = miner.getAssistant();
 		this.trainingKb = (HistogramTupleIndependentProbabilisticFactDatabase) this.miningAssistant.getKb();
 		this.pcaConfidenceThreshold = this.miningAssistant.getPcaConfidenceThreshold();
 		this.pruningMetric = miner.getPruningMetric();
 		this.testingKb = testing;
+		this.numberOfCoresEvaluation = 1;
 	}
 	
 	public double getPcaConfidenceThreshold() {
@@ -97,6 +101,14 @@ public class AMIEPredictor {
 
 	public void setRuleMiner(AMIE amieMiner) {
 		this.ruleMiner = amieMiner;
+	}
+	
+	public int getNumberOfCoresForEvaluation() {
+		return numberOfCoresEvaluation;
+	}
+	
+	public void setNumberOfCoresForEvaluation(int numberOfCoresEvaluation) {
+		this.numberOfCoresEvaluation = numberOfCoresEvaluation;
 	}
 
 	/**
@@ -126,7 +138,7 @@ public class AMIEPredictor {
 				if (i > 0) { 
 					// Override the support and the PCA confidence to store the
 					// probabilistic version
-					miningAssistant.computeProbabilisticMetrics(rule);					
+					Utilities.computeProbabilisticMetrics(rule, trainingKb);
 					boolean pruningCondition = false;
 					if (this.pruningMetric == Metric.HeadCoverage) {
 						pruningCondition = rule.getHeadCoverage() < this.pruningThreshold;
@@ -285,7 +297,8 @@ public class AMIEPredictor {
 						miningAssistant.computeCardinality(combinedRule);
 						miningAssistant.computePCAConfidence(combinedRule);
 					} else {
-						miningAssistant.computeProbabilisticMetrics(combinedRule);
+						Utilities.computeProbabilisticMetrics(combinedRule, 
+								(TupleIndependentFactDatabase) miningAssistant.getKb());
 					}
 				}	
 				combinedRule = prediction.getJointRule();				
@@ -333,7 +346,7 @@ public class AMIEPredictor {
 		// multiple times.
 		Map<List<Integer>, Query> combinedRulesMap = new HashMap<List<Integer>, Query>();
 		timeStamp1 = System.currentTimeMillis();
-		Thread[] threads = new Thread[2];
+		Thread[] threads = new Thread[this.numberOfCoresEvaluation];
 		for (int i = 0; i < threads.length; ++i) {
 			threads[i] = new Thread(new PredictionsBuilder(predictions, output, combinedRulesMap, iteration));
 			threads[i].start();
@@ -390,12 +403,13 @@ public class AMIEPredictor {
 		boolean allowTypes = false;
 		Metric metric = Metric.HeadCoverage;
 		int numberOfIterations = Integer.MAX_VALUE;
+		int numberOfCoresEvaluation = 1;
 		boolean addOnlyVerifiedPredictions = false;
 		List<Prediction> predictions = null;
         
         Option supportOpt = OptionBuilder.withArgName("min-support")
                 .hasArg()
-                .withDescription("Minimum absolute support. Default: 100 positive examples")
+                .withDescription("Minimum absolute support. Default: " + DefaultSupportThreshold + " positive examples")
                 .create("mins");
        
         Option initialSupportOpt = OptionBuilder.withArgName("min-initial-support")
@@ -556,6 +570,17 @@ public class AMIEPredictor {
 			}
 			
 		}
+		
+		if (cli.hasOption("nce")) {
+			try {
+				numberOfCoresEvaluation = Integer.parseInt(cli.getOptionValue("nce"));
+			} catch (NumberFormatException e) {
+				System.err.println("The argument nce (number of cores for evaluation) expects a positive number.");
+				formatter.printHelp("AMIEPredictor", options);
+				System.exit(1);
+			}
+			
+		}
 				
         MiningAssistant assistant = null;
         if (allowTypes) {
@@ -566,6 +591,7 @@ public class AMIEPredictor {
         assistant.setPcaConfidenceThreshold(confidenceThreshold);
         AMIE miner = new AMIE(assistant, minInitialSupport, minMetricValue, metric, Runtime.getRuntime().availableProcessors());
 		AMIEPredictor predictor = new AMIEPredictor(miner);
+		predictor.setNumberOfCoresForEvaluation(numberOfCoresEvaluation);
 		predictions = predictor.predict(numberOfIterations, addOnlyVerifiedPredictions);
 		
 		IntHashMap<Integer> hitsInTargetHistogram = new IntHashMap<>();

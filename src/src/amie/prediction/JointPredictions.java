@@ -1,6 +1,5 @@
 package amie.prediction;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,15 +10,11 @@ import java.util.Set;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Triple;
-import javatools.filehandlers.TSVFile;
 import amie.data.FactDatabase;
 import amie.data.eval.Evaluator;
 import amie.data.eval.PredictionsSampler;
 import amie.mining.assistant.DefaultMiningAssistant;
-import amie.prediction.assistant.ProbabilisticDefaultMiningAssistant;
-import amie.query.AMIEreader;
 import amie.query.Query;
-import amie.utils.Utils;
 
 public class JointPredictions {
 
@@ -100,8 +95,7 @@ public class JointPredictions {
 	 * @return
 	 */
 	public static List<Prediction> getPredictions(List<Query> queries, 
-			FactDatabase trainingDataset, FactDatabase targetDataset, 
-			ProbabilisticDefaultMiningAssistant miningAssistant, boolean notInTraining) {
+			FactDatabase trainingDataset, FactDatabase targetDataset, boolean notInTraining) {
 		List<Prediction> result = new ArrayList<>();
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions =
 				findPredictionsForRules(queries, trainingDataset, targetDataset, notInTraining);
@@ -116,31 +110,7 @@ public class JointPredictions {
 			
 			if(trainingDataset.count(triple) > 0) {
 				prediction.setHitInTraining(true);
-			}
-			
-			// First calculate the confidence of the combined rule
-			/*Query combinedRule = prediction.getJointRule();
-			
-			if (combinedRule != prediction.getRules().get(0)) {
-				if (i == 0) {
-					miningAssistant.computeCardinality(combinedRule);
-					miningAssistant.computePCAConfidence(combinedRule);						
-					computeCardinalityScore(prediction, false);
-				} else {
-					miningAssistant.computeProbabilisticMetrics(combinedRule);
-					computeCardinalityScore(prediction, true);
-				}
-			}
-			
-			double finalConfidence = prediction.getFullScore();
-			if (finalConfidence >= confidenceThreshold) {
-				++addedPredictions;
-				resultingPredictions.add(prediction);
-				prediction.setIterationId(i + 1);
-				ByteString[] triple = prediction.getTriple();
-				trainingDb.add(triple[0], triple[1], triple[2], finalConfidence);
-			
-			result.add(prediction);*/
+			}			
 		}
 		
 		return result;

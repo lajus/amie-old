@@ -111,7 +111,7 @@ public class TypesCleaner {
 			
 			if(source2.subjectSize.get(subject) != 1){
 				//and its types
-				Set<ByteString> types = SchemaUtilities.getAllTypesForEntity(source2, subject);
+				Set<ByteString> types = Utilities.getAllTypesForEntity(source2, subject);
 				if(entityToTypes.containsKey(subject)){
 					entityToTypes.get(subject).addAll(types);
 				}else{
@@ -121,7 +121,7 @@ public class TypesCleaner {
 		}
 		
 		for(ByteString object: source1.objectSize){
-			Set<ByteString> types = SchemaUtilities.getAllTypesForEntity(source2, object);
+			Set<ByteString> types = Utilities.getAllTypesForEntity(source2, object);
 			if(entityToTypes.containsKey(object)){
 				entityToTypes.get(object).addAll(types);
 			}else{
@@ -269,7 +269,7 @@ public class TypesCleaner {
 			
 			Map<ByteString, IntHashMap<ByteString> > bindings = source.subject2predicate2object.get(subject);
 			for(ByteString relation: bindings.keySet()){
-				ByteString domain = SchemaUtilities.getRelationDomain(source, relation);
+				ByteString domain = Utilities.getRelationDomain(source, relation);
 				if(domain != null){
 					finalTypes.add(domain);
 				}
@@ -288,7 +288,7 @@ public class TypesCleaner {
 			
 			Map<ByteString, IntHashMap<ByteString> > bindings = source.object2predicate2subject.get(object);
 			for(ByteString relation: bindings.keySet()){
-				ByteString range = SchemaUtilities.getRelationRange(source, relation);
+				ByteString range = Utilities.getRelationRange(source, relation);
 				if(range != null)
 					finalTypes.add(range);
 			}
@@ -296,7 +296,7 @@ public class TypesCleaner {
 		
 		//Print domain and schema information
 		for(ByteString relation: source.predicateSize){
-			ByteString domain = SchemaUtilities.getRelationDomain(source, relation);			
+			ByteString domain = Utilities.getRelationDomain(source, relation);			
 			if(domain != null)
 				System.out.println(relation + "\t<rdfs:domain>\t" + domain);	
 		}
@@ -308,7 +308,7 @@ public class TypesCleaner {
 		}
 		
 		for(ByteString relation: source.predicateSize){
-			ByteString range = SchemaUtilities.getRelationRange(source, relation);			
+			ByteString range = Utilities.getRelationRange(source, relation);			
 			if(range != null)			
 				System.out.println(relation + "\t<rdfs:range>\t" + range);	
 		}
@@ -335,11 +335,11 @@ public class TypesCleaner {
 		Map<ByteString, ByteString> rangesMap = new HashMap<ByteString, ByteString>();		
 		//Build simple maps for the domain and ranges of relations	
 		for(ByteString relation: source.predicateSize){
-			ByteString domain = SchemaUtilities.getRelationDomain(source, relation);
+			ByteString domain = Utilities.getRelationDomain(source, relation);
 			if(domain !=  null)			
 				domainsMap.put(relation, domain);			
 			
-			ByteString range = SchemaUtilities.getRelationRange(source, relation);
+			ByteString range = Utilities.getRelationRange(source, relation);
 			if(range !=  null)
 				rangesMap.put(relation, range);
 		}
@@ -385,14 +385,14 @@ public class TypesCleaner {
 					possibleTypes.add(domain);
 				}else{
 					//Take it from the database
-					domain = SchemaUtilities.getRelationDomain(source, relation);
+					domain = Utilities.getRelationDomain(source, relation);
 					if(domain != null)
 						finalTypes.add(domain);
 				}
 			}
 			
 			for(ByteString type: possibleTypes){
-				Set<ByteString> inferredTypes = SchemaUtilities.getAllTypesForEntity(source, subject);
+				Set<ByteString> inferredTypes = Utilities.getAllTypesForEntity(source, subject);
 				if(inferredTypes.contains(type))
 					finalTypes.add(type);
 			}
@@ -415,7 +415,7 @@ public class TypesCleaner {
 				if(range != null){
 					possibleTypes.add(range);
 				}else{
-					range = SchemaUtilities.getRelationRange(source, relation);
+					range = Utilities.getRelationRange(source, relation);
 					if(range != null){
 						finalTypes.add(range);
 					}
@@ -423,7 +423,7 @@ public class TypesCleaner {
 			}
 			
 			for(ByteString type: possibleTypes){
-				Set<ByteString> inferredTypes = SchemaUtilities.getAllTypesForEntity(source, object);
+				Set<ByteString> inferredTypes = Utilities.getAllTypesForEntity(source, object);
 				if(inferredTypes.contains(type))
 					finalTypes.add(type);	
 			}
@@ -433,7 +433,7 @@ public class TypesCleaner {
 		for(ByteString relation: source.predicateSize){
 			ByteString domain = domainsMap.get(relation);
 			if(domain == null)
-				domain = SchemaUtilities.getRelationDomain(source, relation);
+				domain = Utilities.getRelationDomain(source, relation);
 			
 			if(domain != null)
 				System.out.println(relation + "\t<rdfs:domain>\t" + domain);	
@@ -448,7 +448,7 @@ public class TypesCleaner {
 		for(ByteString relation: source.predicateSize){
 			ByteString range = rangesMap.get(relation);
 			if(range == null)
-				range = SchemaUtilities.getRelationRange(source, relation);
+				range = Utilities.getRelationRange(source, relation);
 			
 			if(range != null)			
 				System.out.println(relation + "\t<rdfs:range>\t" + range);	

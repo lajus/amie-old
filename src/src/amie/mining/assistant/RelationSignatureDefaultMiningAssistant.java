@@ -4,7 +4,7 @@ import java.util.List;
 
 import javatools.datatypes.ByteString;
 import amie.data.FactDatabase;
-import amie.data.SchemaUtilities;
+import amie.data.Utilities;
 import amie.query.Query;
 
 /**
@@ -35,7 +35,7 @@ public class RelationSignatureDefaultMiningAssistant extends DefaultMiningAssist
 		//Add the schema information to the rule
 		ByteString domain, range, relation;
 		relation = candidate.getHead()[1];
-		domain = SchemaUtilities.getRelationDomain(kb, relation);
+		domain = Utilities.getRelationDomain(kb, relation);
 		if(domain != null){
 			ByteString[] domainTriple = new ByteString[3];
 			domainTriple[0] = candidate.getHead()[0];
@@ -45,7 +45,7 @@ public class RelationSignatureDefaultMiningAssistant extends DefaultMiningAssist
 			queryChanged = true;
 		}
 		
-		range = SchemaUtilities.getRelationRange(kb, relation);
+		range = Utilities.getRelationRange(kb, relation);
 		if(range != null){
 			ByteString[] rangeTriple = new ByteString[3];
 			rangeTriple[0] = candidate.getHead()[2];
