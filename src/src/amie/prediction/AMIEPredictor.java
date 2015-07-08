@@ -481,15 +481,15 @@ public class AMIEPredictor {
             System.exit(1);
         }
 		HistogramTupleIndependentProbabilisticFactDatabase training = new HistogramTupleIndependentProbabilisticFactDatabase();
-        FactDatabase testing = new FactDatabase();
-        
-		File[] inputFilesArray = new File[inputFileArgs.length];
+        FactDatabase testing = new FactDatabase();        
+		
+        File[] inputFilesArray = new File[inputFileArgs.length];
 		for (int i = 0; i < inputFileArgs.length; ++i) {
         	inputFilesArray[i] = new File(inputFileArgs[i]);
         }
 		training.load(inputFilesArray);
 		
-		if (cli.hasOption("tkb")) {
+		if (cli.hasOption("tkb")) {		
 			String[] testingFileArgs = cli.getOptionValue("tkb").split(":");
 			File[] testingFilesArray = new File[testingFileArgs.length];
 			for (int i = 0; i < testingFileArgs.length; ++i) {
@@ -590,7 +590,7 @@ public class AMIEPredictor {
         }
         assistant.setPcaConfidenceThreshold(confidenceThreshold);
         AMIE miner = new AMIE(assistant, minInitialSupport, minMetricValue, metric, Runtime.getRuntime().availableProcessors());
-		AMIEPredictor predictor = new AMIEPredictor(miner);
+		AMIEPredictor predictor = new AMIEPredictor(miner, testing);
 		predictor.setNumberOfCoresForEvaluation(numberOfCoresEvaluation);
 		predictions = predictor.predict(numberOfIterations, addOnlyVerifiedPredictions);
 		

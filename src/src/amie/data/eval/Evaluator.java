@@ -36,6 +36,13 @@ public class Evaluator {
 				> training.inverseFunctionality(triple[1]) ? 0 : 2;
 
 		//If we know something else about the triple, PCA says it is false
+		if (triple == null) {
+			System.out.println("Triple is null");			
+		}
+		
+		if (target == null) {
+			System.out.println("Target is null");						
+		}
 		if(target.count(triple) > 0){
 			//Bingo!
 			returnVal = 0;
