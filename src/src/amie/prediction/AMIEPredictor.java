@@ -488,7 +488,6 @@ public class AMIEPredictor {
         File[] inputFilesArray = new File[inputFileArgs.length];
 		for (int i = 0; i < inputFileArgs.length; ++i) {
         	inputFilesArray[i] = new File(inputFileArgs[i]);
-        	//training.load(inputFilesArray[i]);
         }
 		training.load(inputFilesArray);
 		
@@ -505,6 +504,7 @@ public class AMIEPredictor {
 		if (cli.hasOption("minpca")) {
 			try {
 				confidenceThreshold = Double.parseDouble(cli.getOptionValue("minpca"));
+	        	System.out.println("Using PCA confidence threshold " + confidenceThreshold);
 			} catch (NumberFormatException e) {
 				System.err.println("The argument minpca (minimal confidence threshold) expects a real number between 0 and 1");
 				formatter.printHelp("AMIEPredictor", options);
@@ -516,6 +516,7 @@ public class AMIEPredictor {
 		if (cli.hasOption("minis")) {
             try {
                 minInitialSupport = Integer.parseInt(cli.getOptionValue("minis"));
+        		System.out.println("Using an initial support threshold of " + minInitialSupport);
             } catch (NumberFormatException e) {
 				System.err.println("The argument minis (minimal initial support) expects a non-negative positive integer");
 				formatter.printHelp("AMIEPredictor", options);
@@ -584,6 +585,7 @@ public class AMIEPredictor {
     				ByteString.of("rdfs:domain"), ByteString.of("rdfs:range"));
     		assistant.setHeadExcludedRelations(excludedRelationsSignatured);
     		assistant.setBodyExcludedRelations(excludedRelationsSignatured);
+    		System.out.println("Mining rules with type constraints, i.e., of form B ^ is(x, D) ^ is(y, R) => rh(x, y)");
         } else {
         	assistant = new DefaultMiningAssistant(training);
         }
