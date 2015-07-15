@@ -232,10 +232,10 @@ public class Prediction {
 			builder.append("\tHit in training");
 		}
 		
+		builder.append("\t" + getFullScore());
 		builder.append("\t" + getNaiveConfidence());
 		builder.append("\t" + getConfidence());
 		builder.append("\t" + getNaiveFullScore());
-		builder.append("\t" + getFullScore());
 		
 		for (Query q : rules) {
 			builder.append("\t" + q.getRuleString() + "[" + q.getSupport() + ", " + q.getPcaConfidence() + "]");

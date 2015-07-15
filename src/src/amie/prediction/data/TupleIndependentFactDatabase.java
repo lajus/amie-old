@@ -139,9 +139,7 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	/**
 	 * Returns the probabilities for all the bindings of the given query. 
 	 * @param query
-	 * @param var
-	 * @return Probability for each binding of the select variable as an array of doubles, or null
-	 * if the variable does not have any bindings.
+	 * @return Probability for each possible combination of bindings that satisfies the query.
 	 */
 	protected double[] probabibilitiesOfQuery(List<ByteString[]> query) {
 		// Count the number of variables

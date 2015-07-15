@@ -1,8 +1,10 @@
 package amie.prediction;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,7 +25,9 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.semanticweb.yars.util.Array;
 
+import telecom.util.collections.MultiMap;
 import amie.data.FactDatabase;
 import amie.data.eval.Evaluator;
 import amie.data.eval.PredictionsSampler;
@@ -51,6 +55,8 @@ public class AMIEPredictor {
 	public static final int DefaultSupportThreshold = 10;
 	
 	public static final double DefaultHeadCoverageThreshold = 0.01;
+	
+	public static final int DefaultSampleSize = 30;
 	
 	private double pcaConfidenceThreshold;
 	
@@ -165,7 +171,7 @@ public class AMIEPredictor {
 			}
 		}
 		System.out.println("The inference is done. Sorting prediction by probabilistic score.");
-		PredictionsComparator predictionsCmp = new PredictionsComparator();
+		PredictionsComparator predictionsCmp = new PredictionsComparator(amie.prediction.Metric.FullJointScore);
 		Collections.sort(resultingPredictions, predictionsCmp);
 		return resultingPredictions;
 	}
@@ -408,6 +414,8 @@ public class AMIEPredictor {
 		int numberOfCoresEvaluation = 1;
 		boolean addOnlyVerifiedPredictions = false;
 		List<Prediction> predictions = null;
+		boolean outputSample = false;
+		int sampleSize = DefaultSampleSize;
         
         Option supportOpt = OptionBuilder.withArgName("min-support")
                 .hasArg()
@@ -456,7 +464,20 @@ public class AMIEPredictor {
         				+ "it generates rules of the form B ^ type(x, C) ^ type(y, C') => rh(x, y)")
         		.create("et");
         
+        Option outputSampleOption = OptionBuilder.withArgName("output-sample")
+        		.withDescription("It outputs a sample of the predictions for confidence evaluation.")
+        		.create("os");
         
+        Option sampleSizeOption = OptionBuilder.withArgName("sample-size")
+        		.hasArg()
+        		.withDescription("Bucket size for sample. The sampler creates buckets of width 0.1 with the given number of samples.")
+        		.create("ss");
+        
+        Option sampleOutputFile = OptionBuilder.withArgName("sample-output-file")
+        		.hasArg()
+        		.withDescription("Print the sample in this file.")
+        		.create("sout");
+                
         options.addOption(supportOpt);
         options.addOption(initialSupportOpt);
         options.addOption(headCoverageOpt);
@@ -466,6 +487,9 @@ public class AMIEPredictor {
         options.addOption(iterationsOption);
         options.addOption(nCoresEvaluationOption);
         options.addOption(enableTypesOption);
+        options.addOption(outputSampleOption);
+        options.addOption(sampleSizeOption);       
+        options.addOption(sampleOutputFile);
         
         try {
             cli = parser.parse(options, args);
@@ -510,8 +534,9 @@ public class AMIEPredictor {
 				formatter.printHelp("AMIEPredictor", options);
 				System.exit(1);
 			}
-			
 		}
+		
+		System.err.println("Using a PCA confidence threshold of " + confidenceThreshold);
 		
 		if (cli.hasOption("minis")) {
             try {
@@ -519,6 +544,16 @@ public class AMIEPredictor {
         		System.out.println("Using an initial support threshold of " + minInitialSupport);
             } catch (NumberFormatException e) {
 				System.err.println("The argument minis (minimal initial support) expects a non-negative positive integer");
+				formatter.printHelp("AMIEPredictor", options);
+				System.exit(1);
+            }
+        }
+		
+		if (cli.hasOption("mins")) {
+            try {
+                minSupport = Integer.parseInt(cli.getOptionValue("mins"));
+            } catch (NumberFormatException e) {
+				System.err.println("The argument mins (minimal support) expects a non-negative positive integer");
 				formatter.printHelp("AMIEPredictor", options);
 				System.exit(1);
             }
@@ -577,6 +612,8 @@ public class AMIEPredictor {
 			}
 			
 		}
+		
+		
 				
         MiningAssistant assistant = null;
         if (allowTypes) {
@@ -590,11 +627,15 @@ public class AMIEPredictor {
         	assistant = new DefaultMiningAssistant(training);
         }
         assistant.setPcaConfidenceThreshold(confidenceThreshold);
+        assistant.setEnabledConfidenceUpperBounds(true);
+        assistant.setEnabledFunctionalityHeuristic(true);
+        assistant.setEnablePerfectRules(true);
         AMIE miner = new AMIE(assistant, minInitialSupport, minMetricValue, metric, Runtime.getRuntime().availableProcessors());
 		AMIEPredictor predictor = new AMIEPredictor(miner, testing);
 		predictor.setNumberOfCoresForEvaluation(numberOfCoresEvaluation);
+		long timeStamp1 = System.currentTimeMillis();
 		predictions = predictor.predict(numberOfIterations, addOnlyVerifiedPredictions);
-		
+
 		IntHashMap<Integer> hitsInTargetHistogram = new IntHashMap<>();
 		IntHashMap<Integer> hitsInTargetNotInSourceHistogram = new IntHashMap<>();
 		IntHashMap<Integer> predictionsHistogram = new IntHashMap<>();
@@ -609,7 +650,7 @@ public class AMIEPredictor {
 				}
 			}
 		}
-		
+		System.out.println("Inference took " + ((System.currentTimeMillis() - timeStamp1) / 1000.0) + " seconds");
 		System.out.println("Predictions histogram");
 		Utils.printHistogram(predictionsHistogram);
 		
@@ -618,5 +659,56 @@ public class AMIEPredictor {
 		
 		System.out.println("Hits In target but not in training histogram");
 		Utils.printHistogram(hitsInTargetNotInSourceHistogram);
+		
+		outputSample = cli.hasOption("os");
+		if (outputSample) {
+			if (cli.hasOption("ss")) {
+				try {
+					sampleSize = Integer.parseInt(cli.getOptionValue("ss"));
+				} catch (NumberFormatException e) {
+					System.err.println("Sample size");
+					formatter.printHelp("AMIEPredictor", options);
+					System.err.println("Using default sample size: " + sampleSize);
+				}				
+			}
+			PrintStream stream = null;			
+			if (cli.hasOption("sout")) {
+				stream = new PrintStream(cli.getOptionValue("sout"));
+				System.out.println("Outputing a sample of size " 
+				+ sampleSize + " for evaluation in file " + cli.getOptionValue("sout"));				
+			} else {
+				stream = new PrintStream(System.out);
+				System.out.println("Outputing a sample " + sampleSize + " for evaluation in the standard output");
+			}
+			sampleBucketizedPredictions(predictions, stream, sampleSize);
+		}
+	}
+
+	/**
+	 * It outputs in the given stream a bucketized sample of the input predictions. 
+	 * A bucket corresponds to a group of predictions within a score interval.
+	 * @param predictions
+	 * @param stream
+	 */
+	private static void sampleBucketizedPredictions(
+			List<Prediction> predictions, PrintStream stream, int sampleSize) {
+		MultiMap<Integer, Prediction> buckets = new MultiMap<>();
+		
+		for (Prediction prediction : predictions) {
+			int key = (int) Math.ceil(prediction.getFullScore() * 10);
+			buckets.add(key, prediction);
+		}
+		
+		List<Integer> keys = new ArrayList<Integer>(buckets.keySet());
+		Collections.sort(keys);
+		for (Integer key : keys) {
+			List<Prediction> bucket = buckets.get(key);
+			Collection<Prediction> sample = 
+					telecom.util.collections.Collections.reservoirSampling(bucket, sampleSize);
+			stream.println("Bucket [" + key / 10.0 + ", " + (key - 1.0) / 10.0 + ") " + bucket.size() + " predictions");
+			for (Prediction prediction : sample) {
+				stream.println(prediction);
+			}
+		}
 	}
 }

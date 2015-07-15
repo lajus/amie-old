@@ -6,17 +6,17 @@ import javatools.datatypes.ByteString;
 
 public class PredictionsComparator implements Comparator<Prediction> {
 
-	public boolean naive;
+	Metric metric;
 	
 	public PredictionsComparator() {
-		naive = false;
+		metric = Metric.NaiveConfidence;
 	}
 	
 	/**
 	 * @param naive Use the naive independence score.
 	 */
-	public PredictionsComparator(boolean naive) {
-		this.naive = naive;
+	public PredictionsComparator(Metric metric) {
+		this.metric = metric;
 	}
 	
 	@Override
@@ -24,12 +24,21 @@ public class PredictionsComparator implements Comparator<Prediction> {
 		Double conf1 = null;
 		Double conf2 = null;
 
-		if (naive) {
+		switch (this.metric) {
+		case NaiveConfidence :
 			conf1 = o1.getNaiveConfidence();
 			conf2 = o2.getNaiveConfidence();			
-		} else {
+			break;
+		case JointConfidence :			
 			conf1 = o1.getConfidence();
-			conf2 = o2.getConfidence();			
+			conf2 = o2.getConfidence();
+			break;
+		case NaiveJointScore :
+			conf1 = o1.getNaiveFullScore();
+			conf2 = o2.getNaiveFullScore();
+		case FullJointScore :
+			conf1 = o1.getFullScore();
+			conf2 = o2.getFullScore();
 		}
 		
 		if (conf1.equals(conf2)) {

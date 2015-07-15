@@ -199,7 +199,7 @@ public class AMIE {
         Thread consumerThread = null;
         Lock resultsLock = new ReentrantLock();
         Condition resultsCondVar = resultsLock.newCondition();
-        AtomicInteger sharedCounter = new AtomicInteger(0);
+        AtomicInteger sharedCounter = new AtomicInteger(nThreads);
 
         Collection<Query> seedsPool = new LinkedHashSet<>();
         // Queue initialization
@@ -248,6 +248,154 @@ public class AMIE {
         }
 
         return result;
+    }
+    
+    /**
+     * A variant of the mine() method that tries to optimize for CPU utilization.
+     * @param realTime
+     * @param seeds
+     * @return
+     * @throws Exception
+     */
+    public List<Query> mine2(boolean realTime, Collection<ByteString> seeds) throws Exception {
+    	Collection<Query> headsPool = new LinkedHashSet<>();
+    	MultiMap<Integer, Query> indexedResult = new MultiMap<>();
+    	List<Query> result = new ArrayList<>();
+    	Lock resultsLock = new ReentrantLock();
+    	Condition resultsCondVar = resultsLock.newCondition();
+        RuleConsumer consumerObj = null;
+        Thread consumerThread = null;
+        Collection<Collection<Query>> queues = new LinkedHashSet<Collection<Query>>();
+        
+        if (realTime) {
+            consumerObj = new RuleConsumer(result, resultsLock, resultsCondVar);
+            consumerThread = new Thread(consumerObj);
+            consumerThread.start();
+        }
+        
+        // Queue initialization
+        if (seeds == null || seeds.isEmpty()) {
+            assistant.getInitialAtoms(minInitialSupport, headsPool);
+        } else {
+            assistant.getInitialAtomsFromSeeds(seeds, minInitialSupport, headsPool);
+        }
+        
+        // Build one queue per relation
+        for (Query head : headsPool) {
+        	Collection<Query> queue = new LinkedHashSet<Query>();
+        	queue.add(head);
+        	queues.add(queue);
+        }
+        
+        System.out.println("Using " + nThreads + " threads");
+        //Create as many threads as available cores
+        ArrayList<Thread> currentJobs = new ArrayList<>();
+        ArrayList<RDFMinerJob2> jobObjects = new ArrayList<>();
+        List<RDFMinerJob> runningThreads = new ArrayList<>();
+        for (int i = 0; i < (int) Math.min(nThreads, headsPool.size()); ++i) {
+        	Collection<Query> queue = telecom.util.collections.Collections.poll(queues);
+            RDFMinerJob2 jobObject = new RDFMinerJob2(queues, queue, result, resultsLock, resultsCondVar, indexedResult, runningThreads);
+            Thread job = new Thread(jobObject);
+            currentJobs.add(job);
+            jobObjects.add(jobObject);
+        }
+        
+        for (Thread job : currentJobs) {
+            job.start();
+        }
+
+        for (Thread job : currentJobs) {
+            job.join();
+        }
+        
+        if (realTime) {
+            consumerObj.finish();
+            consumerThread.interrupt();
+        }
+
+        return result;
+       
+    }
+    
+    class RDFMinerJob2 implements Runnable {
+    	
+    	public List<RDFMinerJob> runningThreads;
+    	
+    	private Collection<Collection<Query>> headsPool;
+    	
+    	private List<Query> outputSet;
+
+        // A version of the output set thought for search.
+        private MultiMap<Integer, Query> indexedOutputSet;
+
+        private Collection<Query> queryPool;
+
+        private Lock resultsLock;
+
+        private Condition resultsCondition;
+    	
+    	
+		public RDFMinerJob2(Collection<Collection<Query>> headsPool, 
+				Collection<Query> queue, List<Query> result,
+				Lock resultsLock, Condition resultsCondVar,
+				MultiMap<Integer, Query> indexedResult,
+				List<RDFMinerJob> runningThreads) {
+			this.runningThreads = runningThreads;
+			this.headsPool = headsPool;
+			this.queryPool = queue;
+			this.outputSet = result;
+			this.resultsLock = resultsLock;
+			this.resultsCondition = resultsCondVar;
+			this.indexedOutputSet = indexedResult;
+		}
+
+		@Override
+		public void run() {
+			RDFMinerJob job = null;
+			AtomicInteger sharedCounter = new AtomicInteger(1);
+			while (queryPool != null) {								
+				if (job == null) {
+					job = new RDFMinerJob(queryPool, outputSet, resultsLock, resultsCondition, sharedCounter, indexedOutputSet);
+					Thread thread = new Thread(job);
+					thread.start();
+					synchronized (runningThreads) {
+						runningThreads.add(job);
+					}
+				} else if (job.isDone()) {
+					synchronized (runningThreads) {
+						runningThreads.remove(job);
+					}
+					
+					boolean helpOtherThreads = false;
+					synchronized (headsPool) {
+						helpOtherThreads = headsPool.isEmpty();
+					}
+					if (helpOtherThreads) {
+						synchronized (runningThreads) {
+							boolean helpedSomebody = false;
+							for (int i = 0; i < runningThreads.size(); ++i) {
+								// Still here there is a risk that the job is done by the time we 
+								// give it some help
+								if (!runningThreads.get(i).isDone()) {
+									queryPool = runningThreads.get(i).getPool();
+									sharedCounter = runningThreads.get(i).getSharedCounter();
+									job = null;
+									helpedSomebody = true;
+									break;
+								}
+							}
+
+							// If I reach this stage, then nobody needs help
+							if (!helpedSomebody)
+								break;
+						}
+					} else {
+						queryPool = telecom.util.collections.Collections.poll(headsPool);
+						job = null;
+					}
+				}
+			}
+		}    	
     }
 
     /**
@@ -327,6 +475,8 @@ public class AMIE {
         private AtomicInteger sharedCounter;
 
         private boolean idle;
+        
+        private Boolean done;
 
         // Time spent in applying the operators.
         private long specializationTime;
@@ -352,10 +502,25 @@ public class AMIE {
             this.sharedCounter = sharedCounter;
             this.indexedOutputSet = indexedOutputSet;
             this.idle = false;
+            this.done = false;
             this.specializationTime = 0l;
             this.scoringTime = 0l;
             this.queueingAndDuplicateElimination = 0l;
             this.approximationTime = 0l;
+        }
+        
+		public AtomicInteger getSharedCounter() {
+			// TODO Auto-generated method stub
+			return this.sharedCounter;
+		}
+
+		public Collection<Query> getPool() {
+			// TODO Auto-generated method stub
+			return this.queryPool;
+		}
+
+		public synchronized Boolean isDone() {
+        	return this.done;
         }
 
         private Query pollQuery() {
@@ -373,6 +538,9 @@ public class AMIE {
 
         @Override
         public void run() {
+        	synchronized (this.done) {
+            	this.done = false;	
+			}
             while (true) {
                 Query currentRule = null;
 
@@ -381,9 +549,9 @@ public class AMIE {
                 }
 
                 if (currentRule != null) {
-                    if (idle) {
-                        idle = false;
-                        sharedCounter.decrementAndGet();
+                    if (this.idle) {
+                        this.idle = false;
+                        this.sharedCounter.decrementAndGet();
                     }
 
                     // Check if the rule meets the language bias and confidence thresholds and
@@ -395,9 +563,9 @@ public class AMIE {
                                 = assistant.calculateConfidenceBoundsAndApproximations(currentRule);
                         this.approximationTime += (System.currentTimeMillis() - timeStamp1);
                         if (ruleSatisfiesConfidenceBounds) {
-                            resultsLock.lock();
+                            this.resultsLock.lock();
                             setAdditionalParents2(currentRule);
-                            resultsLock.unlock();
+                            this.resultsLock.unlock();
                             // Calculate the metrics
                             assistant.calculateConfidenceMetrics(currentRule);
                             // Check the confidence threshold and skyline technique.
@@ -444,40 +612,44 @@ public class AMIE {
 
                     // Output the rule
                     if (outputRule) {
-                        resultsLock.lock();
+                        this.resultsLock.lock();
                         long timeStamp1 = System.currentTimeMillis();
                         Set<Query> outputQueries = indexedOutputSet.get(currentRule.alternativeParentHashCode());
                         if (outputQueries != null) {
                             if (!outputQueries.contains(currentRule)) {
-                                outputSet.add(currentRule);
+                                this.outputSet.add(currentRule);
                                 outputQueries.add(currentRule);
                             }
                         } else {
-                            outputSet.add(currentRule);
-                            indexedOutputSet.put(currentRule.alternativeParentHashCode(), currentRule);
+                            this.outputSet.add(currentRule);
+                            this.indexedOutputSet.put(currentRule.alternativeParentHashCode(), currentRule);
                         }
                         long timeStamp2 = System.currentTimeMillis();
                         this.queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
-                        resultsCondition.signal();
-                        resultsLock.unlock();
+                        this.resultsCondition.signal();
+                        this.resultsLock.unlock();
                     }
                 } else {
-                    if (!idle) {
-                        idle = true;
+                    if (!this.idle) {
+                        this.idle = true;
                         boolean leave;
-                        synchronized (sharedCounter) {
-                            leave = sharedCounter.incrementAndGet() >= nThreads;
+                        synchronized (this.sharedCounter) {
+                            leave = this.sharedCounter.decrementAndGet() <= 0;	
                         }
                         if (leave) {
                             break;
                         }
                     } else {
-                        if (sharedCounter.get() >= nThreads) {
+                        if (this.sharedCounter.get() <= 0) {
                             break;
                         }
                     }
                 }
             }
+            
+            synchronized (this.done) {
+            	this.done = false;	
+			}
         }
 
         /**
@@ -1151,7 +1323,7 @@ public class AMIE {
         long time = System.currentTimeMillis();
         List<Query> rules = null;
 
-        rules = miner.mine(realTime, headTargetRelations);
+        rules = miner.mine2(realTime, headTargetRelations);
 
         if (!realTime) {
             Query.printRuleHeaders();

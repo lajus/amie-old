@@ -78,7 +78,7 @@ public class SampleWikiLinksByScore {
 			linksToLabels = getPredictions(queries, trainingDataset, true, testingDataset);
 		
 		System.out.println(linksToLabels.size() + " links");
-		PredictionsComparator cmp = new PredictionsComparator(true);
+		PredictionsComparator cmp = new PredictionsComparator();
 		int numberOfHits = 0; // Number of triples found in the testing dataset.
 		int numberOfAutomSemantified = 0; // Number of automatically semantified wikilinks
 		for (Pair<ByteString, ByteString> link : linksToLabels.keySet()) {

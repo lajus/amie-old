@@ -183,6 +183,7 @@ public class MiningAssistant{
 		this.silent = true;
 		this.exploitMaxLengthOption = true;
 		this.enableQueryRewriting = true;
+		this.enablePerfectRules = true;
 		this.confidenceMetric = ConfidenceMetric.PCAConfidence;
 		buildRelationsDictionary();
 		
