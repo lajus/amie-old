@@ -48,11 +48,17 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
 
     @Override
     public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output) {
-        int querySize = query.getLength();
         ByteString[] head = query.getHead();
+        List<ByteString> bodyRelations = query.getBodyRelations();
+        int positionInNonKey = bodyRelations.size();
         for (List<ByteString> nonKey : nonKeys) {
-            if (nonKey.size() + 1 > querySize) {
-                ByteString property = nonKey.get(querySize - 1);
+            if (nonKey.size() > bodyRelations.size()) {
+                if (positionInNonKey > 0) {
+                    if (!nonKey.subList(0, positionInNonKey-1).containsAll(bodyRelations)) {
+                        continue;
+                    }
+                }
+                ByteString property = nonKey.get(positionInNonKey);
                 ByteString[] atom1 = query.fullyUnboundTriplePattern();
                 ByteString[] atom2 = query.fullyUnboundTriplePattern();
                 atom1[0] = head[0];//x
@@ -73,17 +79,24 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                     newQuery.setSupport(support);
                     output.add(newQuery);
                 }
+
             }
         }
     }
 
     @Override
     public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output) {
-        int querySize = query.getLength();
         ByteString[] head = query.getHead();
+        List<ByteString> bodyRelations = query.getBodyRelations();
+        int positionInNonKey = bodyRelations.size();
         for (List<ByteString> nonKey : nonKeys) {
-            if (nonKey.size() + 1 > querySize) {
-                ByteString property = nonKey.get(querySize - 1);
+            if (nonKey.size() > bodyRelations.size()) {
+                if (positionInNonKey > 0) {
+                    if (!nonKey.subList(0, positionInNonKey-1).containsAll(bodyRelations)) {
+                        continue;
+                    }
+                }
+                ByteString property = nonKey.get(positionInNonKey);
                 ByteString[] atom1 = query.fullyUnboundTriplePattern();
                 atom1[0] = head[0];//x
                 atom1[1] = property;//property
