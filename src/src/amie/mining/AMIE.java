@@ -63,17 +63,16 @@ public class AMIE {
      *
      */
     private static final double DEFAULT_HEAD_COVERAGE = 0.01;
-    
+
     /**
      * The default minimum size for a relation to be used as a head relation
      */
     private static final int DEFAULT_INITIAL_SUPPORT = 100;
-    
+
     /**
      * The default support threshold
      */
     private static final int DEFAULT_SUPPORT = 100;
-
 
     /**
      * It implements all the operators defined for the mining process: ADD-EDGE,
@@ -153,20 +152,20 @@ public class AMIE {
         this._queueingAndDuplicateElimination = 0l;
         this._approximationTime = 0l;
     }
-    
+
     public MiningAssistant getAssistant() {
-    	return assistant;
+        return assistant;
     }
 
     public Metric getPruningMetric() {
-		return pruningMetric;
-	}
+        return pruningMetric;
+    }
 
-	public void setPruningMetric(Metric pruningMetric) {
-		this.pruningMetric = pruningMetric;
-	}
+    public void setPruningMetric(Metric pruningMetric) {
+        this.pruningMetric = pruningMetric;
+    }
 
-	public long _getSpecializationTime() {
+    public long _getSpecializationTime() {
         return _specializationTime;
     }
 
@@ -215,20 +214,23 @@ public class AMIE {
             consumerThread.start();
         }
 
-        System.out.println("Using " + nThreads + " threads");
+        System.out.println("Usinggg " + nThreads + " threads");
         //Create as many threads as available cores
         ArrayList<Thread> currentJobs = new ArrayList<>();
         ArrayList<RDFMinerJob> jobObjects = new ArrayList<>();
+        System.out.println("stuck1");
         for (int i = 0; i < nThreads; ++i) {
             RDFMinerJob jobObject = new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter, indexedResult);
             Thread job = new Thread(jobObject);
             currentJobs.add(job);
             jobObjects.add(jobObject);
+
         }
 
         for (Thread job : currentJobs) {
             job.start();
         }
+        System.out.println("stuckk");
 
         for (Thread job : currentJobs) {
             job.join();
@@ -249,57 +251,59 @@ public class AMIE {
 
         return result;
     }
-    
+
     /**
-     * A variant of the mine() method that tries to optimize for CPU utilization.
+     * A variant of the mine() method that tries to optimize for CPU
+     * utilization.
+     *
      * @param realTime
      * @param seeds
      * @return
      * @throws Exception
      */
     public List<Query> mine2(boolean realTime, Collection<ByteString> seeds) throws Exception {
-    	Collection<Query> headsPool = new LinkedHashSet<>();
-    	MultiMap<Integer, Query> indexedResult = new MultiMap<>();
-    	List<Query> result = new ArrayList<>();
-    	Lock resultsLock = new ReentrantLock();
-    	Condition resultsCondVar = resultsLock.newCondition();
+        Collection<Query> headsPool = new LinkedHashSet<>();
+        MultiMap<Integer, Query> indexedResult = new MultiMap<>();
+        List<Query> result = new ArrayList<>();
+        Lock resultsLock = new ReentrantLock();
+        Condition resultsCondVar = resultsLock.newCondition();
         RuleConsumer consumerObj = null;
         Thread consumerThread = null;
         Collection<Collection<Query>> queues = new LinkedHashSet<Collection<Query>>();
-        
+
         if (realTime) {
             consumerObj = new RuleConsumer(result, resultsLock, resultsCondVar);
             consumerThread = new Thread(consumerObj);
             consumerThread.start();
         }
-        
+
         // Queue initialization
         if (seeds == null || seeds.isEmpty()) {
             assistant.getInitialAtoms(minInitialSupport, headsPool);
         } else {
             assistant.getInitialAtomsFromSeeds(seeds, minInitialSupport, headsPool);
         }
-        
+
         // Build one queue per relation
         for (Query head : headsPool) {
-        	Collection<Query> queue = new LinkedHashSet<Query>();
-        	queue.add(head);
-        	queues.add(queue);
+            Collection<Query> queue = new LinkedHashSet<Query>();
+            queue.add(head);
+            queues.add(queue);
         }
-        
+
         System.out.println("Using " + nThreads + " threads");
         //Create as many threads as available cores
         ArrayList<Thread> currentJobs = new ArrayList<>();
         ArrayList<RDFMinerJob2> jobObjects = new ArrayList<>();
         List<RDFMinerJob> runningThreads = new ArrayList<>();
         for (int i = 0; i < (int) Math.min(nThreads, headsPool.size()); ++i) {
-        	Collection<Query> queue = telecom.util.collections.Collections.poll(queues);
+            Collection<Query> queue = telecom.util.collections.Collections.poll(queues);
             RDFMinerJob2 jobObject = new RDFMinerJob2(queues, queue, result, resultsLock, resultsCondVar, indexedResult, runningThreads);
             Thread job = new Thread(jobObject);
             currentJobs.add(job);
             jobObjects.add(jobObject);
         }
-        
+
         for (Thread job : currentJobs) {
             job.start();
         }
@@ -307,23 +311,23 @@ public class AMIE {
         for (Thread job : currentJobs) {
             job.join();
         }
-        
+
         if (realTime) {
             consumerObj.finish();
             consumerThread.interrupt();
         }
 
         return result;
-       
+
     }
-    
+
     class RDFMinerJob2 implements Runnable {
-    	
-    	public List<RDFMinerJob> runningThreads;
-    	
-    	private Collection<Collection<Query>> headsPool;
-    	
-    	private List<Query> outputSet;
+
+        public List<RDFMinerJob> runningThreads;
+
+        private Collection<Collection<Query>> headsPool;
+
+        private List<Query> outputSet;
 
         // A version of the output set thought for search.
         private MultiMap<Integer, Query> indexedOutputSet;
@@ -333,74 +337,75 @@ public class AMIE {
         private Lock resultsLock;
 
         private Condition resultsCondition;
-    	
-		public RDFMinerJob2(Collection<Collection<Query>> headsPool, 
-				Collection<Query> queue, List<Query> result,
-				Lock resultsLock, Condition resultsCondVar,
-				MultiMap<Integer, Query> indexedResult,
-				List<RDFMinerJob> runningThreads) {
-			this.runningThreads = runningThreads;
-			this.headsPool = headsPool;
-			this.queryPool = queue;
-			this.outputSet = result;
-			this.resultsLock = resultsLock;
-			this.resultsCondition = resultsCondVar;
-			this.indexedOutputSet = indexedResult;
-		}
 
-		@Override
-		public void run() {
-			RDFMinerJob job = null;
-			AtomicInteger sharedCounter = new AtomicInteger(0);
-			while (queryPool != null) {				
-				//System.out.println(Thread.currentThread().getId() + " is creating a new job");
-				sharedCounter.getAndIncrement();
-				job = new RDFMinerJob(queryPool, outputSet, resultsLock, resultsCondition, sharedCounter, indexedOutputSet);
-				synchronized (runningThreads) {
-					runningThreads.add(job);
-				}
-				job.run();
-				synchronized (runningThreads) {
-					runningThreads.remove(job);
-				}
-				
-				boolean helpOtherThreads = false;
-				synchronized (headsPool) {
-					helpOtherThreads = headsPool.isEmpty();
-				}
-				
-				if (helpOtherThreads) {
-					synchronized (runningThreads) {
-						//System.out.println(Thread.currentThread().getId() + " is done and looking for other threads to help " + runningThreads.size() + " running");
-						boolean helpedSomebody = false;
-						java.util.Collections.shuffle(runningThreads);
-						for (int i = 0; i < runningThreads.size(); ++i) {
-							// Still here there is a risk that the job is done by the time we 
-							// give it some help
-							if (!runningThreads.get(i).isDone()) {
-								queryPool = runningThreads.get(i).getPool();
-								sharedCounter = runningThreads.get(i).getSharedCounter();
-								job = null;
-								helpedSomebody = true;
-								//System.out.println(Thread.currentThread().getId() + " is gonna help job with id " + runningThreads.get(i).hashCode());
-								break;
-							}
-						}
+        public RDFMinerJob2(Collection<Collection<Query>> headsPool,
+                Collection<Query> queue, List<Query> result,
+                Lock resultsLock, Condition resultsCondVar,
+                MultiMap<Integer, Query> indexedResult,
+                List<RDFMinerJob> runningThreads) {
+            this.runningThreads = runningThreads;
+            this.headsPool = headsPool;
+            this.queryPool = queue;
+            this.outputSet = result;
+            this.resultsLock = resultsLock;
+            this.resultsCondition = resultsCondVar;
+            this.indexedOutputSet = indexedResult;
+        }
 
-						// If I reach this stage, then nobody needs help
-						if (!helpedSomebody)
-							break;
-					}
-				} else {
-					synchronized (headsPool) {							
-						queryPool = telecom.util.collections.Collections.poll(headsPool);	
-						job = null;
-						sharedCounter = new AtomicInteger(0);
-						//System.out.println(Thread.currentThread().getId() + " is dequeing a new relation");
-					}
-				}
-			}
-		}    	
+        @Override
+        public void run() {
+            RDFMinerJob job = null;
+            AtomicInteger sharedCounter = new AtomicInteger(0);
+            while (queryPool != null) {
+                //System.out.println(Thread.currentThread().getId() + " is creating a new job");
+                sharedCounter.getAndIncrement();
+                job = new RDFMinerJob(queryPool, outputSet, resultsLock, resultsCondition, sharedCounter, indexedOutputSet);
+                synchronized (runningThreads) {
+                    runningThreads.add(job);
+                }
+                job.run();
+                synchronized (runningThreads) {
+                    runningThreads.remove(job);
+                }
+
+                boolean helpOtherThreads = false;
+                synchronized (headsPool) {
+                    helpOtherThreads = headsPool.isEmpty();
+                }
+
+                if (helpOtherThreads) {
+                    synchronized (runningThreads) {
+                        //System.out.println(Thread.currentThread().getId() + " is done and looking for other threads to help " + runningThreads.size() + " running");
+                        boolean helpedSomebody = false;
+                        java.util.Collections.shuffle(runningThreads);
+                        for (int i = 0; i < runningThreads.size(); ++i) {
+                            // Still here there is a risk that the job is done by the time we 
+                            // give it some help
+                            if (!runningThreads.get(i).isDone()) {
+                                queryPool = runningThreads.get(i).getPool();
+                                sharedCounter = runningThreads.get(i).getSharedCounter();
+                                job = null;
+                                helpedSomebody = true;
+                                //System.out.println(Thread.currentThread().getId() + " is gonna help job with id " + runningThreads.get(i).hashCode());
+                                break;
+                            }
+                        }
+
+                        // If I reach this stage, then nobody needs help
+                        if (!helpedSomebody) {
+                            break;
+                        }
+                    }
+                } else {
+                    synchronized (headsPool) {
+                        queryPool = telecom.util.collections.Collections.poll(headsPool);
+                        job = null;
+                        sharedCounter = new AtomicInteger(0);
+                        //System.out.println(Thread.currentThread().getId() + " is dequeing a new relation");
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -476,13 +481,13 @@ public class AMIE {
         private Lock resultsLock;
 
         private Condition resultsCondition;
-        
+
         private Condition monitorCondition;
 
         private AtomicInteger sharedCounter;
 
         private boolean idle;
-        
+
         private Boolean done;
 
         // Time spent in applying the operators.
@@ -517,18 +522,18 @@ public class AMIE {
             this.approximationTime = 0l;
         }
 
-		public AtomicInteger getSharedCounter() {
-			// TODO Auto-generated method stub
-			return this.sharedCounter;
-		}
+        public AtomicInteger getSharedCounter() {
+            // TODO Auto-generated method stub
+            return this.sharedCounter;
+        }
 
-		public Collection<Query> getPool() {
-			// TODO Auto-generated method stub
-			return this.queryPool;
-		}
+        public Collection<Query> getPool() {
+            // TODO Auto-generated method stub
+            return this.queryPool;
+        }
 
-		public synchronized Boolean isDone() {
-        	return this.done;
+        public synchronized Boolean isDone() {
+            return this.done;
         }
 
         private Query pollQuery() {
@@ -546,9 +551,9 @@ public class AMIE {
 
         @Override
         public void run() {
-        	synchronized (this.done) {
-            	this.done = false;	
-			}
+            synchronized (this.done) {
+                this.done = false;
+            }
             while (true) {
                 Query currentRule = null;
 
@@ -590,14 +595,14 @@ public class AMIE {
                     if (assistant.isEnablePerfectRules()) {
                         furtherRefined = !currentRule.isPerfect();
                     }
-                    
+
                     // If so specialize it
                     if (furtherRefined) {
                         long timeStamp1 = System.currentTimeMillis();
                         double threshold = getCountThreshold(currentRule);
                         List<Query> temporalOutput = new ArrayList<Query>();
                         List<Query> temporalOutputDanglingEdges = new ArrayList<Query>();
-                        
+
                         // Application of the mining operators
                         assistant.getClosingAtoms(currentRule, threshold, temporalOutput);
                         assistant.getDanglingAtoms(currentRule, threshold, temporalOutputDanglingEdges);
@@ -608,11 +613,11 @@ public class AMIE {
                         synchronized (queryPool) {
                             timeStamp1 = System.currentTimeMillis();
                             queryPool.addAll(temporalOutput);
-                        	// This part of the code, check please!
+                            // This part of the code, check please!
                             if (currentRule.getRealLength() < assistant.getMaxDepth() - 1) {
-                            	queryPool.addAll(temporalOutputDanglingEdges);
-                        	}
-                            
+                                queryPool.addAll(temporalOutputDanglingEdges);
+                            }
+
                             timeStamp2 = System.currentTimeMillis();
                             this.queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
                         }
@@ -642,7 +647,7 @@ public class AMIE {
                         this.idle = true;
                         boolean leave;
                         synchronized (this.sharedCounter) {
-                            leave = this.sharedCounter.decrementAndGet() <= 0;	
+                            leave = this.sharedCounter.decrementAndGet() <= 0;
                         }
                         if (leave) {
                             break;
@@ -654,10 +659,10 @@ public class AMIE {
                     }
                 }
             }
-            
+
             synchronized (this.done) {
-            	this.done = true;	
-			}
+                this.done = true;
+            }
         }
 
         /**
@@ -898,12 +903,12 @@ public class AMIE {
                 .withDescription("path to the file containing the nonkeys for the conditional key mining")
                 .hasArg()
                 .create("nkf");
-        
+
         Option miningTechniqueOp = OptionBuilder.withArgName("mining-technique")
                 .withDescription("AMIE offers 2 multi-threading strategies: standard (traditional) and solidary (experimental)")
                 .hasArg()
                 .create("mt");
-        
+
         options.addOption(stdConfThresholdOpt);
         options.addOption(supportOpt);
         options.addOption(initialSupportOpt);
@@ -974,14 +979,13 @@ public class AMIE {
                 System.exit(1);
             }
         }
-        
 
         if (cli.hasOption("minis")) {
             String minInitialSupportStr = cli.getOptionValue("minis");
             try {
-                minInitialSup = Integer.parseInt(minInitialSupportStr);	
+                minInitialSup = Integer.parseInt(minInitialSupportStr);
             } catch (NumberFormatException e) {
-            	System.err.println("The option -minis (initial support threshold) requires an integer as argument");
+                System.err.println("The option -minis (initial support threshold) requires an integer as argument");
                 System.err.println("AMIE+ [OPTIONS] <.tsv INPUT FILES>");
                 formatter.printHelp("AMIE+", options);
                 System.exit(1);
@@ -1094,15 +1098,15 @@ public class AMIE {
                 nThreads = nProcessors;
             }
         }
-        
+
         if (cli.hasOption("mt")) {
-        	miningTechniqueStr = cli.getOptionValue("mt").toLowerCase();
-        	if (!miningTechniqueStr.equals("solidary") 
-        			&& !miningTechniqueStr.equals("standard")) {
-        		miningTechniqueStr = "standard";
-        	}
+            miningTechniqueStr = cli.getOptionValue("mt").toLowerCase();
+            if (!miningTechniqueStr.equals("solidary")
+                    && !miningTechniqueStr.equals("standard")) {
+                miningTechniqueStr = "standard";
+            }
         }
-		System.out.println("Using "+ miningTechniqueStr +" multi-threading strategy.");
+        System.out.println("Using " + miningTechniqueStr + " multi-threading strategy.");
 
         avoidUnboundTypeAtoms = cli.hasOption("auta");
         exploitMaxLengthForRuntime = !cli.hasOption("deml");
@@ -1147,7 +1151,6 @@ public class AMIE {
             schemaSource = new FactDatabase();
             schemaSource.load(schemaFiles);
         }
-        
 
         if (cli.hasOption("pm")) {
             switch (cli.getOptionValue("pm")) {
@@ -1216,11 +1219,11 @@ public class AMIE {
                 break;
             case "signatured":
                 mineAssistant = new RelationSignatureDefaultMiningAssistant(dataSource);
-        		List<ByteString> excludedRelationsSignatured = Arrays.asList(ByteString.of("rdf:type"), 
-        				ByteString.of("rdfs:domain"), ByteString.of("rdfs:range"));
-        		bodyExcludedRelations = excludedRelationsSignatured;
-        		headExcludedRelations = excludedRelationsSignatured;                
-                System.out.println("Counting on both head variables and using relation signatures (domain and range types) [EXPERIMENTAL]");                
+                List<ByteString> excludedRelationsSignatured = Arrays.asList(ByteString.of("rdf:type"),
+                        ByteString.of("rdfs:domain"), ByteString.of("rdfs:range"));
+                bodyExcludedRelations = excludedRelationsSignatured;
+                headExcludedRelations = excludedRelationsSignatured;
+                System.out.println("Counting on both head variables and using relation signatures (domain and range types) [EXPERIMENTAL]");
                 break;
             case "typed":
                 mineAssistant = new TypedDefaultMiningAssistant(dataSource);
@@ -1349,9 +1352,9 @@ public class AMIE {
         List<Query> rules = null;
 
         if (miningTechniqueStr.equals("standard")) {
-        	rules = miner.mine(realTime, headTargetRelations);
+            rules = miner.mine(realTime, headTargetRelations);
         } else {
-        	rules = miner.mine2(realTime, headTargetRelations);        	
+            rules = miner.mine2(realTime, headTargetRelations);
         }
 
         if (!realTime) {
