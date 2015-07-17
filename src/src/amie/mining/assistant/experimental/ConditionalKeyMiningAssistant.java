@@ -49,6 +49,7 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
     @Override
     public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output) {
 //        System.out.println("test1");
+     //   System.out.println("newQuery11:" + query);
         ByteString[] head = query.getHead();
         List<ByteString> bodyRelations = query.getBodyRelations();
         int positionInNonKey = bodyRelations.size();
@@ -79,6 +80,7 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                     Query newQuery = query.addEdges(atom1, atom2);
                     newQuery.setSupport(support);
                     output.add(newQuery);
+           //         System.out.println("newQuery12:" + newQuery);
 //                    System.out.println("NonKey1:" + nonKey + " Query:" + query + " NewQuery:" + newQuery);
                 }
 
@@ -103,18 +105,27 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                 }
                 ByteString property = nonKey.get(positionInNonKey);
                 ByteString[] atom1 = query.fullyUnboundTriplePattern();
+                ByteString[] atom2 = query.fullyUnboundTriplePattern();
                 atom1[0] = head[0];//x
                 atom1[1] = property;//property
+                atom2[0] = head[2];
+                atom2[1] = property;
+                atom2[2] = atom1[2];
                 query.getTriples().add(atom1);
+                query.getTriples().add(atom2);
                 IntHashMap<ByteString> constants = kb.countProjectionBindings(head, query.getTriples(), atom1[2]);
                 int effectiveSize = query.getTriples().size();
                 query.getTriples().remove(effectiveSize - 1);
+                query.getTriples().remove(effectiveSize - 2);
                 for (ByteString constant : constants) {
                     int support = constants.get(constant);
                     if (support >= minCardinality) {
                         atom1[2] = constant;
-                        Query newQuery = query.addAtom(atom1, support);
+                        atom2[2] = constant;
+                        Query newQuery = query.addEdges(atom1, atom2);
+                        newQuery.setSupport(support);
                         output.add(newQuery);
+              //          System.out.println("newQuery:" + newQuery);
                     }
                 }
 
