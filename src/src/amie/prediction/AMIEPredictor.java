@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
@@ -25,7 +26,6 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import org.semanticweb.yars.util.Array;
 
 import telecom.util.collections.MultiMap;
 import amie.data.FactDatabase;
@@ -139,25 +139,18 @@ public class AMIEPredictor {
 			List<Query> rules = ruleMiner.mine(false, Collections.EMPTY_LIST);
 			System.out.println("Rule mining took " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
 			System.out.println(rules.size() + " rules found");
+			System.out.println("Using " + this.numberOfCoresEvaluation + " threads to re-evaluate the rules (probabilistic scores).");
 			// Build the uncertain version of the rules
 			List<Query> finalRules = new ArrayList<Query>();
-			int ruleId = 1; // We will assign each rule a unique identifier for hashing purposes.
-			for (Query rule: rules) {
-				if (i > 0) { 
-					// Override the support and the PCA confidence to store the
-					// probabilistic version
-					Utilities.computeProbabilisticMetrics(rule, trainingKb);
-					boolean pruningCondition = false;
-					if (this.pruningMetric == Metric.HeadCoverage) {
-						pruningCondition = rule.getHeadCoverage() < this.pruningThreshold;
-					} else if (this.pruningMetric == Metric.Support) {
-						pruningCondition = rule.getSupport() < this.pruningThreshold;
-					}
-					pruningCondition = pruningCondition || rule.getPcaConfidence() < this.pcaConfidenceThreshold;
-				}
-				rule.setId(ruleId); // Assign an integer identifier for hashing purposes
-				++ruleId;
-				finalRules.add(rule);
+			AtomicInteger ruleId = new AtomicInteger(1); // We will assign each rule a unique identifier for hashing purposes.
+			Thread[] threads = new Thread[this.numberOfCoresEvaluation]; 
+			for (int k = 0; k < threads.length; ++k) {
+				threads[k] = new Thread(new RuleEvaluator(rules, i, finalRules, ruleId));
+				threads[k].start();
+			}
+			
+			for (int k = 0; k < threads.length; ++k) {
+				threads[k].join();
 			}
 			
 			System.out.println(finalRules.size() + " used to fire predictions");
@@ -258,13 +251,60 @@ public class AMIEPredictor {
 		return predictions;
 	}
 	
+	class RuleEvaluator implements Runnable {
+
+		private Collection<Query> rules;
+		private int iteration;
+		private Collection<Query> output;
+		private AtomicInteger ruleId;
+		
+		
+		public RuleEvaluator(Collection<Query> rules, int iteration, Collection<Query> output, AtomicInteger ruleId) {
+			this.rules = rules;
+			this.iteration = iteration;
+			this.output = output;
+			this.ruleId = ruleId;
+		}
+		
+		@Override
+		public void run() {
+			Query rule = null;
+			while (true) {
+				synchronized (this.rules) {
+					rule = telecom.util.collections.Collections.poll(this.rules);
+				}				
+				
+				if (rule == null) {
+					break;
+				}
+				
+				if (iteration > 0) { 
+					// Override the support and the PCA confidence to store the
+					// probabilistic version
+					Utilities.computeProbabilisticMetrics(rule, trainingKb);
+					boolean pruningCondition = false;
+					if (pruningMetric == Metric.HeadCoverage) {
+						pruningCondition = rule.getHeadCoverage() < pruningThreshold;
+					} else if (pruningMetric == Metric.Support) {
+						pruningCondition = rule.getSupport() < pruningThreshold;
+					}
+					pruningCondition = pruningCondition || rule.getPcaConfidence() < pcaConfidenceThreshold;
+				}				
+				rule.setId(ruleId.incrementAndGet()); // Assign an integer identifier for hashing purposes
+				synchronized(output) {
+					output.add(rule);	
+				}
+			}			
+		}
+	}
+	
 	class PredictionsBuilder implements Runnable {
 		private Map<Triple<ByteString, ByteString, ByteString>, List<Query>> items;
 		private List<Prediction> result;
 		private int iteration;
 		
 		public PredictionsBuilder(Map<Triple<ByteString, ByteString, ByteString>, List<Query>> items,
-				List<Prediction> result, Map<List<Integer>, Query> combinedRulesMap, int iteration) {
+				List<Prediction> result, int iteration) {
 			this.items = items;			
 			this.result = result;
 			this.iteration = iteration;
@@ -283,7 +323,7 @@ public class AMIEPredictor {
 						rules = items.get(nextTriple);
 						items.remove(nextTriple);
 					} catch (NoSuchElementException e) {
-						return;
+						break;
 					}
 				}
 				Prediction prediction = new Prediction(nextTriple);		
@@ -350,13 +390,11 @@ public class AMIEPredictor {
 				calculatePredictions2RulesMap(queries, notInTraining);
 		System.out.println((System.currentTimeMillis() - timeStamp1) + " milliseconds for calculatePredictions2RulesMap");
 		System.out.println(predictions.size() + " predictions deduced from the KB");
-		// We keep a map with the combined rules in order to avoid combining rules
-		// multiple times.
-		Map<List<Integer>, Query> combinedRulesMap = new HashMap<List<Integer>, Query>();
+		System.out.println("Using " + this.numberOfCoresEvaluation + " threads to score predictions.");
 		timeStamp1 = System.currentTimeMillis();
 		Thread[] threads = new Thread[this.numberOfCoresEvaluation];
 		for (int i = 0; i < threads.length; ++i) {
-			threads[i] = new Thread(new PredictionsBuilder(predictions, output, combinedRulesMap, iteration));
+			threads[i] = new Thread(new PredictionsBuilder(predictions, output, iteration));
 			threads[i].start();
 		}
 		
@@ -368,6 +406,10 @@ public class AMIEPredictor {
 			ByteString[] t = prediction.getTriple();
 			trainingKb.add(t[0], t[1], t[2], prediction.getFullScore());
 		}
+		
+		System.out.println("Rebuilding overlap tables");
+		trainingKb.buildOverlapTables();
+		System.out.println("Done");
 		
 		System.out.println((System.currentTimeMillis() - timeStamp1) + " milliseconds to calculate the scores for predictions");
 	}
@@ -514,6 +556,7 @@ public class AMIEPredictor {
         	inputFilesArray[i] = new File(inputFileArgs[i]);
         }
 		training.load(inputFilesArray);
+        training.buildOverlapTables();
 		
 		if (cli.hasOption("tkb")) {		
 			String[] testingFileArgs = cli.getOptionValue("tkb").split(":");
@@ -629,7 +672,6 @@ public class AMIEPredictor {
         assistant.setPcaConfidenceThreshold(confidenceThreshold);
         assistant.setEnabledConfidenceUpperBounds(true);
         assistant.setEnabledFunctionalityHeuristic(true);
-        assistant.setEnablePerfectRules(true);
         AMIE miner = new AMIE(assistant, minInitialSupport, minMetricValue, metric, Runtime.getRuntime().availableProcessors());
 		AMIEPredictor predictor = new AMIEPredictor(miner, testing);
 		predictor.setNumberOfCoresForEvaluation(numberOfCoresEvaluation);
