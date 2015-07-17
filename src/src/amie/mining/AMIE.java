@@ -600,6 +600,7 @@ public class AMIE {
                         synchronized (queryPool) {
                             timeStamp1 = System.currentTimeMillis();
                             queryPool.addAll(temporalOutput);
+                            System.out.println("stuck");
                         	// This part of the code, check please!
                             if (currentRule.getRealLength() < assistant.getMaxDepth() - 1) {
                             	queryPool.addAll(temporalOutputDanglingEdges);
