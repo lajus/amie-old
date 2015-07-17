@@ -48,13 +48,14 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
 
     @Override
     public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output) {
+        System.out.println("test1");
         ByteString[] head = query.getHead();
         List<ByteString> bodyRelations = query.getBodyRelations();
         int positionInNonKey = bodyRelations.size();
         for (List<ByteString> nonKey : nonKeys) {
             if (nonKey.size() > bodyRelations.size()) {
                 if (positionInNonKey > 0) {
-                    if (!nonKey.subList(0, positionInNonKey-1).containsAll(bodyRelations)) {
+                    if (!nonKey.subList(0, positionInNonKey).containsAll(bodyRelations)) {
                         continue;
                     }
                 }
@@ -78,21 +79,27 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                     Query newQuery = query.addEdges(atom1, atom2);
                     newQuery.setSupport(support);
                     output.add(newQuery);
+                    System.out.println("NonKey1:" + nonKey + " Query:" + query + " NewQuery:" + newQuery);
                 }
 
             }
         }
     }
 
-    @Override
     public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output) {
+    }
+
+    @Override
+    public void getInstantiatedAtoms(Query query, double minCardinality, Collection<Query> temporalSomething, Collection<Query> output) {
         ByteString[] head = query.getHead();
         List<ByteString> bodyRelations = query.getBodyRelations();
         int positionInNonKey = bodyRelations.size();
         for (List<ByteString> nonKey : nonKeys) {
+                                System.out.println("test3");
+
             if (nonKey.size() > bodyRelations.size()) {
                 if (positionInNonKey > 0) {
-                    if (!nonKey.subList(0, positionInNonKey-1).containsAll(bodyRelations)) {
+                    if (!nonKey.subList(0, positionInNonKey).containsAll(bodyRelations)) {
                         continue;
                     }
                 }
@@ -110,10 +117,12 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                         atom1[2] = constant;
                         Query newQuery = query.addAtom(atom1, support);
                         output.add(newQuery);
+                        System.out.println("NonKey2:" + nonKey + " Query:" + query + " NewQuery:" + newQuery);
                     }
                 }
 
             }
         }
+        System.out.println("end");
     }
 }
