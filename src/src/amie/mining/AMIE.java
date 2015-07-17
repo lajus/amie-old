@@ -562,6 +562,7 @@ public class AMIE {
                 }
 
                 if (currentRule != null) {
+                  //  System.out.println("Dequeued:"+currentRule);
                     if (this.idle) {
                         this.idle = false;
                         this.sharedCounter.decrementAndGet();
