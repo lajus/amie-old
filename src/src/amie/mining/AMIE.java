@@ -214,11 +214,10 @@ public class AMIE {
             consumerThread.start();
         }
 
-        System.out.println("Usinggg " + nThreads + " threads");
+        System.out.println("Using " + nThreads + " threads");
         //Create as many threads as available cores
         ArrayList<Thread> currentJobs = new ArrayList<>();
         ArrayList<RDFMinerJob> jobObjects = new ArrayList<>();
-        System.out.println("stuck1");
         for (int i = 0; i < nThreads; ++i) {
             RDFMinerJob jobObject = new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter, indexedResult);
             Thread job = new Thread(jobObject);
@@ -230,7 +229,6 @@ public class AMIE {
         for (Thread job : currentJobs) {
             job.start();
         }
-        System.out.println("stuckk");
 
         for (Thread job : currentJobs) {
             job.join();

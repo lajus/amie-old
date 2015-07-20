@@ -68,6 +68,8 @@ public class AMIEPredictor {
 		
 	private MiningAssistant miningAssistant;
 	
+	private boolean standardMining;
+	
 	public AMIEPredictor(AMIE miner) {
 		this.miningAssistant = miner.getAssistant();
 		this.trainingKb = (HistogramTupleIndependentProbabilisticFactDatabase) this.miningAssistant.getKb();
@@ -119,6 +121,14 @@ public class AMIEPredictor {
 		this.numberOfCoresEvaluation = numberOfCoresEvaluation;
 	}
 
+	public boolean isStandardMining() {
+		return standardMining;
+	}
+
+	public void setStandardMining(boolean standardMining) {
+		this.standardMining = standardMining;
+	}
+
 	/**
 	 * 
 	 * @param numberIterations
@@ -136,7 +146,12 @@ public class AMIEPredictor {
 			List<Prediction> predictionsAtIterationI = new ArrayList<>();
 			// Mine rules using AMIE
 			long startTime = System.currentTimeMillis();
-			List<Query> rules = ruleMiner.mine(false, Collections.EMPTY_LIST);
+			List<Query> rules = null;
+			if (this.standardMining) {
+				rules = ruleMiner.mine(false, Collections.EMPTY_LIST);
+			} else {
+				rules = ruleMiner.mine(false, Collections.EMPTY_LIST);
+			}
 			System.out.println("Rule mining took " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
 			System.out.println(rules.size() + " rules found");
 			System.out.println("Using " + this.numberOfCoresEvaluation + " threads to re-evaluate the rules (probabilistic scores).");
@@ -433,7 +448,7 @@ public class AMIEPredictor {
 		}
 		
 		double functionalityScore = trainingKb.probabilityOfCardinalityGreaterThan(relation, (int)cardinality);
-		prediction.setCardinalityScore(functionalityScore);		
+		prediction.setFunctionalityScore(functionalityScore);		
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -458,6 +473,7 @@ public class AMIEPredictor {
 		List<Prediction> predictions = null;
 		boolean outputSample = false;
 		int sampleSize = DefaultSampleSize;
+		String miningTechniqueStr = "standard";
         
         Option supportOpt = OptionBuilder.withArgName("min-support")
                 .hasArg()
@@ -519,6 +535,11 @@ public class AMIEPredictor {
         		.hasArg()
         		.withDescription("Print the sample in this file.")
         		.create("sout");
+        
+        Option miningTechniqueOp = OptionBuilder.withArgName("mining-technique")
+                .withDescription("AMIE offers 2 multi-threading strategies: standard (traditional) and solidary (experimental)")
+                .hasArg()
+                .create("mt");
                 
         options.addOption(supportOpt);
         options.addOption(initialSupportOpt);
@@ -532,6 +553,7 @@ public class AMIEPredictor {
         options.addOption(outputSampleOption);
         options.addOption(sampleSizeOption);       
         options.addOption(sampleOutputFile);
+        options.addOption(miningTechniqueOp);
         
         try {
             cli = parser.parse(options, args);
@@ -656,7 +678,15 @@ public class AMIEPredictor {
 			
 		}
 		
-		
+		if (cli.hasOption("mt")) {
+            miningTechniqueStr = cli.getOptionValue("mt").toLowerCase();
+            if (!miningTechniqueStr.equals("solidary")
+                    && !miningTechniqueStr.equals("standard")) {
+                miningTechniqueStr = "standard";
+            }
+        }
+        System.out.println("Using " + miningTechniqueStr + " multi-threading strategy.");
+        boolean standardMining = !miningTechniqueStr.equals("solidary"); 
 				
         MiningAssistant assistant = null;
         if (allowTypes) {
@@ -674,6 +704,7 @@ public class AMIEPredictor {
         assistant.setEnabledFunctionalityHeuristic(true);
         AMIE miner = new AMIE(assistant, minInitialSupport, minMetricValue, metric, Runtime.getRuntime().availableProcessors());
 		AMIEPredictor predictor = new AMIEPredictor(miner, testing);
+		predictor.setStandardMining(standardMining);
 		predictor.setNumberOfCoresForEvaluation(numberOfCoresEvaluation);
 		long timeStamp1 = System.currentTimeMillis();
 		predictions = predictor.predict(numberOfIterations, addOnlyVerifiedPredictions);

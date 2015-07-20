@@ -143,7 +143,7 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	 */
 	protected double[] probabibilitiesOfQuery(List<ByteString[]> query) {
 		// Count the number of variables
-		double[] result = null;
+		double[] result = new double[]{0.0};
 		if (!containsVariables(query)) {
 			result = new double[query.size()];
 			int k = 0;
@@ -163,17 +163,20 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 		
 		try (Instantiator insty = new Instantiator(query, pivotVariable)) {
 			double tmp[][] = new double[bindings.size()][];
-			int k = 0;
+			int effectiveSize = 0;
 			int totalSize = 0;
 			for (ByteString inst : bindings) {
-				tmp[k] = probabibilitiesOfQuery(insty.instantiate(inst));
-				totalSize += tmp[k].length;
-				++k;
+				double[] tmpAtI = probabibilitiesOfQuery(insty.instantiate(inst));
+				if (tmpAtI.length > 1 || tmpAtI[0] != 0.0) {
+					totalSize += tmpAtI.length;
+					tmp[effectiveSize] = tmpAtI;
+					++effectiveSize;
+				}
 			}
 			if (totalSize > 0) {
 				result = new double[totalSize];
-				k = 0;
-				for (int i = 0; i < tmp.length; ++i) {
+				int k = 0;
+				for (int i = 0; i < effectiveSize; ++i) {
 					for (int j = 0; j < tmp[i].length; ++j, ++k) {
 						result[k] = tmp[i][j];
 					}
@@ -288,13 +291,15 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 					headExistInsty1.instantiate(val1);
 					headInst1.instantiate(val1);
 					double[] bodyProbabilities = probabibilitiesOfQuery(query); // Body probability
-					double[] headProbabilities = probabibilitiesOfQuery(listExistential);
-					// For the denominator
-					double headProbability = aggregateProbabilities(headProbabilities);
-					result[1] += probability(headProbability, bodyProbabilities);					
-					// For the numerator
-					headProbability = probabilityOfFact(projection);
-					result[0] += probability(headProbability, bodyProbabilities);
+					if (bodyProbabilities.length > 1 || bodyProbabilities[0] != 0.0) {
+						double[] headProbabilities = probabibilitiesOfQuery(listExistential);
+						// For the denominator
+						double headProbability = aggregateProbabilities(headProbabilities);
+						result[1] += probability(headProbability, bodyProbabilities);					
+						// For the numerator
+						headProbability = probabilityOfFact(projection);
+						result[0] += probability(headProbability, bodyProbabilities);
+					}
 				}
 			}
 		} else {
@@ -313,7 +318,7 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 						headInst2.instantiate(val2);
 						insty2.instantiate(val2);
 						double[] bodyProbabilities = probabibilitiesOfQuery(query); // Body probability
-						if (bodyProbabilities != null) {
+						if (bodyProbabilities.length > 1 || bodyProbabilities[0] != 0.0) {
 							double[] headProbabilities = probabibilitiesOfQuery(listExistential);						
 							// For the denominator
 							double headProbability = aggregateProbabilities(headProbabilities);

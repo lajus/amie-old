@@ -39,7 +39,7 @@ public class Prediction {
 	 * postulates a third child for a person, the cardinality score is the probability
 	 * that people has more than 2 children in the KB. 
 	 */
-	private double cardinalityScore;
+	private double functionalityScore;
 	
 	/**
 	 * If the predictions are drawn from an iterative process, this attribute stores
@@ -61,7 +61,7 @@ public class Prediction {
 		hitInTarget = false;
 		rules = new ArrayList<>();
 		naiveConfidence = Double.NEGATIVE_INFINITY;
-		cardinalityScore = 1.0;
+		functionalityScore = 1.0;
 		jointRule = null;
 		setIterationId(-1);
 	}
@@ -71,7 +71,7 @@ public class Prediction {
 		hitInTarget = false;
 		rules = new ArrayList<>();
 		naiveConfidence = Double.NEGATIVE_INFINITY;
-		cardinalityScore = 1.0;
+		functionalityScore = 1.0;
 		jointRule = null;
 		setIterationId(-1);
 	}
@@ -120,20 +120,20 @@ public class Prediction {
 		return naiveConfidence;
 	}
 	
-	public double getCardinalityScore() {
-		return cardinalityScore;
+	public double getFunctionalityScore() {
+		return functionalityScore;
 	}
 
-	public void setCardinalityScore(double cardinalityScore) {
-		this.cardinalityScore = cardinalityScore;
+	public void setFunctionalityScore(double cardinalityScore) {
+		this.functionalityScore = cardinalityScore;
 	}
 	
 	public double getNaiveFullScore() {
-		return getNaiveConfidence() * getCardinalityScore();
+		return getNaiveConfidence() * getFunctionalityScore();
 	}
 	
 	public double getFullScore() {
-		return getConfidence() * getCardinalityScore();
+		return getConfidence() * getFunctionalityScore();
 	}
 	
 	public void setJointRule(Query rule) {
@@ -235,6 +235,7 @@ public class Prediction {
 		builder.append("\t" + getFullScore());
 		builder.append("\t" + getNaiveConfidence());
 		builder.append("\t" + getConfidence());
+		builder.append("\t" + getFunctionalityScore());
 		builder.append("\t" + getNaiveFullScore());
 		
 		for (Query q : rules) {
