@@ -31,7 +31,7 @@ public class Prediction {
 	 * 1 - (Conf(R1) * Conf(R2) ... Conf(Rn))
 	 * where Conf can be either the standard or the PCA confidence
 	 */
-	private double naiveConfidence;
+	private double naiveIndependentConfidence;
 	
 	/**
 	 * Based on soft cardinality constraints, it is the probability that
@@ -60,7 +60,7 @@ public class Prediction {
 		this.triple = triple;
 		hitInTarget = false;
 		rules = new ArrayList<>();
-		naiveConfidence = Double.NEGATIVE_INFINITY;
+		naiveIndependentConfidence = Double.NEGATIVE_INFINITY;
 		functionalityScore = 1.0;
 		jointRule = null;
 		setIterationId(-1);
@@ -70,7 +70,7 @@ public class Prediction {
 		this.triple = new ByteString[]{triple.first, triple.second, triple.third};
 		hitInTarget = false;
 		rules = new ArrayList<>();
-		naiveConfidence = Double.NEGATIVE_INFINITY;
+		naiveIndependentConfidence = Double.NEGATIVE_INFINITY;
 		functionalityScore = 1.0;
 		jointRule = null;
 		setIterationId(-1);
@@ -105,8 +105,8 @@ public class Prediction {
 	 * It assumes rules are independent.
 	 * @return
 	 */
-	public double getNaiveConfidence() {
-		if (naiveConfidence == Double.NEGATIVE_INFINITY) {
+	public double getNaiveIndependentConfidence() {
+		if (naiveIndependentConfidence == Double.NEGATIVE_INFINITY) {
 			double product = 1.0;
 			for (Query rule : rules) {
 				if (Prediction.metric == Metric.PCAConfidence) {
@@ -115,9 +115,9 @@ public class Prediction {
 					product *= (1.0 - rule.getStdConfidence());					
 				}
 			}
-			naiveConfidence = 1.0 - product;
+			naiveIndependentConfidence = 1.0 - product;
 		}
-		return naiveConfidence;
+		return naiveIndependentConfidence;
 	}
 	
 	public double getFunctionalityScore() {
@@ -128,12 +128,26 @@ public class Prediction {
 		this.functionalityScore = cardinalityScore;
 	}
 	
-	public double getNaiveFullScore() {
-		return getNaiveConfidence() * getFunctionalityScore();
+	public double getNaiveConfidenceTimesFuncScore() {
+		return getNaiveIndependentConfidence() * getFunctionalityScore();
 	}
 	
-	public double getFullScore() {
-		return getConfidence() * getFunctionalityScore();
+	public double getJointConfidenceTimesFuncScore() {
+		return getJointConfidence() * getFunctionalityScore();
+	}
+	
+	public double get(PredictionMetric metric) {
+		switch (metric) {
+		case NaiveIndependenceConfidence :
+			return getNaiveIndependentConfidence();
+		case JointConfidence :
+			return getJointConfidence();
+		case NaiveIndependenceConfidenceTimesFuncScore :
+			return getNaiveConfidenceTimesFuncScore();
+		case JointScoreTimesFuncScore :
+			return getJointConfidenceTimesFuncScore();			
+		}
+		return getJointConfidenceTimesFuncScore();
 	}
 	
 	public void setJointRule(Query rule) {
@@ -155,7 +169,7 @@ public class Prediction {
 		return this.jointRule;
 	}
 	
-	public double getConfidence() {
+	public double getJointConfidence() {		
 		Query jointRule = getJointRule();
 		if (Prediction.metric == Metric.PCAConfidence) {
 			if (jointRule.getPcaConfidence() < 0.0)
@@ -187,7 +201,7 @@ public class Prediction {
 		builder.append("\t");		
 		builder.append(triple[2]);
 		builder.append("\t");	
-		builder.append(getNaiveConfidence());
+		builder.append(getNaiveIndependentConfidence());
 		builder.append("\t");
 		
 		if (hitInTarget) {
@@ -207,9 +221,9 @@ public class Prediction {
 		builder.append("\t");		
 		builder.append(triple[2]);
 		builder.append("\t");	
-		builder.append(getNaiveConfidence());
+		builder.append(getNaiveIndependentConfidence());
 		builder.append("\t");
-		builder.append(getConfidence());
+		builder.append(getJointConfidence());
 		builder.append("\t");
 		
 		if (hitInTarget) {
@@ -232,11 +246,11 @@ public class Prediction {
 			builder.append("\tHit in training");
 		}
 		
-		builder.append("\t" + getFullScore());
-		builder.append("\t" + getNaiveConfidence());
-		builder.append("\t" + getConfidence());
+		builder.append("\t" + getJointConfidenceTimesFuncScore());
+		builder.append("\t" + getNaiveIndependentConfidence());
+		builder.append("\t" + getJointConfidence());
 		builder.append("\t" + getFunctionalityScore());
-		builder.append("\t" + getNaiveFullScore());
+		builder.append("\t" + getNaiveConfidenceTimesFuncScore());
 		
 		for (Query q : rules) {
 			builder.append("\t" + q.getRuleString() + "[" + q.getSupport() + ", " + q.getPcaConfidence() + "]");
@@ -259,8 +273,8 @@ public class Prediction {
 		}
 	
 		builder.append("\t" + rules.size());
-		builder.append("\t" + getNaiveConfidence());
-		builder.append("\t" + getConfidence());
+		builder.append("\t" + getNaiveIndependentConfidence());
+		builder.append("\t" + getJointConfidence());
 		
 		return builder.toString(); 
 	}
@@ -268,4 +282,5 @@ public class Prediction {
 	public boolean inTargetButNotInTraining() {
 		return hitInTarget && !hitInTraining;
 	}
+	
 }

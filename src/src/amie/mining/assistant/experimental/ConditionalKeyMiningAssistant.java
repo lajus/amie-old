@@ -48,8 +48,6 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
 
     @Override
     public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output) {
-//        System.out.println("test1");
-     //   System.out.println("newQuery11:" + query);
         ByteString[] head = query.getHead();
         List<ByteString> bodyRelations = query.getBodyRelations();
         int positionInNonKey = bodyRelations.size();

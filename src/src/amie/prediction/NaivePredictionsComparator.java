@@ -7,8 +7,8 @@ import javatools.datatypes.ByteString;
 public class NaivePredictionsComparator implements Comparator<Prediction>{	
 	@Override
 	public int compare(Prediction o1, Prediction o2) {
-		Double conf1 = o1.getNaiveConfidence();
-		Double conf2 = o2.getNaiveConfidence();
+		Double conf1 = o1.getNaiveIndependentConfidence();
+		Double conf2 = o2.getNaiveIndependentConfidence();
 		
 		if (conf1.equals(conf2)) {
 			ByteString[] triple1 = o1.getTriple();

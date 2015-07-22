@@ -97,7 +97,7 @@ public class SampleWikiLinksByScore {
 				++numberOfAutomSemantified;
 			}
 			
-			double naiveConfidence = representativePrediction.getNaiveConfidence();
+			double naiveConfidence = representativePrediction.getNaiveIndependentConfidence();
 			
 			if (naiveConfidence < 0.0 || naiveConfidence > 1.0) {
 				System.err.println(representativePrediction.toNaiveEvaluationString());
@@ -128,9 +128,9 @@ public class SampleWikiLinksByScore {
 				// Order is preserved
 				boolean checked = prediction.isHitInTarget();
 				if (pair.first.first.equals(triple.first)) {
-					System.out.print(triple.second + "[" + prediction.getNaiveConfidence() + ", " + checked + "]" +  ", ");	
+					System.out.print(triple.second + "[" + prediction.getNaiveIndependentConfidence() + ", " + checked + "]" +  ", ");	
 				} else {
-					System.out.print(triple.second + "-inv[" + prediction.getNaiveConfidence() + ", " + checked + "]" +  ", ");	
+					System.out.print(triple.second + "-inv[" + prediction.getNaiveIndependentConfidence() + ", " + checked + "]" +  ", ");	
 				}
 			}
 			System.out.println();

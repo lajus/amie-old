@@ -69,6 +69,8 @@ public class AMIEPredictor {
 	private MiningAssistant miningAssistant;
 	
 	private boolean standardMining;
+
+	private PredictionMetric pmetric;
 	
 	public AMIEPredictor(AMIE miner) {
 		this.miningAssistant = miner.getAssistant();
@@ -128,6 +130,14 @@ public class AMIEPredictor {
 	public void setStandardMining(boolean standardMining) {
 		this.standardMining = standardMining;
 	}
+	
+	public PredictionMetric getPredictionMetric() {
+		return this.pmetric;
+	}
+	
+	public void setPredictionMetric(PredictionMetric pmetric) {
+		this.pmetric = pmetric;
+	}
 
 	/**
 	 * 
@@ -179,7 +189,7 @@ public class AMIEPredictor {
 			}
 		}
 		System.out.println("The inference is done. Sorting prediction by probabilistic score.");
-		PredictionsComparator predictionsCmp = new PredictionsComparator(amie.prediction.Metric.FullJointScore);
+		PredictionsComparator predictionsCmp = new PredictionsComparator(this.pmetric);
 		Collections.sort(resultingPredictions, predictionsCmp);
 		return resultingPredictions;
 	}
@@ -377,7 +387,7 @@ public class AMIEPredictor {
 					prediction.setHitInTraining(true);
 				}
 				
-				double finalConfidence = prediction.getFullScore();
+				double finalConfidence = prediction.getJointConfidenceTimesFuncScore();
 				if (finalConfidence >= pcaConfidenceThreshold) {
 					prediction.setIterationId(iteration);
 					synchronized (result) {
@@ -419,7 +429,7 @@ public class AMIEPredictor {
 		
 		for (Prediction prediction : output) {
 			ByteString[] t = prediction.getTriple();
-			trainingKb.add(t[0], t[1], t[2], prediction.getFullScore());
+			trainingKb.add(t[0], t[1], t[2], prediction.getJointConfidenceTimesFuncScore());
 		}
 		
 		System.out.println("Rebuilding overlap tables");
@@ -467,6 +477,7 @@ public class AMIEPredictor {
 		double confidenceThreshold = DefaultPCAConfidenceThreshold;
 		boolean allowTypes = false;
 		Metric metric = Metric.HeadCoverage;
+		PredictionMetric pmetric = PredictionMetric.JointScoreTimesFuncScore;
 		int numberOfIterations = Integer.MAX_VALUE;
 		int numberOfCoresEvaluation = 1;
 		boolean addOnlyVerifiedPredictions = false;
@@ -540,6 +551,11 @@ public class AMIEPredictor {
                 .withDescription("AMIE offers 2 multi-threading strategies: standard (traditional) and solidary (experimental)")
                 .hasArg()
                 .create("mt");
+        
+        Option pmetricOp =  OptionBuilder.withArgName("score-metric")
+                .withDescription("Metric used score predictions: NaiveConfidence | JointConfidence | NaiveJointScore | FullJointScore")
+                .hasArg()
+                .create("sm");
                 
         options.addOption(supportOpt);
         options.addOption(initialSupportOpt);
@@ -554,6 +570,7 @@ public class AMIEPredictor {
         options.addOption(sampleSizeOption);       
         options.addOption(sampleOutputFile);
         options.addOption(miningTechniqueOp);
+        options.addOption(pmetricOp);
         
         try {
             cli = parser.parse(options, args);
@@ -685,6 +702,15 @@ public class AMIEPredictor {
                 miningTechniqueStr = "standard";
             }
         }
+		
+		if (cli.hasOption("sm")) {
+			try {				
+				pmetric = PredictionMetric.valueOf(cli.getOptionValue("sm"));
+			} catch (Exception e) {
+				pmetric = PredictionMetric.JointScoreTimesFuncScore;
+			}
+		}
+		
         System.out.println("Using " + miningTechniqueStr + " multi-threading strategy.");
         boolean standardMining = !miningTechniqueStr.equals("solidary"); 
 				
@@ -706,6 +732,7 @@ public class AMIEPredictor {
 		AMIEPredictor predictor = new AMIEPredictor(miner, testing);
 		predictor.setStandardMining(standardMining);
 		predictor.setNumberOfCoresForEvaluation(numberOfCoresEvaluation);
+		predictor.setPredictionMetric(pmetric);
 		long timeStamp1 = System.currentTimeMillis();
 		predictions = predictor.predict(numberOfIterations, addOnlyVerifiedPredictions);
 
@@ -768,7 +795,7 @@ public class AMIEPredictor {
 		MultiMap<Integer, Prediction> buckets = new MultiMap<>();
 		
 		for (Prediction prediction : predictions) {
-			int key = (int) Math.ceil(prediction.getFullScore() * 10);
+			int key = (int) Math.ceil(prediction.getJointConfidenceTimesFuncScore() * 10);
 			buckets.add(key, prediction);
 		}
 		

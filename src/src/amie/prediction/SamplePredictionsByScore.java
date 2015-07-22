@@ -69,7 +69,7 @@ public class SamplePredictionsByScore {
 		int predictionsConsidered = 0;
 		System.out.println(predictions.size() + " predictions");
 		for (Prediction prediction : predictions) {
-			double naiveConfidence = prediction.getNaiveConfidence();
+			double naiveConfidence = prediction.getNaiveIndependentConfidence();
 			if (!allRules && prediction.getRules().size() == 1) {
 				continue;
 			}
