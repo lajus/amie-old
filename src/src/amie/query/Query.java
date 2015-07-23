@@ -107,6 +107,11 @@ public class Query {
      * Highest letter used for variable names
      */
     private char highestVariable;
+    
+    /**
+     * Highest numerical suffix associated to variables
+     */
+    private int highestVariableSuffix;
 
     /**
      * ****** End of Standard Metrics ************
@@ -195,11 +200,35 @@ public class Query {
 
     public ByteString[] fullyUnboundTriplePattern() {
         ByteString[] result = new ByteString[3];
-        result[0] = ByteString.of("?" + highestVariable);
+        
+        if (this.highestVariableSuffix < 1) {
+        	result[0] = ByteString.of("?" + highestVariable);
+        } else {
+        	result[0] = ByteString.of("?" + highestVariable + this.highestVariableSuffix);        	
+        }
+        
         result[1] = ByteString.of("?p");
-        ++highestVariable;
-        result[2] = ByteString.of("?" + highestVariable);
-        ++highestVariable;
+        
+        this.highestVariable = (char) (highestVariable + 1);
+        
+        if (this.highestVariable > 'z') {
+        	this.highestVariableSuffix++;
+        	this.highestVariable = 'a';
+        }
+        
+        if (this.highestVariableSuffix < 1) {
+            result[2] = ByteString.of("?" + highestVariable);
+        } else {
+        	result[2] = ByteString.of("?" + highestVariable + highestVariableSuffix);        	
+        }
+        
+        this.highestVariable = (char) (highestVariable + 1);
+        
+        if (this.highestVariable > 'z') {
+        	this.highestVariableSuffix++;
+        	this.highestVariable = 'a';
+        }
+        
         return result;
     }
 
@@ -231,6 +260,7 @@ public class Query {
         this._belowMinimumSupport = false;
         this._containsQuasiBindings = false;
         this.ancestors = new ArrayList<>();
+        this.highestVariableSuffix = 0;
     }
 
     public Query(ByteString[] pattern, double cardinality) {
@@ -249,6 +279,7 @@ public class Query {
         this._belowMinimumSupport = false;
         this._containsQuasiBindings = false;
         this.ancestors = new ArrayList<>();
+        this.highestVariableSuffix = 0;
     }
 
     public Query(Query otherQuery, double cardinality) {
@@ -271,6 +302,7 @@ public class Query {
         this._pcaConfidenceEstimation = 0.0;
         this._containsQuasiBindings = false;
         this.ancestors = new ArrayList<>();
+        this.highestVariableSuffix = 0;
     }
 
     public Query(ByteString[] head, List<ByteString[]> body, double cardinality) {
@@ -1750,32 +1782,6 @@ public class Query {
         }
     }
 
-    public static void main(String args[]) {
-        List<ByteString[]> antecedent = FactDatabase.triples(
-                FactDatabase.triple("?z3", "<surname>", "?b"),
-                FactDatabase.triple("?z1", "<rp>", "?a"),
-                FactDatabase.triple("?z1", "<rp>", "?z2"),
-                FactDatabase.triple("?z2", "<rpp>", "?z3")
-        );
-
-        ByteString[] head = FactDatabase.triple("?a", "<rh>", "?b");
-        Query query = new Query(head, antecedent, 0.0);
-        System.out.println(query.containsSinglePath());
-        List<ByteString[]> path = query.getCanonicalPath();
-        System.out.println(FactDatabase.toString(path));
-
-        List<ByteString[]> antecedent2 = FactDatabase.triples(
-                FactDatabase.triple("?z3", "<surname>", "?b"),
-                FactDatabase.triple("?b", "<rp>", "?a"),
-                FactDatabase.triple("?z1", "<rp>", "?z2"),
-                FactDatabase.triple("?z2", "<rpp>", "?z3")
-        );
-
-        ByteString[] head2 = FactDatabase.triple("?a", "<rh>", "?b");
-        Query query2 = new Query(head2, antecedent2, 0.0);
-        System.out.println(query2.containsSinglePath());
-    }
-
     /**
      * It determines whether the rule contains a single path that connects the
      * head variables in the body. For example, the rule: - worksAt(x, w),
@@ -1962,5 +1968,12 @@ public class Query {
             }
         }
         return bodyRelations;
+    }
+    
+    public static void main(String[] args) {
+    	Query q = new Query();
+    	for (int i = 0;  i < 50; ++i) {
+    		System.out.println(Arrays.toString(q.fullyUnboundTriplePattern()));
+    	}
     }
 }
