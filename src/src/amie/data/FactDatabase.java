@@ -2194,25 +2194,28 @@ public class FactDatabase {
 		for (String fileName : args) {
 			d.load(new File(fileName));
 		}
-		//D.p(d.selectDistinct(ByteString.of("?x"),triples(triple("?y",EQUALSstr,"?x"))));
-		
-		 //d.load(new File("/home/galarrag/workspace/AMIE/Data/yago2/yago2core.10kseedsSample.decoded.compressed.notypes.linksto.tsv"),
-		//		 new File("/home/galarrag/workspace/AMIE/Data/yago2/yago2core.10kseedsSample.decoded.compressed.notypes.tsv")); 
-/*		  D.p(d.countPairs(
-				ByteString.of("?a"),
-				ByteString.of("?b"),
-				triples(triple("?a", "<wasBornIn>", "?b"),
-						triple("?a", "<livesIn>", "?b"),
-						triple("?a", "<diedIn>", "?b"))));*/
-		  
-		
-		 D.p("Number of wikilinks: " + d.count(triple(ByteString.of("?a"), ByteString.of("<linksTo>"), ByteString.of("?b"))));
-		 D.p("Number of semantified wikilinks: " + d.countDistinctPairs(ByteString.of("?a"), ByteString.of("?b"),
-				  triples(
-						  triple(ByteString.of("?a"), ByteString.of("<linksTo>"), ByteString.of("?b")), 
-						  triple(ByteString.of("?a"), ByteString.of("?p"), ByteString.of("?b")),
-						  triple(ByteString.of("?p"), DIFFERENTFROMbs, ByteString.of("<linksTo>"))
-						  )));
+
+		 Map<ByteString, IntHashMap<ByteString>> tt = d.selectDistinct(ByteString.of("?a"), ByteString.of("?b"),
+                         
+                         triples(
+                                 triple(ByteString.of("?a"), ByteString.of("http://xmlns.com/foaf/0.1/name"), ByteString.of("?j")), 
+				triple(ByteString.of("?b"), ByteString.of("http://xmlns.com/foaf/0.1/name"), ByteString.of("?j"))
+                         ));
+                 int size = 0;
+                 for(ByteString key: tt.keySet()) {
+                     for(ByteString key1: tt.get(key)){
+                         System.out.println("key:"+key + " key1:"+key1);
+                         ++size;
+                     }
+                 }
+                 System.out.println("size: "+ size);                 
+                 
+//		 D.p("Number of semantified wikilinks: " + d.countDistinctPairs(ByteString.of("?a"), ByteString.of("?b"),
+//				  triples(
+//						  triple(ByteString.of("?a"), ByteString.of("<linksTo>"), ByteString.of("?b")), 
+//						  triple(ByteString.of("?a"), ByteString.of("?p"), ByteString.of("?b")),
+//						  triple(ByteString.of("?p"), DIFFERENTFROMbs, ByteString.of("<linksTo>"))
+//						  )));
 /*		 D.p("Number of non-wikilinks: " + d.countPairs(ByteString.of("?a"), ByteString.of("?b"),
 				  triples(
 						  triple(ByteString.of("?a"), ByteString.of("?p"), ByteString.of("?b")),
