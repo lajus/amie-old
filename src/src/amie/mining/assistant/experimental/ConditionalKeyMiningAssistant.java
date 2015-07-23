@@ -51,6 +51,8 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
         ByteString[] head = query.getHead();
         List<ByteString> bodyRelations = query.getBodyRelations();
         int positionInNonKey = bodyRelations.size();
+        ByteString[] atom1 = query.fullyUnboundTriplePattern();
+        ByteString[] atom2 = query.fullyUnboundTriplePattern();
         for (List<ByteString> nonKey : nonKeys) {
             if (nonKey.size() > bodyRelations.size()) {
                 if (positionInNonKey > 0) {
@@ -59,8 +61,6 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                     }
                 }
                 ByteString property = nonKey.get(positionInNonKey);
-                ByteString[] atom1 = query.fullyUnboundTriplePattern();
-                ByteString[] atom2 = query.fullyUnboundTriplePattern();
                 atom1[0] = head[0];//x
                 atom1[1] = property;//property
                 atom2[0] = head[2];//y
@@ -72,14 +72,10 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                 double support = kb.countDistinctPairs(head[0], head[2], query.getTriples());
                 query.getTriples().remove(effectiveSize - 1);
                 query.getTriples().remove(effectiveSize - 2);
-                //System.out.println("support:" + support);
-                //System.out.println("minCard:" + minCardinality);
                 if (support >= (double) minSupportThreshold) {
                     Query newQuery = query.addEdges(atom1, atom2);
                     newQuery.setSupport(support);
                     output.add(newQuery);
-           //         System.out.println("newQuery12:" + newQuery);
-//                    System.out.println("NonKey1:" + nonKey + " Query:" + query + " NewQuery:" + newQuery);
                 }
 
             }
@@ -94,6 +90,8 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
         ByteString[] head = query.getHead();
         List<ByteString> bodyRelations = query.getBodyRelations();
         int positionInNonKey = bodyRelations.size();
+        ByteString[] atom1 = query.fullyUnboundTriplePattern();
+        ByteString[] atom2 = query.fullyUnboundTriplePattern();
         for (List<ByteString> nonKey : nonKeys) {
             if (nonKey.size() > bodyRelations.size()) {
                 if (positionInNonKey > 0) {
@@ -102,13 +100,12 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                     }
                 }
                 ByteString property = nonKey.get(positionInNonKey);
-                ByteString[] atom1 = query.fullyUnboundTriplePattern();
-                ByteString[] atom2 = query.fullyUnboundTriplePattern();
                 atom1[0] = head[0];//x
                 atom1[1] = property;//property
                 atom2[0] = head[2];
                 atom2[1] = property;
                 atom2[2] = atom1[2];
+                ByteString danglingVariable = atom1[2];
                 query.getTriples().add(atom1);
                 query.getTriples().add(atom2);
                 IntHashMap<ByteString> constants = kb.countProjectionBindings(head, query.getTriples(), atom1[2]);
@@ -123,10 +120,11 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                         Query newQuery = query.addEdges(atom1, atom2);
                         newQuery.setSupport(support);
                         output.add(newQuery);
-              //          System.out.println("newQuery:" + newQuery);
                     }
                 }
-
+                
+                atom1[2] = danglingVariable;
+                atom2[2] = danglingVariable;
             }
         }
     }
