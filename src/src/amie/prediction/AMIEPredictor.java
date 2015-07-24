@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -65,6 +66,8 @@ public class AMIEPredictor {
 	private double pruningThreshold;
 	
 	private int numberOfCoresEvaluation;
+	
+	private boolean rewriteProbabilities;
 		
 	private MiningAssistant miningAssistant;
 	
@@ -79,6 +82,7 @@ public class AMIEPredictor {
 		this.pruningMetric = miner.getPruningMetric();
 		this.ruleMiner = miner;
 		this.numberOfCoresEvaluation = 1;
+		this.rewriteProbabilities = true;
 	}
 	
 	public AMIEPredictor(AMIE miner, FactDatabase testing) {
@@ -89,6 +93,7 @@ public class AMIEPredictor {
 		this.ruleMiner = miner;
 		this.testingKb = testing;
 		this.numberOfCoresEvaluation = 1;
+		this.rewriteProbabilities = true;
 	}
 	
 	public double getPcaConfidenceThreshold() {
@@ -138,6 +143,14 @@ public class AMIEPredictor {
 	public void setPredictionMetric(PredictionMetric pmetric) {
 		this.pmetric = pmetric;
 	}
+	
+	public void setRewriteProbabilities(boolean rewriteProbabilities) {
+		this.rewriteProbabilities = rewriteProbabilities;
+	}
+	
+	public boolean getRewriteProbabilities() {
+		return this.rewriteProbabilities;
+	}
 
 	/**
 	 * 
@@ -147,13 +160,12 @@ public class AMIEPredictor {
 	 * @throws Exception
 	 */
 	private List<Prediction> predict(int numberIterations, boolean onlyHits) throws Exception {
-		List<Prediction> resultingPredictions = new ArrayList<>();
+		List<Prediction> resultingPredictions = new ArrayList<Prediction>();
 		if (onlyHits) {
 			System.out.println("Including only hits");
 		}
 		for (int i = 0; i < numberIterations; ++i) {
 			System.out.println("Inference round #" + (i + 1));
-			List<Prediction> predictionsAtIterationI = new ArrayList<>();
 			// Mine rules using AMIE
 			long startTime = System.currentTimeMillis();
 			List<Query> rules = null;
@@ -164,6 +176,8 @@ public class AMIEPredictor {
 			}
 			System.out.println("Rule mining took " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
 			System.out.println(rules.size() + " rules found");
+			for (Query r : rules)
+				System.out.println(r.getFullRuleString());
 			System.out.println("Using " + this.numberOfCoresEvaluation + " threads to re-evaluate the rules (probabilistic scores).");
 			// Build the uncertain version of the rules
 			List<Query> finalRules = new ArrayList<Query>();
@@ -181,16 +195,21 @@ public class AMIEPredictor {
 			System.out.println(finalRules.size() + " used to fire predictions");
 			
 			// Get the predictions
-			getPredictions(finalRules, true, i, predictionsAtIterationI);
-			System.out.println(predictionsAtIterationI.size() + " predictions added to the KB");			
-			resultingPredictions.addAll(predictionsAtIterationI);
-			if (predictionsAtIterationI.size() == 0) {
-				break;
+			resultingPredictions = new ArrayList<>();
+			IterationInformation iInfo = getPredictions(finalRules, true, i, resultingPredictions);	
+			System.out.println(iInfo);
+			
+			if (this.rewriteProbabilities) {
+				if (iInfo.averageVariance() < 0.00001) {					
+					break;
+				}
+			} else {
+				if (iInfo.newFacts == 0) {
+					break;
+				}
 			}
 		}
-		System.out.println("The inference is done. Sorting prediction by probabilistic score.");
-		PredictionsComparator predictionsCmp = new PredictionsComparator(this.pmetric);
-		Collections.sort(resultingPredictions, predictionsCmp);
+		
 		return resultingPredictions;
 	}
 	
@@ -247,10 +266,12 @@ public class AMIEPredictor {
 							new Triple<>(ByteString.of("?a"), head[1], ByteString.of("?b"));
 					if (q.getFunctionalVariablePosition() == 0) {
 						t.first = binding;
+						t.third = head[2];
 					} else {
 						t.third = binding;
+						t.first = head[0];
 					}
-					// Add the pair prediction, query
+					// Add the pair prediction, rule
 					add2Map(predictions, t, q);
 				}
 			}else{
@@ -351,6 +372,11 @@ public class AMIEPredictor {
 						break;
 					}
 				}
+				
+				if (trainingKb.isCertain(nextTriple)) {
+					continue;
+				}
+				
 				Prediction prediction = new Prediction(nextTriple);		
 				List<Integer> ruleIds = new ArrayList<Integer>();
 				for (Query rule : rules) {
@@ -374,7 +400,7 @@ public class AMIEPredictor {
 								(TupleIndependentFactDatabase) miningAssistant.getKb());
 					}
 				}	
-				combinedRule = prediction.getJointRule();				
+				combinedRule = prediction.getJointRule();
 				computeCardinalityScore(prediction);
 				
 				ByteString triple[] = prediction.getTriple();
@@ -387,7 +413,7 @@ public class AMIEPredictor {
 					prediction.setHitInTraining(true);
 				}
 				
-				double finalConfidence = prediction.getJointConfidenceTimesFuncScore();
+				double finalConfidence = prediction.get(pmetric);
 				if (finalConfidence >= pcaConfidenceThreshold) {
 					prediction.setIterationId(iteration);
 					synchronized (result) {
@@ -395,6 +421,34 @@ public class AMIEPredictor {
 					}
 				}
 			}
+		}
+	}
+	
+	class IterationInformation {
+		public int newFacts;
+		
+		public int totalConclusions;
+		
+		public double totalError;
+		
+		public IterationInformation() {
+			this.newFacts = this.totalConclusions = 0;
+			this.totalError = 0.0;
+		}
+		
+		public double averageVariance() {
+			return (double) this.totalError / (this.totalConclusions + 1);
+		}
+		
+		public String toString() {
+			StringBuilder strBuilder = new StringBuilder();
+			
+			strBuilder.append("New facts: " + this.newFacts + "\n");
+			strBuilder.append("Conclusions: " + this.totalConclusions + "\n");
+			strBuilder.append("Total error: " + this.totalError + "\n");
+			strBuilder.append("Average error: " + this.averageVariance() + "\n");
+			
+			return strBuilder.toString();
 		}
 	}
 	
@@ -407,19 +461,25 @@ public class AMIEPredictor {
 	 * @return int
 	 * @throws InterruptedException 
 	 */
-	private void getPredictions(List<Query> queries, 
-			boolean notInTraining, int iteration, 
-			List<Prediction> output) throws InterruptedException {
+	private IterationInformation getPredictions(List<Query> queries, 
+			boolean notInTraining, int iteration, List<Prediction> output) throws InterruptedException {
 		long timeStamp1 = System.currentTimeMillis();
+		List<Prediction> deductions = new ArrayList<Prediction>();
+		IterationInformation iInfo = new IterationInformation();
 		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions =
-				calculatePredictions2RulesMap(queries, notInTraining);
+				calculatePredictions2RulesMap(queries, !this.rewriteProbabilities);
 		System.out.println((System.currentTimeMillis() - timeStamp1) + " milliseconds for calculatePredictions2RulesMap");
-		System.out.println(predictions.size() + " predictions deduced from the KB");
+		if (this.rewriteProbabilities) {
+			System.out.println(predictions.size() + " conclusions deduced from the KB");
+		} else {
+			System.out.println(predictions.size() + " predictions deduced from the KB");			
+		}
+		
 		System.out.println("Using " + this.numberOfCoresEvaluation + " threads to score predictions.");
 		timeStamp1 = System.currentTimeMillis();
 		Thread[] threads = new Thread[this.numberOfCoresEvaluation];
 		for (int i = 0; i < threads.length; ++i) {
-			threads[i] = new Thread(new PredictionsBuilder(predictions, output, iteration));
+			threads[i] = new Thread(new PredictionsBuilder(predictions, deductions, iteration));
 			threads[i].start();
 		}
 		
@@ -427,9 +487,20 @@ public class AMIEPredictor {
 			threads[i].join();
 		}
 		
-		for (Prediction prediction : output) {
-			ByteString[] t = prediction.getTriple();
-			trainingKb.add(t[0], t[1], t[2], prediction.getJointConfidenceTimesFuncScore());
+		System.out.println("Adding predictions to KB");
+		for (Prediction prediction : deductions) {
+			ByteString[] t = prediction.getTriple();			
+			
+			if (!trainingKb.contains(t)) {
+				++iInfo.newFacts;
+			}
+			
+			++iInfo.totalConclusions;
+			double probability = trainingKb.probabilityOfFact(t);
+			double newProbability = prediction.get(this.pmetric); 
+			iInfo.totalError += Math.abs(probability - newProbability);
+			trainingKb.add(t[0], t[1], t[2], newProbability);
+			output.add(prediction);
 		}
 		
 		System.out.println("Rebuilding overlap tables");
@@ -437,6 +508,7 @@ public class AMIEPredictor {
 		System.out.println("Done");
 		
 		System.out.println((System.currentTimeMillis() - timeStamp1) + " milliseconds to calculate the scores for predictions");
+		return iInfo;
 	}
 	
 	/**
@@ -485,6 +557,7 @@ public class AMIEPredictor {
 		boolean outputSample = false;
 		int sampleSize = DefaultSampleSize;
 		String miningTechniqueStr = "standard";
+		boolean rewriteProbabilities = false;
         
         Option supportOpt = OptionBuilder.withArgName("min-support")
                 .hasArg()
@@ -556,6 +629,10 @@ public class AMIEPredictor {
                 .withDescription("Metric used score predictions: NaiveConfidence | JointConfidence | NaiveJointScore | FullJointScore")
                 .hasArg()
                 .create("sm");
+        
+        Option rewriteProbabilitiesOp = OptionBuilder.withArgName("rewrite-mode")
+        		.withDescription("The method can override the score associated to a prediction.")
+        		.create("rm");
                 
         options.addOption(supportOpt);
         options.addOption(initialSupportOpt);
@@ -571,6 +648,7 @@ public class AMIEPredictor {
         options.addOption(sampleOutputFile);
         options.addOption(miningTechniqueOp);
         options.addOption(pmetricOp);
+        options.addOption(rewriteProbabilitiesOp);
         
         try {
             cli = parser.parse(options, args);
@@ -711,6 +789,8 @@ public class AMIEPredictor {
 			}
 		}
 		
+		rewriteProbabilities = cli.hasOption("rm");
+				
         System.out.println("Using " + miningTechniqueStr + " multi-threading strategy.");
         boolean standardMining = !miningTechniqueStr.equals("solidary"); 
 				
@@ -733,6 +813,7 @@ public class AMIEPredictor {
 		predictor.setStandardMining(standardMining);
 		predictor.setNumberOfCoresForEvaluation(numberOfCoresEvaluation);
 		predictor.setPredictionMetric(pmetric);
+		predictor.setRewriteProbabilities(rewriteProbabilities);
 		long timeStamp1 = System.currentTimeMillis();
 		predictions = predictor.predict(numberOfIterations, addOnlyVerifiedPredictions);
 
@@ -740,9 +821,7 @@ public class AMIEPredictor {
 		IntHashMap<Integer> hitsInTargetNotInSourceHistogram = new IntHashMap<>();
 		IntHashMap<Integer> predictionsHistogram = new IntHashMap<>();
 		for (Prediction prediction : predictions) {
-			System.out.println(prediction);
 			predictionsHistogram.increase(prediction.getRules().size());
-			
 			if (prediction.isHitInTarget()) {
 				hitsInTargetHistogram.increase(prediction.getRules().size());
 				if (!prediction.isHitInTraining()) {
@@ -780,7 +859,7 @@ public class AMIEPredictor {
 				stream = new PrintStream(System.out);
 				System.out.println("Outputing a sample " + sampleSize + " for evaluation in the standard output");
 			}
-			sampleBucketizedPredictions(predictions, stream, sampleSize);
+			sampleBucketizedPredictions(predictions, stream, pmetric, sampleSize);
 		}
 	}
 
@@ -791,11 +870,12 @@ public class AMIEPredictor {
 	 * @param stream
 	 */
 	private static void sampleBucketizedPredictions(
-			List<Prediction> predictions, PrintStream stream, int sampleSize) {
+			List<Prediction> predictions, PrintStream stream, PredictionMetric metric,
+			int sampleSize) {
 		MultiMap<Integer, Prediction> buckets = new MultiMap<>();
 		
 		for (Prediction prediction : predictions) {
-			int key = (int) Math.ceil(prediction.getJointConfidenceTimesFuncScore() * 10);
+			int key = (int) Math.ceil(prediction.get(metric) * 10);
 			buckets.add(key, prediction);
 		}
 		

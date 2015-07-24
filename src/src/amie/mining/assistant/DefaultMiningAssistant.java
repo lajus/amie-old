@@ -620,7 +620,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 				freeVarPos = 0;
 		}
 
-		existentialTriple[freeVarPos] = ByteString.of("?x");
+		existentialTriple[freeVarPos] = ByteString.of("?xw");
 		if (!antecedent.isEmpty()) {
 			antecedent.add(existentialTriple);
 			try{

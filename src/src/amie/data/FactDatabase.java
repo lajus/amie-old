@@ -2194,8 +2194,56 @@ public class FactDatabase {
 		for (String fileName : args) {
 			d.load(new File(fileName));
 		}
+		
+		// ?a  http://dbpedia.org/ontology/areaCode  ?p  ?b  http://dbpedia.org/ontology/areaCode  ?p  
+		// ?a  http://dbpedia.org/ontology/areaLand  ?t  ?b  http://dbpedia.org/ontology/areaLand  ?t  
+		// ?a  http://dbpedia.org/ontology/areaTotal  ?v  ?b  http://dbpedia.org/ontology/areaTotal  ?v  
+		// ?a  http://dbpedia.org/ontology/areaWater  ?x  ?b  http://dbpedia.org/ontology/areaWater  ?x  
+		// ?a  http://dbpedia.org/ontology/country  ?b1  ?b  http://dbpedia.org/ontology/country  ?b1  
+		// ?a  http://dbpedia.org/ontology/elevation  ?z  ?b  http://dbpedia.org/ontology/elevation  ?z  
+		// ?a  http://dbpedia.org/ontology/postalCode  ?j  ?b  http://dbpedia.org/ontology/postalCode  ?j  
+		// ?a  http://dbpedia.org/ontology/timeZone  ?h  ?b  http://dbpedia.org/ontology/timeZone  ?h  
+		// ?a  http://dbpedia.org/ontology/utcOffset  ?d  ?b  http://dbpedia.org/ontology/utcOffset  ?d 
+		// ?a  http://www.georss.org/georss/point  ?r  ?b  http://www.georss.org/georss/point  ?r  
+		// ?a  http://www.w3.org/2003/01/geo/wgs84_pos#lat  ?n  ?b  http://www.w3.org/2003/01/geo/wgs84_pos#lat  ?n  
+		// ?a  http://www.w3.org/2003/01/geo/wgs84_pos#long  ?l  ?b  http://www.w3.org/2003/01/geo/wgs84_pos#long  ?l  
+		// ?a  http://xmlns.com/foaf/0.1/name  ?f  ?b  http://xmlns.com/foaf/0.1/name  ?f   => ?a  equals  ?b 0 0.999749687 ∞ 7988.0 7990 0.0 ?a 0.0 0.0 0.0
 
-		 Map<ByteString, IntHashMap<ByteString>> tt = d.selectDistinct(ByteString.of("?a"), ByteString.of("?b"),
+		List<ByteString[]> bodyStar = new ArrayList<>();
+		bodyStar.add(triple("?a",  FactDatabase.EQUALSstr,  "?b"));
+		bodyStar.add(triple("?a", "http://dbpedia.org/ontology/areaCode", "?p"));
+		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/areaCode", "?p"));
+		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/areaLand", "?t"));
+		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/areaLand", "?t"));
+		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/areaTotal", "?v"));
+		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/areaTotal", "?v"));		
+		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/areaWater", "?x"));
+		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/areaWater", "?x"));				
+		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/country", "?b1"));
+		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/country", "?b1"));
+		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/elevation", "?z"));
+		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/elevation", "?z"));
+		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/postalCode", "?j"));
+		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/postalCode", "?j"));
+		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/timeZone", "?h"));
+		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/timeZone", "?h"));
+		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/utcOffset", "?d"));
+		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/utcOffset", "?d"));		
+		bodyStar.add(triple("?a",  "http://www.georss.org/georss/point", "?r"));
+		bodyStar.add(triple("?b",  "http://www.georss.org/georss/point", "?r"));
+		bodyStar.add(triple("?a",  "http://www.w3.org/2003/01/geo/wgs84_pos#lat", "?n"));
+		bodyStar.add(triple("?b",  "http://www.w3.org/2003/01/geo/wgs84_pos#lat", "?n"));
+		bodyStar.add(triple("?a",  "http://www.w3.org/2003/01/geo/wgs84_pos#long", "?l"));
+		bodyStar.add(triple("?b",  "http://www.w3.org/2003/01/geo/wgs84_pos#long", "?l"));
+		bodyStar.add(triple("?a",  "http://xmlns.com/foaf/0.1/name", "?f"));
+		bodyStar.add(triple("?b",  "http://xmlns.com/foaf/0.1/name", "?f"));
+
+		
+		System.out.println(d.countPairs(ByteString.of("?a"), ByteString.of("?b"), bodyStar));
+		bodyStar.get(0)[2] = ByteString.of("?xw");
+		System.out.println(d.countPairs(ByteString.of("?a"), ByteString.of("?b"), bodyStar));
+		
+/*		 Map<ByteString, IntHashMap<ByteString>> tt = d.selectDistinct(ByteString.of("?a"), ByteString.of("?b"),
                          
                          triples(
                                  triple(ByteString.of("?a"), ByteString.of("http://xmlns.com/foaf/0.1/name"), ByteString.of("?j")), 
@@ -2208,7 +2256,7 @@ public class FactDatabase {
                          ++size;
                      }
                  }
-                 System.out.println("size: "+ size);                 
+                 System.out.println("size: "+ size);                 */
                  
 //		 D.p("Number of semantified wikilinks: " + d.countDistinctPairs(ByteString.of("?a"), ByteString.of("?b"),
 //				  triples(

@@ -198,6 +198,12 @@ public class Query {
                 && pattern1[2] == pattern2[2];
     }
 
+    /**
+     * It creates a new unbound atom with fresh variables for the subject and object
+     * and an undefined property, i.e., ?s[n] ?p ?o[n]. n is optional and is always greater
+     * than 1.
+     * @return
+     */
     public ByteString[] fullyUnboundTriplePattern() {
         ByteString[] result = new ByteString[3];
         
@@ -232,6 +238,10 @@ public class Query {
         return result;
     }
 
+    /** It creates a new unbound atom with fresh variables for the subject and object
+    * and an undefined property, i.e., ?s[n] ?p ?o[n]. n is optional and is always greater
+    * than 1.
+    **/
     public static synchronized ByteString[] fullyUnboundTriplePattern1() {
         ByteString[] result = new ByteString[3];
         ++varsCount;
@@ -245,6 +255,9 @@ public class Query {
         return atom1[0].equals(atom2[0]) && atom1[1].equals(atom2[1]) && atom1[2].equals(atom2[2]);
     }
 
+    /**
+     * Instantiates an empty rule.
+     */
     public Query() {
         this.triples = new ArrayList<>();
         this.headKey = null;
@@ -263,16 +276,22 @@ public class Query {
         this.highestVariableSuffix = 0;
     }
 
-    public Query(ByteString[] pattern, double cardinality) {
+    /**
+     * Instantiates a rule of the form [] => r(?a, ?b) with empty body
+     * and the given pattern as rule. 
+     * @param headAtom The head atom as an array of the form [?a, r, ?b].
+     * @param cardinality
+     */
+    public Query(ByteString[] headAtom, double cardinality) {
         this.triples = new ArrayList<>();
         this.support = cardinality;
         this.hashSupport = (int) cardinality;
         this.parent = null;
-        this.triples.add(pattern);
+        this.triples.add(headAtom);
         this.functionalVariablePosition = 0;
         this.bodySize = 0;
         computeHeadKey();
-        this.highestVariable = (char) (pattern[2].charAt(1) + 1);
+        this.highestVariable = (char) (headAtom[2].charAt(1) + 1);
         this._stdConfidenceUpperBound = 0.0;
         this._pcaConfidenceUpperBound = 0.0;
         this._pcaConfidenceEstimation = 0.0;
@@ -282,13 +301,19 @@ public class Query {
         this.highestVariableSuffix = 0;
     }
 
-    public Query(Query otherQuery, double cardinality) {
+    /**
+     * Creates a new query as a clone of the query sent as argument with the given
+     * support.
+     * @param otherQuery
+     * @param support
+     */
+    public Query(Query otherQuery, double support) {
         triples = new ArrayList<>();
         for (ByteString[] sequence : otherQuery.triples) {
             triples.add(sequence.clone());
         }
-        this.support = cardinality;
-        this.hashSupport = (int) cardinality;
+        this.support = support;
+        this.hashSupport = (int) support;
         this.pcaBodySize = otherQuery.pcaBodySize;
         this.bodySize = otherQuery.bodySize;
         this.bodyMinusHeadSize = otherQuery.bodyMinusHeadSize;
@@ -297,12 +322,12 @@ public class Query {
         this.parent = null;
         this.bodySize = -1;
         this.highestVariable = otherQuery.highestVariable;
+        this.highestVariableSuffix = otherQuery.highestVariableSuffix;
         this._stdConfidenceUpperBound = 0.0;
         this._pcaConfidenceUpperBound = 0.0;
         this._pcaConfidenceEstimation = 0.0;
         this._containsQuasiBindings = false;
         this.ancestors = new ArrayList<>();
-        this.highestVariableSuffix = 0;
     }
 
     public Query(ByteString[] head, List<ByteString[]> body, double cardinality) {
@@ -367,10 +392,21 @@ public class Query {
         }
     }
 
+    /**
+     * Return the list of triples of the query. Modifications to this
+     * list alter the query.
+     * @return
+     */
     public List<ByteString[]> getTriples() {
         return triples;
     }
 
+    /**
+     * Returns the triples of a query except for those containing DIFFERENTFROM
+     * constraints. Modifications to this list do not alter the query. However, modifications
+     * to the atoms do alter the query.
+     * @return
+     */
     public List<ByteString[]> getRealTriples() {
         List<ByteString[]> resultList = new ArrayList<>();
         for (ByteString[] triple : triples) {
@@ -382,26 +418,45 @@ public class Query {
         return resultList;
     }
 
+    /**
+     * Returns the head of a query B => r(a, b) as a triple [?a, r, ?b]. 
+     * @return
+     */
     public ByteString[] getHead() {
         return triples.get(0);
     }
 
+    /**
+     * Returns the head of a query B => r(a, b) as a triple [?a, r, ?b]. 
+     * Alias for the method getHead().
+     * @return
+     */
     public ByteString[] getSuccedent() {
         return triples.get(0);
     }
 
+    /**
+     * Returns the list of triples in the body of the rule.
+     * @return Non-modifiable list of atoms.
+     */
     public List<ByteString[]> getBody() {
         return triples.subList(1, triples.size());
     }
 
+    /**
+     * Returns the list of triples in the body of the rule. It is an alias
+     * for the method getBody()
+     * @return Non-modifiable list of atoms.
+     */
     public List<ByteString[]> getAntecedent() {
         return triples.subList(1, triples.size());
     }
 
     /**
      * Returns a list with copies of the triples of the rule.
+     * Modifications to either the list or the atoms do not alter the rule.
      *
-     * @return
+     * @return 
      */
     public List<ByteString[]> getAntecedentClone() {
         List<ByteString[]> cloneList = new ArrayList<>();

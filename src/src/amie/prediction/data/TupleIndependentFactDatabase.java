@@ -24,25 +24,51 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	Map<Triple<ByteString, ByteString, ByteString>, Double> probabilities = 
 			new HashMap<Triple<ByteString, ByteString, ByteString>, Double>();
 	
+	// Triples can have probability 1.0 because they were deduced from rules
+	// with 100% confidence. We want to keep track of those predictions that were
+	// certain from the beginning because they are part of the original KB
+	Map<Triple<ByteString, ByteString, ByteString>, Boolean> certaintyMap = 
+			new HashMap<Triple<ByteString, ByteString, ByteString>, Boolean>();
+	
 	/**
 	 * Adds a certain tuple to the tuple-independent in-memory database.
 	 */
 	protected boolean add(ByteString subject, ByteString predicate, 
 			ByteString object) {
-		return add(subject, predicate, object, 1.0);
+		return add(subject, predicate, object, 1.0, true);
 	}
 	
 	/**
 	 * Adds a tuple to the tuple-independent in-memory database.
 	 */
 	protected boolean add(ByteString subject, ByteString predicate, 
-			ByteString object, double probability) {
+			ByteString object, double probability, boolean certainty) {
 		boolean returnVal = super.add(subject, predicate, object);
 		Triple<ByteString, ByteString, ByteString> triple = 
 				new Triple<ByteString, ByteString, ByteString>(subject, predicate, object);	
 		synchronized (probabilities) {
 			probabilities.put(triple, probability);	
 		}
+		
+		synchronized (certaintyMap) {
+			certaintyMap.put(triple, certainty);
+		}
+		
+		return returnVal;
+	}
+	
+	/**
+	 * Determines whether the triple was marked as certain in the KB.
+	 * @param subject
+	 * @param predicate
+	 * @param object
+	 * @return
+	 */
+	public boolean isCertain(Triple<ByteString, ByteString, ByteString> triple) {
+		Boolean returnVal = certaintyMap.get(triple);
+		if (returnVal == null)
+			return false;
+		
 		return returnVal;
 	}
 	
@@ -81,11 +107,9 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	}
 
 	/** Adds a fact to the in-memory database **/
-	public boolean add(CharSequence subject, 
-			CharSequence predicate, 
-			CharSequence object, 
-			double probability) {
-		return add(compress(subject), compress(predicate), compress(object), probability);
+	public boolean add(CharSequence subject, CharSequence predicate, 
+			CharSequence object, double probability) {
+		return add(compress(subject), compress(predicate), compress(object), probability, false);
 	}
 	
 	/**
