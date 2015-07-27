@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -176,8 +175,6 @@ public class AMIEPredictor {
 			}
 			System.out.println("Rule mining took " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
 			System.out.println(rules.size() + " rules found");
-			for (Query r : rules)
-				System.out.println(r.getFullRuleString());
 			System.out.println("Using " + this.numberOfCoresEvaluation + " threads to re-evaluate the rules (probabilistic scores).");
 			// Build the uncertain version of the rules
 			List<Query> finalRules = new ArrayList<Query>();
@@ -193,14 +190,17 @@ public class AMIEPredictor {
 			}
 			
 			System.out.println(finalRules.size() + " used to fire predictions");
+			for (Query r : finalRules)
+				System.out.println(r.getBasicRuleString());
 			
 			// Get the predictions
 			resultingPredictions = new ArrayList<>();
 			IterationInformation iInfo = getPredictions(finalRules, true, i, resultingPredictions);	
 			System.out.println(iInfo);
+			System.out.println("Size of the KB: " + trainingKb.size());
 			
 			if (this.rewriteProbabilities) {
-				if (iInfo.averageVariance() < 0.00001) {					
+				if (iInfo.averageChange() < 0.00001) {					
 					break;
 				}
 			} else {
@@ -334,7 +334,11 @@ public class AMIEPredictor {
 					} else if (pruningMetric == Metric.Support) {
 						pruningCondition = rule.getSupport() < pruningThreshold;
 					}
-					pruningCondition = pruningCondition || rule.getPcaConfidence() < pcaConfidenceThreshold;
+					pruningCondition = pruningCondition 
+							|| rule.getPcaConfidence() < pcaConfidenceThreshold;
+					if (pruningCondition) {
+						continue;
+					}
 				}				
 				rule.setId(ruleId.incrementAndGet()); // Assign an integer identifier for hashing purposes
 				synchronized(output) {
@@ -377,6 +381,10 @@ public class AMIEPredictor {
 					continue;
 				}
 				
+				if (nextTriple.first.equals(ByteString.of("<Brooke_English>")) && nextTriple.second.equals(ByteString.of("<livesIn>")) && nextTriple.third.equals(ByteString.of("<Pine_Valley,_Pennsylvania>"))) {
+					System.out.println("Hit");
+				}
+				
 				Prediction prediction = new Prediction(nextTriple);		
 				List<Integer> ruleIds = new ArrayList<Integer>();
 				for (Query rule : rules) {
@@ -386,12 +394,11 @@ public class AMIEPredictor {
 				// Avoid recomputing joint rules for each prediction (there can be many)
 				Collections.sort(ruleIds);
 				
-				Query combinedRule = combinedRulesMap.get(ruleIds);
+				Query combinedRule = combinedRulesMap.get(ruleIds);				
 				if (combinedRule != null) {
 					prediction.setJointRule(combinedRule);
 				} else {
 					combinedRule = prediction.getJointRule();
-					combinedRulesMap.put(ruleIds, combinedRule);
 					if (iteration == 0) {
 						miningAssistant.computeCardinality(combinedRule);
 						miningAssistant.computePCAConfidence(combinedRule);
@@ -399,8 +406,10 @@ public class AMIEPredictor {
 						Utilities.computeProbabilisticMetrics(combinedRule, 
 								(TupleIndependentFactDatabase) miningAssistant.getKb());
 					}
+					combinedRulesMap.put(ruleIds, combinedRule);
 				}	
-				combinedRule = prediction.getJointRule();
+								
+				combinedRule = prediction.getJointRule();				
 				computeCardinalityScore(prediction);
 				
 				ByteString triple[] = prediction.getTriple();
@@ -409,16 +418,9 @@ public class AMIEPredictor {
 					prediction.setHitInTarget(true);
 				}
 				
-				if(trainingKb.count(triple) > 0) {
-					prediction.setHitInTraining(true);
-				}
-				
-				double finalConfidence = prediction.get(pmetric);
-				if (finalConfidence >= pcaConfidenceThreshold) {
-					prediction.setIterationId(iteration);
-					synchronized (result) {
-						result.add(prediction);	
-					}
+				prediction.setIterationId(iteration);
+				synchronized (result) {
+					result.add(prediction);	
 				}
 			}
 		}
@@ -429,15 +431,17 @@ public class AMIEPredictor {
 		
 		public int totalConclusions;
 		
-		public double totalError;
+		public double totalChange;
+		
+		public double maximumChange;
 		
 		public IterationInformation() {
 			this.newFacts = this.totalConclusions = 0;
-			this.totalError = 0.0;
+			this.totalChange = 0.0;
 		}
 		
-		public double averageVariance() {
-			return (double) this.totalError / (this.totalConclusions + 1);
+		public double averageChange() {
+			return (double) this.totalChange / (this.totalConclusions + 1);
 		}
 		
 		public String toString() {
@@ -445,8 +449,9 @@ public class AMIEPredictor {
 			
 			strBuilder.append("New facts: " + this.newFacts + "\n");
 			strBuilder.append("Conclusions: " + this.totalConclusions + "\n");
-			strBuilder.append("Total error: " + this.totalError + "\n");
-			strBuilder.append("Average error: " + this.averageVariance() + "\n");
+			strBuilder.append("Total change: " + this.totalChange + "\n");
+			strBuilder.append("Maximum change: " + this.maximumChange + "\n");
+			strBuilder.append("Average change: " + this.averageChange());
 			
 			return strBuilder.toString();
 		}
@@ -488,6 +493,7 @@ public class AMIEPredictor {
 		}
 		
 		System.out.println("Adding predictions to KB");
+		iInfo.maximumChange = -1.0;
 		for (Prediction prediction : deductions) {
 			ByteString[] t = prediction.getTriple();			
 			
@@ -498,7 +504,15 @@ public class AMIEPredictor {
 			++iInfo.totalConclusions;
 			double probability = trainingKb.probabilityOfFact(t);
 			double newProbability = prediction.get(this.pmetric); 
-			iInfo.totalError += Math.abs(probability - newProbability);
+			double change = Math.abs(probability - newProbability);
+			if (Double.isNaN(change)) {
+				System.out.println(prediction + " has a problem");
+				System.out.println(prediction.getJointRule().getBasicRuleString());
+			}
+			iInfo.totalChange += change;
+			if (change > iInfo.maximumChange) {
+				iInfo.maximumChange = change;
+			}
 			trainingKb.add(t[0], t[1], t[2], newProbability);
 			output.add(prediction);
 		}
@@ -696,8 +710,6 @@ public class AMIEPredictor {
 			}
 		}
 		
-		System.err.println("Using a PCA confidence threshold of " + confidenceThreshold);
-		
 		if (cli.hasOption("minis")) {
             try {
                 minInitialSupport = Integer.parseInt(cli.getOptionValue("minis"));
@@ -788,6 +800,7 @@ public class AMIEPredictor {
 				pmetric = PredictionMetric.JointScoreTimesFuncScore;
 			}
 		}
+		System.out.println("Using " + pmetric + " as prediction score metric");
 		
 		rewriteProbabilities = cli.hasOption("rm");
 				

@@ -144,6 +144,9 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	 */
 	protected double[] probabibilitiesOfQuery(List<ByteString[]> query, ByteString var) {
 		Set<ByteString> bindings = selectDistinct(var, query);
+		if (bindings == null) {
+			System.out.println(FactDatabase.toString(query));
+		}
 		double[] results = new double[bindings.size()];
 		try (Instantiator insty = new Instantiator(query, var)) {
 			int k = 0;
@@ -191,13 +194,17 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 			int totalSize = 0;
 			for (ByteString inst : bindings) {
 				double[] tmpAtI = probabibilitiesOfQuery(insty.instantiate(inst));
-				if (tmpAtI.length > 1 || tmpAtI[0] != 0.0) {
+				if (tmpAtI.length > 1 || tmpAtI[0] > 0.0) {
 					totalSize += tmpAtI.length;
 					tmp[effectiveSize] = tmpAtI;
 					++effectiveSize;
 				}
 			}
 			if (totalSize > 0) {
+				if (totalSize > 1000000) {
+					System.out.println(FactDatabase.toString(query));
+					System.out.println("Warning: Memory issue " + totalSize);
+				}
 				result = new double[totalSize];
 				int k = 0;
 				for (int i = 0; i < effectiveSize; ++i) {
@@ -511,55 +518,26 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 	 */
 	public static void main(String args[]) throws IOException {
 		TupleIndependentFactDatabase db = new TupleIndependentFactDatabase();
-		//db.load(new File("/home/galarrag/workspace/AMIE/Data/yago2/sample-final/yago2core.10kseedsSample.decoded.compressed.notypes.tsv"));
-		/*db.add("<Ana>", "<livesIn>", "<Gye>", 0.9);
-		db.add("<Gye>", "<locatedIn>", "<Ecuador>", 0.5);
-		db.add("<Ana>", "<livesIn>", "<Ecuador>", 1.0);	
-		db.add("<Luis>", "<created>", "<Titanic>", 0.5);	
-		db.add("<Luis>", "<directed>", "<Titanic>", 0.9);
-		db.add("<Ana>", "<created>", "<Blah>", 0.77);	
-		db.add("<Ana>", "<directed>", "<Transformers>", 0.75);	
-		db.add("<Francois>", "<directed>", "<Amelie>", 0.8);	*/
-		//List<ByteString[]> query = triples(triple(ByteString.of("<Francois>"), ByteString.of("<livesIn>"), ByteString.of("?x")),
-		//		triple(ByteString.of("?x"), ByteString.of("<locatedIn>"), ByteString.of("<France>")));
-		//List<ByteString[]> query2 = triples(triple(ByteString.of("<Francois>"), ByteString.of("<livesIn>"), ByteString.of("?x")),
-		//		triple(ByteString.of("?x"), ByteString.of("<locatedIn>"), ByteString.of("?y")));
-		List<ByteString[]> query3 = triples(triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?y")),
-				triple(ByteString.of("?y"), ByteString.of("<locatedIn>"), ByteString.of("?z")));
-		List<ByteString[]> query5 = triples(triple(ByteString.of("?a"), ByteString.of("<created>"), ByteString.of("?b")));
-		//System.out.println(db.probabibilityOfQuery(query));
-		//System.out.println(db.probabibilityOfQuery(query2));
-		/*System.out.println(db.probabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?z"))));
-		System.out.println(db.pcaProbabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?w")), 
-				ByteString.of("?x"), ByteString.of("?z")));
-		System.out.println(db.probabilityOf(query5, triple(ByteString.of("?a"), ByteString.of("<directed>"), ByteString.of("?b"))));
-		System.out.println(db.pcaProbabilityOf(query5, triple(ByteString.of("?a"), ByteString.of("<directed>"), ByteString.of("?x")), 
-				ByteString.of("?a"), ByteString.of("?b")));*/
 		
-		//db.add("<Francois>", "<livesIn>", "<USA>");
-		/*System.out.println(db.pcaProbabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?w")), 
-				ByteString.of("?x"), ByteString.of("?z")));*/
-		db.add("<Francois>", "<livesIn>", "<Paris>");
-		db.add("<Francois>", "<livesIn>", "<Nantes>");
-		db.add("<Paris>", "<locatedIn>", "<France>");
-		db.add("<Nantes>", "<locatedIn>", "<France>");
-		db.add("<Francois>", "<livesIn>", "<France>");
+		db.load(new File(args[0]));
+
+		//?a  <isMarriedTo>  ?f  ?f  <livesIn>  ?b   => ?a  <livesIn>  ?b[8.0, 0.6153846153846154]	
+		//?a  <hasChild>  ?f  ?f  <livesIn>  ?b   => ?a  <livesIn>  ?b[6.0, 0.8571428571428571]	
+		//		?e  <isMarriedTo>  ?a  ?e  <livesIn>  ?b   => ?a  <livesIn>  ?b[8.0, 0.6153846153846154]	
+		//		?e  <hasChild>  ?a  ?e  <livesIn>  ?b   => ?a  <livesIn>  ?b[6.0, 0.75]	
 		
-		db.add("<Diana>", "<livesIn>", "<Lyon>");
-		db.add("<Lyon>", "<locatedIn>", "<France>");
-		db.add("<Diana>", "<livesIn>", "<UK>");
-		
-		/*System.out.println(db.pcaProbabilityOf(query3, triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?w")), 
-				ByteString.of("?x"), ByteString.of("?z")));*/
-		
-		System.out.println(Arrays.toString(db.probabilitiesOf(query3, 
-				triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?z")), 
-				ByteString.of("?z"))));
-		ByteString[] head = triple(ByteString.of("?x"), ByteString.of("<livesIn>"), ByteString.of("?z"));
-		List<ByteString[]> query31 = new ArrayList<ByteString[]>(query3);
-		query31.add(head);
-		System.out.println(db.countDistinctPairs(ByteString.of("?x"), ByteString.of("?z"), query31));
-		head[2] = ByteString.of("?zw");
-		System.out.println(db.countDistinctPairs(ByteString.of("?x"), ByteString.of("?z"), query31));
+		//?a <livesIn> ?b  ?a <isMarriedTo> ?v0  ?v0 <livesIn> ?b  ?a <hasChild> ?v1  ?v1 <livesIn> ?b  ?v2 <hasChild> ?a  ?v2 <livesIn> ?b  ?v3 <isMarriedTo> ?a  ?v3 <livesIn> ?b
+		List<ByteString[]> query = FactDatabase.triples(
+				FactDatabase.triple("?a",  "<livesIn>",  "?b"),
+				FactDatabase.triple("?a",  "<isMarriedTo>",  "?v0"),
+				FactDatabase.triple("?v0", "<livesIn>", "?b"),
+				FactDatabase.triple("?a",  "<hasChild>",  "?v1"),
+				FactDatabase.triple("?v1", "<livesIn>", "?b"),				
+				FactDatabase.triple("?v3",  "<isMarriedTo>",  "?a"),
+				FactDatabase.triple("?v3",  "<livesIn>",  "?b"),
+				FactDatabase.triple("?v2", "<hasChild>", "?a"),
+				FactDatabase.triple("?v2", "<livesIn>", "?b")
+				);
+		System.out.println(db.countPairs("?a", "?b", query));
 	}
 }

@@ -1285,15 +1285,16 @@ public class Query {
 
     public String getFullRuleString() {
         DecimalFormat df = new DecimalFormat("#.#########");
+        DecimalFormat df1 = new DecimalFormat("#.##");
         StringBuilder strBuilder = new StringBuilder();
         strBuilder.append(getRuleString());
 
         strBuilder.append("\t" + df.format(getHeadCoverage()));
         strBuilder.append("\t" + df.format(getStdConfidence()));
         strBuilder.append("\t" + df.format(getPcaConfidence()));
-        strBuilder.append("\t" + getSupport());
-        strBuilder.append("\t" + getBodySize());
-        strBuilder.append("\t" + getPcaBodySize());
+        strBuilder.append("\t" + df1.format(getSupport()));
+        strBuilder.append("\t" + df1.format(getBodySize()));
+        strBuilder.append("\t" + df1.format(getPcaBodySize()));
         strBuilder.append("\t" + getFunctionalVariable());
         strBuilder.append("\t" + _stdConfidenceUpperBound);
         strBuilder.append("\t" + _pcaConfidenceUpperBound);
@@ -1304,15 +1305,16 @@ public class Query {
 
     public String getBasicRuleString() {
         DecimalFormat df = new DecimalFormat("#.#########");
+        DecimalFormat df1 = new DecimalFormat("#.##");
         StringBuilder strBuilder = new StringBuilder();
         strBuilder.append(getRuleString());
 
         strBuilder.append("\t" + df.format(getHeadCoverage()));
         strBuilder.append("\t" + df.format(getStdConfidence()));
         strBuilder.append("\t" + df.format(getPcaConfidence()));
-        strBuilder.append("\t" + getSupport());
+        strBuilder.append("\t" + df.format(getSupport()));
         strBuilder.append("\t" + getBodySize());
-        strBuilder.append("\t" + getPcaBodySize());
+        strBuilder.append("\t" + df.format(getPcaBodySize()));
         strBuilder.append("\t" + getFunctionalVariable());
 
         return strBuilder.toString();
@@ -1760,7 +1762,20 @@ public class Query {
             mappings.put(head[2], canonicalObjectExp);
             Query.bind(mappings, antecedentClone);
 
-            commonAntecendent.addAll(antecedentClone);
+//            commonAntecendent.addAll(antecedentClone);
+//            commonAntecendent.add(atom);
+            for (ByteString[] atom : antecedentClone) {
+            	boolean repeated = false;
+            	for (ByteString[] otherAtom : commonAntecendent) {
+            		if (equals(atom, otherAtom)) {
+            			repeated = true;
+            			break;
+            		}
+            	}
+            	if (!repeated) {
+            		commonAntecendent.add(atom);
+            	}
+            }
         }
 
         Query resultRule = new Query(canonicalHead, commonAntecendent, 0.0);
