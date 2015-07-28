@@ -283,4 +283,24 @@ public class Prediction {
 		return hitInTarget && !hitInTraining;
 	}
 	
+	@Override
+	public int hashCode() {
+		return this.getTripleObj().hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        if (getClass() != other.getClass()) {
+            return false;
+        }
+        Prediction otherPrediction = (Prediction) other;
+        return otherPrediction.getTripleObj().equals(getTripleObj());
+	}
+	
 }

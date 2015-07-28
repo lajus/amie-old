@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -72,7 +73,7 @@ public class AMIEPredictor {
 	
 	private boolean standardMining;
 
-	private PredictionMetric pmetric;
+	private PredictionMetric predictionsMetric;
 	
 	public AMIEPredictor(AMIE miner) {
 		this.miningAssistant = miner.getAssistant();
@@ -106,6 +107,10 @@ public class AMIEPredictor {
 	public double getPruningThreshold() {
 		return pruningThreshold;
 	}
+	
+	public void setPruningThreshold(double threshold) {
+		this.pruningThreshold = threshold;
+	}
 
 	public void setHeadCoverageThreshold(double headCoverageThreshold) {
 		this.pruningThreshold = headCoverageThreshold;
@@ -136,11 +141,11 @@ public class AMIEPredictor {
 	}
 	
 	public PredictionMetric getPredictionMetric() {
-		return this.pmetric;
+		return this.predictionsMetric;
 	}
 	
 	public void setPredictionMetric(PredictionMetric pmetric) {
-		this.pmetric = pmetric;
+		this.predictionsMetric = pmetric;
 	}
 	
 	public void setRewriteProbabilities(boolean rewriteProbabilities) {
@@ -158,8 +163,9 @@ public class AMIEPredictor {
 	 * @return
 	 * @throws Exception
 	 */
-	private List<Prediction> predict(int numberIterations, boolean onlyHits) throws Exception {
-		List<Prediction> resultingPredictions = new ArrayList<Prediction>();
+	private Set<Prediction> predict(int numberIterations, boolean onlyHits) throws Exception {
+		Set<Prediction> resultingPredictions = new LinkedHashSet<Prediction>();
+		Set<Prediction> previousPredictions = new LinkedHashSet<Prediction>();
 		if (onlyHits) {
 			System.out.println("Including only hits");
 		}
@@ -194,8 +200,9 @@ public class AMIEPredictor {
 				System.out.println(r.getBasicRuleString());
 			
 			// Get the predictions
-			resultingPredictions = new ArrayList<>();
+			resultingPredictions = new LinkedHashSet<>();
 			IterationInformation iInfo = getPredictions(finalRules, true, i, resultingPredictions);	
+			
 			System.out.println(iInfo);
 			System.out.println("Size of the KB: " + trainingKb.size());
 			
@@ -208,6 +215,21 @@ public class AMIEPredictor {
 					break;
 				}
 			}
+			
+			// If there is no convergence, remove those predictions that remained
+			// without any support.
+			if (!previousPredictions.isEmpty()) {
+				System.out.println("Removing unsupported predictions");
+				previousPredictions.removeAll(resultingPredictions);
+				System.out.println(previousPredictions.size() + " predictions will be removed");
+				// The remaining predictions have to removed
+				for (Prediction prediction : previousPredictions) {
+					ByteString[] triple = prediction.getTriple();
+					trainingKb.delete(triple[0], triple[1], triple[2]);
+				}
+			}
+			
+			previousPredictions = resultingPredictions;
 		}
 		
 		return resultingPredictions;
@@ -381,10 +403,6 @@ public class AMIEPredictor {
 					continue;
 				}
 				
-				if (nextTriple.first.equals(ByteString.of("<Brooke_English>")) && nextTriple.second.equals(ByteString.of("<livesIn>")) && nextTriple.third.equals(ByteString.of("<Pine_Valley,_Pennsylvania>"))) {
-					System.out.println("Hit");
-				}
-				
 				Prediction prediction = new Prediction(nextTriple);		
 				List<Integer> ruleIds = new ArrayList<Integer>();
 				for (Query rule : rules) {
@@ -393,23 +411,24 @@ public class AMIEPredictor {
 				}
 				// Avoid recomputing joint rules for each prediction (there can be many)
 				Collections.sort(ruleIds);
-				
-				Query combinedRule = combinedRulesMap.get(ruleIds);				
-				if (combinedRule != null) {
-					prediction.setJointRule(combinedRule);
-				} else {
-					combinedRule = prediction.getJointRule();
-					if (iteration == 0) {
-						miningAssistant.computeCardinality(combinedRule);
-						miningAssistant.computePCAConfidence(combinedRule);
+
+				if (predictionsMetric == PredictionMetric.JointConfidence ||
+						predictionsMetric == PredictionMetric.JointScoreTimesFuncScore) {
+					Query combinedRule = combinedRulesMap.get(ruleIds);				
+					if (combinedRule != null) {
+						prediction.setJointRule(combinedRule);
 					} else {
-						Utilities.computeProbabilisticMetrics(combinedRule, 
-								(TupleIndependentFactDatabase) miningAssistant.getKb());
-					}
-					combinedRulesMap.put(ruleIds, combinedRule);
-				}	
-								
-				combinedRule = prediction.getJointRule();				
+						combinedRule = prediction.getJointRule();
+						if (iteration == 0 || combinedRule.getLength() > 6) {
+							miningAssistant.computeCardinality(combinedRule);
+							miningAssistant.computePCAConfidence(combinedRule);
+						} else {
+							Utilities.computeProbabilisticMetrics(combinedRule, 
+									(TupleIndependentFactDatabase) miningAssistant.getKb());
+						}
+						combinedRulesMap.put(ruleIds, combinedRule);
+					}	
+				}
 				computeCardinalityScore(prediction);
 				
 				ByteString triple[] = prediction.getTriple();
@@ -467,7 +486,7 @@ public class AMIEPredictor {
 	 * @throws InterruptedException 
 	 */
 	private IterationInformation getPredictions(List<Query> queries, 
-			boolean notInTraining, int iteration, List<Prediction> output) throws InterruptedException {
+			boolean notInTraining, int iteration, Collection<Prediction> output) throws InterruptedException {
 		long timeStamp1 = System.currentTimeMillis();
 		List<Prediction> deductions = new ArrayList<Prediction>();
 		IterationInformation iInfo = new IterationInformation();
@@ -503,7 +522,7 @@ public class AMIEPredictor {
 			
 			++iInfo.totalConclusions;
 			double probability = trainingKb.probabilityOfFact(t);
-			double newProbability = prediction.get(this.pmetric); 
+			double newProbability = getScoreForPrediction(prediction);			
 			double change = Math.abs(probability - newProbability);
 			if (Double.isNaN(change)) {
 				System.out.println(prediction + " has a problem");
@@ -523,6 +542,26 @@ public class AMIEPredictor {
 		
 		System.out.println((System.currentTimeMillis() - timeStamp1) + " milliseconds to calculate the scores for predictions");
 		return iInfo;
+	}
+	
+	private double getScoreForPrediction(Prediction p) {
+		Query jointRule = p.getJointRule();
+		double score = 0.0;
+		if (this.pruningMetric == Metric.HeadCoverage) {
+			score = jointRule.getHeadCoverage();
+		} else {
+			score = jointRule.getSupport();
+		}
+			
+		if ( (this.predictionsMetric == PredictionMetric.JointConfidence || 
+				this.predictionsMetric == PredictionMetric.JointScoreTimesFuncScore)
+				&& score < this.pruningThreshold) {
+			return this.predictionsMetric == PredictionMetric.JointConfidence ?
+					p.get(PredictionMetric.NaiveIndependenceConfidence) :
+						p.get(PredictionMetric.NaiveIndependenceConfidenceTimesFuncScore);
+		} else {
+			return p.get(this.predictionsMetric);
+		}
 	}
 	
 	/**
@@ -556,18 +595,18 @@ public class AMIEPredictor {
         Options options = new Options();
 		
         // Arguments
-        double minMetricValue = 0.0;
+        double pruningThreshold = 0.0;
         int minInitialSupport = DefaultInitialSupportThreshold;
         int minSupport = DefaultSupportThreshold;
         double minHeadCoverage = DefaultHeadCoverageThreshold;
 		double confidenceThreshold = DefaultPCAConfidenceThreshold;
 		boolean allowTypes = false;
-		Metric metric = Metric.HeadCoverage;
+		Metric pruningMetric = Metric.HeadCoverage;
 		PredictionMetric pmetric = PredictionMetric.JointScoreTimesFuncScore;
 		int numberOfIterations = Integer.MAX_VALUE;
 		int numberOfCoresEvaluation = 1;
 		boolean addOnlyVerifiedPredictions = false;
-		List<Prediction> predictions = null;
+		Set<Prediction> predictions = null;
 		boolean outputSample = false;
 		int sampleSize = DefaultSampleSize;
 		String miningTechniqueStr = "standard";
@@ -744,20 +783,20 @@ public class AMIEPredictor {
         if (cli.hasOption("pm")) {
             switch (cli.getOptionValue("pm")) {
                 case "support":
-                    metric = Metric.Support;
-                    System.err.println("Using " + metric + " as pruning metric with threshold " + minSupport);
-                    minMetricValue = minSupport;
+                    pruningMetric = Metric.Support;
+                    System.err.println("Using " + pruningMetric + " as pruning metric with threshold " + minSupport);
+                    pruningThreshold = minSupport;
                     minInitialSupport = minSupport;
                     break;
                 default:
-                    metric = Metric.HeadCoverage;
-                    System.err.println("Using " + metric + " as pruning metric with threshold " + minHeadCoverage);
-                    minMetricValue = minHeadCoverage;
+                    pruningMetric = Metric.HeadCoverage;
+                    System.err.println("Using " + pruningMetric + " as pruning metric with threshold " + minHeadCoverage);
+                    pruningThreshold = minHeadCoverage;
                     break;
             }
         } else {
-        	System.out.println("Using " + metric + " as pruning metric with minimum threshold " + minHeadCoverage);
-            minMetricValue = minHeadCoverage;
+        	System.out.println("Using " + pruningMetric + " as pruning metric with minimum threshold " + minHeadCoverage);
+            pruningThreshold = minHeadCoverage;
             minInitialSupport = minSupport;
         }
 		
@@ -821,12 +860,13 @@ public class AMIEPredictor {
         assistant.setPcaConfidenceThreshold(confidenceThreshold);
         assistant.setEnabledConfidenceUpperBounds(true);
         assistant.setEnabledFunctionalityHeuristic(true);
-        AMIE miner = new AMIE(assistant, minInitialSupport, minMetricValue, metric, Runtime.getRuntime().availableProcessors());
+        AMIE miner = new AMIE(assistant, minInitialSupport, pruningThreshold, pruningMetric, Runtime.getRuntime().availableProcessors());
 		AMIEPredictor predictor = new AMIEPredictor(miner, testing);
 		predictor.setStandardMining(standardMining);
 		predictor.setNumberOfCoresForEvaluation(numberOfCoresEvaluation);
 		predictor.setPredictionMetric(pmetric);
 		predictor.setRewriteProbabilities(rewriteProbabilities);
+		predictor.setPruningThreshold(pruningThreshold);
 		long timeStamp1 = System.currentTimeMillis();
 		predictions = predictor.predict(numberOfIterations, addOnlyVerifiedPredictions);
 
@@ -883,7 +923,7 @@ public class AMIEPredictor {
 	 * @param stream
 	 */
 	private static void sampleBucketizedPredictions(
-			List<Prediction> predictions, PrintStream stream, PredictionMetric metric,
+			Collection<Prediction> predictions, PrintStream stream, PredictionMetric metric,
 			int sampleSize) {
 		MultiMap<Integer, Prediction> buckets = new MultiMap<>();
 		

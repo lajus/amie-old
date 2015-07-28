@@ -247,4 +247,17 @@ public class TupleIndependentFactDatabaseTest extends TestCase {
 		assertEquals((double)support, scores[0], 0.00000001);
 		assertEquals((double)pcaBody, scores[1], 0.00000001);
 	}
+	
+	public void test7() {
+		long size = kb1.size();
+		kb1.delete("<Francois>", "<livesIn>", "<Paris>");
+		assertEquals(size - 1, kb1.size());
+		assertFalse(kb1.contains(new String[]{"<Francois>", "<livesIn>", "<Paris>"}));
+		kb1.delete("<Francois>", "<livesIn>", "<Nantes>");
+		assertEquals(size - 2, kb1.size());
+		assertFalse(kb1.contains(new String[]{"<Francois>", "<livesIn>", "<Nantes>"}));
+		kb1.delete("<Francois>", "<livesIn>", "<France>");
+		assertEquals(size - 3, kb1.size());
+		assertFalse(kb1.contains(new String[]{"<Francois>", "<livesIn>", "<France>"}));		
+	}
 }

@@ -3,7 +3,6 @@ package amie.prediction.data;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,6 +111,53 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 		return add(compress(subject), compress(predicate), compress(object), probability, false);
 	}
 	
+	/*** Delete a triple ***/
+	public boolean delete(CharSequence subject, CharSequence predicate, CharSequence object) {
+		return delete(compress(subject), compress(predicate), compress(object));
+	}
+	
+	public boolean delete(ByteString subject, ByteString predicate, ByteString object) {
+		if (contains(subject, predicate, object)) {
+			subjectSize.decrease(subject);
+			predicateSize.decrease(predicate);
+			objectSize.decrease(object);
+			removeFromIndex(subject, predicate, object, subject2predicate2object);
+			removeFromIndex(subject, object, predicate, subject2object2predicate);
+			removeFromIndex(predicate, subject, object, predicate2subject2object);
+			removeFromIndex(predicate, object, subject, predicate2object2subject);
+			removeFromIndex(object, subject, predicate, object2subject2predicate);
+			removeFromIndex(object, predicate, subject, object2predicate2subject);
+			Triple<ByteString, ByteString, ByteString> tripleObj = new Triple<>(subject, predicate, object);
+			probabilities.remove(tripleObj);
+			certaintyMap.remove(tripleObj);
+			--size;
+
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/** Remove a triple from an index **/
+	private void removeFromIndex(
+			ByteString s1,
+			ByteString s2,
+			ByteString s3,
+			Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> index) {
+		Map<ByteString, IntHashMap<ByteString>> imap2 = index.get(s1);
+		IntHashMap<ByteString> imap3 = imap2.get(s2);
+		if (imap3 == null) {
+			System.out.println("Problem for prediction " + s1 + " " + s2 + " " + s3);
+		}
+		imap3.decrease(s3);
+		if (imap3.isEmpty()) {
+			imap2.remove(s2);
+			if (imap2.isEmpty()) {
+				index.remove(s1);
+			}
+		}
+	}
+
 	/**
 	 * Returns the probability of a given fact. It assumes the fact already exists.
 	 * @param atom
@@ -148,16 +194,34 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 			System.out.println(FactDatabase.toString(query));
 		}
 		double[] results = new double[bindings.size()];
+		int effectiveSize = 0;
 		try (Instantiator insty = new Instantiator(query, var)) {
-			int k = 0;
 			for (ByteString inst : bindings) {
 				double result = 1.0;
 				for (ByteString[] atom : insty.instantiate(inst)) {
 					result *= probabilityOfFact(atom);
 				}
-				results[k] = result;
-				++k;
+				if (result != 0.0) { // We could relax it a bit.
+					results[effectiveSize] = result;
+					++effectiveSize;
+				}
+				
+				if (result == 1.0) {
+					return new double[]{1.0};
+				}
 			}
+		}
+		
+		if (effectiveSize == 0) {
+			return new double[] {0.0};
+		}
+		
+		if (effectiveSize < bindings.size()) {
+			double trimedResult[] = new double[effectiveSize];
+			for (int j = 0; j < effectiveSize; ++j) {
+				trimedResult[j] = results[j];
+			}
+			return trimedResult;
 		}
 		
 		return results;
@@ -194,15 +258,17 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 			int totalSize = 0;
 			for (ByteString inst : bindings) {
 				double[] tmpAtI = probabibilitiesOfQuery(insty.instantiate(inst));
-				if (tmpAtI.length > 1 || tmpAtI[0] > 0.0) {
-					totalSize += tmpAtI.length;
-					tmp[effectiveSize] = tmpAtI;
-					++effectiveSize;
-				}
+				if (tmpAtI.length == 0 || (tmpAtI.length == 1 && tmpAtI[0] == 0.0))
+					continue;
+				
+				totalSize += tmpAtI.length;
+				tmp[effectiveSize] = tmpAtI;
+				++effectiveSize;
 			}
 			if (totalSize > 0) {
-				if (totalSize > 1000000) {
+				if (totalSize > 32000) {
 					System.out.println(FactDatabase.toString(query));
+					System.out.println("Pivot variable " + pivotVariable);
 					System.out.println("Warning: Memory issue " + totalSize);
 				}
 				result = new double[totalSize];
@@ -322,15 +388,18 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 					headExistInsty1.instantiate(val1);
 					headInst1.instantiate(val1);
 					double[] bodyProbabilities = probabibilitiesOfQuery(query); // Body probability
-					if (bodyProbabilities.length > 1 || bodyProbabilities[0] != 0.0) {
-						double[] headProbabilities = probabibilitiesOfQuery(listExistential);
-						// For the denominator
-						double headProbability = aggregateProbabilities(headProbabilities);
-						result[1] += probability(headProbability, bodyProbabilities);					
-						// For the numerator
-						headProbability = probabilityOfFact(projection);
-						result[0] += probability(headProbability, bodyProbabilities);
+					if (bodyProbabilities.length == 0 || 
+							(bodyProbabilities.length == 1 && bodyProbabilities[0] == 0.0)) {
+						continue;
 					}
+					
+					double[] headProbabilities = probabibilitiesOfQuery(listExistential);
+					// For the denominator
+					double headProbability = aggregateProbabilities(headProbabilities);
+					result[1] += probability(headProbability, bodyProbabilities);					
+					// For the numerator
+					headProbability = probabilityOfFact(projection);
+					result[0] += probability(headProbability, bodyProbabilities);
 				}
 			}
 		} else {
@@ -349,14 +418,17 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 						headInst2.instantiate(val2);
 						insty2.instantiate(val2);
 						double[] bodyProbabilities = probabibilitiesOfQuery(query); // Body probability
-						if (bodyProbabilities.length > 1 || bodyProbabilities[0] != 0.0) {
-							double[] headProbabilities = probabibilitiesOfQuery(listExistential);						
-							// For the denominator
-							double headProbability = aggregateProbabilities(headProbabilities);
-							result[1] += probability(headProbability, bodyProbabilities);					
-							headProbability = probabilityOfFact(projection);
-							result[0] += probability(headProbability, bodyProbabilities);
+						if (bodyProbabilities.length == 0 || 
+								(bodyProbabilities.length == 1 && bodyProbabilities[0] == 0.0)) {
+							continue;
 						}
+					
+						double[] headProbabilities = probabibilitiesOfQuery(listExistential);						
+						// For the denominator
+						double headProbability = aggregateProbabilities(headProbabilities);
+						result[1] += probability(headProbability, bodyProbabilities);					
+						headProbability = probabilityOfFact(projection);
+						result[0] += probability(headProbability, bodyProbabilities);
 					}
 				}
 			}
@@ -520,15 +592,9 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 		TupleIndependentFactDatabase db = new TupleIndependentFactDatabase();
 		
 		db.load(new File(args[0]));
-
-		//?a  <isMarriedTo>  ?f  ?f  <livesIn>  ?b   => ?a  <livesIn>  ?b[8.0, 0.6153846153846154]	
-		//?a  <hasChild>  ?f  ?f  <livesIn>  ?b   => ?a  <livesIn>  ?b[6.0, 0.8571428571428571]	
-		//		?e  <isMarriedTo>  ?a  ?e  <livesIn>  ?b   => ?a  <livesIn>  ?b[8.0, 0.6153846153846154]	
-		//		?e  <hasChild>  ?a  ?e  <livesIn>  ?b   => ?a  <livesIn>  ?b[6.0, 0.75]	
 		
-		//?a <livesIn> ?b  ?a <isMarriedTo> ?v0  ?v0 <livesIn> ?b  ?a <hasChild> ?v1  ?v1 <livesIn> ?b  ?v2 <hasChild> ?a  ?v2 <livesIn> ?b  ?v3 <isMarriedTo> ?a  ?v3 <livesIn> ?b
 		List<ByteString[]> query = FactDatabase.triples(
-				FactDatabase.triple("?a",  "<livesIn>",  "?b"),
+//				FactDatabase.triple("?a",  "<livesIn>",  "?b"),
 				FactDatabase.triple("?a",  "<isMarriedTo>",  "?v0"),
 				FactDatabase.triple("?v0", "<livesIn>", "?b"),
 				FactDatabase.triple("?a",  "<hasChild>",  "?v1"),
@@ -538,6 +604,62 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 				FactDatabase.triple("?v2", "<hasChild>", "?a"),
 				FactDatabase.triple("?v2", "<livesIn>", "?b")
 				);
-		System.out.println(db.countPairs("?a", "?b", query));
+		System.out.println(db.selectDistinct(ByteString.of("?a"), ByteString.of("?b"), query));
+		
+		List<ByteString[]> query2 = FactDatabase.triples(
+				FactDatabase.triple("?a",  "<livesIn>",  "?b"),
+				FactDatabase.triple("?a",  "<isMarriedTo>",  "?f"),
+				FactDatabase.triple("?f", "<livesIn>", "?b")
+				);
+		
+		List<ByteString[]> query3 = FactDatabase.triples(
+				FactDatabase.triple("?a",  "<livesIn>",  "?b"),
+				FactDatabase.triple("?a",  "<hasChild>",  "?f"),
+				FactDatabase.triple("?f", "<livesIn>", "?b")				
+				);
+		
+		List<ByteString[]> query4 = FactDatabase.triples(
+				FactDatabase.triple("?a",  "<livesIn>",  "?b"),
+				FactDatabase.triple("?e",  "<isMarriedTo>",  "?a"),
+				FactDatabase.triple("?e",  "<livesIn>",  "?b")				
+				);
+		
+		List<ByteString[]> query5 = FactDatabase.triples(
+				FactDatabase.triple("?a",  "<livesIn>",  "?b"),
+				FactDatabase.triple("?e", "<hasChild>", "?a"),
+				FactDatabase.triple("?e", "<livesIn>", "?b")			
+				);
+		System.out.println(db.selectDistinct(ByteString.of("?a"), ByteString.of("?b"), query2));
+		System.out.println(db.selectDistinct(ByteString.of("?a"), ByteString.of("?b"), query3));
+		System.out.println(db.selectDistinct(ByteString.of("?a"), ByteString.of("?b"), query4));
+		System.out.println(db.selectDistinct(ByteString.of("?a"), ByteString.of("?b"), query5));
+		
+		List<ByteString[]> query21 = FactDatabase.triples(
+				FactDatabase.triple("?a",  "<isMarriedTo>",  "?f"),
+				FactDatabase.triple("?f", "<livesIn>", "?b")
+				);
+		
+		List<ByteString[]> query31 = FactDatabase.triples(
+				FactDatabase.triple("?a",  "<hasChild>",  "?f"),
+				FactDatabase.triple("?f", "<livesIn>", "?b")				
+				);
+		
+		List<ByteString[]> query41 = FactDatabase.triples(
+				FactDatabase.triple("?e",  "<isMarriedTo>",  "?a"),
+				FactDatabase.triple("?e",  "<livesIn>",  "?b")				
+				);
+		
+		List<ByteString[]> query51 = FactDatabase.triples(
+				FactDatabase.triple("?e", "<hasChild>", "?a"),
+				FactDatabase.triple("?e", "<livesIn>", "?b")	
+				);
+
+		System.out.println(db.selectDistinct(ByteString.of("?a"), ByteString.of("?b"), query21));
+		System.out.println(db.selectDistinct(ByteString.of("?a"), ByteString.of("?b"), query31));
+		System.out.println(db.selectDistinct(ByteString.of("?a"), ByteString.of("?b"), query41));
+		System.out.println(db.selectDistinct(ByteString.of("?a"), ByteString.of("?b"), query51));		
+				
+				
+				
 	}
 }
