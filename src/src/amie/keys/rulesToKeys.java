@@ -20,8 +20,8 @@ public class rulesToKeys {
     public static void main(String[] args) throws IOException {
 
         /*SET THE FILE AND THE NUMBER OF EXCEPTIONS */
-        String triplesFile = "/Users/Danai/NetBeansProjects/AMIE/Datasets/DBWrittenWork/fullDescriptionsOfTypeWrittenWorkL.rdf";
-        String rulesFile = "/Users/Danai/NetBeansProjects/AMIE/Datasets/DBwrittenWork/rules.txt";
+        String triplesFile = "/home/galarrag/Dropbox/postdoc/DBWrittenWork/fullDescriptionsOfTypeWrittenWorkL.rdf";
+        String rulesFile = "/home/galarrag/Desktop/rules-danai";
         rulesToKeys(triplesFile, rulesFile);
         //exceptionsValidator(triplesFile, "wasbornininv");
     }

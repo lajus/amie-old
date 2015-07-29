@@ -1305,7 +1305,7 @@ public class AMIE {
         mineAssistant.setSilent(!verbose);
 
         AMIE miner = new AMIE(mineAssistant, minInitialSup, minMetricValue, metric, nThreads);
-        if (bias.equals("keys")) {
+        if (bias.equals("keys") || bias.equals("conditionalKeys")) {
             miner.setCheckParentsOfDegree2(true);
         }
 

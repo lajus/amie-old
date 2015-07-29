@@ -75,6 +75,7 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                 if (support >= (double) minSupportThreshold) {
                     Query newQuery = query.addEdges(atom1, atom2);
                     newQuery.setSupport(support);
+                    newQuery.setParent(query);
                     output.add(newQuery);
                 }
 
@@ -120,6 +121,7 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                         Query newQuery = query.addEdges(atom1, atom2);
                         newQuery.setSupport(support);
                         output.add(newQuery);
+                        newQuery.setParent(query);
                     }
                 }
                 

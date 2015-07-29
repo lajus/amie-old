@@ -149,7 +149,7 @@ public class TupleIndependentFactDatabase extends FactDatabase {
 		if (imap3 == null) {
 			System.out.println("Problem for prediction " + s1 + " " + s2 + " " + s3);
 		}
-		imap3.decrease(s3);
+		imap3.remove(s3);
 		if (imap3.isEmpty()) {
 			imap2.remove(s2);
 			if (imap2.isEmpty()) {
