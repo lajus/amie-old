@@ -161,7 +161,7 @@ public class Prediction {
 	 * assumptions.
 	 * @return
 	 */
-	public Query getJointRule() {
+	public Query computeAndGetJointRule() {
 		if (this.jointRule == null) {
 			this.jointRule = Query.combineRules(rules);
 		}
@@ -170,14 +170,14 @@ public class Prediction {
 	}
 	
 	public double getJointConfidence() {		
-		Query jointRule = getJointRule();
+		Query jointRule = computeAndGetJointRule();
 		if (Prediction.metric == Metric.PCAConfidence) {
 			if (jointRule.getPcaConfidence() < 0.0)
 				return jointRule.getPcaConfidence();
 			else 
 				return jointRule.getPcaConfidence();
 		} else {
-			return getJointRule().getStdConfidence();
+			return computeAndGetJointRule().getStdConfidence();
 		}
 	}
 	
@@ -256,7 +256,7 @@ public class Prediction {
 			builder.append("\t" + q.getRuleString() + "[" + q.getSupport() + ", " + q.getPcaConfidence() + "]");
 		}
 		
-		Query combinedRule = getJointRule();
+		Query combinedRule = computeAndGetJointRule();
 		builder.append("\t" + combinedRule.getRuleString() + "[" + combinedRule.getSupport() + ", " + combinedRule.getPcaConfidence() + "]");
 		
 		return builder.toString(); 

@@ -75,7 +75,7 @@ public class SamplePredictionsByScore {
 			}
 			++predictionsConsidered;
 			if (!naive) {
-				Query combinedRule = prediction.getJointRule();
+				Query combinedRule = prediction.computeAndGetJointRule();
 				miningAssistant.computeCardinality(combinedRule);
 				miningAssistant.computePCAConfidence(combinedRule);
 			}

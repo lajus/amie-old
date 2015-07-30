@@ -207,7 +207,7 @@ public class AMIEPredictor {
 			System.out.println("Size of the KB: " + trainingKb.size());
 			
 			if (this.rewriteProbabilities) {
-				if (iInfo.averageChange() < 0.00001) {					
+				if (iInfo.averageDelta() == 0.000001) {					
 					break;
 				}
 			} else {
@@ -409,27 +409,40 @@ public class AMIEPredictor {
 					ruleIds.add(rule.getId());
 					prediction.getRules().add(rule);
 				}
-				// Avoid recomputing joint rules for each prediction (there can be many)
-				Collections.sort(ruleIds);
 
+				// If the score is based on the joint rule then compute it.
 				if (predictionsMetric == PredictionMetric.JointConfidence ||
 						predictionsMetric == PredictionMetric.JointScoreTimesFuncScore) {
-					Query combinedRule = combinedRulesMap.get(ruleIds);				
-					if (combinedRule != null) {
-						prediction.setJointRule(combinedRule);
+					Query jointRule = null;
+					// Avoid recomputing joint rules for each prediction (there can be many)
+					Collections.sort(ruleIds);
+					// If there is only one rule, the joint prediction is that rule
+					if (prediction.getRules().size() == 1) {
+						jointRule = prediction.getRules().get(0);
 					} else {
-						combinedRule = prediction.getJointRule();
-						if (iteration == 0 || combinedRule.getLength() > 6) {
-							miningAssistant.computeCardinality(combinedRule);
-							miningAssistant.computePCAConfidence(combinedRule);
+						// Otherwise check whether we already computed it
+						jointRule = combinedRulesMap.get(ruleIds);				
+					}
+					
+					if (jointRule != null) {
+						prediction.setJointRule(jointRule);
+					} else {
+						jointRule = prediction.computeAndGetJointRule();
+						// If it is the first iteration, no need for probabilistic scores.
+						// Also avoid probabilistic scores for very long rules
+						if (iteration == 0 || jointRule.getLength() > 6) {
+							miningAssistant.computeCardinality(jointRule);
+							miningAssistant.computePCAConfidence(jointRule);
 						} else {
-							Utilities.computeProbabilisticMetrics(combinedRule, 
+							Utilities.computeProbabilisticMetrics(jointRule, 
 									(TupleIndependentFactDatabase) miningAssistant.getKb());
 						}
-						combinedRulesMap.put(ruleIds, combinedRule);
+						// Update the map
+						combinedRulesMap.put(ruleIds, jointRule);
 					}	
 				}
-				computeCardinalityScore(prediction);
+				// Now compute the functionality score
+				computeFunctionalityScore(prediction);
 				
 				ByteString triple[] = prediction.getTriple();
 				int eval = Evaluator.evaluate(triple, trainingKb, testingKb);
@@ -459,7 +472,7 @@ public class AMIEPredictor {
 			this.totalChange = 0.0;
 		}
 		
-		public double averageChange() {
+		public double averageDelta() {
 			return (double) this.totalChange / (this.totalConclusions + 1);
 		}
 		
@@ -468,9 +481,9 @@ public class AMIEPredictor {
 			
 			strBuilder.append("New facts: " + this.newFacts + "\n");
 			strBuilder.append("Conclusions: " + this.totalConclusions + "\n");
-			strBuilder.append("Total change: " + this.totalChange + "\n");
-			strBuilder.append("Maximum change: " + this.maximumChange + "\n");
-			strBuilder.append("Average change: " + this.averageChange());
+			strBuilder.append("Total delta: " + this.totalChange + "\n");
+			strBuilder.append("Maximum delta: " + this.maximumChange + "\n");
+			strBuilder.append("Average delta: " + this.averageDelta());
 			
 			return strBuilder.toString();
 		}
@@ -510,32 +523,38 @@ public class AMIEPredictor {
 		for (int i = 0; i < threads.length; ++i) {
 			threads[i].join();
 		}
-		
+		long timeStamp1Prime = System.currentTimeMillis();
 		System.out.println("Adding predictions to KB");
-		iInfo.maximumChange = -1.0;
+		iInfo.maximumChange = 0.0;
 		for (Prediction prediction : deductions) {
 			ByteString[] t = prediction.getTriple();			
+			double probability = trainingKb.probabilityOfFact(t);
+			double newProbability = getScoreForPrediction(prediction);
+			
+			/**if (newProbability < pcaConfidenceThreshold) {
+				continue;
+			}**/
 			
 			if (!trainingKb.contains(t)) {
 				++iInfo.newFacts;
 			}
 			
 			++iInfo.totalConclusions;
-			double probability = trainingKb.probabilityOfFact(t);
-			double newProbability = getScoreForPrediction(prediction);			
 			double change = Math.abs(probability - newProbability);
 			if (Double.isNaN(change)) {
 				System.out.println(prediction + " has a problem");
-				System.out.println(prediction.getJointRule().getBasicRuleString());
+				System.out.println(prediction.computeAndGetJointRule().getBasicRuleString());
 			}
 			iInfo.totalChange += change;
 			if (change > iInfo.maximumChange) {
 				iInfo.maximumChange = change;
 			}
+			
 			trainingKb.add(t[0], t[1], t[2], newProbability);
 			output.add(prediction);
 		}
-		
+		long timeStamp2Prime = System.currentTimeMillis();
+		System.out.println((timeStamp2Prime - timeStamp1Prime) + " milliseconds to iterate predictions");
 		System.out.println("Rebuilding overlap tables");
 		trainingKb.buildOverlapTables();
 		System.out.println("Done");
@@ -545,7 +564,7 @@ public class AMIEPredictor {
 	}
 	
 	private double getScoreForPrediction(Prediction p) {
-		Query jointRule = p.getJointRule();
+		Query jointRule = p.computeAndGetJointRule();
 		double score = 0.0;
 		if (this.pruningMetric == Metric.HeadCoverage) {
 			score = jointRule.getHeadCoverage();
@@ -568,11 +587,13 @@ public class AMIEPredictor {
 	 * For a given prediction, it computes the probability that meets soft cardinality constraints.
 	 * @param prediction
 	 */
-	private void computeCardinalityScore(Prediction prediction) {
+	private void computeFunctionalityScore(Prediction prediction) {
 		// Take the most functional side of the prediction
 		ByteString relation = prediction.getTriple()[1];
 		long cardinality = 0;
-		if (trainingKb.functionality(relation) > trainingKb.inverseFunctionality(relation)) {
+		double func = trainingKb.functionality(relation);
+		double invFunc = trainingKb.inverseFunctionality(relation);
+		if (func >= invFunc) {
 			ByteString subject = prediction.getTriple()[0];
 			List<ByteString[]> query = FactDatabase.triples(FactDatabase.triple(subject, relation, ByteString.of("?x")));
 			cardinality = trainingKb.countDistinct(ByteString.of("?x"), query);

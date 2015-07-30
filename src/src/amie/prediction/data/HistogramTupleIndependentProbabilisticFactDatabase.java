@@ -17,14 +17,43 @@ public class HistogramTupleIndependentProbabilisticFactDatabase extends TupleInd
 	
 	private Map<ByteString, Long> sums = new HashMap<>();
 	
+	/** Precomputed functionalities and inverse functionalities for relations **/
+	private Map<ByteString, Double> functionalities;
+	
+	private Map<ByteString, Double> invfunctionalities;
+	
+	/**
+	 * Method to pre-compute and cache functionalities and inverse functionalities
+	 * scores.
+	 */
+	protected void computeFunctionalities() {
+		functionalities = new HashMap<ByteString, Double>();
+		invfunctionalities = new HashMap<ByteString, Double>();
+		for (ByteString relation : predicateSize) {
+			functionalities.put(relation, super.functionality(relation));
+			invfunctionalities.put(relation, super.inverseFunctionality(relation));
+		}
+	}
+	
+	@Override
+	public double functionality(ByteString relation) {
+		return functionalities.get(relation);
+	}
+	
+	@Override
+	public double inverseFunctionality(ByteString relation) {
+		return invfunctionalities.get(relation);
+	}
+	
 	@Override
 	public void load(File... files) throws IOException {
 		super.load(files);
+		computeFunctionalities();
 		// Construct the histogram tables
 		for (ByteString relation : predicateSize) {
 			IntHashMap<Integer> counts;
 			IntHashMap<Integer> cumulativeCounts = new IntHashMap<>();
-			if (functionality(relation) > inverseFunctionality(relation)) {
+			if (functionality(relation) >= inverseFunctionality(relation)) {
 				counts = buildHistogram(predicate2subject2object.get(relation));
 			} else {
 				counts = buildHistogram(predicate2object2subject.get(relation));
@@ -46,6 +75,13 @@ public class HistogramTupleIndependentProbabilisticFactDatabase extends TupleInd
 		System.out.println(sums);
 	}
 
+	/**
+	 * Build a histogram storing the number of objects associated to each subject
+	 * for a given relation (or viceversa, if the relation is more inverse functional
+	 * than functional).
+	 * @param map
+	 * @return
+	 */
 	private IntHashMap<Integer> buildHistogram(
 			Map<ByteString, IntHashMap<ByteString>> map) {
 		IntHashMap<Integer> histogram = new IntHashMap<>();
@@ -57,11 +93,25 @@ public class HistogramTupleIndependentProbabilisticFactDatabase extends TupleInd
 		return histogram;
 	}
 	
+	/**
+	 * Number of subjects that are associated exactly with a given number
+	 * of objects for some relation.
+	 * @param relation
+	 * @param cardinality
+	 * @return
+	 */
 	public int cardinalityEqualsTo(ByteString relation, int cardinality) {
 		int result = cardinalityEqualsTo(relation, cardinality, histograms);
 		return result == -1 ? 0 : result;
 	}
 	
+	/**
+	 * Number of subjects that are associated to more than the given number
+	 * of objects for some relation.
+	 * @param relation
+	 * @param cardinality
+	 * @return
+	 */
 	public int cardinalityGreaterThan(ByteString relation, int cardinality) {
 		return (int) cardinalityGreaterThan(relation, cardinality, cumulativeHistograms, false);
 	}

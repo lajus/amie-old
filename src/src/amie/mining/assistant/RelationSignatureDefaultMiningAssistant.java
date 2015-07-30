@@ -1,11 +1,8 @@
 package amie.mining.assistant;
 
-import java.util.List;
-
 import javatools.datatypes.ByteString;
 import amie.data.FactDatabase;
 import amie.data.Utilities;
-import amie.mining.ConfidenceMetric;
 import amie.query.Query;
 
 /**
