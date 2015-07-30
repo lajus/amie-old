@@ -27,15 +27,18 @@ with open(tmpFile) as kf :
 	nonKeys = nonKeysSubstr.split("], [") 
 	with open('nonKeysFile', 'w') as nonKeysFile :
 		for nonKey in nonKeys :
+                    if nonKey.find(',')!=-1:
 			nonKeysFile.write(nonKey + "\n")
 
-heapSpace = '4G'
-if len(sys.argv) > 2 :
-	heapSpace = sys.argv[2]
-	
+
 minSupport = 100
+if len(sys.argv) > 2 :
+	minSupport = int(sys.argv[2])	
+
+heapSpace = '4G'
 if len(sys.argv) > 3 :
-	minSupport = int(sys.argv[3])	
+	heapSpace = sys.argv[3]
+	
 
 amieCmdLine = 'java -XX:-UseGCOverheadLimit -Xmx' 
 amieCmdLine += heapSpace + ' -jar amie.jar -bias conditionalKeys -dpr ' 
@@ -56,7 +59,7 @@ with open('rules', 'w') as rulesFile :
 				rulesFile.write(amieLine)
 
 rulesToKeysCmd = 'java -cp amie.jar amie.keys.rulesToKeys ' + kbPath 
-rulesToKeysCmd += ''' rules'''
+rulesToKeysCmd += ''' rules > conditionalKeys'''
 print 'Running ' + rulesToKeysCmd
 if os.system(rulesToKeysCmd) != 0 :
 	print 'There was a problem converting the rules to keys'
