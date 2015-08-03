@@ -207,7 +207,7 @@ public class AMIEPredictor {
 			System.out.println("Size of the KB: " + trainingKb.size());
 			
 			if (this.rewriteProbabilities) {
-				if (iInfo.averageDelta() == 0.000001) {					
+				if (iInfo.averageDelta() <= 0.000001) {					
 					break;
 				}
 			} else {

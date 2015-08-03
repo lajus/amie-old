@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.LinkedHashSet;
 
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
@@ -25,14 +27,34 @@ import amie.query.Query;
  */
 public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
 
-    List<List<ByteString>> nonKeys = new ArrayList<>();
+    List<List<ByteString>> nonKeys;
+    
+    Set<Set<ByteString>> propertyCombinations;
 
     public ConditionalKeyMiningAssistant(FactDatabase dataSource, File nonKeysFile) throws FileNotFoundException, IOException {
         super(dataSource);
+        nonKeys = new ArrayList<List<ByteString>>();
+        propertyCombinations = new LinkedHashSet<Set<ByteString>>();
         parseNonKeysFile(nonKeysFile);
+        buildPropertyCombinations();
     }
 
-    private void parseNonKeysFile(File nonKeysFile) throws FileNotFoundException, IOException {
+    private void buildPropertyCombinations() {
+		for (List<ByteString> nonKey : nonKeys) {
+	    	List<int[]> subsets = 
+					telecom.util.collections.Collections.subsetsUpToSize(nonKey.size(), 
+							nonKey.size());
+			for (int[] subset : subsets) {
+				Set<ByteString> subsetObj = new LinkedHashSet<>();
+				for (int index : subset) {
+					subsetObj.add(nonKey.get(index));
+				}
+				propertyCombinations.add(subsetObj);
+			}
+		}
+	}
+
+	private void parseNonKeysFile(File nonKeysFile) throws FileNotFoundException, IOException {
         BufferedReader br = new BufferedReader(new FileReader(nonKeysFile));
         String line = null;
         while ((line = br.readLine()) != null) {
@@ -50,20 +72,31 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
     public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output) {
         ByteString[] head = query.getHead();
         List<ByteString> bodyRelations = query.getBodyRelations();
-        int positionInNonKey = bodyRelations.size();
         ByteString[] atom1 = query.fullyUnboundTriplePattern();
         ByteString[] atom2 = query.fullyUnboundTriplePattern();
         for (List<ByteString> nonKey : nonKeys) {
-            if (nonKey.size() > bodyRelations.size()) {
-                if (positionInNonKey > 0) {
-                    if (!nonKey.subList(0, positionInNonKey).containsAll(bodyRelations)) {
-                        continue;
-                    }
+            int positionInNonKey = 0;
+        	if (!bodyRelations.isEmpty()) {
+        		positionInNonKey =
+            		nonKey.indexOf(bodyRelations.get(bodyRelations.size() - 1));
+        		
+        		if (positionInNonKey == nonKey.size() - 1)
+        			continue;
+        		
+            	if (positionInNonKey >= 0) {
+                	Set<ByteString> subset = new LinkedHashSet<ByteString>(bodyRelations);
+                	if (!propertyCombinations.contains(subset)) {
+                		continue;
+                	}
+                } else {
+                	continue;
                 }
-                ByteString property = nonKey.get(positionInNonKey);
-                atom1[0] = head[0];//x
+        	}
+            atom1[0] = head[0];//x
+            atom2[0] = head[2];//y
+            for (int k = positionInNonKey + 1; k < nonKey.size(); ++k) {
+                ByteString property = nonKey.get(k);
                 atom1[1] = property;//property
-                atom2[0] = head[2];//y
                 atom2[1] = property;//property
                 atom1[2] = atom2[2];//same fresh variable
                 query.getTriples().add(atom1);
@@ -78,7 +111,6 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                     newQuery.setParent(query);
                     output.add(newQuery);
                 }
-
             }
         }
     }
@@ -90,43 +122,55 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
     public void getInstantiatedAtoms(Query query, double minCardinality, Collection<Query> temporalSomething, Collection<Query> output) {
         ByteString[] head = query.getHead();
         List<ByteString> bodyRelations = query.getBodyRelations();
-        int positionInNonKey = bodyRelations.size();
         ByteString[] atom1 = query.fullyUnboundTriplePattern();
         ByteString[] atom2 = query.fullyUnboundTriplePattern();
         for (List<ByteString> nonKey : nonKeys) {
             if (nonKey.size() > bodyRelations.size()) {
-                if (positionInNonKey > 0) {
-                    if (!nonKey.subList(0, positionInNonKey).containsAll(bodyRelations)) {
-                        continue;
-                    }
-                }
-                ByteString property = nonKey.get(positionInNonKey);
+            	int positionInNonKey = 0;
+            	if (!bodyRelations.isEmpty()) {
+            		if (positionInNonKey == nonKey.size() - 1)
+            			continue;
+            		
+            		positionInNonKey =
+                		nonKey.indexOf(bodyRelations.get(bodyRelations.size() - 1));
+	            	if (positionInNonKey >= 0) {
+	                	Set<ByteString> subset = new LinkedHashSet<ByteString>(bodyRelations);
+	                	if (!propertyCombinations.contains(subset)) {
+	                		continue;
+	                	}
+	                } else {
+	                	continue;
+	                }
+            	}
                 atom1[0] = head[0];//x
-                atom1[1] = property;//property
-                atom2[0] = head[2];
-                atom2[1] = property;
-                atom2[2] = atom1[2];
-                ByteString danglingVariable = atom1[2];
-                query.getTriples().add(atom1);
-                query.getTriples().add(atom2);
-                IntHashMap<ByteString> constants = kb.countProjectionBindings(head, query.getTriples(), atom1[2]);
-                int effectiveSize = query.getTriples().size();
-                query.getTriples().remove(effectiveSize - 1);
-                query.getTriples().remove(effectiveSize - 2);
-                for (ByteString constant : constants) {
-                    int support = constants.get(constant);
-                    if (support >= minCardinality) {
-                        atom1[2] = constant;
-                        atom2[2] = constant;
-                        Query newQuery = query.addEdges(atom1, atom2);
-                        newQuery.setSupport(support);
-                        output.add(newQuery);
-                        newQuery.setParent(query);
-                    }
+                atom2[0] = head[2];//y
+                for (int k = positionInNonKey + 1; k < nonKey.size(); ++k) {
+	                ByteString property = nonKey.get(k);
+	                atom1[1] = property;//property
+	                atom2[1] = property;
+	                atom2[2] = atom1[2];
+	                ByteString danglingVariable = atom1[2];
+	                query.getTriples().add(atom1);
+	                query.getTriples().add(atom2);
+	                IntHashMap<ByteString> constants = kb.countProjectionBindings(head, query.getTriples(), atom1[2]);
+	                int effectiveSize = query.getTriples().size();
+	                query.getTriples().remove(effectiveSize - 1);
+	                query.getTriples().remove(effectiveSize - 2);
+	                for (ByteString constant : constants) {
+	                    int support = constants.get(constant);
+	                    if (support >= minCardinality) {
+	                        atom1[2] = constant;
+	                        atom2[2] = constant;
+	                        Query newQuery = query.addEdges(atom1, atom2);
+	                        newQuery.setSupport(support);
+	                        output.add(newQuery);
+	                        newQuery.setParent(query);
+	                    }
+	                }
+	                
+	                atom1[2] = danglingVariable;
+	                atom2[2] = danglingVariable;
                 }
-                
-                atom1[2] = danglingVariable;
-                atom2[2] = danglingVariable;
             }
         }
     }

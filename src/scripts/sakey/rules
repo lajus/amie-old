@@ -1,0 +1,6 @@
+?a  p2  b2  ?b  p2  b2   => ?a  equals  ?b	0	1	1	1	1	1	?a	0.0	0.0	0.0
+?a  p3  c2  ?b  p3  c2   => ?a  equals  ?b	0	1	1	1	1	1	?a	0.0	0.0	0.0
+?a  p2  b1  ?b  p2  b1   => ?a  equals  ?b	0	1	1	1	1	1	?a	0.0	0.0	0.0
+?a  p3  c1  ?b  p3  c1   => ?a  equals  ?b	0	1	1	1	1	1	?a	0.0	0.0	0.0
+?a  p2  ?f  ?b  p2  ?f  ?a  p4  d1  ?b  p4  d1   => ?a  equals  ?b	0	1	1	2	2	2	?a	0.0	0.0	0.0
+?a  p3  ?f  ?b  p3  ?f  ?a  p4  d1  ?b  p4  d1   => ?a  equals  ?b	0	1	1	2	2	2	?a	0.0	0.0	0.0
