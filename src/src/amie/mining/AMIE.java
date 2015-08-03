@@ -1203,8 +1203,7 @@ public class AMIE {
                 System.out.println("Overriding recursivity limit. Using a value of " + mineAssistant.getRecursivityLimit());
                 break;
             case "conditionalKeys":
-                File nonKeysFile = new File(cli.getOptionValue("nkf"));
-                mineAssistant = new ConditionalKeyMiningAssistant(dataSource, nonKeysFile);
+                mineAssistant = new ConditionalKeyMiningAssistant(dataSource, cli.getOptionValue("nkf"));
                 System.out.println("Mining conditional keys of the form firstName(x,y)^firstName(x',y)^lastName(x,\"Symeonidou\")^lastName(x',\"Symeonidou\")=> equals(x,x')");
                 break;
             case "seedsCount":
