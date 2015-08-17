@@ -223,6 +223,9 @@ public class AMIEPredictor {
 				previousPredictions.removeAll(resultingPredictions);
 				System.out.println(previousPredictions.size() + " predictions will be removed");
 				// The remaining predictions have to removed
+				if (previousPredictions.size() == 2) {
+					System.out.println(previousPredictions);
+				}
 				for (Prediction prediction : previousPredictions) {
 					ByteString[] triple = prediction.getTriple();
 					trainingKb.delete(triple[0], triple[1], triple[2]);
@@ -531,9 +534,9 @@ public class AMIEPredictor {
 			double probability = trainingKb.probabilityOfFact(t);
 			double newProbability = getScoreForPrediction(prediction);
 			
-			/**if (newProbability < pcaConfidenceThreshold) {
+			/*if (newProbability < pcaConfidenceThreshold) {
 				continue;
-			}**/
+			}*/
 			
 			if (!trainingKb.contains(t)) {
 				++iInfo.newFacts;
@@ -553,6 +556,7 @@ public class AMIEPredictor {
 			trainingKb.add(t[0], t[1], t[2], newProbability);
 			output.add(prediction);
 		}
+		
 		long timeStamp2Prime = System.currentTimeMillis();
 		System.out.println((timeStamp2Prime - timeStamp1Prime) + " milliseconds to iterate predictions");
 		System.out.println("Rebuilding overlap tables");

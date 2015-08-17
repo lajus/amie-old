@@ -99,6 +99,18 @@ public class FactDatabase {
 
 	/** (X equals Y Z ...) predicate */
 	public static final ByteString EQUALSbs = ByteString.of(EQUALSstr);
+	
+	/** r(X, y') exists for some y', predicate */
+	public static final String EXISTSstr = "exists";
+	
+	/** r(X, y') exists for some y', predicate */
+	public static final ByteString EXISTSbs = ByteString.of(EXISTSstr);
+	
+	/** r(y', X) exists for some y', predicate */
+	public static final String EXISTSINVstr = "existsInv";
+	
+	/** r(y', X) exists for some y', predicate */
+	public static final ByteString EXISTSINVbs = ByteString.of(EXISTSINVstr);
 
 	/** Identifiers for the overlap maps */
 	public static final int SUBJECT2SUBJECT = 0;
@@ -208,11 +220,16 @@ public class FactDatabase {
 		return (size);
 	}
 
-	public long size(int var) {
-		if (var < 0 || var > 2)
+	/**
+	 * Returns the number of distinct entities in one column of the database.
+	 * @param column 0 = Subject, 1 = Relation/Predicate, 2 = Object
+	 * @return
+	 */
+	public long size(int column) {
+		if (column < 0 || column > 2)
 			throw new IllegalArgumentException(
 					"Variable position must be between 0 and 2");
-		switch (var) {
+		switch (column) {
 		case 0:
 			return subjectSize.size();
 		case 1:
@@ -223,6 +240,24 @@ public class FactDatabase {
 			throw new IllegalArgumentException(
 					"Variable position must be between 0 and 2");
 		}
+	}
+	
+	/**
+	 * Returns the number of relations in the database.
+	 * @return
+	 */
+	public long relationsSize() {
+		return size(1);
+	}
+	
+	/**
+	 * Returns the number of entities in the database.
+	 * @return
+	 */
+	public long entitiesSize() {
+		Set<ByteString> entities = new HashSet<ByteString>(subjectSize);
+		entities.addAll(objectSize);
+		return entities.size();
 	}
 
 	/** TRUE if the ByteString is a SPARQL variable */
@@ -604,7 +639,20 @@ public class FactDatabase {
 			else
 				result.add(triple[0]);
 			return (result);
+		}		
+		if (triple[1].equals(EXISTSbs)) {
+			if (isVariable(triple[0])) 
+				return (new IntHashMap<ByteString>(get(subject2predicate2object, triple[2]).keySet()));
+			else 
+				return (new IntHashMap<ByteString>(get(predicate2subject2object, triple[0]).keySet()));
+		}		
+		if (triple[1].equals(EXISTSINVbs)) {
+			if (isVariable(triple[0])) 
+				return (new IntHashMap<ByteString>(get(object2predicate2subject, triple[2]).keySet()));
+			else 
+				return (new IntHashMap<ByteString>(get(predicate2object2subject, triple[0]).keySet()));
 		}
+		
 		if (isVariable(triple[0]))
 			return (get(predicate2object2subject, triple[1], triple[2]));
 		if (isVariable(triple[1]))
@@ -626,6 +674,12 @@ public class FactDatabase {
 			return (differentFrom(fact));
 		if (fact[1] == EQUALSbs)
 			return (equalTo(fact));
+		if (fact[1] == EXISTSbs) 
+			return (get(predicate2subject2object, fact[0])
+					.containsKey(fact[2]));
+		if (fact[1] == EXISTSINVbs)
+			return (get(predicate2object2subject, fact[0])
+					.containsKey(fact[2]));
 		return (get(subject2predicate2object, fact[0], fact[1])
 				.contains(fact[2]));
 	}
@@ -688,6 +742,19 @@ public class FactDatabase {
 			}
 			return (result);
 		}
+		if (triple[1].equals(EXISTSbs) || triple[1].equals(EXISTSINVbs)) {
+			Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> map = 
+					triple[1].equals(EXISTSbs) ? predicate2subject2object
+							: predicate2object2subject;
+			Map<ByteString, IntHashMap<ByteString>> result = new HashMap<>();
+			for (ByteString relation : map.keySet()) {
+				IntHashMap<ByteString> innerResult = new IntHashMap<>();
+				innerResult.addAll(map.get(relation).keySet());
+				result.put(relation, innerResult);
+			}
+			return (result);
+		}
+		
 		switch (pos1) {
 		case 0:
 			switch (pos2) {
@@ -718,6 +785,84 @@ public class FactDatabase {
 				"Invalid combination of variables in " + toString(triple)
 						+ " pos1 = " + pos1 + " pos2=" + pos2);
 	}
+	
+	/**
+	 * Returns the results of a triple query pattern with three variables as
+	 * a nested map, firstValue : {secondValue : thirdValue}.
+	 * @param var1
+	 * @param var2
+	 * @param var3
+	 * @param triple
+	 * @return
+	 */
+	private Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> resultsThreeVariables(
+			ByteString var1, ByteString var2, ByteString var3,
+			ByteString[] triple) {
+		int varPos1 = varpos(var1, triple);
+		int varPos2 = varpos(var2, triple);
+		int varPos3 = varpos(var3, triple);
+		
+		return resultsThreeVariables(varPos1, varPos2, varPos3, triple);
+	}
+
+	private Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> resultsThreeVariables(
+			int varPos1, int varPos2, int varPos3, ByteString[] triple) {
+		switch (varPos1) {
+		case 0 :
+			switch (varPos2) {
+			case 1 :
+				if (varPos3 == 2)
+					return subject2predicate2object;
+				else
+					throw new IllegalArgumentException("Invalid combination of variables in " + toString(triple)
+							+ " pos1 = " + varPos1 + " pos2=" + varPos2 + " pos3=" + varPos3);
+			case 2 :
+				if (varPos3 == 1)
+					return subject2object2predicate;
+				else
+					throw new IllegalArgumentException("Invalid combination of variables in " + toString(triple)
+							+ " pos1 = " + varPos1 + " pos2=" + varPos2 + " pos3=" + varPos3);
+			default:
+				throw new IllegalArgumentException("Invalid combination of variables in " + toString(triple)
+						+ " pos1 = " + varPos1 + " pos2=" + varPos2 + " pos3=" + varPos3);
+			}
+		case 1 :
+			switch (varPos2) {
+			case 0 :
+				if (varPos3 == 2)
+					return predicate2subject2object;
+				else 
+					throw new IllegalArgumentException("Invalid combination of variables in " + toString(triple)
+								+ " pos1 = " + varPos1 + " pos2=" + varPos2 + " pos3=" + varPos3);
+			case 2 :
+				if (varPos3 == 0) 
+					return predicate2object2subject;
+				else
+					throw new IllegalArgumentException("Invalid combination of variables in " + toString(triple)
+							+ " pos1 = " + varPos1 + " pos2=" + varPos2 + " pos3=" + varPos3);					
+			default:
+				throw new IllegalArgumentException("Invalid combination of variables in " + toString(triple)
+						+ " pos1 = " + varPos1 + " pos2=" + varPos2 + " pos3=" + varPos3);
+			}
+		case 2 :
+			switch (varPos2) {
+			case 0 :
+				if (varPos3 == 1)
+					return object2subject2predicate;
+				else
+					throw new IllegalArgumentException("Invalid combination of variables in " + toString(triple)
+							+ " pos1 = " + varPos1 + " pos2=" + varPos2 + " pos3=" + varPos3);
+			case 1 :
+				if (varPos3 == 0)
+					return object2predicate2subject;
+				else
+					throw new IllegalArgumentException("Invalid combination of variables in " + toString(triple)
+							+ " pos1 = " + varPos1 + " pos2=" + varPos2 + " pos3=" + varPos3);
+			}
+		}
+		
+		return null;
+	}
 
 	/**
 	 * Returns the results of a triple query pattern with two variables as a map
@@ -736,6 +881,18 @@ public class FactDatabase {
 			return (Long.MAX_VALUE);
 		if (triple[1].equals(EQUALSbs))
 			return (1);
+		if (triple[1].equals(EXISTSbs)) {
+			if (isVariable(triple[2]))
+				return get(predicate2subject2object, triple[0]).size();
+			else 
+				return get(subject2predicate2object, triple[2]).size();
+		}
+		if (triple[1].equals(EXISTSINVbs)) {
+			if (isVariable(triple[2]))
+				return get(predicate2object2subject, triple[0]).size();
+			else
+				return get(object2predicate2subject, triple[2]).size();
+		}
 		return (resultsOneVariable(triple).size());
 	}
 
@@ -745,6 +902,20 @@ public class FactDatabase {
 			return (Long.MAX_VALUE);
 		if (triple[1].equals(EQUALSbs))
 			return (subject2predicate2object.size());
+		if (triple[1].equals(EXISTSbs)) {
+			long count = 0;
+			for (ByteString relation : predicateSize) {
+				count += get(predicate2subject2object, relation).size();
+			}
+			return count;
+		}
+		if (triple[1].equals(EXISTSINVbs)) {
+			long count = 0;
+			for (ByteString relation : predicateSize) {
+				count += get(predicate2object2subject, relation).size();
+			}
+			return count;
+		}			
 		if (!isVariable(triple[0]))
 			return (long) (subjectSize.get(triple[0], 0));
 		if (!isVariable(triple[1])) {
@@ -1037,7 +1208,7 @@ public class FactDatabase {
 		// If the variable is in the most restrictive triple
 		if (Arrays.asList(best).indexOf(variable) != -1) {
 			switch (numVariables(best)) {
-			case 1:
+			case 1 :
 				try (Instantiator insty = new Instantiator(remove(bestPos,
 						query), variable)) {
 					for (ByteString inst : resultsOneVariable(best)) {
@@ -1062,9 +1233,33 @@ public class FactDatabase {
 				break;
 			case 3:
 			default:
-				throw new UnsupportedOperationException(
-						"3 variables in the projection triple are not yet supported: SELECT "
-								+ variable + " WHERE " + toString(query));
+				try (Instantiator insty = new Instantiator(remove(bestPos, query), variable)) {
+					int varPos = varpos(variable, best);
+					ByteString var1, var2, var3;
+					switch (varPos) {
+					case 0 :
+						var1 = best[0];
+						var2 = best[1];
+						var3 = best[2];
+						break;
+					case 1 :
+						var1 = best[1];
+						var2 = best[0];
+						var3 = best[2];
+						break;
+					case 2 : default :
+						var1 = best[2];
+						var2 = best[0];
+						var3 = best[1];
+						break;							
+					}
+
+					for (ByteString inst : resultsThreeVariables(var1, var2, var3, best).keySet()) {
+						if (existsBS(insty.instantiate(inst)))
+							result.add(inst);
+					}
+				}
+				break;
 			}
 			return (result);
 		}
@@ -1102,9 +1297,27 @@ public class FactDatabase {
 			break;
 		case 3:
 		default:
-			throw new UnsupportedOperationException(
-					"3 variables in the projection triple are not yet supported: SELECT "
-							+ variable + " WHERE " + toString(query));
+			firstVar = firstVariablePos(best);
+			secondVar = secondVariablePos(best);
+			Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> map = 
+					resultsThreeVariables(best[0], best[1], best[2], best);
+			try (Instantiator insty1 = new Instantiator(others, best[0]);
+					Instantiator insty2 = new Instantiator(others, best[1]);
+						Instantiator insty3 = new Instantiator(others, best[2])) {
+				for (ByteString val1 : map.keySet()) {
+					insty1.instantiate(val1);
+					instantiations = map.get(val1);
+					for (ByteString val2 : instantiations.keySet()) {
+						insty2.instantiate(val2);
+						IntHashMap<ByteString> instantiations2 = instantiations.get(val2);
+						for (ByteString val3 : instantiations2) {
+							result.addAll(selectDistinct(variable, insty3.instantiate(val3)));
+						}
+					}
+				}
+			}
+			break;
+
 		}
 		return (result);
 	}
@@ -1115,7 +1328,7 @@ public class FactDatabase {
 
 	/** Returns all (distinct) pairs of values that make the query true */
 	public Map<ByteString, IntHashMap<ByteString>> selectDistinct(
-			CharSequence var1, CharSequence var2, List<CharSequence[]> query) {
+			CharSequence var1, CharSequence var2, List<? extends CharSequence[]> query) {
 		return (selectDistinct(compress(var1), compress(var2), triples(query)));
 	}
 
@@ -1139,6 +1352,139 @@ public class FactDatabase {
 			}
 		}
 		return (result);
+	}
+	
+	// ---------------------------------------------------------------------------
+	// Select distinct, more than 2 variables
+	// ---------------------------------------------------------------------------
+
+	/** Return all triplets of values that make the query true **/
+	public Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> selectDistinct(
+			CharSequence var1, CharSequence var2, CharSequence var3,
+			List<? extends CharSequence[]> query) {
+		return selectDistinct(compress(var1), compress(var2), compress(var3), triples(query));
+	}
+	
+	public Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> selectDistinct(
+			ByteString var1, ByteString var2, ByteString var3,
+			List<ByteString[]> query) {
+		if (query.isEmpty()) {
+			return Collections.emptyMap();
+		}
+		
+		if (query.size() == 1) {
+			ByteString[] first = query.get(0);
+			int numVariables = numVariables(first);
+			if (numVariables == 3) {
+				return resultsThreeVariables(var1, var2, var3, first);
+			} else {
+				throw new UnsupportedOperationException("Selection over variables not occuring in the query is not supported");
+			}
+		}
+		
+		Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> result = 
+				new HashMap<>();
+		try (Instantiator insty1 = new Instantiator(query, var1)) {
+			for (ByteString val1 : selectDistinct(var1, query)) {
+				insty1.instantiate(val1);
+				Map<ByteString, IntHashMap<ByteString>> tail = selectDistinct(var2, var3, query);
+				if (!tail.isEmpty()) {
+					result.put(val1, tail);
+				}
+			}
+		}
+		return result;
+	}
+	/**
+	 * Turn a result map of 2 levels into a map of 3 levels.
+	 */
+	private Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> fixResultMap(
+			Map<ByteString, IntHashMap<ByteString>> resultsTwoVars, int fixLevel, ByteString constant) {
+		Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> extendedMap = new
+				HashMap<ByteString, Map<ByteString, IntHashMap<ByteString>>>();
+		switch (fixLevel) {
+		case 1:
+			extendedMap.put(constant, resultsTwoVars);
+			break;
+		case 2 :
+			for (ByteString val : resultsTwoVars.keySet()) {
+				Map<ByteString, IntHashMap<ByteString>> newMap = 
+						new HashMap<ByteString, IntHashMap<ByteString>>();
+				newMap.put(constant, resultsTwoVars.get(val));
+				extendedMap.put(val, newMap);
+			}	
+		case 3 : default:
+			IntHashMap<ByteString> newMap = new IntHashMap<ByteString>();
+			newMap.add(constant);
+			for (ByteString val1 : resultsTwoVars.keySet()) {
+				Map<ByteString, IntHashMap<ByteString>> intermediateMap = 
+						new HashMap<ByteString, IntHashMap<ByteString>>();
+				for (ByteString val2 : resultsTwoVars.get(val1)) {
+					intermediateMap.put(val2, newMap);
+				}
+				extendedMap.put(val1, intermediateMap);
+			}
+			break;
+		}
+		return extendedMap;
+	}
+
+	public Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> selectDistinct(
+			CharSequence var1, CharSequence var2, CharSequence var3, CharSequence var4,
+			List<? extends CharSequence[]> query) {
+		return selectDistinct(compress(var1), compress(var2), compress(var3), compress(var4), triples(query));
+	}
+	
+	public Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> selectDistinct(
+			ByteString var1, ByteString var2, ByteString var3, ByteString var4,
+			List<ByteString[]> query) {
+		if (query.size() < 2) {
+			throw new IllegalArgumentException("The query must have at least 2 atoms");
+		}
+		
+		Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> result = 
+				new HashMap<>();
+		try (Instantiator insty1 = new Instantiator(query, var1)) {
+			for (ByteString val1 : selectDistinct(var1, query)) {
+				insty1.instantiate(val1);
+				Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> tail = 
+						selectDistinct(var2, var3, var4, query);
+				if (!tail.isEmpty()) {
+					result.put(val1, tail);
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	public Map<ByteString, Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>>> selectDistinct(
+			CharSequence var1, CharSequence var2, CharSequence var3, CharSequence var4, CharSequence var5,
+			List<? extends CharSequence[]> query) {
+		return selectDistinct(compress(var1), compress(var2), compress(var3), compress(var4), compress(var5), triples(query));
+	}
+	
+	public Map<ByteString, Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>>> selectDistinct(
+			ByteString var1, ByteString var2, ByteString var3, ByteString var4, ByteString var5,
+			List<ByteString[]> query) {
+		if (query.size() < 2) {
+			throw new IllegalArgumentException("The query must have at least 2 atoms");
+		}
+		
+		Map<ByteString, Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>>> result = 
+				new HashMap<>();
+		try (Instantiator insty1 = new Instantiator(query, var1)) {
+			for (ByteString val1 : selectDistinct(var1, query)) {
+				insty1.instantiate(val1);
+				Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> tail = 
+						selectDistinct(var2, var3, var4, var5, query);
+				if (!tail.isEmpty()) {
+					result.put(val1, tail);
+				}
+			}
+		}
+		
+		return result;
 	}
 
 	// ---------------------------------------------------------------------------
@@ -2055,7 +2401,23 @@ public class FactDatabase {
 					triples.get(triples.size() - 1)));
 		return (null);
 	}
-
+	
+	public Set<ByteString> difference(CharSequence projectionVariable,
+			List<? extends CharSequence[]> antecedent, CharSequence[] head) {
+		List<CharSequence[]> headList = new ArrayList<>();
+		headList.add(head);
+		return difference(compress(projectionVariable), triples(antecedent), 
+				triples(headList));
+	}
+	
+	/**
+	 * It returns all the bindings of the projection variable that match
+	 * the antecedent but not the succedent.
+	 * @param projectionVariable
+	 * @param antecedent
+	 * @param head
+	 * @return
+	 */
 	public Set<ByteString> difference(ByteString projectionVariable,
 			List<ByteString[]> antecedent, List<ByteString[]> head) {
 		// TODO Auto-generated method stub
@@ -2066,7 +2428,13 @@ public class FactDatabase {
 		bodyBindings.removeAll(headBindings);
 		return bodyBindings;
 	}
-
+	
+	
+	/*** Difference with 2 variables ***/
+	public Map<ByteString, IntHashMap<ByteString>> difference(CharSequence var1,
+			CharSequence var2, List<? extends CharSequence[]> antecedent, CharSequence[] head) {
+		return difference(compress(var1), compress(var2), triples(antecedent), triple(head));
+	}
 	/**
 	 * Performs a set difference assuming the bindings of the argument head are
 	 * a subset of the argument antecedent
@@ -2079,13 +2447,78 @@ public class FactDatabase {
 	 */
 	public Map<ByteString, IntHashMap<ByteString>> difference(ByteString var1,
 			ByteString var2, List<ByteString[]> antecedent,
-			List<ByteString[]> head) {
+			ByteString[] head) {
 		// Look for all bindings for the variables that appear on the antecedent
 		// but not in the head
+		List<ByteString[]> headList = new ArrayList<ByteString[]>(1);
+		headList.add(head);
+		return difference(var1, var2, antecedent, headList);
+	}
+	
+	public Map<ByteString, IntHashMap<ByteString>> differenceNoVarsInCommon(CharSequence var1,
+			CharSequence var2, List<? extends CharSequence[]> antecedent,
+			CharSequence[] head) {
+		return differenceNoVarsInCommon(compress(var1), compress(var2), triples(antecedent), triple(head));
+	}
+	
+	/**
+	 * Special case of the difference where the head does not contain the projection 
+	 * variables.
+	 * @param var1
+	 * @param var2
+	 * @param antecedent
+	 * @param head
+	 * @return
+	 */
+	public Map<ByteString, IntHashMap<ByteString>> differenceNoVarsInCommon(ByteString var1,
+			ByteString var2, List<ByteString[]> antecedent,
+			ByteString[] head) {
+		// Look for all bindings for the variables that appear on the antecedent
+		// but not in the head
+		List<ByteString[]> headList = new ArrayList<ByteString[]>(1);
+		headList.add(head);
+		List<ByteString[]> wholeQuery = new ArrayList<ByteString[]>(antecedent);
+		wholeQuery.add(head);
+		Map<ByteString, IntHashMap<ByteString>> results = new HashMap<ByteString, IntHashMap<ByteString>>();
+		
+		Map<ByteString, IntHashMap<ByteString>> antecedentBindings = 
+				selectDistinct(var1, var2, antecedent);
+		try(Instantiator insty1 = new Instantiator(wholeQuery, var1);
+				Instantiator insty2 = new Instantiator(wholeQuery, var2)) {
+			for (ByteString val1 : antecedentBindings.keySet()) {
+				insty1.instantiate(val1);
+				IntHashMap<ByteString> nestedValues = new IntHashMap<ByteString>();
+				for(ByteString val2 : antecedentBindings.get(val1)) {
+					insty2.instantiate(val2);
+					if (!existsBS(wholeQuery)) {
+						nestedValues.add(val2);
+					}
+				}
+				if (!nestedValues.isEmpty()) {
+					results.put(val1, nestedValues);
+				}
+			}
+		}
+		
+		return results;
+	}
+	
+	/**
+	 * Bindings of the projection variables that satisfy the first list of atoms 
+	 * but not the second.
+	 * @param var1
+	 * @param var2
+	 * @param antecedent
+	 * @param headList
+	 * @return
+	 */
+	public Map<ByteString, IntHashMap<ByteString>> difference(ByteString var1,
+			ByteString var2, List<ByteString[]> antecedent,
+			List<ByteString[]> headList) {
 		Map<ByteString, IntHashMap<ByteString>> bodyBindings = selectDistinct(
 				var1, var2, antecedent);
 		Map<ByteString, IntHashMap<ByteString>> headBindings = selectDistinct(
-				var1, var2, head);
+				var1, var2, headList);
 		Map<ByteString, IntHashMap<ByteString>> result = new HashMap<ByteString, IntHashMap<ByteString>>();
 
 		Set<ByteString> keySet = bodyBindings.keySet();
@@ -2107,7 +2540,228 @@ public class FactDatabase {
 
 		return result;
 	}
+	
+	/** Difference with 3 variables **/
+	public Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> difference(
+			CharSequence var1, CharSequence var2, CharSequence var3,
+			List<? extends CharSequence[]> antecedent, CharSequence[] head) {
+		return difference(compress(var1), compress(var2), compress(var3), 
+				triples(antecedent), triple(head));
+	}
+	
+	public Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> difference(
+			ByteString var1, ByteString var2, ByteString var3,
+			List<ByteString[]> antecedent, ByteString[] head) {
+		Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> results = null;
+		
+		List<ByteString[]> headList = new ArrayList<>(1);
+		headList.add(head);
+		
+		Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> bodyBindings = null;
+		Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> headBindings = null;
+		
+		if (numVariables(head) == 3) {
+			results = new HashMap<ByteString, Map<ByteString,IntHashMap<ByteString>>>();
+			bodyBindings = selectDistinct(var1, var2, var3, antecedent);
+			headBindings = selectDistinct(var1, var2, var3, headList);
+		
+			for (ByteString val1 : bodyBindings.keySet()) {
+				if (headBindings.containsKey(val1)) {
+					// Check at the next level
+					Map<ByteString, IntHashMap<ByteString>> tailBody = 
+							bodyBindings.get(val1);
+					Map<ByteString, IntHashMap<ByteString>> tailHead = 
+							headBindings.get(val1);
+					for (ByteString val2 : tailBody.keySet()) {
+						if (tailHead.containsKey(val2)) {
+							IntHashMap<ByteString> tailBody1 = tailBody.get(val2);
+							IntHashMap<ByteString> headBody1 = tailHead.get(val2);
+							for (ByteString val3 : tailBody1) {
+								if (!headBody1.contains(val3)) {
+									Map<ByteString, IntHashMap<ByteString>> secondLevel = 
+											results.get(val1);
+									if (secondLevel == null) {
+										secondLevel = new HashMap<ByteString, IntHashMap<ByteString>>();
+										results.put(val1, secondLevel);
+									}
+									
+									IntHashMap<ByteString> thirdLevel = 
+											secondLevel.get(val2);
+									if (thirdLevel == null) {
+										thirdLevel = new IntHashMap<ByteString>();
+										secondLevel.put(val2, thirdLevel);
+									}
+									
+									thirdLevel.add(val3);								
+								}
+							}
+						} else {
+							Map<ByteString, IntHashMap<ByteString>> secondLevel = 
+									results.get(val1);
+							if (secondLevel == null) {
+								secondLevel = new HashMap<ByteString, IntHashMap<ByteString>>();
+								results.put(val1, secondLevel);
+							}
+							secondLevel.put(val2, tailBody.get(val2));
+						}
+					}
+				} else {
+					// Add all the stuff associated to this subject
+					results.put(val1, bodyBindings.get(val1));
+				}
+			}
+		} else {
+			Map<ByteString, IntHashMap<ByteString>> tmpResult = null;
+			int fixLevel = -1;
+			if (varpos(var1, head) == -1) {				
+				tmpResult = difference(var2, var3, antecedent, head);
+				fixLevel = 1;
+			} else if (varpos(var2, head) == -1) {
+				tmpResult = difference(var1, var3, antecedent, head);
+				fixLevel = 2;
+			} else if (varpos(var3, head) == -1) {
+				tmpResult = difference(var1, var2, antecedent, head);
+				fixLevel = 3;
+			}
+			
+			ByteString constant = null;
+			for (ByteString t : head) {
+				if (!isVariable(t)) {
+					constant = t;
+					break;
+				}
+			}
+			
+			results = fixResultMap(tmpResult, fixLevel, constant);
+		}
+		
+		return results;
+	}
+	
+	
+	/** Difference with 4 variables **/
+	public Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> difference(
+			CharSequence var1, CharSequence var2, CharSequence var3, CharSequence var4,
+			List<? extends CharSequence[]> antecedent, CharSequence[] head) {
+		return difference(compress(var1), compress(var2), compress(var3), compress(var4),
+				triples(antecedent), triple(head));
+	}
+	
+	public Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> difference(
+			CharSequence var1, CharSequence var2, CharSequence var3, CharSequence var4,
+			List<? extends CharSequence[]> antecedent, CharSequence[] head, boolean swap) {
+		return difference(compress(var1), compress(var2), compress(var3), compress(var4),
+				triples(antecedent), triple(head), swap);
+	}
+	
+	public Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> difference(
+			ByteString var1, ByteString var2, ByteString var3, ByteString var4,
+			List<ByteString[]> antecedent, ByteString[] head) {
+		Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> results = new
+				HashMap<ByteString, Map<ByteString, Map<ByteString,IntHashMap<ByteString>>>>();
+		
+		int headNumVars = numVariables(head);
+		if (headNumVars == 3) {
+			try (Instantiator insty = new Instantiator(antecedent, var1)) {
+				for (ByteString val1 : selectDistinct(var1, antecedent)) {
+					insty.instantiate(val1);
+					Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> diff = 
+							difference(var2, var3, var4, antecedent, head);
+					if (!diff.isEmpty()) {
+						results.put(val1, diff);
+					}
+				}
+			}
+		} else if (headNumVars == 2) {
+			try (Instantiator insty1 = new Instantiator(antecedent, var1)) {
+				try (Instantiator insty2 = new Instantiator(antecedent, var2)) {
+					Map<ByteString, IntHashMap<ByteString>> resultsTwoVars =
+							selectDistinct(var1, var2, antecedent);
+					for (ByteString val1 : resultsTwoVars.keySet()) {
+						insty1.instantiate(val1);
+						Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> level1 =
+								new HashMap<ByteString, Map<ByteString,IntHashMap<ByteString>>>();
+						for (ByteString val2 : resultsTwoVars.get(val1)) {
+							insty2.instantiate(val2);
+							Map<ByteString, IntHashMap<ByteString>> diff = 
+									difference(var3, var4, antecedent, head);
+							if (!diff.isEmpty()) {
+								level1.put(val2, diff);
+							}
+						}
+						if (!level1.isEmpty()) {
+							results.put(val1, level1);
+						}
+					}
+				}
+			}
 
+		}
+		
+		return results;
+	}
+	
+
+	public Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> differenceNotVarsInCommon(
+			CharSequence var1, CharSequence var2, CharSequence var3, CharSequence var4,
+			List<? extends CharSequence[]> antecedent, CharSequence[] head) {
+		return differenceNotVarsInCommon(compress(var1), compress(var2), 
+				compress(var3), compress(var4), triples(antecedent), triple(head));
+	}
+	
+	public Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> differenceNotVarsInCommon(
+			ByteString var1, ByteString var2, ByteString var3, ByteString var4,
+			List<ByteString[]> antecedent, ByteString[] head) {
+		int headNumVars = numVariables(head);
+		Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> results = 
+				new HashMap<ByteString, Map<ByteString,Map<ByteString,IntHashMap<ByteString>>>>();
+		List<ByteString[]> wholeQuery = new ArrayList<ByteString[]>(antecedent);
+		wholeQuery.add(head);
+		
+		if (headNumVars == 3) {
+			try (Instantiator insty = new Instantiator(wholeQuery, var1)) {
+				for (ByteString val1 : selectDistinct(var1, antecedent)) {
+					insty.instantiate(val1);
+					if (!existsBS(wholeQuery)) {
+						Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> diff = 
+								selectDistinct(var2, var3, var4, antecedent);
+						results.put(val1, diff);
+					}
+				}
+			}
+		} else if (headNumVars == 2) {
+			try (Instantiator insty1 = new Instantiator(wholeQuery, var1)) {
+				try (Instantiator insty2 = new Instantiator(wholeQuery, var2)) {
+					Map<ByteString, IntHashMap<ByteString>> resultsTwoVars = selectDistinct(var1, var2, antecedent);
+					for (ByteString val1 : resultsTwoVars.keySet()) {
+						insty1.instantiate(val1);
+						Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> level1 =
+								new HashMap<ByteString, Map<ByteString,IntHashMap<ByteString>>>();
+						for (ByteString val2 : resultsTwoVars.get(val1)) {
+							insty2.instantiate(val2);
+							if (!existsBS(wholeQuery)) {
+								Map<ByteString, IntHashMap<ByteString>> diff = 
+										selectDistinct(var3, var4, antecedent);
+								level1.put(val2, diff);
+							}
+						}
+						if (!level1.isEmpty()) {
+							results.put(val1, level1);
+						}
+					}
+				}
+			}
+
+		}
+		
+		return results;
+	}
+
+	/**
+	 * Counts the number of bindings in the nested map.
+	 * @param bindings
+	 * @return
+	 */
 	public static long aggregate(
 			Map<ByteString, IntHashMap<ByteString>> bindings) {
 		long result = 0;
@@ -2186,88 +2840,67 @@ public class FactDatabase {
 	public Collection<ByteString> getRelations() {
 		return predicateSize.decreasingKeys();
 	}
+	
+	public List<ByteString> getRelationsList() {
+		return predicateSize.decreasingKeys();
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder strBuilder = new StringBuilder();
+		for (ByteString v1 : subject2predicate2object.keySet()) {
+			Map<ByteString, IntHashMap<ByteString>> tail = subject2predicate2object.get(v1);
+			for (ByteString v2 : tail.keySet()) {
+				for (ByteString v3 : tail.get(v2)) {
+					strBuilder.append(v1);
+					strBuilder.append("\t");
+					strBuilder.append(v2);
+					strBuilder.append("\t");					
+					strBuilder.append(v3);					
+					strBuilder.append("\n");
+				}
+			}
+		}
+		
+		return strBuilder.toString();
+	}
 
 	/** amie.tests */
 	public static void main(String[] args) throws Exception {
 		FactDatabase d = new FactDatabase();		
 
-		for (String fileName : args) {
-			d.load(new File(fileName));
-		}
+		d.add(triple("Antoine", "livesIn", "Paris"));
+		d.add(triple("Antoine", "livesIn", "Strasbourg"));
+		d.add(triple("Paris", "locatedIn", "France"));
+		d.add(triple("Strasbourg", "locatedIn", "France"));		
+		d.add(triple("Antoine", "citizenOf", "France"));				
 		
-		// ?a  http://dbpedia.org/ontology/areaCode  ?p  ?b  http://dbpedia.org/ontology/areaCode  ?p  
-		// ?a  http://dbpedia.org/ontology/areaLand  ?t  ?b  http://dbpedia.org/ontology/areaLand  ?t  
-		// ?a  http://dbpedia.org/ontology/areaTotal  ?v  ?b  http://dbpedia.org/ontology/areaTotal  ?v  
-		// ?a  http://dbpedia.org/ontology/areaWater  ?x  ?b  http://dbpedia.org/ontology/areaWater  ?x  
-		// ?a  http://dbpedia.org/ontology/country  ?b1  ?b  http://dbpedia.org/ontology/country  ?b1  
-		// ?a  http://dbpedia.org/ontology/elevation  ?z  ?b  http://dbpedia.org/ontology/elevation  ?z  
-		// ?a  http://dbpedia.org/ontology/postalCode  ?j  ?b  http://dbpedia.org/ontology/postalCode  ?j  
-		// ?a  http://dbpedia.org/ontology/timeZone  ?h  ?b  http://dbpedia.org/ontology/timeZone  ?h  
-		// ?a  http://dbpedia.org/ontology/utcOffset  ?d  ?b  http://dbpedia.org/ontology/utcOffset  ?d 
-		// ?a  http://www.georss.org/georss/point  ?r  ?b  http://www.georss.org/georss/point  ?r  
-		// ?a  http://www.w3.org/2003/01/geo/wgs84_pos#lat  ?n  ?b  http://www.w3.org/2003/01/geo/wgs84_pos#lat  ?n  
-		// ?a  http://www.w3.org/2003/01/geo/wgs84_pos#long  ?l  ?b  http://www.w3.org/2003/01/geo/wgs84_pos#long  ?l  
-		// ?a  http://xmlns.com/foaf/0.1/name  ?f  ?b  http://xmlns.com/foaf/0.1/name  ?f   => ?a  equals  ?b 0 0.999749687 ∞ 7988.0 7990 0.0 ?a 0.0 0.0 0.0
-
-		List<ByteString[]> bodyStar = new ArrayList<>();
-		bodyStar.add(triple("?a",  FactDatabase.EQUALSstr,  "?b"));
-		bodyStar.add(triple("?a", "http://dbpedia.org/ontology/areaCode", "?p"));
-		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/areaCode", "?p"));
-		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/areaLand", "?t"));
-		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/areaLand", "?t"));
-		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/areaTotal", "?v"));
-		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/areaTotal", "?v"));		
-		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/areaWater", "?x"));
-		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/areaWater", "?x"));				
-		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/country", "?b1"));
-		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/country", "?b1"));
-		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/elevation", "?z"));
-		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/elevation", "?z"));
-		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/postalCode", "?j"));
-		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/postalCode", "?j"));
-		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/timeZone", "?h"));
-		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/timeZone", "?h"));
-		bodyStar.add(triple("?a",  "http://dbpedia.org/ontology/utcOffset", "?d"));
-		bodyStar.add(triple("?b",  "http://dbpedia.org/ontology/utcOffset", "?d"));		
-		bodyStar.add(triple("?a",  "http://www.georss.org/georss/point", "?r"));
-		bodyStar.add(triple("?b",  "http://www.georss.org/georss/point", "?r"));
-		bodyStar.add(triple("?a",  "http://www.w3.org/2003/01/geo/wgs84_pos#lat", "?n"));
-		bodyStar.add(triple("?b",  "http://www.w3.org/2003/01/geo/wgs84_pos#lat", "?n"));
-		bodyStar.add(triple("?a",  "http://www.w3.org/2003/01/geo/wgs84_pos#long", "?l"));
-		bodyStar.add(triple("?b",  "http://www.w3.org/2003/01/geo/wgs84_pos#long", "?l"));
-		bodyStar.add(triple("?a",  "http://xmlns.com/foaf/0.1/name", "?f"));
-		bodyStar.add(triple("?b",  "http://xmlns.com/foaf/0.1/name", "?f"));
+		d.add(triple("Luis", "livesIn", "Guayaquil"));
+		d.add(triple("Luis", "livesIn", "Duran"));
+		d.add(triple("Guayaquil", "locatedIn", "Ecuador"));
+		d.add(triple("Duran", "locatedIn", "Ecuador"));		
+		d.add(triple("Luis", "citizenOf", "Ecuador"));				
 
 		
-		System.out.println(d.countPairs(ByteString.of("?a"), ByteString.of("?b"), bodyStar));
-		bodyStar.get(0)[2] = ByteString.of("?xw");
-		System.out.println(d.countPairs(ByteString.of("?a"), ByteString.of("?b"), bodyStar));
+		/**List<ByteString[]> query = triples(triple("?a", "livesIn", "?c"), 
+				triple("?c", "locatedIn", "?b"), triple("?a", "citizenOf", "?b"));
 		
-/*		 Map<ByteString, IntHashMap<ByteString>> tt = d.selectDistinct(ByteString.of("?a"), ByteString.of("?b"),
-                         
-                         triples(
-                                 triple(ByteString.of("?a"), ByteString.of("http://xmlns.com/foaf/0.1/name"), ByteString.of("?j")), 
-				triple(ByteString.of("?b"), ByteString.of("http://xmlns.com/foaf/0.1/name"), ByteString.of("?j"))
-                         ));
-                 int size = 0;
-                 for(ByteString key: tt.keySet()) {
-                     for(ByteString key1: tt.get(key)){
-                         System.out.println("key:"+key + " key1:"+key1);
-                         ++size;
-                     }
-                 }
-                 System.out.println("size: "+ size);                 */
-                 
-//		 D.p("Number of semantified wikilinks: " + d.countDistinctPairs(ByteString.of("?a"), ByteString.of("?b"),
-//				  triples(
-//						  triple(ByteString.of("?a"), ByteString.of("<linksTo>"), ByteString.of("?b")), 
-//						  triple(ByteString.of("?a"), ByteString.of("?p"), ByteString.of("?b")),
-//						  triple(ByteString.of("?p"), DIFFERENTFROMbs, ByteString.of("<linksTo>"))
-//						  )));
-/*		 D.p("Number of non-wikilinks: " + d.countPairs(ByteString.of("?a"), ByteString.of("?b"),
-				  triples(
-						  triple(ByteString.of("?a"), ByteString.of("?p"), ByteString.of("?b")),
-						  triple(ByteString.of("?p"), DIFFERENTFROMbs, ByteString.of("<linksTo>"))
-						  )));*/
+		
+		System.out.println(d.selectDistinct(ByteString.of("?a"), ByteString.of("?b"), ByteString.of("?c"), query));
+		System.out.println(d.selectDistinct(ByteString.of("?a"), ByteString.of("?b"), ByteString.of("?c"), 
+				triples(triple("?c", "?b", "?a"))));*/
+		
+		List<ByteString[]> query2 = triples(triple("?a", "livesIn", "?c"), 
+				triple("livesIn", "exists", "?a"));
+		System.out.println(d.selectDistinct(ByteString.of("?a"), ByteString.of("?c"), query2));		
+		System.out.println(d.count("?x", "exists", "Ecuador"));
+		System.out.println(d.count("?x", "existsInv", "Ecuador"));
+		System.out.println(d.contains("livesIn", "exists", "Antoine"));
+		System.out.println(d.contains("livesIn", "exists", "Ambar"));
+		System.out.println(d.contains("citizenOf", "existsInv", "Ecuador"));
+		System.out.println(d.contains("citizenOf", "existsInv", "Guayaquil"));
+		System.out.println(d.resultsOneVariable("?x", "existsInv", "Ecuador"));
+		System.out.println(d.resultsTwoVariables(0, 2, new String[]{"?x", "existsInv", "?y"}));
+		System.out.println(d.resultsTwoVariables(0, 2, new String[]{"?x", "exists", "?y"}));
 	}
 }
