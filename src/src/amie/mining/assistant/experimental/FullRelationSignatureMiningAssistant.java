@@ -5,25 +5,25 @@ import java.util.Collection;
 import java.util.List;
 
 import javatools.datatypes.ByteString;
-import amie.data.FactDatabase;
+import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
-import amie.query.Query;
+import amie.rules.Rule;
 
 public class FullRelationSignatureMiningAssistant extends DefaultMiningAssistant {
 
-	public FullRelationSignatureMiningAssistant(FactDatabase dataSource) {
+	public FullRelationSignatureMiningAssistant(KB dataSource) {
 		super(dataSource);
 		bodyExcludedRelations = Arrays.asList(ByteString.of("<rdf:type>"));
 	}
 	
-	public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output) {		
+	public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output) {		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		ByteString rdfType = ByteString.of("rdf:type");
 		
 		if(query.isEmpty()){
 			//Initial case
 			newEdge[1] = rdfType;
-			Query candidate = new Query(newEdge, minCardinality);
+			Rule candidate = new Rule(newEdge, minCardinality);
 			candidate.setFunctionalVariablePosition(0);
 			registerHeadRelation(candidate);
 			getInstantiatedAtoms(candidate, null, 0, 2, minCardinality, output);
@@ -34,12 +34,12 @@ public class FullRelationSignatureMiningAssistant extends DefaultMiningAssistant
 			// There must be one
 			newEdge[0] = variables.get(0);
 			newEdge[1] = rdfType;
-			Query candidate = query.addAtom(newEdge, minCardinality);
+			Rule candidate = query.addAtom(newEdge, minCardinality);
 			getInstantiatedAtoms(candidate, candidate, 0, 2, minCardinality, output);
 		}
 	}
 	
-	public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output) {
+	public void getClosingAtoms(Rule query, double minSupportThreshold, Collection<Rule> output) {
 		return;
 	}
 }

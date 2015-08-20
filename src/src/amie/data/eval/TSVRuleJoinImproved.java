@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import amie.query.Query;
-import amie.query.AMIEreader;
+import amie.rules.AMIEParser;
+import amie.rules.Rule;
 import javatools.filehandlers.TSVFile;
 
 public class TSVRuleJoinImproved {
@@ -15,14 +15,14 @@ public class TSVRuleJoinImproved {
 		TSVFile file1 = new TSVFile(new File(args[0]));
 		TSVFile file2 = new TSVFile(new File(args[1]));
 		
-		HashMap<Query, List<String>> rulesIndex = new HashMap<>();
+		HashMap<Rule, List<String>> rulesIndex = new HashMap<>();
 		for (List<String> line : file1) {
-			Query rule = AMIEreader.rule(line.get(0));
+			Rule rule = AMIEParser.rule(line.get(0));
 			rulesIndex.put(rule, line);
 		}
 		
 		for (List<String> line : file2) {
-			Query rule = AMIEreader.rule(line.get(0));
+			Rule rule = AMIEParser.rule(line.get(0));
 			List<String> extraInfo = rulesIndex.get(rule);
 			System.out.print(rule.getRuleString() + "\t");
 			if (extraInfo != null) {

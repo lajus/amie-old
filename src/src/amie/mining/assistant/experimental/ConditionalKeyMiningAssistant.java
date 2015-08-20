@@ -13,9 +13,9 @@ import java.util.List;
 
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
-import amie.data.FactDatabase;
+import amie.data.KB;
 import amie.keys.NonKeysGraph;
-import amie.query.Query;
+import amie.rules.Rule;
 
 /**
  *
@@ -27,7 +27,7 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
     
     NonKeysGraph propertyCombinations;
 
-    public ConditionalKeyMiningAssistant(FactDatabase dataSource, String nonKeysFile) throws FileNotFoundException, IOException {
+    public ConditionalKeyMiningAssistant(KB dataSource, String nonKeysFile) throws FileNotFoundException, IOException {
         super(dataSource);
         nonKeys = new ArrayList<List<ByteString>>();
         propertyCombinations = new NonKeysGraph(nonKeysFile);
@@ -36,7 +36,7 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
     
 
     @Override
-    public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output) {
+    public void getClosingAtoms(Rule query, double minSupportThreshold, Collection<Rule> output) {
         ByteString[] head = query.getHead();
         List<ByteString> bodyRelations = query.getBodyRelations();
         ByteString[] atom1 = query.fullyUnboundTriplePattern();
@@ -59,7 +59,7 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
             query.getTriples().remove(effectiveSize - 1);
             query.getTriples().remove(effectiveSize - 2);
             if (support >= (double) minSupportThreshold) {
-                Query newQuery = query.addEdges(atom1, atom2);
+                Rule newQuery = query.addEdges(atom1, atom2);
                 newQuery.setSupport(support);
                 newQuery.setParent(query);
                 output.add(newQuery);
@@ -67,11 +67,11 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
         }
     }
 
-    public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output) {
+    public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output) {
     }
 
     @Override
-    public void getInstantiatedAtoms(Query query, double minCardinality, Collection<Query> temporalSomething, Collection<Query> output) {
+    public void getInstantiatedAtoms(Rule query, double minCardinality, Collection<Rule> temporalSomething, Collection<Rule> output) {
         ByteString[] head = query.getHead();
         List<ByteString> bodyRelations = query.getBodyRelations();
         ByteString[] atom1 = query.fullyUnboundTriplePattern();
@@ -99,7 +99,7 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
                 if (support >= minCardinality) {
                     atom1[2] = constant;
                     atom2[2] = constant;
-                    Query newQuery = query.addEdges(atom1, atom2);
+                    Rule newQuery = query.addEdges(atom1, atom2);
                     newQuery.setSupport(support);
                     output.add(newQuery);
                     newQuery.setParent(query);

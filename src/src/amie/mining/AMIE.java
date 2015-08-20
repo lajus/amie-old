@@ -31,8 +31,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-import amie.data.EquivalenceChecker2;
-import amie.data.FactDatabase;
+import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
 import amie.mining.assistant.MiningAssistant;
 import amie.mining.assistant.RelationSignatureDefaultMiningAssistant;
@@ -45,7 +44,8 @@ import amie.mining.assistant.experimental.KeyMinerMiningAssistant;
 import amie.mining.assistant.experimental.SeedsCountMiningAssistant;
 import amie.mining.assistant.experimental.TypedDefaultMiningAssistant;
 import amie.mining.assistant.experimental.WikilinksHeadVariablesMiningAssistant;
-import amie.query.Query;
+import amie.rules.EquivalenceChecker2;
+import amie.rules.Rule;
 
 /**
  * @author lgalarra
@@ -191,16 +191,16 @@ public class AMIE {
      * @return
      * @throws Exception
      */
-    public List<Query> mine(boolean realTime, Collection<ByteString> seeds) throws Exception {
-        List<Query> result = new ArrayList<>();
-        MultiMap<Integer, Query> indexedResult = new MultiMap<>();
+    public List<Rule> mine(boolean realTime, Collection<ByteString> seeds) throws Exception {
+        List<Rule> result = new ArrayList<>();
+        MultiMap<Integer, Rule> indexedResult = new MultiMap<>();
         RuleConsumer consumerObj = null;
         Thread consumerThread = null;
         Lock resultsLock = new ReentrantLock();
         Condition resultsCondVar = resultsLock.newCondition();
         AtomicInteger sharedCounter = new AtomicInteger(nThreads);
 
-        Collection<Query> seedsPool = new LinkedHashSet<>();
+        Collection<Rule> seedsPool = new LinkedHashSet<>();
         // Queue initialization
         if (seeds == null || seeds.isEmpty()) {
             assistant.getInitialAtoms(minInitialSupport, seedsPool);
@@ -259,15 +259,15 @@ public class AMIE {
      * @return
      * @throws Exception
      */
-    public List<Query> mine2(boolean realTime, Collection<ByteString> seeds) throws Exception {
-        Collection<Query> headsPool = new LinkedHashSet<>();
-        MultiMap<Integer, Query> indexedResult = new MultiMap<>();
-        List<Query> result = new ArrayList<>();
+    public List<Rule> mine2(boolean realTime, Collection<ByteString> seeds) throws Exception {
+        Collection<Rule> headsPool = new LinkedHashSet<>();
+        MultiMap<Integer, Rule> indexedResult = new MultiMap<>();
+        List<Rule> result = new ArrayList<>();
         Lock resultsLock = new ReentrantLock();
         Condition resultsCondVar = resultsLock.newCondition();
         RuleConsumer consumerObj = null;
         Thread consumerThread = null;
-        Collection<Collection<Query>> queues = new LinkedHashSet<Collection<Query>>();
+        Collection<Collection<Rule>> queues = new LinkedHashSet<Collection<Rule>>();
 
         if (realTime) {
             consumerObj = new RuleConsumer(result, resultsLock, resultsCondVar);
@@ -283,8 +283,8 @@ public class AMIE {
         }
 
         // Build one queue per relation
-        for (Query head : headsPool) {
-            Collection<Query> queue = new LinkedHashSet<Query>();
+        for (Rule head : headsPool) {
+            Collection<Rule> queue = new LinkedHashSet<Rule>();
             queue.add(head);
             queues.add(queue);
         }
@@ -295,7 +295,7 @@ public class AMIE {
         ArrayList<RDFMinerJob2> jobObjects = new ArrayList<>();
         List<RDFMinerJob> runningThreads = new ArrayList<>();
         for (int i = 0; i < (int) Math.min(nThreads, headsPool.size()); ++i) {
-            Collection<Query> queue = telecom.util.collections.Collections.poll(queues);
+            Collection<Rule> queue = telecom.util.collections.Collections.poll(queues);
             RDFMinerJob2 jobObject = new RDFMinerJob2(queues, queue, result, resultsLock, resultsCondVar, indexedResult, runningThreads);
             Thread job = new Thread(jobObject);
             currentJobs.add(job);
@@ -323,23 +323,23 @@ public class AMIE {
 
         public List<RDFMinerJob> runningThreads;
 
-        private Collection<Collection<Query>> headsPool;
+        private Collection<Collection<Rule>> headsPool;
 
-        private List<Query> outputSet;
+        private List<Rule> outputSet;
 
         // A version of the output set thought for search.
-        private MultiMap<Integer, Query> indexedOutputSet;
+        private MultiMap<Integer, Rule> indexedOutputSet;
 
-        private Collection<Query> queryPool;
+        private Collection<Rule> queryPool;
 
         private Lock resultsLock;
 
         private Condition resultsCondition;
 
-        public RDFMinerJob2(Collection<Collection<Query>> headsPool,
-                Collection<Query> queue, List<Query> result,
+        public RDFMinerJob2(Collection<Collection<Rule>> headsPool,
+                Collection<Rule> queue, List<Rule> result,
                 Lock resultsLock, Condition resultsCondVar,
-                MultiMap<Integer, Query> indexedResult,
+                MultiMap<Integer, Rule> indexedResult,
                 List<RDFMinerJob> runningThreads) {
             this.runningThreads = runningThreads;
             this.headsPool = headsPool;
@@ -415,7 +415,7 @@ public class AMIE {
      */
     private class RuleConsumer implements Runnable {
 
-        private List<Query> consumeList;
+        private List<Rule> consumeList;
 
         private volatile boolean finished;
 
@@ -425,7 +425,7 @@ public class AMIE {
 
         private Condition conditionVariable;
 
-        public RuleConsumer(List<Query> consumeList, Lock consumeLock, Condition conditionVariable) {
+        public RuleConsumer(List<Rule> consumeList, Lock consumeLock, Condition conditionVariable) {
             this.consumeList = consumeList;
             this.lastConsumedIndex = -1;
             this.consumeLock = consumeLock;
@@ -435,7 +435,7 @@ public class AMIE {
 
         @Override
         public void run() {
-            Query.printRuleHeaders();
+            Rule.printRuleHeaders();
             while (!finished) {
                 consumeLock.lock();
                 try {
@@ -469,12 +469,12 @@ public class AMIE {
      */
     private class RDFMinerJob implements Runnable {
 
-        private List<Query> outputSet;
+        private List<Rule> outputSet;
 
         // A version of the output set thought for search.
-        private MultiMap<Integer, Query> indexedOutputSet;
+        private MultiMap<Integer, Rule> indexedOutputSet;
 
-        private Collection<Query> queryPool;
+        private Collection<Rule> queryPool;
 
         private Lock resultsLock;
 
@@ -500,11 +500,11 @@ public class AMIE {
         // Time to calculate confidence approximations
         private long approximationTime;
 
-        public RDFMinerJob(Collection<Query> seedsPool,
-                List<Query> outputSet, Lock resultsLock,
+        public RDFMinerJob(Collection<Rule> seedsPool,
+                List<Rule> outputSet, Lock resultsLock,
                 Condition resultsCondition,
                 AtomicInteger sharedCounter,
-                MultiMap<Integer, Query> indexedOutputSet) {
+                MultiMap<Integer, Rule> indexedOutputSet) {
             this.queryPool = seedsPool;
             this.outputSet = outputSet;
             this.resultsLock = resultsLock;
@@ -525,7 +525,7 @@ public class AMIE {
             return this.sharedCounter;
         }
 
-        public Collection<Query> getPool() {
+        public Collection<Rule> getPool() {
             // TODO Auto-generated method stub
             return this.queryPool;
         }
@@ -534,11 +534,11 @@ public class AMIE {
             return this.done;
         }
 
-        private Query pollQuery() {
+        private Rule pollQuery() {
             long timeStamp1 = System.currentTimeMillis();
-            Query nextQuery = null;
+            Rule nextQuery = null;
             if (!queryPool.isEmpty()) {
-                Iterator<Query> iterator = queryPool.iterator();
+                Iterator<Rule> iterator = queryPool.iterator();
                 nextQuery = iterator.next();
                 iterator.remove();
             }
@@ -553,7 +553,7 @@ public class AMIE {
                 this.done = false;
             }
             while (true) {
-                Query currentRule = null;
+                Rule currentRule = null;
 
                 synchronized (queryPool) {
                     currentRule = pollQuery();
@@ -599,8 +599,8 @@ public class AMIE {
                     if (furtherRefined) {
                         long timeStamp1 = System.currentTimeMillis();
                         double threshold = getCountThreshold(currentRule);
-                        List<Query> temporalOutput = new ArrayList<Query>();
-                        List<Query> temporalOutputDanglingEdges = new ArrayList<Query>();
+                        List<Rule> temporalOutput = new ArrayList<Rule>();
+                        List<Rule> temporalOutputDanglingEdges = new ArrayList<Rule>();
 
                         // Application of the mining operators
                         assistant.getClosingAtoms(currentRule, threshold, temporalOutput);
@@ -626,7 +626,7 @@ public class AMIE {
                     if (outputRule) {
                         this.resultsLock.lock();
                         long timeStamp1 = System.currentTimeMillis();
-                        Set<Query> outputQueries = indexedOutputSet.get(currentRule.alternativeParentHashCode());
+                        Set<Rule> outputQueries = indexedOutputSet.get(currentRule.alternativeParentHashCode());
                         if (outputQueries != null) {
                             if (!outputQueries.contains(currentRule)) {
                                 this.outputSet.add(currentRule);
@@ -670,9 +670,9 @@ public class AMIE {
          *
          * @param currentQuery
          */
-        private void setAdditionalParents2(Query currentQuery) {
+        private void setAdditionalParents2(Rule currentQuery) {
             int parentHashCode = currentQuery.alternativeParentHashCode();
-            Set<Query> candidateParents = indexedOutputSet.get(parentHashCode);
+            Set<Rule> candidateParents = indexedOutputSet.get(parentHashCode);
             if (candidateParents != null) {
                 List<ByteString[]> queryPattern = currentQuery.getRealTriples();
                 // No need to look for parents of rules of size 2
@@ -680,14 +680,14 @@ public class AMIE {
                     return;
                 }
                 List<List<ByteString[]>> parentsOfSizeI = new ArrayList<>();
-                Query.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), queryPattern.get(0), queryPattern.size() - 2, parentsOfSizeI);
+                Rule.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), queryPattern.get(0), queryPattern.size() - 2, parentsOfSizeI);
                 if (_checkParentsOfDegree2) {
                     if (queryPattern.size() > 3) {
-                        Query.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), queryPattern.get(0), queryPattern.size() - 3, parentsOfSizeI);
+                        Rule.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), queryPattern.get(0), queryPattern.size() - 3, parentsOfSizeI);
                     }
                 }
                 for (List<ByteString[]> parent : parentsOfSizeI) {
-                    for (Query candidate : candidateParents) {
+                    for (Rule candidate : candidateParents) {
                         List<ByteString[]> candidateParentPattern = candidate.getRealTriples();
                         if (EquivalenceChecker2.equal(parent, candidateParentPattern)) {
                             currentQuery.setParent(candidate);
@@ -697,7 +697,7 @@ public class AMIE {
             }
         }
 
-        private double getCountThreshold(Query query) {
+        private double getCountThreshold(Rule query) {
             switch (pruningMetric) {
                 case Support:
                     return minHeadCoverage;
@@ -763,8 +763,8 @@ public class AMIE {
         Collection<ByteString> headExcludedRelations = null;
         Collection<ByteString> headTargetRelations = null;
         Collection<ByteString> bodyTargetRelations = null;
-        FactDatabase targetSource = null;
-        FactDatabase schemaSource = null;
+        KB targetSource = null;
+        KB schemaSource = null;
         String miningTechniqueStr = "standard";
         int nThreads = nProcessors; // By default use as many threads as processors.
         HelpFormatter formatter = new HelpFormatter();
@@ -1130,7 +1130,7 @@ public class AMIE {
                 dataFiles.add(new File(leftOverArgs[i]));
             }
         }
-        FactDatabase dataSource = new FactDatabase();
+        KB dataSource = new KB();
         long timeStamp1 = System.currentTimeMillis();
         dataSource.load(dataFiles);
         long timeStamp2 = System.currentTimeMillis();
@@ -1142,12 +1142,12 @@ public class AMIE {
         sourcesLoadingTime = timeStamp2 - timeStamp1;
 
         if (!targetFiles.isEmpty()) {
-            targetSource = new FactDatabase();
+            targetSource = new KB();
             targetSource.load(targetFiles);
         }
 
         if (!schemaFiles.isEmpty()) {
-            schemaSource = new FactDatabase();
+            schemaSource = new KB();
             schemaSource.load(schemaFiles);
         }
 
@@ -1347,7 +1347,7 @@ public class AMIE {
         Announce.doing("Starting the mining phase");
 
         long time = System.currentTimeMillis();
-        List<Query> rules = null;
+        List<Rule> rules = null;
 
         if (miningTechniqueStr.equals("standard")) {
             rules = miner.mine(realTime, headTargetRelations);
@@ -1356,8 +1356,8 @@ public class AMIE {
         }
 
         if (!realTime) {
-            Query.printRuleHeaders();
-            for (Query rule : rules) {
+            Rule.printRuleHeaders();
+            for (Rule rule : rules) {
                 System.out.println(rule.getFullRuleString());
             }
         }
@@ -1387,7 +1387,7 @@ public class AMIE {
         execute(args);
     }
 
-    public static AMIE getVanillaSettingInstance(FactDatabase db) {
+    public static AMIE getVanillaSettingInstance(KB db) {
         return new AMIE(new HeadVariablesImprovedMiningAssistant(db),
                 100, // Do not look at relations smaller than 100 facts 
                 0.01, // Head coverage 1%
@@ -1395,7 +1395,7 @@ public class AMIE {
                 Runtime.getRuntime().availableProcessors());
     }
 
-    public static AMIE getVanillaSettingInstance(FactDatabase db, double minPCAConfidence) {
+    public static AMIE getVanillaSettingInstance(KB db, double minPCAConfidence) {
         HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(db);
         miningAssistant.setPcaConfidenceThreshold(minPCAConfidence);
         return new AMIE(miningAssistant,
@@ -1405,7 +1405,7 @@ public class AMIE {
                 Runtime.getRuntime().availableProcessors());
     }
 
-    public static AMIE getLossyVanillaSettingInstance(FactDatabase db, double minPCAConfidence, int startSupport) {
+    public static AMIE getLossyVanillaSettingInstance(KB db, double minPCAConfidence, int startSupport) {
         HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(db);
         miningAssistant.setPcaConfidenceThreshold(minPCAConfidence);
         miningAssistant.setEnabledConfidenceUpperBounds(true);
@@ -1417,7 +1417,7 @@ public class AMIE {
                 Runtime.getRuntime().availableProcessors());
     }
 
-    public static AMIE getLossyInstance(FactDatabase db, double minPCAConfidence, int minSupport) {
+    public static AMIE getLossyInstance(KB db, double minPCAConfidence, int minSupport) {
         HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(db);
         miningAssistant.setPcaConfidenceThreshold(minPCAConfidence);
         miningAssistant.setEnabledConfidenceUpperBounds(true);

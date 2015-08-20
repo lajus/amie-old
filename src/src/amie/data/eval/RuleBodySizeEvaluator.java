@@ -9,9 +9,9 @@ import java.util.Set;
 
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
-import amie.data.FactDatabase;
-import amie.query.AMIEreader;
-import amie.query.Query;
+import amie.data.KB;
+import amie.rules.AMIEParser;
+import amie.rules.Rule;
 import javatools.datatypes.Triple;
 
 /**
@@ -30,18 +30,18 @@ public class RuleBodySizeEvaluator {
 	}
 	
 	public static void main(String args[]) throws IOException{
-		FactDatabase db = new FactDatabase();
+		KB db = new KB();
 		db.load(new File(args[1]));
-		List<Query> qList = AMIEreader.rules(new File(args[0]));
+		List<Rule> qList = AMIEParser.rules(new File(args[0]));
 		Set<Triple<ByteString, ByteString, ByteString>> predictions = new HashSet<Triple<ByteString, ByteString, ByteString>>();	
 		
 		//Now calculate the body size for the rules
-		for(Query q: qList){
+		for(Rule q: qList){
 			ByteString[] head = q.getHead();
-			q.setFunctionalVariablePosition(Query.findFunctionalVariable(q, db));
+			q.setFunctionalVariablePosition(Rule.findFunctionalVariable(q, db));
 			long[] result = conditionalBodySize(q, db, predictions);
-			long nSubjects = db.countDistinct(ByteString.of(head[0]), FactDatabase.triples(head));
-			long nObjects = db.countDistinct(ByteString.of(head[2]), FactDatabase.triples(head));
+			long nSubjects = db.countDistinct(ByteString.of(head[0]), KB.triples(head));
+			long nObjects = db.countDistinct(ByteString.of(head[2]), KB.triples(head));
 			ByteString tmp = head[0];
 			head[0] = ByteString.of("?x");
 			long a = db.countDistinctPairs(tmp, head[2], q.getTriples());
@@ -55,7 +55,7 @@ public class RuleBodySizeEvaluator {
 		
 	}
 
-	private static long[] conditionalBodySize(Query q, FactDatabase db, Set<Triple<ByteString, ByteString, ByteString>> allPredictions) {
+	private static long[] conditionalBodySize(Rule q, KB db, Set<Triple<ByteString, ByteString, ByteString>> allPredictions) {
 		PredictionsSampler pp = new PredictionsSampler(db);
 		Object predictionsObj = pp.generatePredictions(q);
 		Map<ByteString, IntHashMap<ByteString>> predictions = (Map<ByteString, IntHashMap<ByteString>>)predictionsObj;

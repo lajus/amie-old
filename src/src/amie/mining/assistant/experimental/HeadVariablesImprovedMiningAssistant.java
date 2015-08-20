@@ -3,19 +3,19 @@ package amie.mining.assistant.experimental;
 import java.util.List;
 
 import javatools.datatypes.ByteString;
-import amie.data.FactDatabase;
+import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
-import amie.query.Query;
+import amie.rules.Rule;
 
 public class HeadVariablesImprovedMiningAssistant extends
 		DefaultMiningAssistant {
 
-	public HeadVariablesImprovedMiningAssistant(FactDatabase dataSource) {
+	public HeadVariablesImprovedMiningAssistant(KB dataSource) {
 		super(dataSource);
 	}
 
 	protected double computePcaBodySize(ByteString var1, 
-			ByteString var2, Query query, 
+			ByteString var2, Rule query, 
 			List<ByteString[]> antecedent, 
 			ByteString[] existentialTriple, 
 			int nonExistentialPosition) {

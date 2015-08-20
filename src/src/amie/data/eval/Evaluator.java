@@ -8,8 +8,8 @@ import java.util.List;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.Pair;
 import javatools.filehandlers.TSVFile;
-import amie.data.FactDatabase;
-import amie.query.Query;
+import amie.data.KB;
+import amie.rules.Rule;
 
 public class Evaluator {
 	
@@ -22,10 +22,10 @@ public class Evaluator {
 	 * @return
 	 */
 	public static int evaluate(ByteString[] triple, 
-			FactDatabase training, FactDatabase target) {
+			KB training, KB target) {
 		// TODO Auto-generated method stub
 		int returnVal = 3;
-		ByteString[] head = Query.fullyUnboundTriplePattern1();
+		ByteString[] head = Rule.fullyUnboundTriplePattern1();
 		head[1] = triple[1];
 		boolean relationIsFunctional = 
 				training.functionality(triple[1]) >= 0.9 
@@ -70,8 +70,8 @@ public class Evaluator {
 	 * @return 0 if the prediction is in the target dataset. 1 if it contradicts a functional constraint in the training dataset. 2 if it contradicts a functional constraint in the target dataset.
 	 * 3 otherwise.
 	 */
-	public static int evaluate(Query rule, 
-			ByteString[] triple, FactDatabase training, FactDatabase target){
+	public static int evaluate(Rule rule, 
+			ByteString[] triple, KB training, KB target){
 		// TODO Auto-generated method stub
 		ByteString[] head = rule.getHead();
 		ByteString boundVariable = null;
@@ -113,10 +113,10 @@ public class Evaluator {
 		
 		File inputFile = new File(args[0]);
 		String lastRuleStr = "";
-		Query lastRule = null, currentRule = null;
+		Rule lastRule = null, currentRule = null;
 		
-		FactDatabase trainingDataset = new FactDatabase();
-		FactDatabase targetDataset = new FactDatabase();		
+		KB trainingDataset = new KB();
+		KB targetDataset = new KB();		
 		TSVFile tsvFile = new TSVFile(inputFile);
 		
 		trainingDataset.load(new File(args[1]));
@@ -138,8 +138,8 @@ public class Evaluator {
 			if(ruleStr.equals(lastRuleStr)){
 				currentRule = lastRule;
 			}else{
-				Pair<List<ByteString[]>, ByteString[]> rulePair = FactDatabase.rule(ruleStr);
-				currentRule = new Query();
+				Pair<List<ByteString[]>, ByteString[]> rulePair = KB.rule(ruleStr);
+				currentRule = new Rule();
 				currentRule.getTriples().add(rulePair.second);
 				currentRule.getTriples().addAll(rulePair.first);
 			}

@@ -9,9 +9,9 @@ import java.util.Set;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Pair;
-import amie.data.FactDatabase;
+import amie.data.KB;
 import amie.mining.ConfidenceMetric;
-import amie.query.Query;
+import amie.rules.Rule;
 
 /**
  * Simpler miner assistant which implements all the logic required 
@@ -31,13 +31,13 @@ public class MiningAssistant{
 	/**
 	 * Factory object to instantiate query components
 	 */
-	protected FactDatabase kb;
+	protected KB kb;
 	
 	/**
 	 * Exclusively used for schema information, such as subclass and sub-property
 	 * relations or relation signatures.
 	 */
-	protected FactDatabase kbSchema;
+	protected KB kbSchema;
 	
 	/**
 	 * Number of different objects in the underlying dataset
@@ -73,7 +73,7 @@ public class MiningAssistant{
 	 * Maximum number of atoms allowed in the antecedent
 	 */
 	
-	private Query subclassQuery;
+	private Rule subclassQuery;
 	
 	/**
 	 * Maximum number of atoms in a query
@@ -162,13 +162,13 @@ public class MiningAssistant{
 	/**
 	 * @param dataSource
 	 */
-	public MiningAssistant(FactDatabase dataSource) {
+	public MiningAssistant(KB dataSource) {
 		this.kb = dataSource;
 		this.minStdConfidence = 0.0;
 		this.minPcaConfidence = 0.0;
 		this.maxDepth = 3;
 		this.allowConstants = false;
-		ByteString[] rootPattern = Query.fullyUnboundTriplePattern1();
+		ByteString[] rootPattern = Rule.fullyUnboundTriplePattern1();
 		List<ByteString[]> triples = new ArrayList<ByteString[]>();
 		triples.add(rootPattern);
 		this.totalSubjectCount = this.kb.countDistinct(rootPattern[0], triples);
@@ -176,9 +176,9 @@ public class MiningAssistant{
 		this.typeString = ByteString.of("rdf:type");
 		this.subPropertyString = ByteString.of("rdfs:subPropertyOf");
 		this.headCardinalities = new HashMap<String, Double>();
-		ByteString[] subclassPattern = Query.fullyUnboundTriplePattern1();
+		ByteString[] subclassPattern = Rule.fullyUnboundTriplePattern1();
 		subclassPattern[1] = subPropertyString;
-		this.subclassQuery = new Query(subclassPattern, 0);
+		this.subclassQuery = new Rule(subclassPattern, 0);
 		this.countAlwaysOnSubject = false;
 		this.silent = true;
 		this.exploitMaxLengthOption = true;
@@ -192,7 +192,7 @@ public class MiningAssistant{
 	private void buildRelationsDictionary() {
 		Collection<ByteString> relations = kb.getRelations();
 		for (ByteString relation : relations) {
-			ByteString[] query = FactDatabase.triple(ByteString.of("?x"), relation, ByteString.of("?y"));
+			ByteString[] query = KB.triple(ByteString.of("?x"), relation, ByteString.of("?y"));
 			double relationSize = kb.count(query);
 			headCardinalities.put(relation.toString(), relationSize);
 		}
@@ -206,7 +206,7 @@ public class MiningAssistant{
 		this.recursivityLimit = recursivityLimit;
 	}
 
-	public long getTotalCount(Query candidate){
+	public long getTotalCount(Rule candidate){
 		if(countAlwaysOnSubject){
 			return totalSubjectCount;
 		}else{
@@ -272,7 +272,7 @@ public class MiningAssistant{
 	 * It returns the training dataset from which rules atoms are added
 	 * @return
 	 */
-	public FactDatabase getKb() {
+	public KB getKb() {
 		return kb;
 	}
 	
@@ -281,20 +281,20 @@ public class MiningAssistant{
 	 * domains and ranges for relation, etc.) about the training dataset.
 	 * @return
 	 */
-	public FactDatabase getKbSchema(){
+	public KB getKbSchema(){
 		return kbSchema;
 	}
 	
-	public void setKbSchema(FactDatabase schemaSource) {
+	public void setKbSchema(KB schemaSource) {
 		// TODO Auto-generated method stub
 		this.kbSchema = schemaSource;
 	}
 
-	public boolean registerHeadRelation(Query query){		
+	public boolean registerHeadRelation(Rule query){		
 		return headCardinalities.put(query.getHeadRelation(), new Double(query.getSupport())) == null;		
 	}
 	
-	public long getHeadCardinality(Query query){
+	public long getHeadCardinality(Rule query){
 		return headCardinalities.get(query.getHeadRelation()).longValue();
 	}
 	
@@ -330,8 +330,8 @@ public class MiningAssistant{
 	 * @param minSupportThreshold
 	 * @param output The results of the method are added directly to this collection.
 	 */
-	public void getInitialAtomsFromSeeds(Collection<ByteString> relations, double minSupportThreshold, Collection<Query> output) {
-		Query emptyQuery = new Query();
+	public void getInitialAtomsFromSeeds(Collection<ByteString> relations, double minSupportThreshold, Collection<Rule> output) {
+		Rule emptyQuery = new Rule();
 		
 		ByteString[] newEdge = emptyQuery.fullyUnboundTriplePattern();		
 		emptyQuery.getTriples().add(newEdge);
@@ -344,11 +344,11 @@ public class MiningAssistant{
 			long cardinality = kb.countDistinct(countingVariable, emptyQuery.getTriples());
 			
 			ByteString[] succedent = newEdge.clone();
-			Query candidate = new Query(succedent, cardinality);
+			Rule candidate = new Rule(succedent, cardinality);
 			candidate.setFunctionalVariablePosition(countVarPos);
 			registerHeadRelation(candidate);			
 
-			if(canAddInstantiatedAtoms() && !relation.equals(FactDatabase.EQUALSbs)) {
+			if(canAddInstantiatedAtoms() && !relation.equals(KB.EQUALSbs)) {
 				getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
 			}
 			
@@ -365,7 +365,7 @@ public class MiningAssistant{
 	 * @param minSupportThreshold
 	 * @param output
 	 */
-	public void getInitialAtoms(double minSupportThreshold, Collection<Query> output) {
+	public void getInitialAtoms(double minSupportThreshold, Collection<Rule> output) {
 		List<ByteString[]> newEdgeList = new ArrayList<ByteString[]>(1);
 		ByteString[] newEdge = new ByteString[]{ByteString.of("?x"), ByteString.of("?y"), ByteString.of("?z")};
 		newEdgeList.add(newEdge);
@@ -381,8 +381,8 @@ public class MiningAssistant{
 	 * @param minSupportThreshold
 	 * @param output
 	 */
-	protected void buildInitialQueries(IntHashMap<ByteString> relations, double minSupportThreshold, Collection<Query> output) {
-		Query query = new Query();
+	protected void buildInitialQueries(IntHashMap<ByteString> relations, double minSupportThreshold, Collection<Rule> output) {
+		Rule query = new Rule();
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		for(ByteString relation: relations){
 			if (this.headExcludedRelations != null 
@@ -395,10 +395,10 @@ public class MiningAssistant{
 				ByteString[] succedent = newEdge.clone();
 				succedent[1] = relation;
 				int countVarPos = this.countAlwaysOnSubject? 0 : findCountingVariable(succedent);
-				Query candidate = new Query(succedent, cardinality);
+				Rule candidate = new Rule(succedent, cardinality);
 				candidate.setFunctionalVariablePosition(countVarPos);
 				registerHeadRelation(candidate);
-				if(canAddInstantiatedAtoms() && !relation.equals(FactDatabase.EQUALSbs)){
+				if(canAddInstantiatedAtoms() && !relation.equals(KB.EQUALSbs)){
 					getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
 				}
 				
@@ -416,7 +416,7 @@ public class MiningAssistant{
 	 * @param minSupportThreshold
 	 * @return
 	 */
-	public void getDanglingAtoms(Query query, double minSupportThreshold, Collection<Query> output){		
+	public void getDanglingAtoms(Rule query, double minSupportThreshold, Collection<Rule> output){		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		if (query.isEmpty()) {
 			throw new IllegalArgumentException("This method expects a non-empty query");
@@ -455,7 +455,7 @@ public class MiningAssistant{
 				query.getTriples().remove(nPatterns);
 				
 				int danglingPosition = (joinPosition == 0 ? 2 : 0);
-				boolean boundHead = !FactDatabase.isVariable(query.getTriples().get(0)[danglingPosition]);
+				boolean boundHead = !KB.isVariable(query.getTriples().get(0)[danglingPosition]);
 				for(ByteString relation: promisingRelations){
 					if(bodyExcludedRelations != null && bodyExcludedRelations.contains(relation))
 						continue;
@@ -463,7 +463,7 @@ public class MiningAssistant{
 					int cardinality = promisingRelations.get(relation);
 					if(cardinality >= minSupportThreshold){
 						newEdge[1] = relation;
-						Query candidate = query.addAtom(newEdge, cardinality);
+						Rule candidate = query.addAtom(newEdge, cardinality);
 						if(candidate.containsUnifiablePatterns()){
 							//Verify whether dangling variable unifies to a single value (I do not like this hack)
 							if(boundHead && kb.countDistinct(newEdge[danglingPosition], candidate.getTriples()) < 2)
@@ -490,9 +490,9 @@ public class MiningAssistant{
 	 * @param candidate
 	 */
 	protected int findCountingVariable(ByteString[] head) {
-		int nVars = FactDatabase.numVariables(head);
+		int nVars = KB.numVariables(head);
 		if(nVars == 1){
-			return FactDatabase.firstVariablePos(head);
+			return KB.firstVariablePos(head);
 		}else{
 			double functionality = kb.functionality(head[1]);
 			double inverseFunctionality = kb.inverseFunctionality(head[1]);
@@ -509,7 +509,7 @@ public class MiningAssistant{
 	 * the rule's cardinality (absolute support) is known.
 	 * @param candidate
 	 */
-	public void calculateConfidenceMetrics(Query candidate) {		
+	public void calculateConfidenceMetrics(Rule candidate) {		
 		computeStandardConfidence(candidate);
 		computePCAConfidence(candidate);
 	}
@@ -521,7 +521,7 @@ public class MiningAssistant{
 	 * @param omittedVariables
 	 * @return
 	 */
-	public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output){
+	public void getClosingAtoms(Rule query, double minSupportThreshold, Collection<Rule> output){
 		if (enforceConstants) {
 			return;
 		}
@@ -575,7 +575,7 @@ public class MiningAssistant{
 							int cardinality = promisingRelations.get(relation);
 							newEdge[1] = relation;
 							if(cardinality >= minSupportThreshold){										
-								Query candidate = query.addAtom(newEdge, cardinality);
+								Rule candidate = query.addAtom(newEdge, cardinality);
 								if(!candidate.isRedundantRecursive()){
 									candidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate.getHeadRelation()));
 									candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
@@ -601,7 +601,7 @@ public class MiningAssistant{
 	 * @param danglingEdges 
 	 * @param output
 	 */
-	public void getInstantiatedAtoms(Query query, double minSupportThreshold, Collection<Query> danglingEdges, Collection<Query> output) {
+	public void getInstantiatedAtoms(Rule query, double minSupportThreshold, Collection<Rule> danglingEdges, Collection<Rule> output) {
 		if (!canAddInstantiatedAtoms()) {
 			return;
 		}
@@ -610,7 +610,7 @@ public class MiningAssistant{
 		if (this.exploitMaxLengthOption 
 				|| query.getRealLength() < this.maxDepth - 1 
 				|| queryFreshVariables.size() < 2) {	
-			for (Query candidate : danglingEdges) {
+			for (Rule candidate : danglingEdges) {
 				// Find the dangling position of the query
 				int lastTriplePatternIndex = candidate.getLastRealTriplePatternIndex();
 				ByteString[] lastTriplePattern = candidate.getTriples().get(lastTriplePatternIndex);
@@ -634,7 +634,7 @@ public class MiningAssistant{
 	 * @param candidate
 	 * @return
 	 */
-	protected boolean testLength(Query candidate){
+	protected boolean testLength(Rule candidate){
 		return candidate.getRealLength() < maxDepth;
 	}
 	
@@ -644,7 +644,7 @@ public class MiningAssistant{
 	 * @return True If neither the confidence bounds nor the approximations are aplicable or if they
 	 * did not find enough evidence to discard the rule.
 	 */
-	public boolean calculateConfidenceBoundsAndApproximations(Query candidate) {		
+	public boolean calculateConfidenceBoundsAndApproximations(Rule candidate) {		
 		if(enabledConfidenceUpperBounds){
 			if (!calculateConfidenceBounds(candidate)) {
 				return false;
@@ -670,7 +670,7 @@ public class MiningAssistant{
 	 * @return boolean True if the confidence bounds are not applicable or they cannot
 	 * find enough evidence to discard the rule.
 	 */
-	private boolean calculateConfidenceBounds(Query candidate) {
+	private boolean calculateConfidenceBounds(Rule candidate) {
 		if (candidate.getRealLength() != 3) {
 			return true;
 		}
@@ -710,7 +710,7 @@ public class MiningAssistant{
 	 * above the confidence thresholds, i.e., there is not enough evidence to drop the rule.
 	 */
 	protected boolean calculateConfidenceApproximationForGeneralCase(
-			Query candidate) {
+			Rule candidate) {
 		// First identify whether the rule is a single path rule
 		if (!candidate.containsSinglePath()) {
 			// The approximation is not applicable.
@@ -722,7 +722,7 @@ public class MiningAssistant{
 		// Let's calculate the first term.
 		ByteString r1 = path.get(0)[1];
 		ByteString rh = candidate.getHead()[1];
-		int[] joinInformation = Query.joinPositions(path.get(0), candidate.getHead());
+		int[] joinInformation = Rule.joinPositions(path.get(0), candidate.getHead());
 		// If r1 is not functional or it is not joining from the subject, we replace it with the corresponding inverse relation.
 		boolean relationRewritten = joinInformation[0] != 0;		
 		double funr1 = this.kb.functionality(r1, relationRewritten);
@@ -735,7 +735,7 @@ public class MiningAssistant{
 		for (int i = 1; i < path.size(); ++i) {
 			ByteString ri = path.get(i)[1];
 			ByteString ri_1 = path.get(i - 1)[1];
-			joinInformation = Query.joinPositions(path.get(i - 1), path.get(i));
+			joinInformation = Rule.joinPositions(path.get(i - 1), path.get(i));
 			// Inverse r_{i-1} if it is not functional or it joins from the subject.
 			boolean rewriteRi = joinInformation[1] != 0;
 			double rng = 0.0;
@@ -771,13 +771,13 @@ public class MiningAssistant{
 	 */
 	private double computeOverlap(int[] jinfo, ByteString r1, ByteString r2) {
 		if (jinfo[0] == 0 && jinfo[1] == 0) {
-			return this.kb.overlap(r1, r2, FactDatabase.SUBJECT2SUBJECT);
+			return this.kb.overlap(r1, r2, KB.SUBJECT2SUBJECT);
 		} else if (jinfo[0] == 2 && jinfo[1] == 2) {
-			return this.kb.overlap(r1, r2, FactDatabase.OBJECT2OBJECT);
+			return this.kb.overlap(r1, r2, KB.OBJECT2OBJECT);
 		} else if (jinfo[0] == 0 && jinfo[1] == 2) {
-			return this.kb.overlap(r1, r2, FactDatabase.SUBJECT2OBJECT);
+			return this.kb.overlap(r1, r2, KB.SUBJECT2OBJECT);
 		} else if (jinfo[0] == 2 && jinfo[1] == 0) {
-			return this.kb.overlap(r2, r1, FactDatabase.SUBJECT2OBJECT);
+			return this.kb.overlap(r2, r1, KB.SUBJECT2OBJECT);
 		} else {
 			return 0.0;
 		}
@@ -790,7 +790,7 @@ public class MiningAssistant{
 	 * @return boolean True if the approximation is not applicable or produces a value above the confidence thresholds, i.e.,
 	 * there is not enough evidence to drop the rule.
 	 */
-	protected boolean calculateConfidenceApproximationFor3Atoms(Query candidate) {
+	protected boolean calculateConfidenceApproximationFor3Atoms(Rule candidate) {
 		int[] hardQueryInfo = null;
 		hardQueryInfo = kb.identifyHardQueryTypeIII(candidate.getAntecedent());
 		if(hardQueryInfo != null){
@@ -801,12 +801,12 @@ public class MiningAssistant{
 			p2 = candidate.getAntecedent().get(hardQueryInfo[3]);
 			int posCommonInput = hardQueryInfo[0];
 			int posCommonOutput = hardQueryInfo[1];					
-			if (FactDatabase.varpos(candidate.getFunctionalVariable(), p1) == -1) {
+			if (KB.varpos(candidate.getFunctionalVariable(), p1) == -1) {
 				targetPatternOutput = p1;
 				targetPatternInput = p2;
 				posCommonInput = hardQueryInfo[0];
 				posCommonOutput = hardQueryInfo[1];
-			} else if (FactDatabase.varpos(candidate.getFunctionalVariable(), p2) == -1) {
+			} else if (KB.varpos(candidate.getFunctionalVariable(), p2) == -1) {
 				targetPatternOutput = p2;
 				targetPatternInput = p1;
 				posCommonInput = hardQueryInfo[1];
@@ -860,7 +860,7 @@ public class MiningAssistant{
 	 * @param candidate
 	 * @return
 	 */
-	public boolean testConfidenceThresholds(Query candidate) {
+	public boolean testConfidenceThresholds(Rule candidate) {
 		boolean addIt = true;
 		
 		if(candidate.containsLevel2RedundantSubgraphs()){
@@ -870,7 +870,7 @@ public class MiningAssistant{
 		if(candidate.getStdConfidence() >= minStdConfidence 
 				&& candidate.getPcaConfidence() >= minPcaConfidence){
 			//Now check the confidence with respect to its ancestors
-			List<Query> ancestors = candidate.getAncestors();			
+			List<Rule> ancestors = candidate.getAncestors();			
 			for(int i = 0; i < ancestors.size(); ++i){
 				double ancestorConfidence = 0.0;
 				double ruleConfidence = 0.0;
@@ -901,7 +901,7 @@ public class MiningAssistant{
 	 * @param rule
 	 * @return
 	 */
-	private double getPcaConfidenceUpperBound(Query rule) {
+	private double getPcaConfidenceUpperBound(Rule rule) {
 		int[] hardCaseInfo = kb.identifyHardQueryTypeI(rule.getAntecedent());
 		ByteString projVariable = rule.getFunctionalVariable();
 		//ByteString commonVariable = query.getAntecedent().get(hardCaseInfo[2])[hardCaseInfo[0]];
@@ -934,7 +934,7 @@ public class MiningAssistant{
 		return rule.getSupport() / denominator;
 	}
 
-	private double getConfidenceUpperBound(Query query) {
+	private double getConfidenceUpperBound(Rule query) {
 		int[] hardCaseInfo = kb.identifyHardQueryTypeI(query.getAntecedent());
 		double denominator = 0.0;
 		ByteString[] triple = new ByteString[3];
@@ -944,10 +944,10 @@ public class MiningAssistant{
 		
 		if(hardCaseInfo[0] == 2){
 			// Case r(y, z) r(x, z)
-			denominator = kb.countDistinct(ByteString.of("?xw"), FactDatabase.triples(triple));
+			denominator = kb.countDistinct(ByteString.of("?xw"), KB.triples(triple));
 		}else{
 			// Case r(z, y) r(z, x)
-			denominator = kb.countDistinct(ByteString.of("?yw"), FactDatabase.triples(triple));
+			denominator = kb.countDistinct(ByteString.of("?yw"), KB.triples(triple));
 		}
 		
 		return query.getSupport() / denominator;
@@ -963,8 +963,8 @@ public class MiningAssistant{
 	 * @param minSupportThreshold
 	 * @param output
 	 */
-	protected void getInstantiatedAtoms(Query queryWithDanglingEdge, Query parentQuery, 
-			int danglingAtomPosition, int danglingPositionInEdge, double minSupportThreshold, Collection<Query> output) {
+	protected void getInstantiatedAtoms(Rule queryWithDanglingEdge, Rule parentQuery, 
+			int danglingAtomPosition, int danglingPositionInEdge, double minSupportThreshold, Collection<Rule> output) {
 		ByteString[] danglingEdge = queryWithDanglingEdge.getTriples().get(danglingAtomPosition);
 		IntHashMap<ByteString> constants = kb.frequentBindingsOf(danglingEdge[danglingPositionInEdge], queryWithDanglingEdge.getFunctionalVariable(), queryWithDanglingEdge.getTriples());
 		for(ByteString constant: constants){
@@ -972,7 +972,7 @@ public class MiningAssistant{
 			if(cardinality >= minSupportThreshold){
 				ByteString[] lastPatternCopy = queryWithDanglingEdge.getLastTriplePattern().clone();
 				lastPatternCopy[danglingPositionInEdge] = constant;
-				Query candidate = queryWithDanglingEdge.instantiateConstant(danglingPositionInEdge, constant, cardinality);
+				Rule candidate = queryWithDanglingEdge.instantiateConstant(danglingPositionInEdge, constant, cardinality);
 
 				if(candidate.getRedundantAtoms().isEmpty()){
 					candidate.setHeadCoverage((double)cardinality / headCardinalities.get(candidate.getHeadRelation()));
@@ -990,7 +990,7 @@ public class MiningAssistant{
 	 * @param rule
 	 * @return
 	 */
-	public double computeCardinality(Query rule) {
+	public double computeCardinality(Rule rule) {
 		ByteString[] head = rule.getHead();
 		ByteString countVariable = null;
 		if (countAlwaysOnSubject) {
@@ -1008,7 +1008,7 @@ public class MiningAssistant{
 	 * @param rule
 	 * @return
 	 */
-	public double computePCAConfidence(Query rule) {
+	public double computePCAConfidence(Rule rule) {
 		// TODO Auto-generated method stub
 		List<ByteString[]> antecedent = new ArrayList<ByteString[]>();
 		antecedent.addAll(rule.getTriples().subList(1, rule.getTriples().size()));
@@ -1017,8 +1017,8 @@ public class MiningAssistant{
 		int freeVarPos = 0;
 		long pcaDenominator = 0;
 		
-		if(FactDatabase.numVariables(existentialTriple) == 1){
-			freeVarPos = FactDatabase.firstVariablePos(existentialTriple);
+		if(KB.numVariables(existentialTriple) == 1){
+			freeVarPos = KB.firstVariablePos(existentialTriple);
 		}else{
 			if(existentialTriple[0].equals(rule.getFunctionalVariable()))
 				freeVarPos = 2;
@@ -1041,7 +1041,7 @@ public class MiningAssistant{
 		return rule.getPcaConfidence();
 	}
 	
-	public double computeStandardConfidence(Query candidate) {
+	public double computeStandardConfidence(Rule candidate) {
 		// Calculate confidence
 		long denominator = 0;
 		List<ByteString[]> antecedent = new ArrayList<ByteString[]>();

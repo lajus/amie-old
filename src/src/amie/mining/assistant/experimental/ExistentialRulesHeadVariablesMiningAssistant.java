@@ -4,19 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javatools.datatypes.ByteString;
-import amie.data.FactDatabase;
+import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
-import amie.query.Query;
+import amie.rules.Rule;
 
 public class ExistentialRulesHeadVariablesMiningAssistant extends
 		DefaultMiningAssistant {
 
-	public ExistentialRulesHeadVariablesMiningAssistant(FactDatabase dataSource) {
+	public ExistentialRulesHeadVariablesMiningAssistant(KB dataSource) {
 		super(dataSource);
 		// TODO Auto-generated constructor stub
 	}
 	
-	public void calculateConfidenceMetrics(Query candidate) {
+	public void calculateConfidenceMetrics(Rule candidate) {
 		// TODO Auto-generated method stub
 		List<ByteString[]> antecedent = new ArrayList<ByteString[]>();
 		antecedent.addAll(candidate.getAntecedent());
@@ -30,10 +30,10 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 				
 		if (!antecedent.isEmpty()){
 			try{
-				if(FactDatabase.numVariables(head) == 2){
+				if(KB.numVariables(head) == 2){
 					ByteString var1, var2;
-					var1 = head[FactDatabase.firstVariablePos(head)];
-					var2 = head[FactDatabase.secondVariablePos(head)];
+					var1 = head[KB.firstVariablePos(head)];
+					var2 = head[KB.secondVariablePos(head)];
 					denominator = (double) computeBodySize(var1, var2, candidate);
 				} else {					
 					denominator = (double) kb.countDistinct(candidate.getFunctionalVariable(), antecedent);
@@ -46,15 +46,15 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 			// In this case, still report the PCA.
 			if (candidate.isClosed()) {				
 				countVarPos = candidate.getFunctionalVariablePosition();
-				if(FactDatabase.numVariables(existentialTriple) == 1){
-					freeVarPos = FactDatabase.firstVariablePos(existentialTriple) == 0 ? 2 : 0;
+				if(KB.numVariables(existentialTriple) == 1){
+					freeVarPos = KB.firstVariablePos(existentialTriple) == 0 ? 2 : 0;
 				}else{
 					freeVarPos = existentialTriple[0].equals(candidate.getFunctionalVariable()) ? 2 : 0;
 				}
 				existentialTriple[freeVarPos] = ByteString.of("?x");
 				
 				try{
-					List<ByteString[]> redundantAtoms = Query.redundantAtoms(existentialTriple, antecedent);
+					List<ByteString[]> redundantAtoms = Rule.redundantAtoms(existentialTriple, antecedent);
 					boolean existentialQueryRedundant = false;
 					
 					//If the counting variable is in the same position of any of the unifiable patterns => redundant
@@ -66,10 +66,10 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 					if(existentialQueryRedundant){
 						pcaDenominator = denominator;
 					}else{
-						if(FactDatabase.numVariables(head) == 2){
+						if(KB.numVariables(head) == 2){
 							ByteString var1, var2;
-							var1 = head[FactDatabase.firstVariablePos(head)];
-							var2 = head[FactDatabase.secondVariablePos(head)];
+							var1 = head[KB.firstVariablePos(head)];
+							var2 = head[KB.secondVariablePos(head)];
 							pcaDenominator = (double) computePcaBodySize(var1, 
 									var2, candidate, antecedent, existentialTriple, candidate.getFunctionalVariablePosition());
 						}else{
@@ -86,7 +86,7 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 		}
 	}
 	
-	public boolean testConfidenceThresholds(Query candidate) {
+	public boolean testConfidenceThresholds(Rule candidate) {
 		boolean addIt = true;
 		
 		if (candidate.getLength() == 1) {
@@ -101,7 +101,7 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 		
 		if (candidate.getStdConfidence() >= minStdConfidence && candidate.getPcaConfidence() >= minPcaConfidence) {
 			//Now check the confidence with respect to its ancestors
-			List<Query> ancestors = candidate.getAncestors();			
+			List<Rule> ancestors = candidate.getAncestors();			
 			for (int i = ancestors.size() - 2; i >= 0; --i) {
 				if (ancestors.get(i).isClosed() 
 						&& 

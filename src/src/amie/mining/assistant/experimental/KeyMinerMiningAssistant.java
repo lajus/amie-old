@@ -7,9 +7,9 @@ import java.util.List;
 
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
-import amie.data.FactDatabase;
+import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
-import amie.query.Query;
+import amie.rules.Rule;
 
 /**
  * Implements a subclass of the mining assistant that is optimized to mine keys. It extends
@@ -20,7 +20,7 @@ import amie.query.Query;
  */
 public class KeyMinerMiningAssistant extends DefaultMiningAssistant {
 
-	public KeyMinerMiningAssistant(FactDatabase dataSource) {
+	public KeyMinerMiningAssistant(KB dataSource) {
 		super(dataSource);
 		recursivityLimit = 2; // The maximum number of atoms of a relation in the query
 	}
@@ -29,13 +29,13 @@ public class KeyMinerMiningAssistant extends DefaultMiningAssistant {
 	 * We enforce always an equals relation on the head, no matter if the user provides
 	 * seeds relations.
 	 */
-	public void getInitialAtomsFromSeeds(Collection<ByteString> seedsRelations, double minSupportThreshold, Collection<Query> output) {
-		Collection<ByteString> equalsRelation = Arrays.asList(FactDatabase.EQUALSbs);
+	public void getInitialAtomsFromSeeds(Collection<ByteString> seedsRelations, double minSupportThreshold, Collection<Rule> output) {
+		Collection<ByteString> equalsRelation = Arrays.asList(KB.EQUALSbs);
 		super.getInitialAtomsFromSeeds(equalsRelation, minSupportThreshold, output);
 	}
 	
 	@Override
-	public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output) {		
+	public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output) {		
 		if (query.isEmpty()) {
 			getInitialAtomsFromSeeds(Collections.EMPTY_LIST, minCardinality, output);
 			return;
@@ -52,7 +52,7 @@ public class KeyMinerMiningAssistant extends DefaultMiningAssistant {
 	 * @return
 	 */
 	@Override
-	public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output) {
+	public void getClosingAtoms(Rule query, double minSupportThreshold, Collection<Rule> output) {
 		if (this.enforceConstants) {
 			return;
 		}
@@ -106,7 +106,7 @@ public class KeyMinerMiningAssistant extends DefaultMiningAssistant {
 			newEdge1[1] = relation;
 			newEdge2[1] = relation;
 			
-			Query candidate = query.addEdges(newEdge1, newEdge2);
+			Rule candidate = query.addEdges(newEdge1, newEdge2);
 			computeCardinality(candidate);
 			if (candidate.getSupport() < minSupportThreshold) {
 				continue;

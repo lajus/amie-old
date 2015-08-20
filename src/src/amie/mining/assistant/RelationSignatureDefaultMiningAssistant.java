@@ -1,9 +1,9 @@
 package amie.mining.assistant;
 
 import javatools.datatypes.ByteString;
-import amie.data.FactDatabase;
-import amie.data.Utilities;
-import amie.query.Query;
+import amie.data.KB;
+import amie.data.U;
+import amie.rules.Rule;
 
 /**
  * This class overrides the default mining asssistant enforcing type constraints on the 
@@ -17,12 +17,12 @@ public class RelationSignatureDefaultMiningAssistant extends DefaultMiningAssist
 	/**
 	 * @param dataSource
 	 */
-	public RelationSignatureDefaultMiningAssistant(FactDatabase dataSource) {
+	public RelationSignatureDefaultMiningAssistant(KB dataSource) {
 		super(dataSource);
 	}
 	
 	@Override
-	public boolean testConfidenceThresholds(Query candidate) {
+	public boolean testConfidenceThresholds(Rule candidate) {
 		boolean queryChanged = false;
 		
 		if (!candidate.isClosed()){
@@ -32,7 +32,7 @@ public class RelationSignatureDefaultMiningAssistant extends DefaultMiningAssist
 		//Add the schema information to the rule
 		ByteString domain, range, relation;
 		relation = candidate.getHead()[1];
-		domain = Utilities.getRelationDomain(kb, relation);
+		domain = U.getRelationDomain(kb, relation);
 		if(domain != null){
 			ByteString[] domainTriple = new ByteString[3];
 			domainTriple[0] = candidate.getHead()[0];
@@ -42,7 +42,7 @@ public class RelationSignatureDefaultMiningAssistant extends DefaultMiningAssist
 			queryChanged = true;
 		}
 		
-		range = Utilities.getRelationRange(kb, relation);
+		range = U.getRelationRange(kb, relation);
 		if(range != null){
 			ByteString[] rangeTriple = new ByteString[3];
 			rangeTriple[0] = candidate.getHead()[2];
@@ -64,7 +64,7 @@ public class RelationSignatureDefaultMiningAssistant extends DefaultMiningAssist
 	 * It recalculates the support of a rule after it has been enhanced with type constraints.
 	 * @param candidate
 	 */
-	private void recalculateSupport(Query candidate) {
+	private void recalculateSupport(Rule candidate) {
 		long cardinality = kb.countProjection(candidate.getHead(), candidate.getAntecedent());
 		candidate.setSupport(cardinality);
 		candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));

@@ -13,7 +13,7 @@ import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Pair;
 
-import amie.data.FactDatabase;
+import amie.data.KB;
 
 public class EntitiesRelationSampler {
 
@@ -25,11 +25,11 @@ public class EntitiesRelationSampler {
 	 */
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
-		FactDatabase db = new FactDatabase();
+		KB db = new KB();
 		int maxOccurrencePerRelation = Integer.parseInt(args[0]);		
 		db.load(new File(args[1]));
-		Set<ByteString> allEntities = db.selectDistinct(ByteString.of("?s"), FactDatabase.triples(FactDatabase.triple(ByteString.of("?s"), ByteString.of("?p"), ByteString.of("?o"))));
-		List<ByteString> allRelations = new ArrayList<ByteString>(db.selectDistinct(ByteString.of("?p"), FactDatabase.triples(FactDatabase.triple(ByteString.of("?s"), ByteString.of("?p"), ByteString.of("?o")))));
+		Set<ByteString> allEntities = db.selectDistinct(ByteString.of("?s"), KB.triples(KB.triple(ByteString.of("?s"), ByteString.of("?p"), ByteString.of("?o"))));
+		List<ByteString> allRelations = new ArrayList<ByteString>(db.selectDistinct(ByteString.of("?p"), KB.triples(KB.triple(ByteString.of("?s"), ByteString.of("?p"), ByteString.of("?o")))));
 		List<ByteString> entitiesArray = new ArrayList<ByteString>(allEntities); 
 		Map<ByteString, List<Pair<ByteString, ByteString>>> relationsMap = new HashMap<ByteString, List<Pair<ByteString, ByteString>>>();
 		IntHashMap<ByteString> relationEntityCount = new IntHashMap<ByteString>();
@@ -48,7 +48,7 @@ public class EntitiesRelationSampler {
 			entitiesArray.remove(entitiesArray.size() - 1);
 			
 			//Now take all the triples about this entity
-			List<ByteString[]> query = FactDatabase.triples(FactDatabase.triple(entity, ByteString.of("?p"), ByteString.of("?o")));
+			List<ByteString[]> query = KB.triples(KB.triple(entity, ByteString.of("?p"), ByteString.of("?o")));
 			Map<ByteString, IntHashMap<ByteString>> predicateObjects = db.selectDistinct(ByteString.of("?p"), ByteString.of("?o"), query);
 			
 			for(ByteString relation: predicateObjects.keySet()){				

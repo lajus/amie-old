@@ -7,19 +7,19 @@ import java.util.List;
 
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
-import amie.data.FactDatabase;
+import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
-import amie.query.Query;
+import amie.rules.Rule;
 
 public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 
-	public InstantiatedHeadMiningAssistant(FactDatabase dataSource) {
+	public InstantiatedHeadMiningAssistant(KB dataSource) {
 		super(dataSource);
 	}
 	
 	@Override
-	public void getInitialAtomsFromSeeds(Collection<ByteString> relations, double minCardinality, Collection<Query> output) {
-		Query query = new Query();
+	public void getInitialAtomsFromSeeds(Collection<ByteString> relations, double minCardinality, Collection<Rule> output) {
+		Rule query = new Rule();
 		//The query must be empty
 		if(!query.isEmpty()) {
 			throw new IllegalArgumentException("Expected an empty query");
@@ -36,10 +36,10 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 			long cardinality = kb.countProjection(query.getHead(), emptyList);
 			
 			ByteString[] succedent = newEdge.clone();
-			Query candidate = new Query(succedent, cardinality);
+			Rule candidate = new Rule(succedent, cardinality);
 			candidate.setFunctionalVariablePosition(countVarPos);
 			registerHeadRelation(candidate);
-			ArrayList<Query> tmpOutput = new ArrayList<>();
+			ArrayList<Rule> tmpOutput = new ArrayList<>();
 			getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minCardinality, tmpOutput);			
 			output.addAll(tmpOutput);
 		}
@@ -48,8 +48,8 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 	}
 	
 	@Override
-	public void getInitialAtoms(double minSupportThreshold, Collection<Query> output) {
-		Query query = new Query();
+	public void getInitialAtoms(double minSupportThreshold, Collection<Rule> output) {
+		Rule query = new Rule();
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		
 		if(query.isEmpty()) {
@@ -66,7 +66,7 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 					ByteString[] succedent = newEdge.clone();
 					succedent[1] = relation;
 					int countVarPos = countAlwaysOnSubject ? 0 : findCountingVariable(succedent);
-					Query candidate = new Query(succedent, cardinality);
+					Rule candidate = new Rule(succedent, cardinality);
 					candidate.setFunctionalVariablePosition(countVarPos);
 					registerHeadRelation(candidate);
 					getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
@@ -79,7 +79,7 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 	}
 	
 	@Override
-	public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output) {
+	public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output) {
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		
 		if(query.isEmpty()) {
@@ -96,7 +96,7 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 					ByteString[] succedent = newEdge.clone();
 					succedent[1] = relation;
 					int countVarPos = countAlwaysOnSubject ? 0 : findCountingVariable(succedent);
-					Query candidate = new Query(succedent, cardinality);
+					Rule candidate = new Rule(succedent, cardinality);
 					candidate.setFunctionalVariablePosition(countVarPos);
 					registerHeadRelation(candidate);
 					getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minCardinality, output);
@@ -125,7 +125,7 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 	/**
 	 * Simplified version that calculates only standard confidence.
 	 */
-	public void calculateConfidenceMetrics(Query candidate) {	
+	public void calculateConfidenceMetrics(Rule candidate) {	
 		if (candidate.getLength() == 2) {
 			List<ByteString[]> antecedent = new ArrayList<ByteString[]>();
 			antecedent.addAll(candidate.getTriples().subList(1, candidate.getTriples().size()));
@@ -139,7 +139,7 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 		}
 	}
 	
-	public boolean testConfidenceThresholds(Query candidate) {
+	public boolean testConfidenceThresholds(Rule candidate) {
 		if (candidate.getLength() == 2) {
 			calculateConfidenceMetrics(candidate);
 			return true;

@@ -9,9 +9,9 @@ import java.util.Set;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Pair;
-import amie.data.FactDatabase;
+import amie.data.KB;
 import amie.mining.assistant.MiningAssistant;
-import amie.query.Query;
+import amie.rules.Rule;
 
 public class SeedsCountMiningAssistant extends MiningAssistant {
 
@@ -19,21 +19,21 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 	
 	private Set<ByteString> allSubjects;
 	
-	public SeedsCountMiningAssistant(FactDatabase dataSource, FactDatabase schemaSource) {
+	public SeedsCountMiningAssistant(KB dataSource, KB schemaSource) {
 		super(dataSource);
 		this.kbSchema = schemaSource;
-		ByteString[] rootPattern = Query.fullyUnboundTriplePattern1();
+		ByteString[] rootPattern = Rule.fullyUnboundTriplePattern1();
 		List<ByteString[]> triples = new ArrayList<ByteString[]>();
 		triples.add(rootPattern);
 		allSubjects = this.kbSchema.selectDistinct(rootPattern[0], triples);
 		subjectSchemaCount = allSubjects.size();
 	}
 	
-	public long getTotalCount(Query candidate){
+	public long getTotalCount(Rule candidate){
 		return subjectSchemaCount;
 	}
 
-	protected void getInstantiatedAtoms(Query query, Query originalQuery, ByteString[] danglingEdge, int danglingPosition, double minSupportThreshold, Collection<Query> output) {
+	protected void getInstantiatedAtoms(Rule query, Rule originalQuery, ByteString[] danglingEdge, int danglingPosition, double minSupportThreshold, Collection<Rule> output) {
 		IntHashMap<ByteString> constants = kb.frequentBindingsOf(danglingEdge[danglingPosition], query.getFunctionalVariable(), query.getTriples());
 		for(ByteString constant: constants){
 			ByteString tmp = danglingEdge[danglingPosition];
@@ -47,7 +47,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 				if(cardLastEdge < 2)
 					continue;
 				
-				Query candidate = query.instantiateConstant(danglingPosition, constant, cardinality);
+				Rule candidate = query.instantiateConstant(danglingPosition, constant, cardinality);
 				if(candidate.getRedundantAtoms().isEmpty()){
 					candidate.setHeadCoverage((double)cardinality / headCardinalities.get(candidate.getHeadRelation()));
 					candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
@@ -65,7 +65,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 	 * @param omittedVariables
 	 * @return
 	 */
-	public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output){		
+	public void getClosingAtoms(Rule query, double minSupportThreshold, Collection<Rule> output){		
 		int nPatterns = query.getTriples().size();
 
 		if(query.isEmpty())
@@ -132,7 +132,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 							int cardinality = seedsCardinality(query);
 							query.getTriples().remove(nPatterns);
 							if(cardinality >= minSupportThreshold){										
-								Query candidate = query.addAtom(newEdge, cardinality);
+								Rule candidate = query.addAtom(newEdge, cardinality);
 								if(!candidate.isRedundantRecursive()){
 									candidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate.getHeadRelation()));
 									candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
@@ -150,7 +150,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 		}
 	}
 	
-	private int seedsCardinality(Query query) {
+	private int seedsCardinality(Rule query) {
 		// TODO Auto-generated method stub
 		Set<ByteString> subjects = new HashSet<ByteString>(kb.selectDistinct(query.getFunctionalVariable(), query.getTriples()));
 		subjects.retainAll(allSubjects);
@@ -158,8 +158,8 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 	}
 	
 	@Override
-	public void getInitialAtoms(double minSupportThreshold, Collection<Query> output) {
-		Query query = new Query();
+	public void getInitialAtoms(double minSupportThreshold, Collection<Rule> output) {
+		Rule query = new Rule();
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		query.getTriples().add(newEdge);
 		IntHashMap<ByteString> relations = 
@@ -175,7 +175,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 			query.setSupport(cardinality);
 			if(cardinality >= minSupportThreshold) {
 				ByteString[] succedent = newEdge.clone();					
-				Query candidate = new Query(succedent, cardinality);
+				Rule candidate = new Rule(succedent, cardinality);
 				candidate.setFunctionalVariablePosition(countVarPos);
 				registerHeadRelation(candidate);
 				if(allowConstants)
@@ -189,7 +189,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 	}
 
 	@Override
-	public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output){		
+	public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output){		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		List<ByteString> openVariables = query.getOpenVariables();
 		
@@ -230,7 +230,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 				query.getTriples().remove(nPatterns);
 				
 				int danglingPosition = (joinPosition == 0 ? 2 : 0);
-				boolean boundHead = !FactDatabase.isVariable(query.getTriples().get(0)[danglingPosition]);
+				boolean boundHead = !KB.isVariable(query.getTriples().get(0)[danglingPosition]);
 				for(ByteString relation: promisingRelations){
 					if(bodyExcludedRelations != null && bodyExcludedRelations.contains(relation))
 						continue;
@@ -240,7 +240,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 					int cardinality = seedsCardinality(query);
 					query.getTriples().remove(nPatterns);						
 					if(cardinality >= minCardinality){
-						Query candidate = query.addAtom(newEdge, cardinality, newEdge[joinPosition], newEdge[danglingPosition]);
+						Rule candidate = query.addAtom(newEdge, cardinality, newEdge[joinPosition], newEdge[danglingPosition]);
 						if(candidate.containsUnifiablePatterns()){
 							//Verify whether dangling variable unifies to a single value (I do not like this hack)
 							if(boundHead && kb.countDistinct(newEdge[danglingPosition], candidate.getTriples()) < 2)
@@ -273,7 +273,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 	}
 	
 	@Override
-	public void calculateConfidenceMetrics(Query candidate) {		
+	public void calculateConfidenceMetrics(Rule candidate) {		
 		// TODO Auto-generated method stub
 		List<ByteString[]> antecedent = new ArrayList<ByteString[]>();
 		antecedent.addAll(candidate.getTriples().subList(1, candidate.getTriples().size()));
@@ -284,8 +284,8 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 		ByteString[] existentialTriple = succedent.get(0).clone();
 		int freeVarPos = 0;
 		
-		if(FactDatabase.numVariables(existentialTriple) == 1){
-			freeVarPos = FactDatabase.firstVariablePos(existentialTriple);
+		if(KB.numVariables(existentialTriple) == 1){
+			freeVarPos = KB.firstVariablePos(existentialTriple);
 		}else{
 			if(existentialTriple[0].equals(candidate.getFunctionalVariable()))
 				freeVarPos = 2;

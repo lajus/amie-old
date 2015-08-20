@@ -13,17 +13,17 @@ import java.util.Set;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Triple;
-import amie.data.FactDatabase;
-import amie.query.AMIEreader;
-import amie.query.Query;
+import amie.data.KB;
+import amie.rules.AMIEParser;
+import amie.rules.Rule;
 
 public class PCAFalseFactsSampler {
 
-	private FactDatabase db;
+	private KB db;
 	
 	private int sampleSize;
 	
-	public PCAFalseFactsSampler(FactDatabase db, int sampleSize) {
+	public PCAFalseFactsSampler(KB db, int sampleSize) {
 		this.db = db;
 		this.sampleSize = sampleSize;
 	}
@@ -33,7 +33,7 @@ public class PCAFalseFactsSampler {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		FactDatabase trainingSource = new FactDatabase();
+		KB trainingSource = new KB();
 		
 		if(args.length < 3){
 			System.err.println("PCAFalseFactsSampler <db> <samplesPerRule> <rules>");
@@ -47,12 +47,12 @@ public class PCAFalseFactsSampler {
 		
 		int sampleSize = Integer.parseInt(args[1]);
 	
-		List<Query> rules = new ArrayList<Query>();
+		List<Rule> rules = new ArrayList<Rule>();
 		for(int i = 2; i < args.length; ++i){		
-			rules.addAll(AMIEreader.rules(new File(args[i])));
+			rules.addAll(AMIEParser.rules(new File(args[i])));
 		}
 		
-		for(Query rule: rules){
+		for(Rule rule: rules){
 			if(trainingSource.functionality(rule.getHead()[1]) >= trainingSource.inverseFunctionality(rule.getHead()[1]))
 				rule.setFunctionalVariablePosition(0);
 			else
@@ -64,8 +64,8 @@ public class PCAFalseFactsSampler {
 
 	}
 
-	private void run(Collection<Query> rules){
-		for(Query rule: rules){	
+	private void run(Collection<Rule> rules){
+		for(Rule rule: rules){	
 			Collection<Triple<ByteString, ByteString, ByteString>> ruleAssumedFalse = generateAssumedFalseFacts(rule);			
 			Collection<Triple<ByteString, ByteString, ByteString>> sample =  PredictionsSampler.sample(ruleAssumedFalse, sampleSize);
 			for(Triple<ByteString, ByteString, ByteString> fact: sample){
@@ -78,22 +78,22 @@ public class PCAFalseFactsSampler {
 	 * It outputs a sample of the assumed-false facts
 	 * @param rules
 	 */
-	private void runAndGroupByRelation(Collection<Query> rules) {
-		Map<ByteString, Collection<Query>> headsToRules = new HashMap<ByteString, Collection<Query>>();
+	private void runAndGroupByRelation(Collection<Rule> rules) {
+		Map<ByteString, Collection<Rule>> headsToRules = new HashMap<ByteString, Collection<Rule>>();
 		
-		for(Query rule: rules){
-			Collection<Query> rulesForRelation = headsToRules.get(rule.getHead()[1]);
+		for(Rule rule: rules){
+			Collection<Rule> rulesForRelation = headsToRules.get(rule.getHead()[1]);
 			if(rulesForRelation == null){
-				rulesForRelation = new ArrayList<Query>();
+				rulesForRelation = new ArrayList<Rule>();
 				headsToRules.put(rule.getHead()[1], rulesForRelation);
 			}
 			rulesForRelation.add(rule);			
 		}
 		
 		for(ByteString relation: headsToRules.keySet()){
-			Map<Triple<ByteString, ByteString, ByteString>, Query> factToRule = new HashMap<Triple<ByteString, ByteString, ByteString>, Query>();
+			Map<Triple<ByteString, ByteString, ByteString>, Rule> factToRule = new HashMap<Triple<ByteString, ByteString, ByteString>, Rule>();
 			Set<Triple<ByteString, ByteString, ByteString>> allAssumedFalse = new LinkedHashSet<Triple<ByteString, ByteString, ByteString>>();	
-			for(Query rule: headsToRules.get(relation)){		
+			for(Rule rule: headsToRules.get(relation)){		
 				Collection<Triple<ByteString, ByteString, ByteString>> ruleAssumedFalse = generateAssumedFalseFacts(rule);
 				for(Triple<ByteString, ByteString, ByteString> fact: ruleAssumedFalse){
 					factToRule.put(fact, rule);
@@ -105,13 +105,13 @@ public class PCAFalseFactsSampler {
 		}
 	}
 
-	private void printSample(Collection<Triple<ByteString, ByteString, ByteString>> sample, Map<Triple<ByteString, ByteString, ByteString>, Query> factToRule) {
+	private void printSample(Collection<Triple<ByteString, ByteString, ByteString>> sample, Map<Triple<ByteString, ByteString, ByteString>, Rule> factToRule) {
 		for(Triple<ByteString, ByteString, ByteString> fact: sample){
 			System.out.println(factToRule.get(fact).getRuleString() + "\t" + fact.first + "\t" + fact.second + "\t" + fact.third);
 		}
 	}
 
-	private Set<Triple<ByteString, ByteString, ByteString>> generateAssumedFalseFacts(Query rule) {
+	private Set<Triple<ByteString, ByteString, ByteString>> generateAssumedFalseFacts(Rule rule) {
 		List<ByteString[]> query = new ArrayList<ByteString[]>();	
 		Set<Triple<ByteString, ByteString, ByteString>> result = new LinkedHashSet<Triple<ByteString, ByteString, ByteString>>();
 		ByteString[] head = rule.getHead();
@@ -127,7 +127,7 @@ public class PCAFalseFactsSampler {
 		for(ByteString[] triple: rule.getAntecedent())
 			query.add(triple.clone());
 		
-		if(FactDatabase.numVariables(rule.getHead()) == 2){
+		if(KB.numVariables(rule.getHead()) == 2){
 			Map<ByteString, IntHashMap<ByteString>> bindingsTwoVars = db.difference(head[0], head[2], query, rule.getTriples());
 			for(ByteString subject: bindingsTwoVars.keySet()){
 				for(ByteString object: bindingsTwoVars.get(subject)){

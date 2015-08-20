@@ -2,11 +2,11 @@ package amie.data.eval;
 
 import javatools.datatypes.ByteString;
 import javatools.datatypes.Triple;
-import amie.query.Query;
+import amie.rules.Rule;
 
 public class Evaluation {
 
-	public Query rule;
+	public Rule rule;
 	
 	public Triple<ByteString, ByteString, ByteString> fact;
 		
@@ -14,14 +14,14 @@ public class Evaluation {
 	
 	public EvalSource source;
 	
-	public Evaluation(Query rule, Triple<ByteString, ByteString, ByteString> fact, EvalResult result){
+	public Evaluation(Rule rule, Triple<ByteString, ByteString, ByteString> fact, EvalResult result){
 		this.rule = rule;
 		this.fact = fact;
 		this.result = result;
 		source = EvalSource.Undefined;
 	}
 	
-	public Evaluation(Query rule, Triple<ByteString, ByteString, ByteString> fact, EvalResult result, EvalSource source){
+	public Evaluation(Rule rule, Triple<ByteString, ByteString, ByteString> fact, EvalResult result, EvalSource source){
 		this.rule = rule;
 		this.fact = fact;
 		this.result = result;

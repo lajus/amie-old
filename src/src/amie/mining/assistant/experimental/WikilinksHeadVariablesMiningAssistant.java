@@ -7,20 +7,20 @@ import java.util.List;
 
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
-import amie.data.FactDatabase;
+import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
-import amie.query.Query;
+import amie.rules.Rule;
 
 public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistant {
 	
 	public static String wikiLinkProperty = "<linksTo>";
 	
-	public WikilinksHeadVariablesMiningAssistant(FactDatabase dataSource) {
+	public WikilinksHeadVariablesMiningAssistant(KB dataSource) {
 		super(dataSource);
 	}
 	
 	@Override
-	public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output) {		
+	public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output) {		
 		if(query.isEmpty()){
 			//Initial case
 			ByteString[] newEdge = query.fullyUnboundTriplePattern();
@@ -42,7 +42,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 					ByteString[] succedent = newEdge.clone();
 					succedent[1] = relation;
 					int countVarPos = countAlwaysOnSubject? 0 : findCountingVariable(succedent);
-					Query candidate = new Query(succedent, cardinality);
+					Rule candidate = new Rule(succedent, cardinality);
 					candidate.setFunctionalVariablePosition(countVarPos);
 					registerHeadRelation(candidate);
 					output.add(candidate);
@@ -58,12 +58,12 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 		}
 	}
 	
-	public void getSpecializationCandidates(Query query, double minSupportThreshold, Collection<Query> output){
-		List<Query> tmpCandidates = new ArrayList<Query>();
+	public void getSpecializationCandidates(Rule query, double minSupportThreshold, Collection<Rule> output){
+		List<Rule> tmpCandidates = new ArrayList<Rule>();
 		ByteString[] head = query.getHead();
 		
 		//Specialization by type
-		if(FactDatabase.isVariable(head[0])){
+		if(KB.isVariable(head[0])){
 			ByteString[] newEdge = query.fullyUnboundTriplePattern();
 			newEdge[0] = head[0];
 			newEdge[1] = typeString;				
@@ -73,7 +73,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 				for(ByteString type: subjectTypes){
 					int cardinality = subjectTypes.get(type);
 					if(cardinality >= minSupportThreshold){
-						Query newCandidate = new Query(query, cardinality);
+						Rule newCandidate = new Rule(query, cardinality);
 						newCandidate.getLastTriplePattern()[2] = type;
 						tmpCandidates.add(newCandidate);
 					}
@@ -84,8 +84,8 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 			tmpCandidates.add(query);
 		}
 		
-		if(FactDatabase.isVariable(head[2])){
-			for(Query candidate: tmpCandidates){
+		if(KB.isVariable(head[2])){
+			for(Rule candidate: tmpCandidates){
 				ByteString[] newEdge = query.fullyUnboundTriplePattern();
 				newEdge[0] = head[2];
 				newEdge[1] = typeString;
@@ -94,7 +94,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 				for(ByteString type: objectTypes){
 					int cardinality = objectTypes.get(type);
 					if(cardinality >= minSupportThreshold){
-						Query newCandidate = new Query(candidate, cardinality);
+						Rule newCandidate = new Rule(candidate, cardinality);
 						newCandidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(newCandidate.getHeadRelation()));
 						newCandidate.setSupportRatio((double)cardinality / (double)kb.size());
 						newCandidate.setParent(query);
@@ -114,17 +114,17 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 	}
 	
 	@Override
-	public void getClosingAtoms(Query query, double minSupportThreshold, Collection<Query> output) {
+	public void getClosingAtoms(Rule query, double minSupportThreshold, Collection<Rule> output) {
 		int length = query.getLengthWithoutTypesAndLinksTo(typeString, ByteString.of(wikiLinkProperty));
 		ByteString[] head = query.getHead();
 		if (length == maxDepth - 1) {
 			List<ByteString> openVariables = query.getOpenVariables();
 			for (ByteString openVar : openVariables) {
-				if (FactDatabase.isVariable(head[0]) && !openVar.equals(head[0])) {
+				if (KB.isVariable(head[0]) && !openVar.equals(head[0])) {
 					return;
 				}
 				
-				if (FactDatabase.isVariable(head[2]) && !openVar.equals(head[2])) {
+				if (KB.isVariable(head[2]) && !openVar.equals(head[2])) {
 					return;
 				}
 			}
@@ -138,7 +138,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 			queryAtoms.add(newEdge);
 			long cardinality = kb.countDistinctPairs(head[0], head[2], queryAtoms);
 			if (cardinality >= minSupportThreshold) {
-				Query candidate1 = query.addAtom(newEdge, (int)cardinality);
+				Rule candidate1 = query.addAtom(newEdge, (int)cardinality);
 				candidate1.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate1.getHeadRelation()));
 				candidate1.setSupportRatio((double)cardinality / (double)kb.size());
 				candidate1.setParent(query);			
@@ -150,7 +150,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 			newEdge[2] = tmp;
 			cardinality = kb.countDistinctPairs(head[0], head[2], queryAtoms);
 			if (cardinality >= minSupportThreshold) {
-				Query candidate2 = query.addAtom(newEdge, (int)cardinality);
+				Rule candidate2 = query.addAtom(newEdge, (int)cardinality);
 				candidate2.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate2.getHeadRelation()));
 				candidate2.setSupportRatio((double)cardinality / (double)kb.size());
 				candidate2.setParent(query);			
@@ -161,7 +161,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 		super.getClosingAtoms(query, minSupportThreshold, output);
 	}
 
-	protected boolean testLength(Query candidate){
+	protected boolean testLength(Rule candidate){
 		boolean passed = candidate.getLengthWithoutTypesAndLinksTo(typeString, ByteString.of(wikiLinkProperty)) < maxDepth;
 		return passed;
 	}

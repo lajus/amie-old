@@ -11,9 +11,9 @@ import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Triple;
 import javatools.filehandlers.TSVFile;
-import amie.data.FactDatabase;
-import amie.query.AMIEreader;
-import amie.query.Query;
+import amie.data.KB;
+import amie.rules.AMIEParser;
+import amie.rules.Rule;
 
 
 class TripleComparator implements Comparator<ByteString[]> {
@@ -46,8 +46,8 @@ public class RuleHitsEvaluator {
 		}
 		
 		File inputFile = new File(args[0]);		
-		FactDatabase trainingDataset = new FactDatabase();
-		FactDatabase targetDataset = new FactDatabase();		
+		KB trainingDataset = new KB();
+		KB targetDataset = new KB();		
 		TSVFile tsvFile = new TSVFile(inputFile);
 		int rawHitsInTargetNotInTraining = 0;
 		int hitsInTarget = 0;
@@ -63,13 +63,13 @@ public class RuleHitsEvaluator {
 				new IntHashMap<>();
 		// Collect all predictions made by the rules.
 		for(List<String> record: tsvFile) {
-			Query q = AMIEreader.rule(record.get(0));
+			Rule q = AMIEParser.rule(record.get(0));
 			if(q == null) {
 				continue;
 			}
 			
 			ByteString[] head = q.getHead();
-			q.setFunctionalVariablePosition(Query.findFunctionalVariable(q, trainingDataset));
+			q.setFunctionalVariablePosition(Rule.findFunctionalVariable(q, trainingDataset));
 			Object bindings = null;
 			try {
 				bindings = predictor.generateBodyBindings(q);
@@ -77,7 +77,7 @@ public class RuleHitsEvaluator {
 				continue;
 			}
 			
-			if(FactDatabase.numVariables(head) == 1){
+			if(KB.numVariables(head) == 1){
 				Set<ByteString> oneVarBindings = (Set<ByteString>)bindings;
 				for(ByteString binding: oneVarBindings){
 					Triple<ByteString, ByteString, ByteString> t = 
@@ -110,7 +110,7 @@ public class RuleHitsEvaluator {
 		}
 		
 		for (Triple<ByteString, ByteString, ByteString> t : predictions) {
-			ByteString[] triple = FactDatabase.triple2Array(t);
+			ByteString[] triple = KB.triple2Array(t);
 			int eval = Evaluator.evaluate(triple, trainingDataset, targetDataset);
 			if(eval == 0) { 
 				++hitsInTarget;

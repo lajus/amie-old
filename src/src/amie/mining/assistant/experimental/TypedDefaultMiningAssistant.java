@@ -10,9 +10,9 @@ import java.util.List;
 
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
-import amie.data.FactDatabase;
+import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
-import amie.query.Query;
+import amie.rules.Rule;
 
 /**
  * This class overrides the default mining assistant and adds to the rule
@@ -26,7 +26,7 @@ public class TypedDefaultMiningAssistant extends DefaultMiningAssistant {
 	/**
 	 * @param dataSource
 	 */
-	public TypedDefaultMiningAssistant(FactDatabase dataSource) {
+	public TypedDefaultMiningAssistant(KB dataSource) {
 		super(dataSource);
 	}
 		
@@ -36,7 +36,7 @@ public class TypedDefaultMiningAssistant extends DefaultMiningAssistant {
 	 * @param minCardinality
 	 * @return
 	 */
-	public void getDanglingAtoms(Query query, double minCardinality, Collection<Query> output){		
+	public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output){		
 		if(query.getRealLength() == 1){
 			//Add the types at the beginning of the query.
 			getSpecializationCandidates(query, minCardinality, output);
@@ -45,12 +45,12 @@ public class TypedDefaultMiningAssistant extends DefaultMiningAssistant {
 		}
 	}
 		
-	public void getSpecializationCandidates(Query query, double minSupportThreshold, Collection<Query> output) {
-		List<Query> tmpCandidates = new ArrayList<Query>();
+	public void getSpecializationCandidates(Rule query, double minSupportThreshold, Collection<Rule> output) {
+		List<Rule> tmpCandidates = new ArrayList<Rule>();
 		ByteString[] head = query.getHead();
 		
 		//Specialization by type
-		if(FactDatabase.isVariable(head[0])){
+		if(KB.isVariable(head[0])){
 			ByteString[] newEdge = query.fullyUnboundTriplePattern();
 			newEdge[0] = head[0];
 			newEdge[1] = typeString;				
@@ -60,7 +60,7 @@ public class TypedDefaultMiningAssistant extends DefaultMiningAssistant {
 				for(ByteString type: subjectTypes){
 					int cardinality = subjectTypes.get(type);
 					if(cardinality >= minSupportThreshold){
-						Query newCandidate = new Query(query, cardinality);
+						Rule newCandidate = new Rule(query, cardinality);
 						newCandidate.getLastTriplePattern()[2] = type;
 						tmpCandidates.add(newCandidate);
 					}
@@ -71,8 +71,8 @@ public class TypedDefaultMiningAssistant extends DefaultMiningAssistant {
 			tmpCandidates.add(query);
 		}
 		
-		if(FactDatabase.isVariable(head[2])){
-			for(Query candidate: tmpCandidates){
+		if(KB.isVariable(head[2])){
+			for(Rule candidate: tmpCandidates){
 				ByteString[] newEdge = query.fullyUnboundTriplePattern();
 				newEdge[0] = head[2];
 				newEdge[1] = typeString;
@@ -82,7 +82,7 @@ public class TypedDefaultMiningAssistant extends DefaultMiningAssistant {
 					for(ByteString type: objectTypes){
 						int cardinality = objectTypes.get(type);
 						if(cardinality >= minSupportThreshold){
-							Query newCandidate = new Query(candidate, cardinality);
+							Rule newCandidate = new Rule(candidate, cardinality);
 							newCandidate.getLastTriplePattern()[2] = type;
 							newCandidate.setParent(query);
 							output.add(newCandidate);
@@ -100,7 +100,7 @@ public class TypedDefaultMiningAssistant extends DefaultMiningAssistant {
 	}
 
 	@Override
-	protected boolean testLength(Query candidate) {
+	protected boolean testLength(Rule candidate) {
 		return candidate.getLengthWithoutTypes(typeString) < maxDepth;
 	}
 }
