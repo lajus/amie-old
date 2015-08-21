@@ -13,6 +13,12 @@ public class HeadVariablesImprovedMiningAssistant extends
 	public HeadVariablesImprovedMiningAssistant(KB dataSource) {
 		super(dataSource);
 	}
+	
+	@Override
+	public String getDescription() {
+        return "Counting on both head variables. "
+        		+ "Adding type constraints when calculating support and confidence.";
+	}
 
 	protected double computePcaBodySize(ByteString var1, 
 			ByteString var2, Rule query, 

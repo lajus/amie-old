@@ -17,6 +17,15 @@ import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Pair;
 import javatools.datatypes.Triple;
 
+/**
+ * Given a KB with non-canonicalized verbal phrases and types for the entities, 
+ * it defines new relations as the combination of a verbal phrase and a signature (domain
+ * and range types) and outputs information about the domain and range overlaps of the
+ * identified relations.
+ * 
+ * @author galarrag
+ *
+ */
 public class OutputSignedRelationPhrases {
 
 	public OutputSignedRelationPhrases() {
@@ -33,7 +42,8 @@ public class OutputSignedRelationPhrases {
 		db.load(files);
 		Map<Triple<ByteString, ByteString, ByteString>, Set<Pair<ByteString, ByteString>>> signedRelations = 
 				buildSignedRelations(db);
-		List<Triple<ByteString, ByteString, ByteString>> signatures = new ArrayList<>(signedRelations.keySet());
+		List<Triple<ByteString, ByteString, ByteString>> signatures = 
+				new ArrayList<>(signedRelations.keySet());
 		FileWriter out = new FileWriter(new File("relations.txt"));
 		PrintWriter pWriter = new PrintWriter (out);
 		for (int i = 0; i < signatures.size(); ++i) {
@@ -100,23 +110,26 @@ public class OutputSignedRelationPhrases {
 		return count;
 	}
 
-	private static Map<Triple<ByteString, ByteString, ByteString>, Set<Pair<ByteString, ByteString>>> buildSignedRelations(
-			KB db) {
+	private static Map<Triple<ByteString, ByteString, ByteString>, 
+	Set<Pair<ByteString, ByteString>>> buildSignedRelations(KB db) {
 		// TODO Auto-generated method stub
 		Map<Triple<ByteString, ByteString, ByteString>, Set<Pair<ByteString, ByteString>>> result 
 		= new HashMap<Triple<ByteString, ByteString, ByteString>, Set<Pair<ByteString, ByteString>>>();
 		ByteString typeRelation = ByteString.of("<rdf:type>");
 		ByteString defaultStr = ByteString.of("default");
-		for (ByteString relation : db.predicateSize) {
+		Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> map =
+				db.resultsThreeVariables(ByteString.of("?p"), ByteString.of("?s"), ByteString.of("o"), 
+						KB.triple("?s", "?p", "?o"));
+		for (ByteString relation : map.keySet()) {
 			if (!relation.equals(typeRelation)) {
-				Map<ByteString, IntHashMap<ByteString>> tail = db.predicate2subject2object.get(relation);
+				Map<ByteString, IntHashMap<ByteString>> tail = map.get(relation);
 				for (ByteString subject : tail.keySet()) {
 					for (ByteString object : tail.get(subject)) {
 						// Get the types
 						IntHashMap<ByteString> subjectTypes = 
-								db.predicate2subject2object.get(typeRelation).get(subject);
+								map.get(typeRelation).get(subject);
 						IntHashMap<ByteString> objectTypes = 
-								db.predicate2subject2object.get(typeRelation).get(object);
+								map.get(typeRelation).get(object);
 						if (subjectTypes == null) {
 							subjectTypes = new IntHashMap<>();
 							subjectTypes.add(defaultStr);
@@ -130,7 +143,8 @@ public class OutputSignedRelationPhrases {
 						for (ByteString domain : subjectTypes) {
 							for (ByteString range : objectTypes) {
 								Triple<ByteString, ByteString, ByteString> triple = 
-										new Triple<ByteString, ByteString, ByteString>(relation, domain, range);
+										new Triple<ByteString, ByteString, ByteString>(
+												relation, domain, range);
 								Set<Pair<ByteString, ByteString>> pairs = result.get(triple);
 								if (pairs == null) {
 									pairs = new LinkedHashSet<Pair<ByteString, ByteString>>();

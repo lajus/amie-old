@@ -1,4 +1,4 @@
-package amie.mining.assistant.experimental;
+package amie.keys.assistant;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,11 +25,16 @@ public class KeyMinerMiningAssistant extends DefaultMiningAssistant {
 		recursivityLimit = 2; // The maximum number of atoms of a relation in the query
 	}
 	
+	public String getDescription() {
+		 return "Overriding recursivity limit. Using a value of " + getRecursivityLimit();
+	}
+	
 	/**
 	 * We enforce always an equals relation on the head, no matter if the user provides
 	 * seeds relations.
 	 */
-	public void getInitialAtomsFromSeeds(Collection<ByteString> seedsRelations, double minSupportThreshold, Collection<Rule> output) {
+	public void getInitialAtomsFromSeeds(Collection<ByteString> seedsRelations, 
+			double minSupportThreshold, Collection<Rule> output) {
 		Collection<ByteString> equalsRelation = Arrays.asList(KB.EQUALSbs);
 		super.getInitialAtomsFromSeeds(equalsRelation, minSupportThreshold, output);
 	}

@@ -26,7 +26,7 @@ public class StringUtils {
 	    return true;
 	}
 
-	public static void main (String args[]) throws Exception {
+	public static void main(String args[]) throws Exception {
 		try (TSVFile file = new TSVFile(new File(args[0]))) {
 			for (List<String> row : file) {
 				if (StringUtils.isPureAscii(row.get(0)) && StringUtils.isPureAscii(row.get(2))) {

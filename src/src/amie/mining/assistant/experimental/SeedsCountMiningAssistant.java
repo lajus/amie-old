@@ -10,6 +10,7 @@ import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Pair;
 import amie.data.KB;
+import amie.mining.ConfidenceMetric;
 import amie.mining.assistant.MiningAssistant;
 import amie.rules.Rule;
 
@@ -27,6 +28,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 		triples.add(rootPattern);
 		allSubjects = this.kbSchema.selectDistinct(rootPattern[0], triples);
 		subjectSchemaCount = allSubjects.size();
+		confidenceMetric = ConfidenceMetric.StandardConfidence;
 	}
 	
 	public long getTotalCount(Rule candidate){
@@ -152,7 +154,8 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 	
 	private int seedsCardinality(Rule query) {
 		// TODO Auto-generated method stub
-		Set<ByteString> subjects = new HashSet<ByteString>(kb.selectDistinct(query.getFunctionalVariable(), query.getTriples()));
+		Set<ByteString> subjects = new HashSet<ByteString>(
+				kb.selectDistinct(query.getFunctionalVariable(), query.getTriples()));
 		subjects.retainAll(allSubjects);
 		return subjects.size();
 	}
@@ -170,7 +173,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 
 			newEdge[1] = relation;
 			int countVarPos = countAlwaysOnSubject? 0 : findCountingVariable(newEdge);
-			query.setFunctionalVariablePosition(countVarPos);
+			query.setFunctionalVariablePosition(countVarPos);		
 			double cardinality = (double) seedsCardinality(query);
 			query.setSupport(cardinality);
 			if(cardinality >= minSupportThreshold) {
@@ -183,9 +186,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 				
 				output.add(candidate);
 			}
-			query.getTriples().remove(0);
 		}
-		
 	}
 
 	@Override

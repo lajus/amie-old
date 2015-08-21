@@ -11,7 +11,7 @@ import amie.data.KB;
 import javatools.administrative.D;
 import javatools.datatypes.ByteString;
 
-public class EquivalenceChecker2 {
+public class QueryEquivalenceChecker {
 	
 	static class Node implements Comparable<Node>{
 		ByteString[] data;

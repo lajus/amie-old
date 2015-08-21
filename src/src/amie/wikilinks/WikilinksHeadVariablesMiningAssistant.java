@@ -1,6 +1,7 @@
-package amie.mining.assistant.experimental;
+package amie.wikilinks;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +18,21 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 	
 	public WikilinksHeadVariablesMiningAssistant(KB dataSource) {
 		super(dataSource);
+        headExcludedRelations = Arrays.asList(ByteString.of(WikilinksHeadVariablesMiningAssistant.wikiLinkProperty), 
+        		ByteString.of("rdf:type"));
+        bodyExcludedRelations = headExcludedRelations;
 	}
+	
+	public String getDescription() {
+		return "Rules of the form .... linksTo(x, y) "
+				+ "type(x, C) type(y, C') => r(x, y)";
+	}
+	
+	@Override
+	public void setHeadExcludedRelations(java.util.Collection<ByteString> headExcludedRelations) {};
+	
+	@Override
+	public void setBodyExcludedRelations(java.util.Collection<ByteString> excludedRelations) {};
 	
 	@Override
 	public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output) {		

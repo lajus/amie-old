@@ -8,6 +8,13 @@ import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
 import amie.rules.Rule;
 
+/**
+ * Extension of the default mining assistant that also reports existential rules,
+ * i.e., rules where one of the head variables is allowed to be non-closed.
+ * 
+ * @author galarrag
+ *
+ */
 public class ExistentialRulesHeadVariablesMiningAssistant extends
 		DefaultMiningAssistant {
 
@@ -16,6 +23,13 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 		// TODO Auto-generated constructor stub
 	}
 	
+	@Override
+	public String getDescription() {
+        return "Reporting also existential rules. "
+        		+ "Counting on both head variables.";	
+	}
+	
+	@Override
 	public void calculateConfidenceMetrics(Rule candidate) {
 		// TODO Auto-generated method stub
 		List<ByteString[]> antecedent = new ArrayList<ByteString[]>();
@@ -86,6 +100,7 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 		}
 	}
 	
+	@Override
 	public boolean testConfidenceThresholds(Rule candidate) {
 		boolean addIt = true;
 		
@@ -105,7 +120,8 @@ public class ExistentialRulesHeadVariablesMiningAssistant extends
 			for (int i = ancestors.size() - 2; i >= 0; --i) {
 				if (ancestors.get(i).isClosed() 
 						&& 
-						(candidate.getStdConfidence() <= ancestors.get(i).getStdConfidence() || candidate.getPcaConfidence() <= ancestors.get(i).getPcaConfidence())) {
+						(candidate.getStdConfidence() <= ancestors.get(i).getStdConfidence() 
+						|| candidate.getPcaConfidence() <= ancestors.get(i).getPcaConfidence())) {
 					addIt = false;
 					break;
 				}

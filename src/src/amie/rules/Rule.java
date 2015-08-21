@@ -1225,7 +1225,7 @@ public class Rule {
             return false;
         }
 
-        return EquivalenceChecker2.equal(triples, other.triples);
+        return QueryEquivalenceChecker.equal(triples, other.triples);
     }
 
     public static void printRuleBasicHeaders() {

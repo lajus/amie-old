@@ -39,6 +39,12 @@ public class DefaultMiningAssistant extends MiningAssistant{
 	}
 	
 	@Override
+	public String getDescription() {
+       	return "Default mining assistant that defines support "
+       			+ "by counting support on both head variables";
+	}
+	
+	@Override
 	public void getInitialAtomsFromSeeds(Collection<ByteString> relations, double minCardinality, Collection<Rule> output) {
 		Rule query = new Rule();
 		//The query must be empty
@@ -160,13 +166,13 @@ public class DefaultMiningAssistant extends MiningAssistant{
 								long t1 = System.currentTimeMillis();
 								promisingRelations = kb.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[1]);
 								long t2 = System.currentTimeMillis();
-								if((t2 - t1) > 20000 && !silent)
+								if((t2 - t1) > 20000 && !verbose)
 									System.err.println("countProjectionBindings var=" + newEdge[1] + " "  + query + " has taken " + (t2 - t1) + " ms");
 							}else{
 								long t1 = System.currentTimeMillis();
 								promisingRelations = kb.countProjectionBindings(rewrittenQuery.getHead(), rewrittenQuery.getAntecedent(), newEdge[1]);
 								long t2 = System.currentTimeMillis();
-								if((t2 - t1) > 20000 && !silent)
+								if((t2 - t1) > 20000 && !verbose)
 									System.err.println("countProjectionBindings on rewritten query var=" + newEdge[1] + " "  + rewrittenQuery + " has taken " + (t2 - t1) + " ms");						
 							}
 						} else {
@@ -282,14 +288,14 @@ public class DefaultMiningAssistant extends MiningAssistant{
 					long t1 = System.currentTimeMillis();
 					promisingRelations = this.kb.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[1]);
 					long t2 = System.currentTimeMillis();
-					if((t2 - t1) > 20000 && !silent) {
+					if((t2 - t1) > 20000 && !verbose) {
 						System.err.println("countProjectionBindings var=" + newEdge[1] + " "  + query + " has taken " + (t2 - t1) + " ms");
 					}
 				}else{
 					long t1 = System.currentTimeMillis();
 					promisingRelations = this.kb.countProjectionBindings(rewrittenQuery.getHead(), rewrittenQuery.getAntecedent(), newEdge[1]);
 					long t2 = System.currentTimeMillis();
-					if((t2 - t1) > 20000 && !silent)
+					if((t2 - t1) > 20000 && !verbose)
 					System.err.println("countProjectionBindings on rewritten query var=" + newEdge[1] + " "  + rewrittenQuery + " has taken " + (t2 - t1) + " ms");						
 				}
 				
@@ -437,13 +443,13 @@ public class DefaultMiningAssistant extends MiningAssistant{
 			long t1 = System.currentTimeMillis();		
 			constants = this.kb.countProjectionBindings(rewrittenQuery.getHead(), rewrittenQuery.getAntecedent(), danglingEdge[danglingPosition]);
 			long t2 = System.currentTimeMillis();
-			if((t2 - t1) > 20000 && !silent)
+			if((t2 - t1) > 20000 && !verbose)
 				System.err.println("countProjectionBindings var=" + danglingEdge[danglingPosition] + " in " + query + " (rewritten to " + rewrittenQuery + ") has taken " + (t2 - t1) + " ms");						
 		}else{
 			long t1 = System.currentTimeMillis();		
 			constants = this.kb.countProjectionBindings(query.getHead(), query.getAntecedent(), danglingEdge[danglingPosition]);
 			long t2 = System.currentTimeMillis();
-			if((t2 - t1) > 20000 && !silent)
+			if((t2 - t1) > 20000 && !verbose)
 				System.err.println("countProjectionBindings var=" + danglingEdge[danglingPosition] + " in " + query + " has taken " + (t2 - t1) + " ms");			
 		}
 		
@@ -547,7 +553,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 		long result = this.kb.countDistinctPairs(var1, var2, query.getAntecedent());
 		long t2 = System.currentTimeMillis();	
 		query.setPcaConfidenceRunningTime(t2 - t1);
-		if((t2 - t1) > 20000 && !this.silent)
+		if((t2 - t1) > 20000 && !this.verbose)
 			System.out.println("countPairs vars " + var1 + ", " + var2 + " in " + KB.toString(query.getAntecedent()) + " has taken " + (t2 - t1) + " ms");		
 		
 		return result;
@@ -569,7 +575,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 		long result = this.kb.countDistinctPairs(var1, var2, antecedent);
 		long t2 = System.currentTimeMillis();
 		query.setConfidenceRunningTime(t2 - t1);
-		if((t2 - t1) > 20000 && !this.silent)
+		if((t2 - t1) > 20000 && !this.verbose)
 			System.out.println("countPairs vars " + var1 + ", " + var2 + " in " + KB.toString(antecedent) + " has taken " + (t2 - t1) + " ms");		
 		
 		return result;		

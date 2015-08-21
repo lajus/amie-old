@@ -17,6 +17,11 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 		super(dataSource);
 	}
 	
+	public String getDescription() {
+        return "Counting on one variable. "
+        		+ "Head relation is always instantiated in one argument";
+	}
+	
 	@Override
 	public void getInitialAtomsFromSeeds(Collection<ByteString> relations, double minCardinality, Collection<Rule> output) {
 		Rule query = new Rule();

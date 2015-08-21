@@ -1,5 +1,8 @@
 package amie.mining.assistant;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javatools.datatypes.ByteString;
 import amie.data.KB;
 import amie.data.U;
@@ -19,7 +22,24 @@ public class RelationSignatureDefaultMiningAssistant extends DefaultMiningAssist
 	 */
 	public RelationSignatureDefaultMiningAssistant(KB dataSource) {
 		super(dataSource);
+        List<ByteString> excludedRelationsSignatured = Arrays.asList(ByteString.of("rdf:type"),
+                ByteString.of("rdfs:domain"), ByteString.of("rdfs:range"));
+        bodyExcludedRelations = excludedRelationsSignatured;
+        headExcludedRelations = excludedRelationsSignatured;
 	}
+	
+	@Override
+	public String getDescription() {
+        return "Counting on both head variables and "
+        		+ "using relation signatures (domain and range types) "
+        		+ "[EXPERIMENTAL]";
+	}
+	
+	@Override
+	public void setHeadExcludedRelations(java.util.Collection<ByteString> headExcludedRelations) {};
+	
+	@Override
+	public void setBodyExcludedRelations(java.util.Collection<ByteString> excludedRelations) {};
 	
 	@Override
 	public boolean testConfidenceThresholds(Rule candidate) {

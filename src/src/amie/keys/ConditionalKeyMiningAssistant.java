@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package amie.mining.assistant.experimental;
+package amie.keys;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.util.List;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import amie.data.KB;
-import amie.keys.NonKeysGraph;
+import amie.keys.assistant.KeyMinerMiningAssistant;
 import amie.rules.Rule;
 
 /**
@@ -32,6 +32,12 @@ public class ConditionalKeyMiningAssistant extends KeyMinerMiningAssistant {
         nonKeys = new ArrayList<List<ByteString>>();
         propertyCombinations = new NonKeysGraph(nonKeysFile);
         System.out.println(propertyCombinations);
+    }
+    
+    public String getDescription() {
+        return "Mining conditional keys of the form "
+        		+ "firstName(x,y)^firstName(x',y)^lastName(x,\"Symeonidou\")^"
+        		+ "lastName(x',\"Symeonidou\")=> equals(x,x')";
     }
     
 

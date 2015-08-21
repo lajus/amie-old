@@ -16,6 +16,12 @@ public class FullRelationSignatureMiningAssistant extends DefaultMiningAssistant
 		bodyExcludedRelations = Arrays.asList(ByteString.of("<rdf:type>"));
 	}
 	
+	@Override
+	public String getDescription() {
+        return "Rules of the form type(x, C) r(x, y) => type(y, C') "
+        		+ "or type(y, C) r(x, y) => type(x, C')";
+	}
+	
 	public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output) {		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		ByteString rdfType = ByteString.of("rdf:type");

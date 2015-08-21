@@ -1,4 +1,4 @@
-package test;
+package amie.keys;
 
 import java.io.FileWriter;
 import java.io.IOException;

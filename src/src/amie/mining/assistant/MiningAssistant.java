@@ -128,7 +128,7 @@ public class MiningAssistant{
 	/**
 	 * If true, the assistant will output minimal debug information
 	 */
-	protected boolean silent;
+	protected boolean verbose;
 		
 	/**
 	 * If true, the assistant will never add atoms of the form type(x, y), i.e., it will always bind 
@@ -180,7 +180,7 @@ public class MiningAssistant{
 		subclassPattern[1] = subPropertyString;
 		this.subclassQuery = new Rule(subclassPattern, 0);
 		this.countAlwaysOnSubject = false;
-		this.silent = true;
+		this.verbose = true;
 		this.exploitMaxLengthOption = true;
 		this.enableQueryRewriting = true;
 		this.enablePerfectRules = true;
@@ -189,6 +189,9 @@ public class MiningAssistant{
 		
 	}	
 	
+	/**
+	 * Builds a dictionary with the relations and their sizes.
+	 */
 	private void buildRelationsDictionary() {
 		Collection<ByteString> relations = kb.getRelations();
 		for (ByteString relation : relations) {
@@ -285,13 +288,25 @@ public class MiningAssistant{
 		return kbSchema;
 	}
 	
+	/**
+	 * Brief description of the MiningAssistant capabilities.
+	 */
+	public String getDescription() {
+		 if (countAlwaysOnSubject) {
+             return "Counting on the subject variable of the head relation";
+         } else {
+             return "Counting on the most functional variable of the head relation";
+         }
+	}
+	
 	public void setKbSchema(KB schemaSource) {
 		// TODO Auto-generated method stub
 		this.kbSchema = schemaSource;
 	}
 
 	public boolean registerHeadRelation(Rule query){		
-		return headCardinalities.put(query.getHeadRelation(), new Double(query.getSupport())) == null;		
+		return headCardinalities.put(query.getHeadRelation(), 
+				new Double(query.getSupport())) == null;		
 	}
 	
 	public long getHeadCardinality(Rule query){
@@ -680,16 +695,16 @@ public class MiningAssistant{
 		if(hardQueryInfo != null){
 			double pcaConfUpperBound = getPcaConfidenceUpperBound(candidate);			
 			if(pcaConfUpperBound < this.minPcaConfidence){
-				if (!silent) {
+				if (!verbose) {
 					System.err.println("Query " + candidate + " discarded by PCA confidence upper bound " + pcaConfUpperBound);			
 				}
 				return false;
 			}
 			
-			double stdConfUpperBound = getConfidenceUpperBound(candidate);			
+			double stdConfUpperBound = getStdConfidenceUpperBound(candidate);			
 			
 			if(stdConfUpperBound < this.minStdConfidence){
-				if (!silent) {
+				if (!verbose) {
 					System.err.println("Query " + candidate + " discarded by standard confidence upper bound " + stdConfUpperBound);
 				}
 				return false;
@@ -752,7 +767,7 @@ public class MiningAssistant{
 		double estimatedPCA = (double)candidate.getSupport() / denominator;
 		candidate.setPcaEstimation(estimatedPCA);
 		if (estimatedPCA < this.minPcaConfidence) {
-			if (!this.silent) {
+			if (!this.verbose) {
 				System.err.println("Query " + candidate + " discarded by functionality heuristic with ratio " + estimatedPCA);
 			}							
 			return false;
@@ -842,7 +857,7 @@ public class MiningAssistant{
 				ratio = (double)candidate.getSupport() / ratio;
 				candidate.setPcaEstimation(ratio);
 				if(ratio < minPcaConfidence) { 
-					if (!silent) {
+					if (!verbose) {
 						System.err.println("Query " + candidate + " discarded by functionality heuristic with ratio " + ratio);
 					}							
 					return false;
@@ -934,7 +949,12 @@ public class MiningAssistant{
 		return rule.getSupport() / denominator;
 	}
 
-	private double getConfidenceUpperBound(Rule query) {
+	/**
+	 * It computes a standard confidence upper bound for the rule.
+	 * @param query
+	 * @return
+	 */
+	private double getStdConfidenceUpperBound(Rule query) {
 		int[] hardCaseInfo = kb.identifyHardQueryTypeI(query.getAntecedent());
 		double denominator = 0.0;
 		ByteString[] triple = new ByteString[3];
@@ -966,13 +986,15 @@ public class MiningAssistant{
 	protected void getInstantiatedAtoms(Rule queryWithDanglingEdge, Rule parentQuery, 
 			int danglingAtomPosition, int danglingPositionInEdge, double minSupportThreshold, Collection<Rule> output) {
 		ByteString[] danglingEdge = queryWithDanglingEdge.getTriples().get(danglingAtomPosition);
-		IntHashMap<ByteString> constants = kb.frequentBindingsOf(danglingEdge[danglingPositionInEdge], queryWithDanglingEdge.getFunctionalVariable(), queryWithDanglingEdge.getTriples());
+		IntHashMap<ByteString> constants = kb.frequentBindingsOf(danglingEdge[danglingPositionInEdge], 
+				queryWithDanglingEdge.getFunctionalVariable(), queryWithDanglingEdge.getTriples());
 		for(ByteString constant: constants){
 			int cardinality = constants.get(constant);
 			if(cardinality >= minSupportThreshold){
 				ByteString[] lastPatternCopy = queryWithDanglingEdge.getLastTriplePattern().clone();
 				lastPatternCopy[danglingPositionInEdge] = constant;
-				Rule candidate = queryWithDanglingEdge.instantiateConstant(danglingPositionInEdge, constant, cardinality);
+				Rule candidate = queryWithDanglingEdge.instantiateConstant(danglingPositionInEdge, 
+						constant, cardinality);
 
 				if(candidate.getRedundantAtoms().isEmpty()){
 					candidate.setHeadCoverage((double)cardinality / headCardinalities.get(candidate.getHeadRelation()));
@@ -1005,6 +1027,7 @@ public class MiningAssistant{
 	
 	/**
 	 * It computes the PCA confidence of the given rule based on the evidence in database.
+	 * The value is both returned and set to the rule
 	 * @param rule
 	 * @return
 	 */
@@ -1041,6 +1064,12 @@ public class MiningAssistant{
 		return rule.getPcaConfidence();
 	}
 	
+	/**
+	 * It computes the standard confidence of the given rule based on the evidence in database.
+	 * The value is both returned and set to the rule
+	 * @param rule
+	 * @return
+	 */
 	public double computeStandardConfidence(Rule candidate) {
 		// Calculate confidence
 		long denominator = 0;
@@ -1081,16 +1110,10 @@ public class MiningAssistant{
 		this.bodyExcludedRelations = excludedRelations;
 	}
 	
-	/**
-	 * @return the headExcludedRelations
-	 */
 	public Collection<ByteString> getHeadExcludedRelations() {
 		return headExcludedRelations;
 	}
 
-	/**
-	 * @param headExcludedRelations the headExcludedRelations to set
-	 */
 	public void setHeadExcludedRelations(
 			Collection<ByteString> headExcludedRelations) {
 		this.headExcludedRelations = headExcludedRelations;
@@ -1132,46 +1155,29 @@ public class MiningAssistant{
 		return kb.size();
 	}
 
-	/**
-	 * @return the enabledFunctionalityHeuristic
-	 */
 	public boolean isEnabledFunctionalityHeuristic() {
 		return enabledFunctionalityHeuristic;
 	}
 
-	/**
-	 * @param enabledFunctionalityHeuristic the enabledFunctionalityHeuristic to set
-	 */
 	public void setEnabledFunctionalityHeuristic(boolean enableOptimizations) {
 		this.enabledFunctionalityHeuristic = enableOptimizations;
 	}
 
-	/**
-	 * @return the enabledConfidenceUpperBounds
-	 */
 	public boolean isEnabledConfidenceUpperBounds() {
 		return enabledConfidenceUpperBounds;
 	}
 
-	/**
-	 * @param enabledConfidenceUpperBounds the enabledConfidenceUpperBounds to set
-	 */
 	public void setEnabledConfidenceUpperBounds(boolean enabledConfidenceUpperBounds) {
 		this.enabledConfidenceUpperBounds = enabledConfidenceUpperBounds;
 	}
 
-	/**
-	 * @return the silent
-	 */
-	public boolean isSilent() {
-		return silent;
+
+	public boolean isVerbose() {
+		return verbose;
 	}
 
-	/**
-	 * @param silent the silent to set
-	 */
-	public void setSilent(boolean silent) {
-		this.silent = silent;
+	public void setVerbose(boolean silent) {
+		this.verbose = silent;
 	}
 
 	public boolean isExploitMaxLengthOption() {

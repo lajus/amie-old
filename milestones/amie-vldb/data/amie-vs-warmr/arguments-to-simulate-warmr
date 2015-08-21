@@ -1,0 +1,1 @@
+-minpca 0 -caos -pm support -minis 5 -mins 5  -bias amie.mining.assistant.experimental.SeedsCountMiningAssistant /home/galarrag/workspace/AMIE/Data/yago2/sample-final/yago2core.10kseedsSample.decoded.compressed.notypes.tsv  :s/home/galarrag/workspace/AMIE/Data/yago2/sample-final/yago2core.10kseeds.decoded.compressed.notypes.tsv

@@ -29,6 +29,12 @@ public class TypedDefaultMiningAssistant extends DefaultMiningAssistant {
 	public TypedDefaultMiningAssistant(KB dataSource) {
 		super(dataSource);
 	}
+	
+	@Override
+	public String getDescription() {
+        return "Counting on both head variables and using "
+        		+ "all available data types [EXPERIMENTAL]";
+	}
 		
 	/**
 	 * Returns all candidates obtained by adding a new triple pattern to the query

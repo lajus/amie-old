@@ -1,4 +1,4 @@
-package amie.tests;
+package amie.data.utils;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,12 +9,29 @@ import java.util.Map;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.parser.NxParser;
 
+/**
+ * It takes a wikidata file containing ids and outputs a more human readable version
+ * that combines ids and entity labels.
+ * 
+ * @author galarrag
+ *
+ */
 public class WikidataCleaner {
 	
 	public static final String labelProperty = "http://www.w3.org/2000/01/rdf-schema#label";
 	
 	public static final String wikidataPrefix = "http://www.wikidata.org/entity/";
 
+	/**
+	 * It parses a .nt file and returns a dictionary where the keys are Wikidata entity ids
+	 * and the values are strings that combine the entity id with a text representation of 
+	 * the entity. If entity i5 has label "Barack Obama", this produces a dictionary entry of
+	 * the form i5 : <i5_Barack_Obama>
+	 * @param fileName
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
 	public static Map<String, String> idsToNames(String fileName) throws FileNotFoundException, IOException {
 		NxParser nxp = new NxParser(new FileInputStream(fileName), false);
 		Map<String, String> resultMap = new HashMap<String, String>();
@@ -35,7 +52,19 @@ public class WikidataCleaner {
 		return resultMap;
 	}
 	
-	private static void cleanWikidata(String file, Map<String, String> relationsMap, Map<String, String> entitiesMap) 
+	/**
+	 * Given a wikidata file (triples subject, predicate, object), containing obscure ids for entities and relations,
+	 * it returns a more human readable version of the KB where the ids are replaced by strings of the form
+	 * id_[human_readable_name]. The replacement strings are stored in the maps sents as arguments.
+	 * @param file
+	 * @param relationsMap
+	 * @param entitiesMap
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private static void cleanWikidata(String file, 
+			Map<String, String> relationsMap, 
+			Map<String, String> entitiesMap) 
 			throws FileNotFoundException, IOException {
 		NxParser nxp = new NxParser(new FileInputStream(file), false);
 		
@@ -63,6 +92,5 @@ public class WikidataCleaner {
 		Map<String, String>	entitiesMap = idsToNames(args[1]);
 		// Parse the big file
 		cleanWikidata(args[2], relationsMap, entitiesMap);
-	
 	}
 }
