@@ -155,7 +155,11 @@ public class KB {
 		}
 	}
 
-	/** Adds a fact */
+	/**
+	 * Adds a fact to the KB
+	 * @param fact
+	 * @return TRUE if the KB was changed, i.e., the fact did not exist before.
+	 */
 	public boolean add(CharSequence... fact) {
 		if (fact.length == 3) {
 			return (add(compress(fact[0]), compress(fact[1]), compress(fact[2])));
@@ -167,6 +171,11 @@ public class KB {
 			
 	}
 
+	/**
+	 * Adds a fact to the KB
+	 * @param fact
+	 * @return TRUE if the KB was changed, i.e., the fact did not exist before.
+	 */
 	public boolean add(ByteString... fact) {
 		if (fact.length == 3) {
 			return add(fact[0], fact[1], fact[2]);
@@ -177,6 +186,13 @@ public class KB {
 		}
 	}
 
+	/**
+	 * Adds a fact to the KB
+	 * @param subject
+	 * @param relation
+	 * @param object
+	 * @return TRUE if the KB was changed, i.e., the fact did not exist before.
+	 */	
 	protected boolean add(ByteString subject, ByteString relation, ByteString object) {
 		if (!add(subject, relation, object, subject2predicate2object))
 			return (false);
@@ -423,7 +439,8 @@ public class KB {
 	
 	/**
 	 * It loads the contents of the given file into the in-memory database.
-	 * @param files
+	 * @param f
+	 * @param message
 	 * @throws IOException
 	 */
 	protected void load(File f, String message)
@@ -543,7 +560,8 @@ public class KB {
 	
 	/**
 	 * It returns the functionality or the inverse functionality of a relation.
-	 * @param inverse If true, the method returns the inverse functionality, otherwise
+	 * @param relation
+	 * @param inversed If true, the method returns the inverse functionality, otherwise
 	 * it returns the standard functionality.
 	 * @return
 	 */
@@ -556,7 +574,7 @@ public class KB {
 	
 	/**
 	 * It returns the functionality or the inverse functionality of a relation.
-	 * @param inverse If true, the method returns the functionality of a relation,
+	 * @param inversed If true, the method returns the functionality of a relation,
 	 * otherwise it returns the inverse functionality.
 	 * @return
 	 */
@@ -693,7 +711,7 @@ public class KB {
 	/**
 	 * It returns the second and third level values of a map given the keys for the first
 	 * level.  
-	 * @param key1
+	 * @param key
 	 * @param map A 3-level map 
 	 * @return
 	 * */
@@ -2557,7 +2575,12 @@ public class KB {
 			.compile("(\\??\\w+|<[-_\\w\\p{L}/:–'.\\(\\),]+>)\\s+(<?[-_\\w:\\.]+>?)\\s+(\"?[-_\\w\\s,'.–:]+\"?(@\\w+)?|\\??\\w+|<?[-_\\w\\p{L}/:–'.\\(\\)\\\"\\^,]+>?)");
 
 
-	/** Parses a triple of the form r(x,y) */
+	/** 
+	 * Parses a triple of the form r(x,y) and turns into a triple
+	 * of the form [x, r, y]
+	 * @param s
+	 * @return
+	 **/
 	public static ByteString[] triple(String s) {
 		Matcher m = triplePattern.matcher(s);
 		if (m.find())
@@ -2568,7 +2591,12 @@ public class KB {
 		return (null);
 	}
 
-	/** Parses a query */
+	/** 
+	 * It parses a Datalog query with atoms of the form r(x,y) and turns into a list of
+	 * AMIE triples of the form [x, r, y].
+	 * @param s
+	 * @return
+	 **/
 	public static ArrayList<ByteString[]> triples(String s) {
 		Matcher m = triplePattern.matcher(s);
 		ArrayList<ByteString[]> result = new ArrayList<>();
@@ -2583,8 +2611,10 @@ public class KB {
 	}
 
 	/**
-	 * Parses a rule of the form triple & triple & ... => triple or triple :-
-	 * triple & triple & ...
+	 * Parses a rule of the form triple &amp; triple &amp; ... =&gt; triple or triple :-
+	 * triple &amp; triple &amp; ...
+	 * @return A pair where the first element is the list of body atoms (left-hand side 
+	 * of the rule) and the second element is triple pattern, the head of the rule.
 	 */
 	public static Pair<List<ByteString[]>, ByteString[]> rule(String s) {
 		List<ByteString[]> triples = triples(s);
@@ -2599,6 +2629,14 @@ public class KB {
 		return (null);
 	}
 	
+	/**
+	 * It returns all the bindings of the projection variable that match
+	 * the antecedent but not the head.
+	 * @param projectionVariable
+	 * @param antecedent
+	 * @param head
+	 * @return
+	 */
 	public Set<ByteString> difference(CharSequence projectionVariable,
 			List<? extends CharSequence[]> antecedent, CharSequence[] head) {
 		List<CharSequence[]> headList = new ArrayList<>();
@@ -2637,7 +2675,7 @@ public class KB {
 	 * @param var1
 	 * @param var2
 	 * @param antecedent
-	 * @param headList
+	 * @param head
 	 * @return
 	 */
 	public Map<ByteString, IntHashMap<ByteString>> difference(CharSequence var1,
@@ -2651,7 +2689,7 @@ public class KB {
 	 * @param var1
 	 * @param var2
 	 * @param antecedent
-	 * @param headList
+	 * @param head
 	 * @return
 	 */
 	public Map<ByteString, IntHashMap<ByteString>> difference(ByteString var1,
@@ -2670,7 +2708,7 @@ public class KB {
 	 * @param var1
 	 * @param var2
 	 * @param antecedent
-	 * @param headList
+	 * @param head
 	 * @return
 	 */
 	public Map<ByteString, IntHashMap<ByteString>> differenceNoVarsInCommon(CharSequence var1,
@@ -2771,7 +2809,7 @@ public class KB {
 	 * @param var2
 	 * @param var3
 	 * @param antecedent
-	 * @param headList
+	 * @param head
 	 * @return
 	 */
 	public Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> difference(
@@ -2788,7 +2826,7 @@ public class KB {
 	 * @param var2
 	 * @param var3
 	 * @param antecedent
-	 * @param headList
+	 * @param head
 	 * @return
 	 */
 	public Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> difference(
@@ -3161,7 +3199,6 @@ public class KB {
 	
 	/**
 	 * It outputs statistical information about the KB.
-	 * @param db
 	 * @param detailRelations If true, print also information about the relations
 	 */
 	public void summarize(boolean detailRelations) {

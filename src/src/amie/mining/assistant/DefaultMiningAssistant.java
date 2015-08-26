@@ -93,34 +93,33 @@ public class DefaultMiningAssistant extends MiningAssistant{
 	
 	/**
 	 * Returns all candidates obtained by adding a closing edge (an edge with two existing variables).
-	 * @param currentNode
+	 * @param rule
 	 * @param minSupportThreshold
-	 * @param omittedVariables
-	 * @return
+	 * @param output
 	 */
-	public void getClosingAtoms(Rule query, double minSupportThreshold, Collection<Rule> output) {
+	public void getClosingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
 		if (this.enforceConstants) {
 			return;
 		}
 		
-		int nPatterns = query.getTriples().size();
+		int nPatterns = rule.getTriples().size();
 
-		if(query.isEmpty())
+		if(rule.isEmpty())
 			return;
 		
-		if(!testLength(query))
+		if(!testLength(rule))
 			return;
 		
 		List<ByteString> sourceVariables = null;
 		List<ByteString> targetVariables = null;
-		List<ByteString> openVariables = query.getOpenVariables();
-		List<ByteString> allVariables = query.getVariables();
+		List<ByteString> openVariables = rule.getOpenVariables();
+		List<ByteString> allVariables = rule.getVariables();
 		
 		if (allVariables.size() < 2) {
 			return;
 		}
 		
-		if(query.isClosed()){
+		if(rule.isClosed()){
 			sourceVariables = allVariables;
 			targetVariables = allVariables;
 		}else{
@@ -129,7 +128,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 				if (this.exploitMaxLengthOption) {
 					// Pruning by maximum length for the \mathcal{O}_C operator.
 					if (sourceVariables.size() > 2 
-							&& query.getRealLength() == this.maxDepth - 1) {
+							&& rule.getRealLength() == this.maxDepth - 1) {
 						return;
 					}
 				}
@@ -142,7 +141,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 		Pair<Integer, Integer>[] varSetups = new Pair[2];
 		varSetups[0] = new Pair<Integer, Integer>(0, 2);
 		varSetups[1] = new Pair<Integer, Integer>(2, 0);
-		ByteString[] newEdge = query.fullyUnboundTriplePattern();
+		ByteString[] newEdge = rule.fullyUnboundTriplePattern();
 		ByteString relationVariable = newEdge[1];
 		
 		for(Pair<Integer, Integer> varSetup: varSetups){			
@@ -158,16 +157,16 @@ public class DefaultMiningAssistant extends MiningAssistant{
 					if(!variable.equals(sourceVariable)){
 						newEdge[closeCirclePosition] = variable;
 						
-						query.getTriples().add(newEdge);
+						rule.getTriples().add(newEdge);
 						IntHashMap<ByteString> promisingRelations = null;
 						if (this.enabledFunctionalityHeuristic && this.enableQueryRewriting) {
-							Rule rewrittenQuery = rewriteProjectionQuery(query, nPatterns, closeCirclePosition);
+							Rule rewrittenQuery = rewriteProjectionQuery(rule, nPatterns, closeCirclePosition);
 							if(rewrittenQuery == null){
 								long t1 = System.currentTimeMillis();
-								promisingRelations = kb.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[1]);
+								promisingRelations = kb.countProjectionBindings(rule.getHead(), rule.getAntecedent(), newEdge[1]);
 								long t2 = System.currentTimeMillis();
 								if((t2 - t1) > 20000 && !verbose)
-									System.err.println("countProjectionBindings var=" + newEdge[1] + " "  + query + " has taken " + (t2 - t1) + " ms");
+									System.err.println("countProjectionBindings var=" + newEdge[1] + " "  + rule + " has taken " + (t2 - t1) + " ms");
 							}else{
 								long t1 = System.currentTimeMillis();
 								promisingRelations = kb.countProjectionBindings(rewrittenQuery.getHead(), rewrittenQuery.getAntecedent(), newEdge[1]);
@@ -176,9 +175,9 @@ public class DefaultMiningAssistant extends MiningAssistant{
 									System.err.println("countProjectionBindings on rewritten query var=" + newEdge[1] + " "  + rewrittenQuery + " has taken " + (t2 - t1) + " ms");						
 							}
 						} else {
-							promisingRelations = this.kb.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[1]);
+							promisingRelations = this.kb.countProjectionBindings(rule.getHead(), rule.getAntecedent(), newEdge[1]);
 						}
-						query.getTriples().remove(nPatterns);
+						rule.getTriples().remove(nPatterns);
 						List<ByteString> listOfPromisingRelations = promisingRelations.decreasingKeys();
 						for(ByteString relation: listOfPromisingRelations){
 							int cardinality = promisingRelations.get(relation);
@@ -187,7 +186,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 							}
 							
 							// Language bias test
-							if (query.cardinalityForRelation(relation) >= this.recursivityLimit) {
+							if (rule.cardinalityForRelation(relation) >= this.recursivityLimit) {
 								continue;
 							}
 							
@@ -203,11 +202,11 @@ public class DefaultMiningAssistant extends MiningAssistant{
 							
 							//Here we still have to make a redundancy check							
 							newEdge[1] = relation;
-							Rule candidate = query.addAtom(newEdge, cardinality);
+							Rule candidate = rule.addAtom(newEdge, cardinality);
 							if(!candidate.isRedundantRecursive()){
 								candidate.setHeadCoverage((double)cardinality / (double)this.headCardinalities.get(candidate.getHeadRelation()));
 								candidate.setSupportRatio((double)cardinality / (double)this.kb.size());
-								candidate.setParent(query);
+								candidate.setParent(rule);
 								output.add(candidate);
 							}
 						}
@@ -222,9 +221,9 @@ public class DefaultMiningAssistant extends MiningAssistant{
 	
 	/**
 	 * Returns all candidates obtained by adding a new triple pattern to the query
-	 * @param queryand will therefore predict too many new facts with scarce evidence, 
+	 * @param query and will therefore predict too many new facts with scarce evidence, 
 	 * @param minCardinality
-	 * @return
+	 * @param output
 	 */
 	public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output) {		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
@@ -420,7 +419,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 
 	/**
 	 * Application of the "Add instantiated atom" operator. It takes a rule of the form
-	 * r(x, w) ^ ..... => rh(x, y), where r(x, w) is recently added atom and adds to the
+	 * r(x, w) ^ ..... =&gt; rh(x, y), where r(x, w) is recently added atom and adds to the
 	 * output all the derived rules where "w" is bound to a constant that keeps the whole
 	 * pattern above the minCardinality threshold.
 	 * @param query
@@ -484,7 +483,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 	 * It identifies redundant patterns in queries and rewrites them accordingly 
 	 * so that they become less expensive to evaluate. This function targets exclusively queries
 	 * of the form: 
-	 * r(x, z) r(x, w) => r'(x, y)
+	 * r(x, z) r(x, w) =&gt; r'(x, y)
 	 * where the newly added atom r(x, z) does not really make the query more selective and it is
 	 * therefore redundant.
 	 * @param query

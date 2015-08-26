@@ -21,7 +21,7 @@ import javatools.datatypes.IntHashMap;
 import amie.data.KB;
 
 /**
- * A class that represents Horn rules of the form A => B where A is a conjunction of binary atoms
+ * A class that represents Horn rules of the form A =&gt; B where A is a conjunction of binary atoms
  * of the form r(x, y). Each atom is represented as a triple [x, r, y] (subject, relation, object).
  * @author lgalarra
  *
@@ -279,7 +279,7 @@ public class Rule {
     }
 
     /**
-     * Instantiates a rule of the form [] => r(?a, ?b) with empty body
+     * Instantiates a rule of the form [] =&gt; r(?a, ?b) with empty body
      * and the given pattern as rule. 
      * @param headAtom The head atom as an array of the form [?a, r, ?b].
      * @param cardinality
@@ -421,7 +421,7 @@ public class Rule {
     }
 
     /**
-     * Returns the head of a query B => r(a, b) as a triple [?a, r, ?b]. 
+     * Returns the head of a query B =&gt; r(a, b) as a triple [?a, r, ?b]. 
      * @return
      */
     public ByteString[] getHead() {
@@ -429,7 +429,7 @@ public class Rule {
     }
 
     /**
-     * Returns the head of a query B => r(a, b) as a triple [?a, r, ?b]. 
+     * Returns the head of a query B =&gt; r(a, b) as a triple [?a, r, ?b]. 
      * Alias for the method getHead().
      * @return
      */
@@ -527,15 +527,15 @@ public class Rule {
     }
 
     /**
-     * @param headBodyCount the headBodyCount to set
+     * @param cardinality the headBodyCount to set
      */
     public void setSupport(double cardinality) {
         this.support = cardinality;
     }
 
     /**
-     * The support of the body of the rule. If the rule has the form B => r(x,
-     * y) then the body size is support(B).
+     * The support of the body of the rule. If the rule has the form B =&gt; r(x,y) 
+     * then the body size is support(B).
      *
      * @return
      */
@@ -684,9 +684,8 @@ public class Rule {
     }
 
     /**
-     * Look for the redundant atoms with respect to the given atom
-     *
-     * @param newAtom
+     * Look for the redundant atoms with respect to a reference atom
+     * @param withRespectToIdx The index of the reference atom
      * @return
      */
     public List<ByteString[]> getRedundantAtoms(int withRespectToIdx) {
@@ -705,9 +704,7 @@ public class Rule {
     }
 
     /**
-     * Checks whether the last atom in the query is redundant
-     *
-     * @param newAtom
+     * Checks whether the last atom in the query is redundant.
      * @return
      */
     public List<ByteString[]> getRedundantAtoms() {
@@ -746,8 +743,8 @@ public class Rule {
 
     /**
      * Determines if the second argument is unifiable to the first one.
-     * Unifiable means there is a valid unification mapping (variable ->
-     * variable, variable -> constant) between the components of the triple
+     * Unifiable means there is a valid unification mapping (variable -&gt;
+     * variable, variable -&gt; constant) between the components of the triple
      * pattern
      *
      * @param pattern
@@ -868,7 +865,7 @@ public class Rule {
     /**
      * Returns a list with all the different variables in the query.
      *
-     * @return List<ByteString>
+     * @return 
      */
     public List<ByteString> getVariables() {
         List<ByteString> variables = new ArrayList<ByteString>();
@@ -1533,7 +1530,7 @@ public class Rule {
     }
 
     /**
-     * For rules with an even number of atoms (n > 2), it checks if it contains
+     * For rules with an even number of atoms (n &gt; 2), it checks if it contains
      * level 2 redundant subgraphs, that is, each relation occurs exactly twice
      * in the rule.
      *
@@ -1642,8 +1639,8 @@ public class Rule {
      * Applies the mappings provided as first argument to the subject and object
      * positions of the query included in the second argument.
      *
-     * @param query
      * @param mappings
+     * @param inputTriples 
      */
     public static void bind(Map<ByteString, ByteString> mappings,
             List<ByteString[]> inputTriples) {
@@ -1720,10 +1717,10 @@ public class Rule {
     }
 
     /**
-     * Given a list of rules A1 => X1, ... An => Xn, having the same head
-     * relation, it returns the combined rule A1,..., An => X', where X' is the
-     * most specific atom. For example given the rules A1 => livesIn(x, y) and
-     * A2 => livesIn(x, USA), the method returns A1, A2 => livesIn(x, USA).
+     * Given a list of rules A1 =&gt; X1, ... An =&gt; Xn, having the same head
+     * relation, it returns the combined rule A1,..., An =&gt; X', where X' is the
+     * most specific atom. For example given the rules A1 =&gt; livesIn(x, y) and
+     * A2 =&gt; livesIn(x, USA), the method returns A1, A2 =&gt; livesIn(x, USA).
      *
      * @param rules
      * @return
@@ -1832,8 +1829,8 @@ public class Rule {
      * returns the combinations of atoms of size 'i' that are "parents" of the
      * current rule, i.e., subsets of atoms of the original rule.
      *
-     * @param queryPattern
-     * @param i
+     * @param antecedent
+     * @param head
      */
     public static void getParentsOfSize(List<ByteString[]> antecedent,
             ByteString[] head,
@@ -1859,9 +1856,9 @@ public class Rule {
     /**
      * It determines whether the rule contains a single path that connects the
      * head variables in the body. For example, the rule: - worksAt(x, w),
-     * locatedInCity(w, z), locatedInCountry(z, y) => livesIn(x, y) meets such
+     * locatedInCity(w, z), locatedInCountry(z, y) =&gt; livesIn(x, y) meets such
      * criteria because there is a single path of variables that connects the
-     * head variables in the body: x -> w -> z -> y.
+     * head variables in the body: x -&gt; w -&gt; z -&gt; y.
      *
      * @return
      */
@@ -1899,6 +1896,12 @@ public class Rule {
         return true;
     }
 
+    /**
+     * Returns true if the given expression (variable or constant) occurs in
+     * the rule's head.
+     * @param expression
+     * @return
+     */
     private boolean occursInHead(ByteString expression) {
         ByteString[] head = getHead();
         return expression.equals(head[0]) || expression.equals(head[2]);
@@ -1907,10 +1910,9 @@ public class Rule {
     /**
      * Returns an array with the variables that occur in the body but not in the
      * head.
-     *
      * @return
      */
-    private Set<ByteString> getBodyVariables() {
+    public Set<ByteString> getBodyVariables() {
         List<ByteString> headVariables = getHeadVariables();
         Set<ByteString> result = new LinkedHashSet<>();
         for (ByteString[] triple : getBody()) {
@@ -2001,8 +2003,8 @@ public class Rule {
      * Given 2 atoms joining in at least one variable, it returns the first
      * pairs of variable positions of each atom.
      *
-     * @param r1
-     * @param rh
+     * @param a1
+     * @param a2
      * @return
      */
     public static int[] joinPositions(ByteString[] a1, ByteString[] a2) {

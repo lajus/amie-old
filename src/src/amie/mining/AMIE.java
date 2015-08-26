@@ -37,14 +37,13 @@ import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
 import amie.mining.assistant.MiningAssistant;
 import amie.mining.assistant.RelationSignatureDefaultMiningAssistant;
-import amie.mining.assistant.experimental.HeadVariablesImprovedMiningAssistant;
 import amie.rules.QueryEquivalenceChecker;
 import amie.rules.Rule;
 
 /**
  * Main class that implements the AMIE algorithm for rule mining 
  * on ontologies. The ontology must be provided as a list of TSV files
- * where each line has the format SUBJECT<TAB>RELATION<TAB>OBJECT.
+ * where each line has the format SUBJECT&lt;TAB&gt;RELATION&lt;TAB&gt;OBJECT.
  * 
  * @author lgalarra
  *
@@ -232,12 +231,9 @@ public class AMIE {
     
 
     /**
-     * The key method which returns a set of rules mined from the KB.
+     * The key method which returns a set of rules mined from the KB based on 
+     * the AMIE object's configuration.
      *
-     * @param realTime If true, the rules are printed as they are discovered,
-     * otherwise they are just returned.
-     * @param seeds A collection of target head relations. If empty, the methods
-     * considers all possible head relations in the KB.
      * @return
      * @throws Exception
      */
@@ -640,7 +636,7 @@ public class AMIE {
      * @return
      */
     public static AMIE getVanillaSettingInstance(KB db) {
-        return new AMIE(new HeadVariablesImprovedMiningAssistant(db),
+        return new AMIE(new DefaultMiningAssistant(db),
                 100, // Do not look at relations smaller than 100 facts 
                 0.01, // Head coverage 1%
                 Metric.HeadCoverage,
@@ -656,7 +652,7 @@ public class AMIE {
      * @return
      */
     public static AMIE getVanillaSettingInstance(KB db, double minPCAConfidence) {
-        HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(db);
+        DefaultMiningAssistant miningAssistant = new DefaultMiningAssistant(db);
         miningAssistant.setPcaConfidenceThreshold(minPCAConfidence);
         return new AMIE(miningAssistant,
                 100, // Do not look at relations smaller than 100 facts 
@@ -674,7 +670,7 @@ public class AMIE {
      * @return
      */
     public static AMIE getLossyVanillaSettingInstance(KB db, double minPCAConfidence, int startSupport) {
-        HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(db);
+        DefaultMiningAssistant miningAssistant = new DefaultMiningAssistant(db);
         miningAssistant.setPcaConfidenceThreshold(minPCAConfidence);
         miningAssistant.setEnabledConfidenceUpperBounds(true);
         miningAssistant.setEnabledFunctionalityHeuristic(true);
@@ -690,11 +686,11 @@ public class AMIE {
      * optimize for runtime but that could in principle omit some rules that should be mined.
      * @param db
      * @param minPCAConfidence
-     * @param startSupport
+     * @param minSupport
      * @return
      */
     public static AMIE getLossyInstance(KB db, double minPCAConfidence, int minSupport) {
-        HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(db);
+        DefaultMiningAssistant miningAssistant = new DefaultMiningAssistant(db);
         miningAssistant.setPcaConfidenceThreshold(minPCAConfidence);
         miningAssistant.setEnabledConfidenceUpperBounds(true);
         miningAssistant.setEnabledFunctionalityHeuristic(true);

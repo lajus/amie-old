@@ -244,7 +244,7 @@ public class MiningAssistant{
 	}
 
 	/**
-	 * @param maxDepth the maxDepth to set
+	 * @param maxAntecedentDepth
 	 */
 	public void setMaxDepth(int maxAntecedentDepth) {
 		this.maxDepth = maxAntecedentDepth;
@@ -265,14 +265,14 @@ public class MiningAssistant{
 	}
 
 	/**
-	 * @param minPcaConfidence the minPcaConfidence to set
+	 * @param minConfidence the minPcaConfidence to set
 	 */
 	public void setPcaConfidenceThreshold(double minConfidence) {
 		this.minPcaConfidence = minConfidence;
 	}
 
 	/**
-	 * @param minStdConfidence the minStdConfidence to set
+	 * @param minConfidence the minConfidence to set
 	 */
 	public void setStdConfidenceThreshold(double minConfidence) {
 		this.minStdConfidence = minConfidence;
@@ -384,7 +384,6 @@ public class MiningAssistant{
 	
 	/**
 	 * Returns a list of one-atom queries using the relations from the KB
-	 * @param query
 	 * @param minSupportThreshold Only relations of size bigger or equal than this value will 
 	 * be considered.
 	 * @param output
@@ -439,7 +438,7 @@ public class MiningAssistant{
 	 * rule on one variable and introduces a fresh variable not seen in the rule.
 	 * @param rule
 	 * @param minSupportThreshold
-	 * @return
+	 * @param output
 	 */
 	public void getDanglingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output){		
 		ByteString[] newEdge = rule.fullyUnboundTriplePattern();
@@ -513,7 +512,7 @@ public class MiningAssistant{
 	/**
 	 * It determines the counting variable of an atom with constant relation based on 
 	 * the functionality of the relation
-	 * @param candidate
+	 * @param headAtom
 	 */
 	protected int findCountingVariable(ByteString[] headAtom) {
 		int nVars = KB.numVariables(headAtom);
@@ -537,9 +536,9 @@ public class MiningAssistant{
 	/**
 	 * Returns all rule candidates obtained by adding a new atom that does not contain
 	 * fresh variables.
-	 * @param currentNode
+	 * @param rule
 	 * @param minSupportThreshold Only candidates with support above or equal this value are returned.
-	 * @return
+	 * @param output 
 	 */
 	public void getClosingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output){
 		if (enforceConstants) {
@@ -1086,7 +1085,7 @@ public class MiningAssistant{
 	/**
 	 * It computes the standard confidence of the given rule based on the evidence in database.
 	 * The value is both returned and set to the rule
-	 * @param rule
+	 * @param candidate
 	 * @return
 	 */
 	public double computeStandardConfidence(Rule candidate) {

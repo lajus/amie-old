@@ -11,7 +11,7 @@ import amie.rules.Rule;
 /**
  * This class overrides the default mining asssistant enforcing type constraints on the 
  * head variables of rules. The type constraints correspond to the domain and ranges of 
- * the head relation, that is, it mines rules of the form B ^ is(x, D) ^ is(y, R) => rh(x, y)
+ * the head relation, that is, it mines rules of the form B ^ is(x, D) ^ is(y, R) =&gt; rh(x, y)
  * where D and R are the domain and ranges of relation rh.
  * @author luis
  *
