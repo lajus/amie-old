@@ -42,6 +42,10 @@ import amie.rules.QueryEquivalenceChecker;
 import amie.rules.Rule;
 
 /**
+ * Main class that implements the AMIE algorithm for rule mining 
+ * on ontologies. The ontology must be provided as a list of TSV files
+ * where each line has the format SUBJECT<TAB>RELATION<TAB>OBJECT.
+ * 
  * @author lgalarra
  *
  */
@@ -145,7 +149,7 @@ public class AMIE {
 
     /**
      *
-     * @param assistant
+     * @param assistant An object that implements the logic of the mining operators.
      * @param minInitialSupport If head coverage is defined as pruning metric,
      * it is the minimum size for a relation to be considered in the mining.
      * @param threshold The minimum support threshold: it can be either a head
@@ -282,10 +286,10 @@ public class AMIE {
 
         // Required by the reviewers of the AMIE+ article. Timing collection   	
         for (RDFMinerJob jobObject : jobObjects) {
-            this._specializationTime += jobObject.getSpecializationTime();
-            this._scoringTime += jobObject.getScoringTime();
-            this._queueingAndDuplicateElimination += jobObject.getQueueingAndDuplicateElimination();
-            this._approximationTime += jobObject.getApproximationTime();
+            this._specializationTime += jobObject._getSpecializationTime();
+            this._scoringTime += jobObject._getScoringTime();
+            this._queueingAndDuplicateElimination += jobObject._getQueueingAndDuplicateElimination();
+            this._approximationTime += jobObject._getApproximationTime();
         }
 
         if (realTime) {
@@ -351,9 +355,7 @@ public class AMIE {
     }
 
     /**
-     * Given a seed query, this class mines rules involving queries which extend
-     * from the seed query. An example of a seed query is <br />
-     * <pre>?s <happenedIn> ?o</pre>
+     * This class implements the AMIE algorithm in a single thread.
      *
      * @author lgalarra
      */
@@ -379,17 +381,27 @@ public class AMIE {
         /** System performance evaluation **/
         
         // Time spent in applying the operators.
-        private long specializationTime;
+        private long _specializationTime;
 
         // Time spent in calculating confidence scores.
-        private long scoringTime;
+        private long _scoringTime;
 
         // Time spent in duplication elimination
-        private long queueingAndDuplicateElimination;
+        private long _queueingAndDuplicateElimination;
 
         // Time to calculate confidence approximations
-        private long approximationTime;
+        private long _approximationTime;
 
+        /**
+         * 
+         * @param seedsPool
+         * @param outputSet
+         * @param resultsLock Lock associated to the output buffer were mined rules are added
+         * @param resultsCondition Condition variable associated to the results lock
+         * @param sharedCounter Reference to a shared counter that keeps track of the number of threads that are running
+         * in the system.
+         * @param indexedOutputSet
+         */
         public RDFMinerJob(Collection<Rule> seedsPool,
                 List<Rule> outputSet, Lock resultsLock,
                 Condition resultsCondition,
@@ -403,26 +415,16 @@ public class AMIE {
             this.indexedOutputSet = indexedOutputSet;
             this.idle = false;
             this.done = false;
-            this.specializationTime = 0l;
-            this.scoringTime = 0l;
-            this.queueingAndDuplicateElimination = 0l;
-            this.approximationTime = 0l;
+            this._specializationTime = 0l;
+            this._scoringTime = 0l;
+            this._queueingAndDuplicateElimination = 0l;
+            this._approximationTime = 0l;
         }
 
-        public AtomicInteger getSharedCounter() {
-            // TODO Auto-generated method stub
-            return this.sharedCounter;
-        }
-
-        public Collection<Rule> getPool() {
-            // TODO Auto-generated method stub
-            return this.queryPool;
-        }
-
-        public synchronized Boolean isDone() {
-            return this.done;
-        }
-
+        /**
+         * Removes the front of the queue of rules.
+         * @return
+         */
         private Rule pollQuery() {
             long timeStamp1 = System.currentTimeMillis();
             Rule nextQuery = null;
@@ -432,7 +434,7 @@ public class AMIE {
                 iterator.remove();
             }
             long timeStamp2 = System.currentTimeMillis();
-            this.queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
+            this._queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
             return nextQuery;
         }
 
@@ -462,7 +464,7 @@ public class AMIE {
                         long timeStamp1 = System.currentTimeMillis();
                         boolean ruleSatisfiesConfidenceBounds
                                 = assistant.calculateConfidenceBoundsAndApproximations(currentRule);
-                        this.approximationTime += (System.currentTimeMillis() - timeStamp1);
+                        this._approximationTime += (System.currentTimeMillis() - timeStamp1);
                         if (ruleSatisfiesConfidenceBounds) {
                             this.resultsLock.lock();
                             setAdditionalParents2(currentRule);
@@ -475,7 +477,7 @@ public class AMIE {
                             outputRule = false;
                         }
                         long timeStamp2 = System.currentTimeMillis();
-                        this.scoringTime += (timeStamp2 - timeStamp1);
+                        this._scoringTime += (timeStamp2 - timeStamp1);
                     }
 
                     // Check if we should further refine the rule
@@ -495,8 +497,9 @@ public class AMIE {
                         assistant.getClosingAtoms(currentRule, threshold, temporalOutput);
                         assistant.getDanglingAtoms(currentRule, threshold, temporalOutputDanglingEdges);
                         assistant.getInstantiatedAtoms(currentRule, threshold, temporalOutputDanglingEdges, temporalOutput);
+                        
                         long timeStamp2 = System.currentTimeMillis();
-                        this.specializationTime += (timeStamp2 - timeStamp1);
+                        this._specializationTime += (timeStamp2 - timeStamp1);
                         // Addition of the specializations to the queue
                         synchronized (queryPool) {
                             timeStamp1 = System.currentTimeMillis();
@@ -507,7 +510,7 @@ public class AMIE {
                             }
 
                             timeStamp2 = System.currentTimeMillis();
-                            this.queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
+                            this._queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
                         }
                     }
 
@@ -526,7 +529,7 @@ public class AMIE {
                             this.indexedOutputSet.put(currentRule.alternativeParentHashCode(), currentRule);
                         }
                         long timeStamp2 = System.currentTimeMillis();
-                        this.queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
+                        this._queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
                         this.resultsCondition.signal();
                         this.resultsLock.unlock();
                     }
@@ -555,7 +558,9 @@ public class AMIE {
 
         /**
          * It finds all potential parents of a rule in the output set of indexed
-         * rules.
+         * rules. A rule X => Y is a parent of rule X'=> Y' if Y = Y' and
+         * X is a subset of X' (in other words X' => Y' is a more specific version
+         * of X => Y)
          *
          * @param currentQuery
          */
@@ -580,7 +585,7 @@ public class AMIE {
                 for (List<ByteString[]> parent : parentsOfSizeI) {
                     for (Rule candidate : candidateParents) {
                         List<ByteString[]> candidateParentPattern = candidate.getRealTriples();
-                        if (QueryEquivalenceChecker.equal(parent, candidateParentPattern)) {
+                        if (QueryEquivalenceChecker.areEquivalent(parent, candidateParentPattern)) {
                             currentQuery.setParent(candidate);
                         }
                     }
@@ -606,20 +611,20 @@ public class AMIE {
             }
         }
 
-        public long getSpecializationTime() {
-            return specializationTime;
+        public long _getSpecializationTime() {
+            return _specializationTime;
         }
 
-        public long getScoringTime() {
-            return scoringTime;
+        public long _getScoringTime() {
+            return _scoringTime;
         }
 
-        public long getQueueingAndDuplicateElimination() {
-            return queueingAndDuplicateElimination;
+        public long _getQueueingAndDuplicateElimination() {
+            return _queueingAndDuplicateElimination;
         }
 
-        public long getApproximationTime() {
-            return approximationTime;
+        public long _getApproximationTime() {
+            return _approximationTime;
         }
 
     }
@@ -628,6 +633,12 @@ public class AMIE {
         this._checkParentsOfDegree2 = booleanVal;
     }
 
+    /**
+     * Returns an instance of AMIE that mines rules on the given KB using
+     * the vanilla setting of head coverage 1% and no confidence threshold.
+     * @param db
+     * @return
+     */
     public static AMIE getVanillaSettingInstance(KB db) {
         return new AMIE(new HeadVariablesImprovedMiningAssistant(db),
                 100, // Do not look at relations smaller than 100 facts 
@@ -638,6 +649,12 @@ public class AMIE {
     
     /** Factory methods. They return canned instances of AMIE. **/ 
 
+    /**
+     * Returns an instance of AMIE that mines rules on the given KB using
+     * the vanilla setting of head coverage 1% and a given PCA confidence threshold
+     * @param db
+     * @return
+     */
     public static AMIE getVanillaSettingInstance(KB db, double minPCAConfidence) {
         HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(db);
         miningAssistant.setPcaConfidenceThreshold(minPCAConfidence);
@@ -648,6 +665,14 @@ public class AMIE {
                 Runtime.getRuntime().availableProcessors());
     }
 
+    /**
+     * Returns an (vanilla setting) instance of AMIE that enables the lossy optimizations, i.e., optimizations that
+     * optimize for runtime but that could in principle omit some rules that should be mined.
+     * @param db
+     * @param minPCAConfidence
+     * @param startSupport
+     * @return
+     */
     public static AMIE getLossyVanillaSettingInstance(KB db, double minPCAConfidence, int startSupport) {
         HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(db);
         miningAssistant.setPcaConfidenceThreshold(minPCAConfidence);
@@ -660,6 +685,14 @@ public class AMIE {
                 Runtime.getRuntime().availableProcessors());
     }
 
+    /**
+     * Returns an instance of AMIE that enables the lossy optimizations, i.e., optimizations that
+     * optimize for runtime but that could in principle omit some rules that should be mined.
+     * @param db
+     * @param minPCAConfidence
+     * @param startSupport
+     * @return
+     */
     public static AMIE getLossyInstance(KB db, double minPCAConfidence, int minSupport) {
         HeadVariablesImprovedMiningAssistant miningAssistant = new HeadVariablesImprovedMiningAssistant(db);
         miningAssistant.setPcaConfidenceThreshold(minPCAConfidence);
@@ -922,7 +955,7 @@ public class AMIE {
             cli = parser.parse(options, args);
         } catch (ParseException e) {
             System.out.println("Unexpected exception: " + e.getMessage());
-            formatter.printHelp("AMIE", options);
+            formatter.printHelp("AMIE [OPTIONS] <TSV FILES>", options);
             System.exit(1);
         }
 
@@ -931,13 +964,13 @@ public class AMIE {
         boolean full = cli.hasOption("full");
         if (onlyOutput && full) {
             System.err.println("The options only-output and full are incompatible. Pick either one.");
-            formatter.printHelp("AMIE", options);
+            formatter.printHelp("AMIE [OPTIONS] <TSV FILES>", options);
             System.exit(1);
         }
 
         if (cli.hasOption("htr") && cli.hasOption("hexr")) {
             System.err.println("The options head-target-relations and head-excluded-relations cannot appear at the same time");
-            formatter.printHelp("AMIE", options);
+            System.err.println("AMIE+ [OPTIONS] <.tsv INPUT FILES>");
             System.exit(1);
         }
 
@@ -978,7 +1011,7 @@ public class AMIE {
             } catch (NumberFormatException e) {
                 System.err.println("The option -minhc (head coverage threshold) requires a real number as argument");
                 System.err.println("AMIE [OPTIONS] <.tsv INPUT FILES>");
-                formatter.printHelp("AMIE", options);
+                System.err.println("AMIE+ [OPTIONS] <.tsv INPUT FILES>");
                 System.exit(1);
             }
         }
@@ -990,7 +1023,7 @@ public class AMIE {
             } catch (NumberFormatException e) {
                 System.err.println("The option -minc (confidence threshold) requires a real number as argument");
                 System.err.println("AMIE [OPTIONS] <.tsv INPUT FILES>");
-                formatter.printHelp("AMIE", options);
+                System.err.println("AMIE+ [OPTIONS] <.tsv INPUT FILES>");
                 System.exit(1);
             }
         }
@@ -1002,7 +1035,7 @@ public class AMIE {
             } catch (NumberFormatException e) {
                 System.err.println("The argument for option -minpca (PCA confidence threshold) must be an integer greater than 2");
                 System.err.println("AMIE [OPTIONS] <.tsv INPUT FILES>");
-                formatter.printHelp("AMIE", options);
+                System.err.println("AMIE+ [OPTIONS] <.tsv INPUT FILES>");
                 System.exit(1);
             }
         }
@@ -1069,7 +1102,7 @@ public class AMIE {
             } catch (NumberFormatException e) {
                 System.err.println("The argument for option -nc (number of threads) must be an integer");
                 System.err.println("AMIE [OPTIONS] <.tsv INPUT FILES>");
-                formatter.printHelp("AMIE", options);
+                System.err.println("AMIE+ [OPTIONS] <.tsv INPUT FILES>");
                 System.exit(1);
             }
 
@@ -1095,7 +1128,7 @@ public class AMIE {
         if (leftOverArgs.length < 1) {
             System.err.println("No input file has been provided");
             System.err.println("AMIE [OPTIONS] <.tsv INPUT FILES>");
-            formatter.printHelp("amie", options);
+            System.err.println("AMIE+ [OPTIONS] <.tsv INPUT FILES>");
             System.exit(1);
         }
 
@@ -1160,7 +1193,7 @@ public class AMIE {
             } catch (NumberFormatException e) {
                 System.err.println("The argument for option -rl (recursivity limit) must be an integer");
                 System.err.println("AMIE [OPTIONS] <.tsv INPUT FILES>");
-                formatter.printHelp("AMIE", options);
+                System.err.println("AMIE+ [OPTIONS] <.tsv INPUT FILES>");
                 System.exit(1);
             }
         }
@@ -1197,7 +1230,7 @@ public class AMIE {
             	try {
 	            	assistantClass = Class.forName(bias);	
             	} catch (Exception e) {
-            		formatter.printHelp("amie", options);
+            		System.err.println("AMIE+ [OPTIONS] <.tsv INPUT FILES>");
             		e.printStackTrace();
             		System.exit(1);
             	}
@@ -1220,12 +1253,12 @@ public class AMIE {
             				mineAssistant = (MiningAssistant) constructor.newInstance(dataSource, schemaSource);
             			} catch (Exception e2p) {
             				e.printStackTrace();
-            				formatter.printHelp("amie", options);
+            				System.err.println("AMIE+ [OPTIONS] <.tsv INPUT FILES>");
                     		e.printStackTrace();
             			}
             		}
             	} catch (SecurityException e) {
-            		formatter.printHelp("amie", options);
+            		System.err.println("AMIE+ [OPTIONS] <.tsv INPUT FILES>");
             		e.printStackTrace();
             		System.exit(1);
             	}
@@ -1324,6 +1357,7 @@ public class AMIE {
     }
 
 	/**
+	 * AMIE's main program
      * @param args
      * @throws Exception
      */

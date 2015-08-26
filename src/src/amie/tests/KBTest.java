@@ -7,7 +7,7 @@ import java.util.List;
 import javatools.datatypes.ByteString;
 import amie.data.KB;
 
-public class FactDatabaseTest {
+public class KBTest {
 	
 	public static void case3(KB source){
 		List<ByteString[]> q1 = KB.triples(KB.triple("?s29","rdf:type","<wikicategory_American_television_actors>"), KB.triple("?o29","rdf:type","<wikicategory_American_television_actors>"),  KB.triple("?o29","<isMarriedTo>","?s29"), KB.triple("?s29","<isMarriedTo>","?o29"));

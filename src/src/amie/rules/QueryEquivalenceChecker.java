@@ -7,10 +7,16 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import amie.data.KB;
-import javatools.administrative.D;
 import javatools.datatypes.ByteString;
+import amie.data.KB;
 
+/**
+ * This class takes two lists of atoms representing conjunctive queries
+ * and determines whether they are equivalent or not.
+ * 
+ * @author galarrag
+ *
+ */
 public class QueryEquivalenceChecker {
 	
 	static class Node implements Comparable<Node>{
@@ -70,6 +76,11 @@ public class QueryEquivalenceChecker {
 		}
 	}
 	
+	/**
+	 * The graph representation of a conjunctive query on binary atoms.
+	 * @author galarrag
+	 *
+	 */
 	static class QueryGraph{
 		List<Node> nodes;
 		List<List<int[]>> outgoingEdges;
@@ -116,6 +127,15 @@ public class QueryEquivalenceChecker {
 			
 		}
 		
+		/**
+		 * It determines whether two query graphs are equivalent.
+		 * @param g1
+		 * @param i
+		 * @param g2
+		 * @param j
+		 * @param mappings
+		 * @return
+		 */
 		private boolean equivalent(QueryGraph g1, int i, QueryGraph g2, int j, List<int[]> mappings) {
 			if(g2.nodes.get(j).removed){
 				//It means g2.nodes[j] did actually found a match which is not g1.node[i]
@@ -177,6 +197,14 @@ public class QueryEquivalenceChecker {
 			return true;	
 		}
 
+		/**
+		 * Determines whether there exists a mapping between nodes i and j in the
+		 * given list of mappings.
+		 * @param i
+		 * @param j
+		 * @param mappings
+		 * @return
+		 */
 		private boolean existsMapping(int i, int j, List<int[]> mappings) {
 			// TODO Auto-generated method stub
 			for(int[] mapping: mappings){
@@ -197,8 +225,14 @@ public class QueryEquivalenceChecker {
 		}
 	}
 	
-	
-	public static boolean equal(List<ByteString[]> q1, List<ByteString[]> q2){
+	/**
+	 * It determines whether two conjunctive queries represented as list of atoms
+	 * are equivalent.
+	 * @param q1
+	 * @param q2
+	 * @return
+	 */
+	public static boolean areEquivalent(List<ByteString[]> q1, List<ByteString[]> q2){
 		if(q1.size() == q2.size() && q1.size() == 1){
 			return Rule.areEquivalent(q1.get(0), q2.get(0));
 		}else{
@@ -206,6 +240,11 @@ public class QueryEquivalenceChecker {
 		}
 	}
 
+	/**
+	 * It returns the query graph representation of a conjunctive query.
+	 * @param q2
+	 * @return
+	 */
 	private static QueryGraph buildQueryGraph(List<ByteString[]> q2) {
 		SortedSet<Node> nodes = new TreeSet<Node>();
 		List<Node> hardNodes = new ArrayList<Node>();
@@ -270,7 +309,14 @@ public class QueryEquivalenceChecker {
 		return new QueryGraph(nodeList, outEdges, inEdges, edgesCount);
 	}
 	
-	  private static Collection<Node> findEquivalentNodes(Node key, List<Node> hardNodes) {
+	/**
+	 * It returns a list of potentially equivalent candidates for the key
+	 * in the list of hard nodes.
+	 * @param key
+	 * @param hardNodes
+	 * @return
+	 */
+	private static Collection<Node> findEquivalentNodes(Node key, List<Node> hardNodes) {
 		List<Node> result = new ArrayList<Node>();
 		for(Node node: hardNodes){
 			if(node.compareTo(key) == 0)
@@ -279,10 +325,4 @@ public class QueryEquivalenceChecker {
 		
 		return result;
 	}
-
-	public static void main(String[] args) throws Exception {		  
-		  D.p(equal(KB.triples(KB.triple("?s","isConnected","?o"), KB.triple("?x","isConnected","?s"), KB.triple("?o","isConnected","?x")), KB.triples(KB.triple("?m","isConnected","?s"), KB.triple("?r","isConnected","?m"), KB.triple("?s","isConnected","?r"))));
-		
-		  D.p(equal(KB.triples(KB.triple("?s","isConnected","?o"), KB.triple("?x","isConnected","?s"), KB.triple("?o","isConnected","?x")), KB.triples(KB.triple("?m","connectedTo","?s"), KB.triple("?r","connectedTo","?m"), KB.triple("?r","connectedTo","?s"))));
-	  }
 }

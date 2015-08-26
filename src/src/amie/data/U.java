@@ -258,12 +258,12 @@ public class U {
 		System.out.println("Relation1\tRelation2\tRelation1-subjects"
 				+ "\tRelation1-objects\tRelation2-subjects\tRelation2-objects"
 				+ "\tSubject-Subject\tSubject-Object\tObject-Subject\tObject-Object");
-		for(ByteString r1: source.predicateSize){
+		for(ByteString r1: source.relationSize){
 			Set<ByteString> subjects1 = source.predicate2subject2object.get(r1).keySet();
 			Set<ByteString> objects1 = source.predicate2object2subject.get(r1).keySet();
 			int nSubjectsr1 = subjects1.size();
 			int nObjectsr1 = objects1.size();
-			for(ByteString r2: source.predicateSize){
+			for(ByteString r2: source.relationSize){
 				if(r1.equals(r2))
 					continue;				
 				System.out.print(r1 + "\t");
@@ -306,7 +306,7 @@ public class U {
 	    
 	    d.load(files);
 	    
-	    for(ByteString relation: d.predicateSize){
+	    for(ByteString relation: d.relationSize){
 	    	System.out.println(relation + "\t" + getRelationDomain(d, relation) 
 	    			+ "\t" + getRelationRange(d, relation));
 	    }

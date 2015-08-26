@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import amie.tests.FactDatabaseTest;
 import javatools.administrative.Announce;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
@@ -28,10 +27,10 @@ import javatools.parsers.Char17;
 import javatools.parsers.NumberFormatter;
 
 /**
- * Class FactDatabase
+ * Class KB
  * 
- * This class implements an in-memory database for facts without identifiers,
- * tuned for Luis' project
+ * This class implements an in-memory knowledge base (KB) for facts without identifiers. 
+ * It supports a series of conjunctive queries.
  * 
  * @author Fabian M. Suchanek
  * 
@@ -67,8 +66,12 @@ public class KB {
 	protected final IntHashMap<ByteString> objectSize = new IntHashMap<ByteString>();
 
 	/** Number of facts per relation */
-	protected final IntHashMap<ByteString> predicateSize = new IntHashMap<ByteString>();
+	protected final IntHashMap<ByteString> relationSize = new IntHashMap<ByteString>();
 
+	// ---------------------------------------------------------------------------
+	// Statistics
+	// ---------------------------------------------------------------------------
+	
 	/**
 	 * Subject-subject overlaps
 	 */
@@ -86,6 +89,10 @@ public class KB {
 
 	/** Number of facts */
 	protected long size;
+	
+	// ---------------------------------------------------------------------------
+	// Constants
+	// ---------------------------------------------------------------------------
 
 	/** (X differentFrom Y Z ...) predicate */
 	public static final String DIFFERENTFROMstr = "differentFrom";
@@ -109,6 +116,9 @@ public class KB {
 	/** r(y', X) exists for some y', predicate */
 	public static final String EXISTSINVstr = "existsInv";
 	
+	/** Variable sign (as defined in SPARQL) **/
+	public static final char VariableSign = '?';
+	
 	/** r(y', X) exists for some y', predicate */
 	public static final ByteString EXISTSINVbs = ByteString.of(EXISTSINVstr);
 
@@ -119,13 +129,15 @@ public class KB {
 
 	public static final int OBJECT2OBJECT = 4;
 	
+	public enum Column { Subject, Relation, Object };
+	
 	// ---------------------------------------------------------------------------
 	// Loading
 	// ---------------------------------------------------------------------------
 
 	public KB() {}
 
-	/** Adds a fact */
+	/** Methods to add single facts to the KB **/
 	protected boolean add(ByteString subject, ByteString relation,
 			ByteString object,
 			Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> map) {
@@ -165,20 +177,19 @@ public class KB {
 		}
 	}
 
-	/** Adds a fact */
-	protected boolean add(ByteString subject, ByteString predicate, ByteString object) {
-		if (!add(subject, predicate, object, subject2predicate2object))
+	protected boolean add(ByteString subject, ByteString relation, ByteString object) {
+		if (!add(subject, relation, object, subject2predicate2object))
 			return (false);
-		add(predicate, object, subject, predicate2object2subject);
-		add(object, subject, predicate, object2subject2predicate);
-		add(predicate, subject, object, predicate2subject2object);
-		add(object, predicate, subject, object2predicate2subject);
-		add(subject, object, predicate, subject2object2predicate);
+		add(relation, object, subject, predicate2object2subject);
+		add(object, subject, relation, object2subject2predicate);
+		add(relation, subject, object, predicate2subject2object);
+		add(object, relation, subject, object2predicate2subject);
+		add(subject, object, relation, subject2object2predicate);
 		synchronized (subjectSize) {
 			subjectSize.increase(subject);
 		}
-		synchronized (predicateSize) {
-			predicateSize.increase(predicate);
+		synchronized (relationSize) {
+			relationSize.increase(relation);
 		}
 		synchronized (objectSize) {
 			objectSize.increase(object);
@@ -186,27 +197,27 @@ public class KB {
 
 		synchronized (subject2subjectOverlap) {
 			IntHashMap<ByteString> overlaps = subject2subjectOverlap
-					.get(predicate);
+					.get(relation);
 			if (overlaps == null) {
-				subject2subjectOverlap.put(predicate,
+				subject2subjectOverlap.put(relation,
 						new IntHashMap<ByteString>());
 			}
 		}
 
 		synchronized (subject2objectOverlap) {
 			IntHashMap<ByteString> overlaps = subject2objectOverlap
-					.get(predicate);
+					.get(relation);
 			if (overlaps == null) {
-				subject2objectOverlap.put(predicate,
+				subject2objectOverlap.put(relation,
 						new IntHashMap<ByteString>());
 			}
 		}
 
 		synchronized (object2objectOverlap) {
 			IntHashMap<ByteString> overlaps = object2objectOverlap
-					.get(predicate);
+					.get(relation);
 			if (overlaps == null) {
-				object2objectOverlap.put(predicate,
+				object2objectOverlap.put(relation,
 						new IntHashMap<ByteString>());
 			}
 		}
@@ -215,7 +226,9 @@ public class KB {
 		return (true);
 	}
 
-	/** Returns the number of facts */
+	/** 
+	 * Returns the number of facts in the KB. 
+	 **/
 	public long size() {
 		return (size);
 	}
@@ -225,20 +238,18 @@ public class KB {
 	 * @param column 0 = Subject, 1 = Relation/Predicate, 2 = Object
 	 * @return
 	 */
-	public long size(int column) {
-		if (column < 0 || column > 2)
-			throw new IllegalArgumentException(
-					"Variable position must be between 0 and 2");
+	public long size(Column column) {
 		switch (column) {
-		case 0:
+		case Subject:
 			return subjectSize.size();
-		case 1:
-			return predicateSize.size();
-		case 2:
+		case Relation:
+			return relationSize.size();
+		case Object:
 			return objectSize.size();
 		default:
 			throw new IllegalArgumentException(
-					"Variable position must be between 0 and 2");
+					"Unrecognized column position. "
+					+ "Accepted values: Subject, Predicate, Object");
 		}
 	}
 	
@@ -247,7 +258,7 @@ public class KB {
 	 * @return
 	 */
 	public long relationsSize() {
-		return size(1);
+		return size(Column.Relation);
 	}
 	
 	/**
@@ -262,7 +273,7 @@ public class KB {
 
 	/** TRUE if the ByteString is a SPARQL variable */
 	public static boolean isVariable(CharSequence s) {
-		return (s.length() > 0 && s.charAt(0) == '?');
+		return (s.length() > 0 && s.charAt(0) == VariableSign);
 	}
 	
 
@@ -300,12 +311,12 @@ public class KB {
 	 * objects in common between pairs of relations. They can be used for join cardinality estimation.
 	 */
 	public void buildOverlapTables() {
-		for (ByteString r1 : predicateSize) {
+		for (ByteString r1 : relationSize) {
 			Set<ByteString> subjects1 = predicate2subject2object.get(r1)
 					.keySet();
 			Set<ByteString> objects1 = predicate2object2subject.get(r1)
 					.keySet();
-			for (ByteString r2 : predicateSize) {
+			for (ByteString r2 : relationSize) {
 				Set<ByteString> subjects2 = predicate2subject2object.get(r2)
 						.keySet();
 				Set<ByteString> objects2 = predicate2object2subject.get(r2)
@@ -336,8 +347,7 @@ public class KB {
 	}
 
 	/**
-	 * Calculates the number of elements in the intersection of two
-	 * sets of ByteStrings.
+	 * Calculates the number of elements in the intersection of two sets of ByteStrings.
 	 * @param s1
 	 * @param s2
 	 * @return
@@ -351,11 +361,20 @@ public class KB {
 		return overlap;
 	}
 
-	/** Loads the files */
+	/**
+	 * It loads the contents of the given files into the in-memory database.
+	 * @param files
+	 * @throws IOException
+	 */
 	public void load(File... files) throws IOException {
 		load(Arrays.asList(files));
 	}
 
+	/**
+	 * It loads the contents of the given files into the in-memory database.
+	 * @param files
+	 * @throws IOException
+	 */
 	public void load(List<File> files) throws IOException {
 		long size = size();
 		long time = System.currentTimeMillis();
@@ -402,6 +421,11 @@ public class KB {
 				+ " MB");
 	}
 	
+	/**
+	 * It loads the contents of the given file into the in-memory database.
+	 * @param files
+	 * @throws IOException
+	 */
 	protected void load(File f, String message)
 			throws IOException {
 		long size = size();
@@ -450,61 +474,77 @@ public class KB {
 	// Functionality
 	// ---------------------------------------------------------------------------
 
-	/** Returns the harmonic functionality, as defined in the PARIS paper */
+	/**
+	 * It returns the harmonic functionality of a relation, as defined in the PARIS paper 
+	 * https://www.lri.fr/~cr/Publications_Master_2013/Brigitte_Safar/p157_fabianmsuchanek_vldb2011.pdf
+	 **/
 	public double functionality(ByteString relation) {
 		if (relation.equals(EQUALSbs)) {
 			return 1.0;
 		} else {
-			return ((double) predicate2subject2object.get(relation).size() / predicateSize
+			return ((double) predicate2subject2object.get(relation).size() / relationSize
 					.get(relation));
 		}
 	}
 
-	/** Returns the harmonic functionality, as defined in the PARIS paper */
+	/**
+	 * It returns the harmonic functionality of a relation, as defined in the PARIS paper 
+	 * https://www.lri.fr/~cr/Publications_Master_2013/Brigitte_Safar/p157_fabianmsuchanek_vldb2011.pdf
+	 **/
 	public double functionality(CharSequence relation) {
 		return (functionality(compress(relation)));
 	}
 
 	/**
 	 * Returns the harmonic inverse functionality, as defined in the PARIS paper
+	 * https://www.lri.fr/~cr/Publications_Master_2013/Brigitte_Safar/p157_fabianmsuchanek_vldb2011.pdf
 	 */
 	public double inverseFunctionality(ByteString relation) {
 		if (relation.equals(EQUALSbs)) {
 			return 1.0;
 		} else {
-			return ((double) predicate2object2subject.get(relation).size() / predicateSize
+			return ((double) predicate2object2subject.get(relation).size() / relationSize
 					.get(relation));			
 		}
 	}
 
 	/**
 	 * Returns the harmonic inverse functionality, as defined in the PARIS paper
+	 * https://www.lri.fr/~cr/Publications_Master_2013/Brigitte_Safar/p157_fabianmsuchanek_vldb2011.pdf
 	 */
 	public double inverseFunctionality(CharSequence relation) {
 		return (inverseFunctionality(compress(relation)));
 	}
 
 	/**
-	 * Functionality given the position.
+	 * Functionality of a relation given the position.
 	 * @param relation
-	 * @param x 0 = subject or 2 = object.
+	 * @param col Subject = functionality, Object = Inverse functionality
 	 * @return
 	 */
-	public double x_functionality(ByteString relation, int x) {
-		if (x == 0)
+	public double colFunctionality(ByteString relation, Column col) {
+		if (col == Column.Subject)
 			return functionality(relation);
-		else if (x == 2)
+		else if (col == Column.Object)
 			return inverseFunctionality(relation);
 		else
 			return -1.0;
 	}
 	
+	/**
+	 * Determines whether a relation is functional, i.e., its harmonic functionality
+	 * is greater than its inverse harmonic functionality.
+	 * @param relation
+	 * @return
+	 */
 	public boolean isFunctional(ByteString relation) {
-		return functionality(relation) > inverseFunctionality(relation);
+		return functionality(relation) >= inverseFunctionality(relation);
 	}
 	
 	/**
-	 * It returns the highest functionality of the relation.
+	 * It returns the functionality or the inverse functionality of a relation.
+	 * @param inverse If true, the method returns the inverse functionality, otherwise
+	 * it returns the standard functionality.
 	 * @return
 	 */
 	public double functionality(ByteString relation, boolean inversed) {
@@ -515,7 +555,9 @@ public class KB {
 	}
 	
 	/**
-	 * It returns the lowest functionality of the relation.
+	 * It returns the functionality or the inverse functionality of a relation.
+	 * @param inverse If true, the method returns the functionality of a relation,
+	 * otherwise it returns the inverse functionality.
 	 * @return
 	 */
 	public double inverseFunctionality(ByteString relation, boolean inversed) {
@@ -529,8 +571,16 @@ public class KB {
 	// Statistics
 	// ---------------------------------------------------------------------------
 
-	public int overlap(ByteString relation1, ByteString relation2, int map) {
-		switch (map) {
+	/**
+	 * Given two relations, it returns the number of entities in common (the overlap) between 
+	 * two of their columns
+	 * @param relation1
+	 * @param relation2
+	 * @param overlap 0 = Subject-Subject, 2 = Subject-Object, 4 = Object-Object
+	 * @return
+	 */
+	public int overlap(ByteString relation1, ByteString relation2, int overlap) {
+		switch (overlap) {
 		case SUBJECT2SUBJECT:
 			return subject2subjectOverlap.get(relation1).get(relation2);
 		case SUBJECT2OBJECT:
@@ -539,19 +589,32 @@ public class KB {
 			return object2objectOverlap.get(relation1).get(relation2);
 		default:
 			throw new IllegalArgumentException(
-					"The argument map must be either 0 (subject-subject overlap), 2 (subject-object overlap) or 4 (object to object overlap)");
+					"The argument map must be either 0 (subject-subject overlap), "
+					+ "2 (subject-object overlap) or 4 (object to object overlap)");
 		}
 	}
 
+	/**
+	 * It returns the number of facts of a relation in the KB.
+	 * @param relation
+	 * @return
+	 */
 	public int relationSize(ByteString relation) {
-		return predicateSize.get(relation);
+		return relationSize.get(relation);
 	}
 
-	public int relationColumnSize(ByteString relation, int column) {
+	/**
+	 * It returns the number of distinct instance of one of the arguments (columns)
+	 * of a relation.
+	 * @param relation
+	 * @param column. Subject or Object
+	 * @return
+	 */
+	public int relationColumnSize(ByteString relation, Column column) {
 		switch (column) {
-		case 0:
+		case Subject:
 			return predicate2subject2object.get(relation).size();
-		case 2:
+		case Object:
 			return predicate2object2subject.get(relation).size();
 		default:
 			throw new IllegalArgumentException(
@@ -563,12 +626,16 @@ public class KB {
 	// Single triple selections
 	// ---------------------------------------------------------------------------
 
-	/** TRUE if the 0th component is different from the 2n, 3rd, 4th, etc. */
+	/**
+	 * It returns TRUE if the 0th component is different from the 2n, 3rd, 4th, etc. 
+	 **/
 	public static boolean differentFrom(CharSequence... triple) {
 		return (differentFrom(triple(triple)));
 	}
 
-	/** TRUE if the 0th component is different from the 2n, 3rd, 4th, etc. */
+	/**
+	 * It returns TRUE if the 0th component is different from the 2n, 3rd, 4th, etc. 
+	 **/
 	public static boolean differentFrom(ByteString... triple) {
 		if (!triple[1].equals(DIFFERENTFROMbs))
 			throw new IllegalArgumentException(
@@ -581,12 +648,16 @@ public class KB {
 		return (true);
 	}
 
-	/** TRUE if the 0th component is equal to the 2n, 3rd, 4th, etc. */
+	/**
+	 * It returns TRUE if the 0th component is different from the 2n, 3rd, 4th, etc. 
+	 **/
 	public static boolean equalTo(CharSequence... triple) {
 		return (equalTo(triple(triple)));
 	}
 
-	/** TRUE if the 0th component is equal to the 2n, 3rd, 4th, etc. */
+	/**
+	 * It returns TRUE if the 0th component is different from the 2n, 3rd, 4th, etc. 
+	 **/
 	public static boolean equalTo(ByteString... triple) {
 		if (!triple[1].equals(EQUALSbs))
 			throw new IllegalArgumentException(
@@ -599,7 +670,14 @@ public class KB {
 		return (true);
 	}
 
-	/** Returns the result of the map for key1 and key2 */
+	/**
+	 * It returns the third level values of a map given the keys for the first
+	 * and second level.  
+	 * @param key1
+	 * @param key2
+	 * @param map A 3-level map 
+	 * @return
+	 * */
 	protected IntHashMap<ByteString> get(
 			Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> map,
 			ByteString key1, ByteString key2) {
@@ -610,6 +688,23 @@ public class KB {
 		if (r == null)
 			return (new IntHashMap<>());
 		return (r);
+	}
+	
+	/**
+	 * It returns the second and third level values of a map given the keys for the first
+	 * level.  
+	 * @param key1
+	 * @param map A 3-level map 
+	 * @return
+	 * */
+	protected Map<ByteString, IntHashMap<ByteString>> get(
+			Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> map,
+			ByteString key) {
+		Map<ByteString, IntHashMap<ByteString>> m = map.get(key);
+		if (m == null)
+			return (Collections.emptyMap());
+		else
+			return (m);
 	}
 
 	/**
@@ -660,7 +755,12 @@ public class KB {
 		return (get(subject2predicate2object, triple[0], triple[1]));
 	}
 
-	/** TRUE if the database contains this fact (no variables) */
+	/**
+	 * It returns TRUE if the database contains this fact (no variables). If the fact
+	 * containst meta-relations (e.g. differentFrom, equals, exists), it returns TRUE
+	 * if the expression evaluates to TRUE.
+	 * @param fact A triple without variables, e.g., [Barack_Obama, wasBornIn, Hawaii]
+	 **/
 	public boolean contains(CharSequence... fact) {
 		if (numVariables(fact) != 0)
 			throw new IllegalArgumentException(
@@ -668,7 +768,12 @@ public class KB {
 		return (contains(triple(fact)));
 	}
 
-	/** TRUE if the database contains this fact (no variables) */
+	/**
+	 * It returns TRUE if the database contains this fact (no variables). If the fact
+	 * containst meta-relations (e.g. differentFrom, equals, exists), it returns TRUE
+	 * if the expression evaluates to TRUE.
+	 * @param fact A triple without variables, e.g., [Barack_Obama, wasBornIn, Hawaii]
+	 **/
 	protected boolean contains(ByteString... fact) {
 		if (fact[1] == DIFFERENTFROMbs)
 			return (differentFrom(fact));
@@ -684,30 +789,6 @@ public class KB {
 				.contains(fact[2]));
 	}
 
-	/** Returns map results for key */
-	protected Map<ByteString, IntHashMap<ByteString>> get(
-			Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> map,
-			ByteString key1) {
-		Map<ByteString, IntHashMap<ByteString>> m = map.get(key1);
-		if (m == null)
-			return (Collections.emptyMap());
-		else
-			return (m);
-	}
-
-	/**
-	 * Returns the results of a triple query pattern with two variables as a map
-	 * of first value to set of second values.
-	 */
-	public Map<ByteString, IntHashMap<ByteString>> resultsTwoVariables(
-			int pos1, int pos2, CharSequence[] triple) {
-		if (!isVariable(triple[pos1]) || !isVariable(triple[pos2])
-				|| numVariables(triple) != 2 || pos1 == pos2)
-			throw new IllegalArgumentException(
-					"Triple should contain 2 variables, one at " + pos1
-							+ " and one at " + pos2 + ": " + toString(triple));
-		return (resultsTwoVariables(pos1, pos2, triple(triple)));
-	}
 
 	/**
 	 * Returns the results of a triple query pattern with two variables as a map
@@ -723,6 +804,32 @@ public class KB {
 		return (resultsTwoVariables(compress(var1), compress(var2),
 				triple(triple)));
 	}
+	
+	/**
+	 * Returns the results of a triple query pattern with two variables as a map
+	 * of first value to set of second values.
+	 */
+	public Map<ByteString, IntHashMap<ByteString>> resultsTwoVariables(
+			int pos1, int pos2, CharSequence[] triple) {
+		if (!isVariable(triple[pos1]) || !isVariable(triple[pos2])
+				|| numVariables(triple) != 2 || pos1 == pos2)
+			throw new IllegalArgumentException(
+					"Triple should contain 2 variables, one at " + pos1
+							+ " and one at " + pos2 + ": " + toString(triple));
+		return (resultsTwoVariables(pos1, pos2, triple(triple)));
+	}	
+	
+	/**
+	 * Returns the results of a triple query pattern with two variables as a map
+	 * of first value to set of second values
+	 */
+	public Map<ByteString, IntHashMap<ByteString>> resultsTwoVariables(
+			ByteString var1, ByteString var2, ByteString[] triple) {
+		int varPos1 = varpos(var1, triple);
+		int varPos2 = varpos(var2, triple);
+		return resultsTwoVariables(varPos1, varPos2, triple);
+	}
+	
 
 	/**
 	 * Returns the results of a triple query pattern with two variables as a map
@@ -805,6 +912,15 @@ public class KB {
 		return resultsThreeVariables(varPos1, varPos2, varPos3, triple);
 	}
 
+	/**
+	 * Returns the results of a triple query pattern with three variables as
+	 * a nested map, firstValue : {secondValue : thirdValue}.
+	 * @param varPos1 Position of first variable in the triple pattern
+	 * @param varPos2 Position of the second variable in the triple pattern
+	 * @param varPos3 Position of the third variable in the triple pattern
+	 * @param triple
+	 * @return
+	 */
 	private Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> resultsThreeVariables(
 			int varPos1, int varPos2, int varPos3, ByteString[] triple) {
 		switch (varPos1) {
@@ -864,18 +980,10 @@ public class KB {
 		return null;
 	}
 
-	/**
-	 * Returns the results of a triple query pattern with two variables as a map
-	 * of first value to set of second values
-	 */
-	public Map<ByteString, IntHashMap<ByteString>> resultsTwoVariables(
-			ByteString var1, ByteString var2, ByteString[] triple) {
-		int varPos1 = varpos(var1, triple);
-		int varPos2 = varpos(var2, triple);
-		return resultsTwoVariables(varPos1, varPos2, triple);
-	}
-
-	/** Returns number of results of the triple pattern query with 1 variable */
+	/** 
+	 * Returns the number of distinct results of the triple pattern query 
+	 * with 1 variable.
+	 **/
 	protected long countOneVariable(ByteString... triple) {
 		if (triple[1].equals(DIFFERENTFROMbs))
 			return (Long.MAX_VALUE);
@@ -896,7 +1004,10 @@ public class KB {
 		return (resultsOneVariable(triple).size());
 	}
 
-	/** Returns number of results of the triple pattern query with 2 variables */
+	/** 
+	 * Returns the number of distinct results of the triple pattern query 
+	 * with 2 variables. 
+	 **/
 	protected long countTwoVariables(ByteString... triple) {
 		if (triple[1].equals(DIFFERENTFROMbs))
 			return (Long.MAX_VALUE);
@@ -904,14 +1015,14 @@ public class KB {
 			return (subject2predicate2object.size());
 		if (triple[1].equals(EXISTSbs)) {
 			long count = 0;
-			for (ByteString relation : predicateSize) {
+			for (ByteString relation : relationSize) {
 				count += get(predicate2subject2object, relation).size();
 			}
 			return count;
 		}
 		if (triple[1].equals(EXISTSINVbs)) {
 			long count = 0;
-			for (ByteString relation : predicateSize) {
+			for (ByteString relation : relationSize) {
 				count += get(predicate2object2subject, relation).size();
 			}
 			return count;
@@ -919,12 +1030,15 @@ public class KB {
 		if (!isVariable(triple[0]))
 			return (long) (subjectSize.get(triple[0], 0));
 		if (!isVariable(triple[1])) {
-			return (long) (predicateSize.get(triple[1], 0));
+			return (long) (relationSize.get(triple[1], 0));
 		}
 		return (long) (objectSize.get(triple[2], 0));
 	}
 
-	/** Returns number of variable occurrences in a triple */
+	/** 
+	 * Returns number of variable occurrences in a triple. Variables
+	 * start with "?".
+	 **/
 	public static int numVariables(CharSequence... fact) {
 		int counter = 0;
 		for (int i = 0; i < fact.length; i++)
@@ -933,6 +1047,11 @@ public class KB {
 		return (counter);
 	}
 	
+	/**
+	 * Determines whether a sequence of triples contains at least one variable
+	 * @param query
+	 * @return
+	 */
 	public static boolean containsVariables(List<ByteString[]> query) {
 		// TODO Auto-generated method stub
 		for (ByteString[] triple : query) {
@@ -943,7 +1062,12 @@ public class KB {
 		return false;
 	}
 
-	/** returns number of instances of this triple */
+	/**
+	 * It returns the number of instances (bindings) that satisfy this 
+	 * triple pattern. 
+	 * @param triple A triple pattern containing both constants and variables (no restrictions,
+	 * it can contain only constants).
+	 **/
 	public long count(CharSequence... triple) {
 		return (count(triple(triple)));
 	}
@@ -969,8 +1093,12 @@ public class KB {
 	// Existence
 	// ---------------------------------------------------------------------------
 
-	/** Remove triple */
-	public static List<ByteString[]> remove(int pos, List<ByteString[]> triples) {
+	/** 
+	 * Remove a triple from a list of triples.
+	 * @param pos Index in the list of the triple to be removed.
+	 * @param triples Target list
+	 **/
+	protected static List<ByteString[]> remove(int pos, List<ByteString[]> triples) {
 		if (pos == 0)
 			return (triples.subList(1, triples.size()));
 		if (pos == triples.size() - 1)
@@ -980,7 +1108,11 @@ public class KB {
 		return (result);
 	}
 
-	/** Returns most restrictive triple, -1 if most restrictive has count 0 */
+	/**
+	 * It returns the index of the most restrictive triple, -1 if most restrictive has count 0.
+	 * The most restrictive triple is the one that contains the smallest number of satisfying
+	 * instantiations.
+	 **/
 	protected int mostRestrictiveTriple(List<ByteString[]> triples) {
 		int bestPos = -1;
 		long count = Long.MAX_VALUE;
@@ -996,7 +1128,13 @@ public class KB {
 		return (bestPos);
 	}
 
-	/** Returns most restrictive triple, -1 if most restrictive has count 0 */
+	/**
+	 * It returns the index of the most restrictive triple among those that contain the given variable, 
+	 * -1 if most restrictive has count 0. The most restrictive triple is the one that contains the smallest 
+	 * number of satisfying instantiations.
+	 * @param triples
+	 * @param variable Only triples containing this variable are considered.
+	 **/
 	protected int mostRestrictiveTriple(List<ByteString[]> triples,
 			ByteString variable) {
 		int bestPos = -1;
@@ -1016,16 +1154,20 @@ public class KB {
 	}
 
 	/**
-	 * Returns most restrictive triple that contains either the proj or the
-	 * variable, -1 if most restrictive has count 0
-	 */
+	 * It returns the index of the most restrictive triple among those that contain the given variables, 
+	 * -1 if most restrictive has count 0. The most restrictive triple is the one that contains the smallest 
+	 * number of satisfying instantiations.
+	 * @param triples
+	 * @param var1 
+	 * @param var2 
+	 **/
 	protected int mostRestrictiveTriple(List<ByteString[]> triples,
 			ByteString var1, ByteString var2) {
 		int bestPos = -1;
 		long count = Long.MAX_VALUE;
 		for (int i = 0; i < triples.size(); i++) {
 			ByteString[] triple = triples.get(i);
-			if (contains(triple, var1) || contains(triple, var2)) {
+			if (contains(var1, triple) || contains(var2, triple)) {
 				long myCount = count(triple);
 				if (myCount >= count)
 					continue;
@@ -1038,12 +1180,22 @@ public class KB {
 		return (bestPos);
 	}
 
-	private boolean contains(ByteString[] triple, ByteString variable) {
-		return triple[0].equals(variable) || triple[1].equals(variable)
-				|| triple[2].equals(variable);
+	/**
+	 * Returns TRUE if the triple pattern contains the given variable.
+	 * @param var
+	 * @param triple
+	 * @return
+	 */
+	private boolean contains(ByteString var, ByteString[] triple) {
+		return triple[0].equals(var) || triple[1].equals(var)
+				|| triple[2].equals(var);
 	}
 
-	/** Returns the position of a variable in a triple */
+	/** 
+	 * Returns the position of a variable in a triple.
+	 * @param var
+	 * @param triple
+	 **/
 	public static int varpos(ByteString var, ByteString[] triple) {
 		for (int i = 0; i < triple.length; i++) {
 			if (var.equals(triple[i]))
@@ -1052,7 +1204,11 @@ public class KB {
 		return (-1);
 	}
 
-	/** Returns the position of a variable in a triple */
+	/** 
+	 * Returns the position of a variable in a triple.
+	 * @param var
+	 * @param triple
+	 **/
 	public static int varpos(CharSequence var, CharSequence[] triple) {
 		for (int i = 0; i < triple.length; i++) {
 			if (var.equals(triple[i]))
@@ -1061,7 +1217,11 @@ public class KB {
 		return (-1);
 	}
 
-	/** Returns the position of the first variable in the pattern */
+	/**
+	 * Returns the position of the first variable in the pattern
+	 * @param fact
+	 * @return
+	 */
 	public static int firstVariablePos(ByteString... fact) {
 		for (int i = 0; i < fact.length; i++)
 			if (isVariable(fact[i]))
@@ -1069,7 +1229,11 @@ public class KB {
 		return (-1);
 	}
 
-	/** Returns the position of the second variable in the pattern */
+	/**
+	 * Returns the position of the second variable in the pattern
+	 * @param fact
+	 * @return
+	 */
 	public static int secondVariablePos(ByteString... fact) {
 		for (int i = firstVariablePos(fact) + 1; i < fact.length; i++)
 			if (isVariable(fact[i]))
@@ -1077,12 +1241,22 @@ public class KB {
 		return (-1);
 	}
 
-	/** TRUE if the query result exists */
+	/**
+	 * It returns TRUE if there exists one instantiation that satisfies
+	 * the query
+	 * @param triples
+	 * @return
+	 */
 	protected boolean exists(List<CharSequence[]> triples) {
 		return (existsBS(triples(triples)));
 	}
 
-	/** TRUE if the query result exists */
+	/**
+	 * It returns TRUE if there exists one instantiation that satisfies
+	 * the query
+	 * @param triples
+	 * @return
+	 */
 	protected boolean existsBS(List<ByteString[]> triples) {
 		if (triples.isEmpty())
 			return (false);
@@ -1141,7 +1315,12 @@ public class KB {
 	// Count Distinct
 	// ---------------------------------------------------------------------------
 
-	/** returns the number of instances that fulfill a certain condition */
+	/** 
+	 * It returns the number of instantiations of variable that fulfill a certain 
+	 * list of triple patterns.
+	 * @param variable Projection variable
+	 * @param query The list of triple patterns 
+	 **/
 	public long countDistinct(CharSequence variable, List<CharSequence[]> query) {
 		return (selectDistinct(variable, query).size());
 	}
@@ -1190,7 +1369,7 @@ public class KB {
 				case 0:
 					return (subjectSize);
 				case 1:
-					return (predicateSize);
+					return (relationSize);
 				case 2:
 					return (objectSize);
 				}
@@ -1540,7 +1719,7 @@ public class KB {
 				return res;
 			}
 
-			for (ByteString predicate : predicateSize.keys()) {
+			for (ByteString predicate : relationSize.keys()) {
 				triple[1] = predicate;
 				res.add(predicate, resultsTwoVariables(0, 2, triple).size());
 			}
@@ -1710,7 +1889,7 @@ public class KB {
 						predicate2object2subject, triple[1])));
 			}
 		case 3:
-			return (pos == 0 ? subjectSize : pos == 1 ? predicateSize
+			return (pos == 0 ? subjectSize : pos == 1 ? relationSize
 					: objectSize);
 		default:
 			throw new InvalidParameterException(
@@ -1909,6 +2088,13 @@ public class KB {
 		return (result);
 	}
 
+	/**
+	 * Returns the in the first atom, of the first variable that is found on the
+	 * second atom.
+	 * @param t1
+	 * @param t2
+	 * @return
+	 */
 	public int firstVariableInCommon(ByteString[] t1, ByteString[] t2) {
 		for (int i = 0; i < t1.length; ++i) {
 			if (KB.isVariable(t1[i]) && varpos(t1[i], t2) != -1)
@@ -1918,6 +2104,12 @@ public class KB {
 		return -1;
 	}
 
+	/**
+	 * Return the number of common variables between 2 atoms.
+	 * @param a
+	 * @param b
+	 * @return
+	 */
 	public int numVarsInCommon(ByteString[] a, ByteString[] b) {
 		int count = 0;
 		for (int i = 0; i < a.length; ++i) {
@@ -2135,7 +2327,7 @@ public class KB {
 		ByteString targetRelation = query.get(queryInfo[2])[1];
 
 		// Heuristic
-		if (predicateSize.get(targetRelation) < 50000)
+		if (relationSize.get(targetRelation) < 50000)
 			return countDistinctPairs(var1, var2, query);
 
 		long duplicatesEstimate, duplicatesCard;
@@ -2179,7 +2371,7 @@ public class KB {
 		List<ByteString[]> subquery = new ArrayList<ByteString[]>(query);
 
 		// Heuristic
-		if (predicateSize.get(targetRelation) < 50000) {
+		if (relationSize.get(targetRelation) < 50000) {
 			subquery.add(existentialTriple);
 			result = countDistinctPairs(var1, var2, subquery);
 			return result;
@@ -2435,19 +2627,31 @@ public class KB {
 	}
 	
 	
-	/*** Difference with 2 variables ***/
+	// ---------------------------------------------------------------------------
+	// Difference with 2 variables
+	// ---------------------------------------------------------------------------
+	
+	/**
+	 * Bindings of the projection variables that satisfy the first list of atoms 
+	 * but not the atom 'head'.
+	 * @param var1
+	 * @param var2
+	 * @param antecedent
+	 * @param headList
+	 * @return
+	 */
 	public Map<ByteString, IntHashMap<ByteString>> difference(CharSequence var1,
 			CharSequence var2, List<? extends CharSequence[]> antecedent, CharSequence[] head) {
 		return difference(compress(var1), compress(var2), triples(antecedent), triple(head));
 	}
+	
 	/**
-	 * Performs a set difference assuming the bindings of the argument head are
-	 * a subset of the argument antecedent
-	 * 
+	 * Bindings of the projection variables that satisfy the first list of atoms 
+	 * but not the atom 'head'.
 	 * @param var1
 	 * @param var2
 	 * @param antecedent
-	 * @param head
+	 * @param headList
 	 * @return
 	 */
 	public Map<ByteString, IntHashMap<ByteString>> difference(ByteString var1,
@@ -2460,6 +2664,15 @@ public class KB {
 		return difference(var1, var2, antecedent, headList);
 	}
 	
+	/**
+	 * Bindings of the projection variables that satisfy the first list of atoms 
+	 * but not the atom 'head'.
+	 * @param var1
+	 * @param var2
+	 * @param antecedent
+	 * @param headList
+	 * @return
+	 */
 	public Map<ByteString, IntHashMap<ByteString>> differenceNoVarsInCommon(CharSequence var1,
 			CharSequence var2, List<? extends CharSequence[]> antecedent,
 			CharSequence[] head) {
@@ -2467,8 +2680,9 @@ public class KB {
 	}
 	
 	/**
-	 * Special case of the difference where the head does not contain the projection 
-	 * variables.
+	 * Bindings of the projection variables that satisfy the first list of atoms 
+	 * but not the atom 'head'. Special case of the difference where the head atom does 
+	 * not contain the projection variables.
 	 * @param var1
 	 * @param var2
 	 * @param antecedent
@@ -2546,7 +2760,20 @@ public class KB {
 		return result;
 	}
 	
-	/** Difference with 3 variables **/
+	// ---------------------------------------------------------------------------
+	// Difference with 3 variables
+	// ---------------------------------------------------------------------------
+	
+	/**
+	 * Bindings of the projection variables that satisfy the first list of atoms 
+	 * but not the atom 'head'.
+	 * @param var1
+	 * @param var2
+	 * @param var3
+	 * @param antecedent
+	 * @param headList
+	 * @return
+	 */
 	public Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> difference(
 			CharSequence var1, CharSequence var2, CharSequence var3,
 			List<? extends CharSequence[]> antecedent, CharSequence[] head) {
@@ -2554,6 +2781,16 @@ public class KB {
 				triples(antecedent), triple(head));
 	}
 	
+	/**
+	 * Bindings of the projection variables that satisfy the first list of atoms 
+	 * but not the atom 'head'
+	 * @param var1
+	 * @param var2
+	 * @param var3
+	 * @param antecedent
+	 * @param headList
+	 * @return
+	 */
 	public Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> difference(
 			ByteString var1, ByteString var2, ByteString var3,
 			List<ByteString[]> antecedent, ByteString[] head) {
@@ -2644,7 +2881,21 @@ public class KB {
 	}
 	
 	
-	/** Difference with 4 variables **/
+	// ---------------------------------------------------------------------------
+	// Difference with 4 variables
+	// ---------------------------------------------------------------------------
+	
+	/**
+	 * Bindings of the projection variables that satisfy the first list of atoms 
+	 * but not the atom 'head'
+	 * @param var1
+	 * @param var2
+	 * @param var3
+	 * @param var4
+	 * @param antecedent
+	 * @param head
+	 * @return
+	 */
 	public Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> difference(
 			CharSequence var1, CharSequence var2, CharSequence var3, CharSequence var4,
 			List<? extends CharSequence[]> antecedent, CharSequence[] head) {
@@ -2652,6 +2903,16 @@ public class KB {
 				triples(antecedent), triple(head));
 	}
 	
+	/**
+	 * Bindings of the projection variables that satisfy the first list of atoms 
+	 * but not the second.
+	 * @param var1
+	 * @param var2
+	 * @param antecedent
+	 * @param head
+	 * @param swap
+	 * @return
+	 */
 	public Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> difference(
 			CharSequence var1, CharSequence var2, CharSequence var3, CharSequence var4,
 			List<? extends CharSequence[]> antecedent, CharSequence[] head, boolean swap) {
@@ -2659,6 +2920,15 @@ public class KB {
 				triples(antecedent), triple(head), swap);
 	}
 	
+	/**
+	 * Bindings of the projection variables that satisfy the first list of atoms 
+	 * but not the second.
+	 * @param var1
+	 * @param var2
+	 * @param antecedent
+	 * @param head
+	 * @return
+	 */
 	public Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> difference(
 			ByteString var1, ByteString var2, ByteString var3, ByteString var4,
 			List<ByteString[]> antecedent, ByteString[] head) {
@@ -2725,6 +2995,17 @@ public class KB {
 				compress(var3), compress(var4), triples(antecedent), triple(head));
 	}
 	
+	/**
+	 * It performs set difference for the case where the head contains 2 out of the 4 variables
+	 * defined in the body. 
+	 * @param var1 First variable, not occurring in the head
+	 * @param var2 Second variable, not occurring in the head
+	 * @param var3 First Variable occurring in both body and head
+	 * @param var4 Second Variable occurring in both body and head
+	 * @param antecedent
+	 * @param head
+	 * @return
+	 */
 	public Map<ByteString, Map<ByteString, Map<ByteString, IntHashMap<ByteString>>>> differenceNotVarsInCommon(
 			ByteString var1, ByteString var2, ByteString var3, ByteString var4,
 			List<ByteString[]> antecedent, ByteString[] head) {
@@ -2774,7 +3055,7 @@ public class KB {
 	}
 
 	/**
-	 * Counts the number of bindings in the nested map.
+	 * Counts the number of bindings in the given nested map.
 	 * @param bindings
 	 * @return
 	 */
@@ -2795,7 +3076,7 @@ public class KB {
 	 * @return
 	 */
 	public Collection<ByteString> getRelations() {
-		return predicateSize.decreasingKeys();
+		return relationSize.decreasingKeys();
 	}
 	
 	/**
@@ -2826,7 +3107,7 @@ public class KB {
 	 * @return
 	 */
 	public List<ByteString> getRelationsList() {
-		return predicateSize.decreasingKeys();
+		return relationSize.decreasingKeys();
 	}
 	
 	@Override
@@ -2849,7 +3130,9 @@ public class KB {
 		return strBuilder.toString();
 	}
 	
-	/** Utilities **/
+	// ---------------------------------------------------------------------------
+	// Utilities
+	// ---------------------------------------------------------------------------
 	
 	/**
 	 * Returns a new FactDatabase containing the triples that are present in 
@@ -2877,22 +3160,22 @@ public class KB {
 	}
 	
 	/**
-	 * It outputs statistical information about a KB.
+	 * It outputs statistical information about the KB.
 	 * @param db
-	 * @param detailRelations
+	 * @param detailRelations If true, print also information about the relations
 	 */
 	public void summarize(boolean detailRelations) {
-		System.out.println("Number of subjects: " + size(0));
-		System.out.println("Number of relations: " + size(1));
-		System.out.println("Number of objects: " + size(2));
+		System.out.println("Number of subjects: " + size(Column.Subject));
+		System.out.println("Number of relations: " + size(Column.Relation));
+		System.out.println("Number of objects: " + size(Column.Object));
 		System.out.println("Number of facts: " + size());
 		
 		if (detailRelations) {
 			System.out.println("Relation\tTriples\tFunctionality"
 					+ "\tInverse functionality\tNumber of subjects"
 					+ "\tNumber of objects");
-			for(ByteString relation: predicateSize.keys()){
-				System.out.println(relation + "\t" + predicateSize.get(relation) + 
+			for(ByteString relation: relationSize.keys()){
+				System.out.println(relation + "\t" + relationSize.get(relation) + 
 						"\t" + functionality(relation) + 
 						"\t" + inverseFunctionality(relation) + 
 						"\t" + predicate2subject2object.get(relation).size() +
@@ -2900,11 +3183,4 @@ public class KB {
 			}
 		}
 	}
-	
-	public static void main(String args[]) throws IOException {
-		KB kb = new KB();
-		kb.load(new File("/home/galarrag/workspace/MaxSAT/bin/tests/optimal-solver/fixedfacts"));
-		System.out.println(kb.selectDistinct("?a", "?b", triples(triple("?a", "livesIn", "?b"), triple("?x", "isCitizenOf", "?b"))));
-	}
-	
 }

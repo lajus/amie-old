@@ -21,6 +21,8 @@ import javatools.datatypes.IntHashMap;
 import amie.data.KB;
 
 /**
+ * A class that represents Horn rules of the form A => B where A is a conjunction of binary atoms
+ * of the form r(x, y). Each atom is represented as a triple [x, r, y] (subject, relation, object).
  * @author lgalarra
  *
  */
@@ -1225,7 +1227,7 @@ public class Rule {
             return false;
         }
 
-        return QueryEquivalenceChecker.equal(triples, other.triples);
+        return QueryEquivalenceChecker.areEquivalent(triples, other.triples);
     }
 
     public static void printRuleBasicHeaders() {
