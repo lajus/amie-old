@@ -2448,28 +2448,35 @@ public class KB {
 		int[] positions;
 
 		ByteString variable;
+		
+		private int atomSize;
 
-		public Instantiator(List<ByteString[]> q, ByteString var) {
-			positions = new int[q.size() * 3];
+		public Instantiator(List<ByteString[]> q, ByteString var, int atomSize) {
+			this.atomSize = atomSize;
+			positions = new int[q.size() * atomSize];
 			int numPos = 0;
 			query = q;
 			variable = var;
 			for (int i = 0; i < query.size(); i++) {
 				for (int j = 0; j < query.get(i).length; j++) {
 					if (query.get(i)[j].equals(variable))
-						positions[numPos++] = i * 3 + j;
+						positions[numPos++] = i * atomSize + j;
 				}
 			}
 
 			if (numPos < positions.length)
 				positions[numPos] = -1;
 		}
+		
+		public Instantiator(List<ByteString[]> q, ByteString var) {
+			this(q, var, 3);
+		}
 
 		public List<ByteString[]> instantiate(ByteString value) {
 			for (int i = 0; i < positions.length; i++) {
 				if (positions[i] == -1)
 					break;
-				query.get(positions[i] / 3)[positions[i] % 3] = value;
+				query.get(positions[i] / atomSize)[positions[i] % atomSize] = value;
 			}
 			return (query);
 		}
@@ -2479,7 +2486,7 @@ public class KB {
 			for (int i = 0; i < positions.length; i++) {
 				if (positions[i] == -1)
 					break;
-				query.get(positions[i] / 3)[positions[i] % 3] = variable;
+				query.get(positions[i] / atomSize)[positions[i] % atomSize] = variable;
 			}
 		}
 	}

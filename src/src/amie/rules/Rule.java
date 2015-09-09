@@ -7,6 +7,7 @@ package amie.rules;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -770,6 +771,19 @@ public class Rule {
 
         return true;
     }
+    
+
+    /**
+     * It returns true if the atom contains the a term (variable or constant)
+     * more than once.
+     * @param literal
+     * @return
+     */
+	public static boolean isReflexive(ByteString[] atom) {
+		// TODO Auto-generated method stub
+		return atom[0].equals(atom[1]) || atom[1].equals(atom[2])
+				|| atom[2].equals(atom[0]);
+	}
 
     public static boolean areEquivalent(ByteString[] pattern, ByteString[] newAtom) {
         boolean unifiesSubject = pattern[0].equals(newAtom[0])
@@ -793,14 +807,22 @@ public class Rule {
         return true;
     }
 
+    /**
+     * Determines if the first argument is unifiable to at least one atom in the second argument.
+     * Unifiable means there is a valid unification mapping (variable -&gt;
+     * variable, variable -&gt; constant) between the components of the triple
+     * pattern
+     *
+     * @param test
+     * @param query
+     * @return boolean
+     */
     public static boolean unifies(ByteString[] test, List<ByteString[]> query) {
         for (ByteString[] pattern : query) {
             if (isUnifiable(pattern, test)) {
                 return true;
             }
-
         }
-
         return false;
     }
 
@@ -884,6 +906,22 @@ public class Rule {
         }
 
         return variables;
+    }
+    
+    /**
+     * It returns the variables of an atom as a collection.
+     * @param atom
+     * @return
+     */
+    public static Collection<ByteString> getVariables(ByteString[] atom) {
+    	Collection<ByteString> result = new ArrayList<>(4);
+    	for (int i = 0; i < atom.length; ++i) {
+    		if (KB.isVariable(atom[i])) {
+    			result.add(atom[i]);
+    		}
+    	}
+    	
+    	return result;
     }
 
     /**
@@ -2036,6 +2074,11 @@ public class Rule {
         return newQuery;
     }
 
+    /**
+     * Returns a list of the relations that occur in the body. The list contains
+     * no duplicates.
+     * @return
+     */
     public List<ByteString> getBodyRelations() {
         List<ByteString> bodyRelations = new ArrayList<>();
         for (ByteString[] atom : getBody()) {
@@ -2047,9 +2090,10 @@ public class Rule {
     }
     
     public static void main(String[] args) {
-    	Rule q = new Rule();
-    	for (int i = 0;  i < 50; ++i) {
-    		System.out.println(Arrays.toString(q.fullyUnboundTriplePattern()));
-    	}
+    	ByteString[] atom = new ByteString[]{ByteString.of("?s"), ByteString.of("?r"), ByteString.of("?o") };
+    	ByteString[] constant1 = new ByteString[]{ByteString.of("Luis"), ByteString.of("livesIn"), ByteString.of("Ecuador") };
+    	ByteString[] atom2 = new ByteString[]{ByteString.of("?s"), ByteString.of("implies"), ByteString.of("?o") };
+    	System.out.println(isUnifiable(atom, constant1));
+    	System.out.println(isUnifiable(atom2, constant1));
     }
 }
