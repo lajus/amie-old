@@ -67,7 +67,7 @@ public class PCAFalseFactsSampler {
 	private void run(Collection<Rule> rules){
 		for(Rule rule: rules){	
 			Collection<Triple<ByteString, ByteString, ByteString>> ruleAssumedFalse = generateAssumedFalseFacts(rule);			
-			Collection<Triple<ByteString, ByteString, ByteString>> sample =  PredictionsSampler.sample(ruleAssumedFalse, sampleSize);
+			Collection<Triple<ByteString, ByteString, ByteString>> sample =  Predictor.sample(ruleAssumedFalse, sampleSize);
 			for(Triple<ByteString, ByteString, ByteString> fact: sample){
 				System.out.println(rule.getRuleString() + "\t" + fact.first + "\t" + fact.second + "\t" + fact.third);
 			}
@@ -100,7 +100,7 @@ public class PCAFalseFactsSampler {
 				}	
 				allAssumedFalse.addAll(ruleAssumedFalse);				
 			}
-			Collection<Triple<ByteString, ByteString, ByteString>> sample =  PredictionsSampler.sample(allAssumedFalse, sampleSize);
+			Collection<Triple<ByteString, ByteString, ByteString>> sample =  Predictor.sample(allAssumedFalse, sampleSize);
 			printSample(sample, factToRule);
 		}
 	}

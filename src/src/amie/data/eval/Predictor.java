@@ -27,7 +27,7 @@ import amie.rules.Rule;
  * @author lgalarra
  *
  */
-public class PredictionsSampler {
+public class Predictor {
 	/**
 	 * Sample size
 	 */
@@ -38,13 +38,13 @@ public class PredictionsSampler {
 	 */
 	private KB source;
 	
-	public PredictionsSampler(KB dataset) {
+	public Predictor(KB dataset) {
 		super();
 		this.source = dataset;
 		sampleSize = 30;
 	}
 	
-	public PredictionsSampler(KB dataset, int sampleSize) {
+	public Predictor(KB dataset, int sampleSize) {
 		super();
 		this.source = dataset;
 		this.sampleSize = sampleSize;
@@ -113,12 +113,21 @@ public class PredictionsSampler {
 	public Object generateBodyBindings(Rule rule){
 		if(KB.numVariables(rule.getHead()) == 1)
 			return generateBindingsForSingleVariable(rule);
-		else
-			return generateBindingsForTwoVariables(rule);		
+		else if (KB.numVariables(rule.getHead()) == 2)
+			return generateBindingsForTwoVariables(rule);
+		else 
+			return generateBindingsForThreeVariables(rule);
 	}
 	
+	private Object generateBindingsForThreeVariables(Rule rule) {
+		ByteString[] head = rule.getHead();
+		return source.selectDistinct(rule.getFunctionalVariable(), 
+				head[1], rule.getNonFunctionalVariable(), rule.getAntecedent());
+	}
+
 	private Object generateBindingsForTwoVariables(Rule rule) {
-		return source.selectDistinct(rule.getFunctionalVariable(), rule.getNonFunctionalVariable(), rule.getAntecedent());
+		return source.selectDistinct(rule.getFunctionalVariable(), 
+				rule.getNonFunctionalVariable(), rule.getAntecedent());
 	}
 
 	private Object generateBindingsForSingleVariable(Rule rule) {
@@ -146,7 +155,8 @@ public class PredictionsSampler {
 
 	private Object generatePCABindingsForTwoVariables(Rule rule) {
 		// TODO Auto-generated method stub
-		return source.selectDistinct(rule.getFunctionalVariable(), rule.getNonFunctionalVariable(), rule.getPCAQuery());
+		return source.selectDistinct(rule.getFunctionalVariable(),
+				rule.getNonFunctionalVariable(), rule.getPCAQuery());
 	}
 
 	/**
@@ -168,7 +178,8 @@ public class PredictionsSampler {
 	}
 	
 	private Map<ByteString, IntHashMap<ByteString>> predictBindingsForTwoVariables(Rule rule) {
-		return source.difference(rule.getFunctionalVariable(), rule.getNonFunctionalVariable(), rule.getAntecedent(), rule.getTriples());
+		return source.difference(rule.getFunctionalVariable(), 
+				rule.getNonFunctionalVariable(), rule.getAntecedent(), rule.getTriples());
 	}
 	
 	/**
@@ -178,11 +189,13 @@ public class PredictionsSampler {
 	 * @param rules
 	 */
 	public void runMode1(Collection<Rule> rules) {
-		Map<ByteString, Map<ByteString, Set<ByteString>>> allPredictions = new HashMap<ByteString, Map<ByteString, Set<ByteString>>>();
+		Map<ByteString, Map<ByteString, Set<ByteString>>> allPredictions = 
+				new HashMap<ByteString, Map<ByteString, Set<ByteString>>>();
 		
 		for(Rule rule: rules){
 			Object predictions = generatePredictions(rule);
-			Collection<Triple<ByteString, ByteString, ByteString>> newPredictions = samplePredictions(predictions, rule, allPredictions);
+			Collection<Triple<ByteString, ByteString, ByteString>> newPredictions = 
+					samplePredictions(predictions, rule, allPredictions);
 			printPredictions(rule, newPredictions);
 		}
 	}		
@@ -196,7 +209,8 @@ public class PredictionsSampler {
 	public void runMode2(Collection<Rule> rules){
 		for(Rule rule: rules){
 			Object predictions = generatePredictions(rule);
-			Collection<Triple<ByteString, ByteString, ByteString>> newPredictions = samplePredictions(predictions, rule);
+			Collection<Triple<ByteString, ByteString, ByteString>> newPredictions = 
+					samplePredictions(predictions, rule);
 			printPredictions(rule, newPredictions);
 		}		
 	}
@@ -224,11 +238,13 @@ public class PredictionsSampler {
 		ByteString relation = rule.getHead()[1];
 		//Depending on the counting variable the order is different
 		int countingVarPos = rule.getFunctionalVariablePosition();
-		Set<Triple<ByteString, ByteString, ByteString>> samplingCandidates = new LinkedHashSet<Triple<ByteString, ByteString, ByteString>>();
+		Set<Triple<ByteString, ByteString, ByteString>> samplingCandidates = 
+				new LinkedHashSet<Triple<ByteString, ByteString, ByteString>>();
 		
 		for(ByteString value1: keySet){
 			for(ByteString value2: predictions.get(value1)){
-				Triple<ByteString, ByteString, ByteString> triple = new Triple<ByteString, ByteString, ByteString>(null, null, null);
+				Triple<ByteString, ByteString, ByteString> triple = 
+						new Triple<ByteString, ByteString, ByteString>(null, null, null);
 				
 				if(value1.equals(value2)) continue;
 				
@@ -245,7 +261,7 @@ public class PredictionsSampler {
 			}			
 		}
 		
-		return PredictionsSampler.sample(samplingCandidates, this.sampleSize);
+		return Predictor.sample(samplingCandidates, this.sampleSize);
 	}
 	
 
@@ -260,7 +276,8 @@ public class PredictionsSampler {
 	 * @param predictions
 	 * @param rule
 	 */
-	private Collection<Triple<ByteString, ByteString, ByteString>> samplePredictions(Object predictions, Rule rule, Map<ByteString, Map<ByteString, Set<ByteString>>> allPredictions) {
+	private Collection<Triple<ByteString, ByteString, ByteString>> samplePredictions(
+			Object predictions, Rule rule, Map<ByteString, Map<ByteString, Set<ByteString>>> allPredictions) {
 		// TODO Auto-generated method stub
 		int nVars = KB.numVariables(rule.getHead());
 		if(nVars == 2){
@@ -280,16 +297,20 @@ public class PredictionsSampler {
 		
 	}
 
-	private Collection<Triple<ByteString, ByteString, ByteString>> samplePredictionsTwoVariables(Map<ByteString, IntHashMap<ByteString>> predictions, Rule rule, Map<ByteString, Map<ByteString, Set<ByteString>>> allPredictions){
+	private Collection<Triple<ByteString, ByteString, ByteString>> samplePredictionsTwoVariables(
+			Map<ByteString, IntHashMap<ByteString>> predictions, 
+			Rule rule, Map<ByteString, Map<ByteString, Set<ByteString>>> allPredictions){
 		Set<ByteString> keySet = predictions.keySet();
 		ByteString relation = rule.getHead()[1];
 		//Depending on the counting variable the order is different
 		int countingVarPos = rule.getFunctionalVariablePosition();
-		Set<Triple<ByteString, ByteString, ByteString>> samplingCandidates = new LinkedHashSet<Triple<ByteString, ByteString, ByteString>>();
+		Set<Triple<ByteString, ByteString, ByteString>> samplingCandidates = 
+				new LinkedHashSet<Triple<ByteString, ByteString, ByteString>>();
 		
 		for(ByteString value1: keySet){
 			for(ByteString value2: predictions.get(value1)){
-				Triple<ByteString, ByteString, ByteString> triple = new Triple<ByteString, ByteString, ByteString>(null, null, null);
+				Triple<ByteString, ByteString, ByteString> triple = 
+						new Triple<ByteString, ByteString, ByteString>(null, null, null);
 				
 				if(value1.equals(value2)) continue;
 				
@@ -311,7 +332,7 @@ public class PredictionsSampler {
 			}			
 		}
 		
-		return PredictionsSampler.sample(samplingCandidates, sampleSize);
+		return Predictor.sample(samplingCandidates, sampleSize);
 	}
 	
 	/**
@@ -320,7 +341,8 @@ public class PredictionsSampler {
 	 * @param allPredictions
 	 * @param triple
 	 */
-	private void addPrediction(Map<ByteString, Map<ByteString, Set<ByteString>>> allPredictions, Triple<ByteString, ByteString, ByteString> triple) {
+	private void addPrediction(Map<ByteString, Map<ByteString, Set<ByteString>>> allPredictions, 
+			Triple<ByteString, ByteString, ByteString> triple) {
 		if(allPredictions.containsKey(triple.second)){
 			Map<ByteString, Set<ByteString>> subjects = allPredictions.get(triple.second);
 			if(subjects.containsKey(triple.first)){
@@ -339,7 +361,8 @@ public class PredictionsSampler {
 		}
 	}
 
-	private boolean containsPrediction(Map<ByteString, Map<ByteString, Set<ByteString>>> allPredictions, Triple<ByteString, ByteString, ByteString> triple) {
+	private boolean containsPrediction(Map<ByteString, Map<ByteString, Set<ByteString>>> allPredictions, 
+			Triple<ByteString, ByteString, ByteString> triple) {
 		// TODO Auto-generated method stub
 		Map<ByteString, Set<ByteString>> subjects2objects = allPredictions.get(triple.second);
 		if(subjects2objects != null){
@@ -359,7 +382,8 @@ public class PredictionsSampler {
 	 * @param samplingCandidates
 	 * @return
 	 */
-	public static Collection<Triple<ByteString, ByteString, ByteString>> sample(Collection<Triple<ByteString, ByteString, ByteString>> samplingCandidates, int sampleSize){
+	public static Collection<Triple<ByteString, ByteString, ByteString>> sample(Collection<Triple<ByteString, ByteString, ByteString>> samplingCandidates,
+			int sampleSize){
 		//Now sample them
 		List<Triple<ByteString, ByteString, ByteString>> result = new ArrayList<>(sampleSize);		
 		if(samplingCandidates.size() <= sampleSize){
@@ -418,7 +442,7 @@ public class PredictionsSampler {
 				rule.setFunctionalVariablePosition(2);
 		}
 		
-		PredictionsSampler pp = new PredictionsSampler(trainingSource, sampleSize);
+		Predictor pp = new Predictor(trainingSource, sampleSize);
 		if(mode == 1)
 			pp.runMode1(rules); //Considered previous samples
 		else

@@ -58,7 +58,7 @@ public class RuleHitsEvaluator {
 		
 		trainingDataset.load(new File(args[1]));
 		targetDataset.load(new File(args[2]));
-		PredictionsSampler predictor = new PredictionsSampler(trainingDataset);	
+		Predictor predictor = new Predictor(trainingDataset);	
 		IntHashMap<Triple<ByteString, ByteString, ByteString>> predictions = 
 				new IntHashMap<>();
 		// Collect all predictions made by the rules.

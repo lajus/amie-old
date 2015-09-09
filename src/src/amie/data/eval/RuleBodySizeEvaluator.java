@@ -56,7 +56,7 @@ public class RuleBodySizeEvaluator {
 	}
 
 	private static long[] conditionalBodySize(Rule q, KB db, Set<Triple<ByteString, ByteString, ByteString>> allPredictions) {
-		PredictionsSampler pp = new PredictionsSampler(db);
+		Predictor pp = new Predictor(db);
 		Object predictionsObj = pp.generatePredictions(q);
 		Map<ByteString, IntHashMap<ByteString>> predictions = (Map<ByteString, IntHashMap<ByteString>>)predictionsObj;
 		int countingVarPos = q.getFunctionalVariablePosition();

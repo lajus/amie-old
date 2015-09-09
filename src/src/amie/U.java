@@ -3,7 +3,9 @@ package amie;
 import java.util.List;
 import java.util.Map;
 
+import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
+import javatools.datatypes.Triple;
 
 public class U {
 	/**
@@ -27,5 +29,27 @@ public class U {
 			histogram.increase(map.get(key).size());
 		}
 		return histogram;
+	}
+	
+	/**
+	 * Converts an array into a triple
+	 * @param array
+	 * @return
+	 */
+	public static <T> Triple<T, T, T> toTriple(T[] array) {
+		if (array.length < 3) {
+			return null;
+		} else {
+			return new Triple<T, T, T>(array[0], array[1], array[2]);
+		}
+	}
+	
+	/**
+	 * Converts an array into a triple
+	 * @param array
+	 * @return
+	 */
+	public static ByteString[] toArray(Triple<ByteString, ByteString, ByteString> triple) {
+		return new ByteString[] { triple.first, triple.second, triple.third};
 	}
 }
