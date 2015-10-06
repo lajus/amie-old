@@ -363,31 +363,6 @@ public class DefaultMiningAssistant extends MiningAssistant{
 					candidate.setSupportRatio(candidate.getSupport() / this.kb.size());
 					candidate.setParent(query);	
 					output.add(candidate);
-					/*if (canAddInstantiatedAtoms()) {
-						// Pruning by maximum length for the \mathcal{O}_E operator.
-						if (this.exploitMaxLengthOption) {
-							if (query.getRealLength() < this.maxDepth - 1 
-									|| openVariables.size() < 2) {
-								getInstantiatedAtoms(candidate, candidate, nPatterns, danglingPosition, minSupportThreshold, output);	
-							}
-						} else {
-							getInstantiatedAtoms(candidate, candidate, nPatterns, danglingPosition, minSupportThreshold, output);							
-						}
-					}*/
-					
-/*					if (!this.enforceConstants) {
-						// If this rule will not be refined anyway.
-						if (candidate.getRealLength() == this.maxDepth 
-								&& !candidate.isClosed() ) {
-							continue;
-						}
-						// If the assistant has been told to avoid atoms of the form type(x, y)
-						if (relation.equals(this.typeString) 
-								&& this.avoidUnboundTypeAtoms) {
-							continue;
-						}
-						output.add(candidate);
-					}*/
 				}
 			}
 		}
