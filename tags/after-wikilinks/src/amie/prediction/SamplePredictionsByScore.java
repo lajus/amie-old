@@ -24,7 +24,7 @@ public class SamplePredictionsByScore {
 	
 	public static void main(String[] args) throws IOException {
 		if(args.length < 5){
-			System.err.println("SamplePredictionsyByScore <rules> <trainingDb> <targetDb> <random> <naive> [bindingsWithoutLinks=false] [allrules=false]");
+			System.err.println("SamplePredictionsyByScore <rules> <trainingDb> <targetDb> <random> <naive> [mode=default|wikilinks|functional|functional+] [allrules=false]");
 			System.exit(1);
 		}
 		
@@ -35,10 +35,10 @@ public class SamplePredictionsByScore {
 		boolean random = Boolean.parseBoolean(args[3]);
 		boolean allRules = false;
 		boolean naive = Boolean.parseBoolean(args[4]);
-		boolean bindingsWithoutLinks = false;
+		String mode = "default";
 
 		if (args.length > 5) {
-			bindingsWithoutLinks = Boolean.parseBoolean(args[5]);
+			mode = args[5];
 		}
 		
 		if (args.length > 6) {
@@ -69,12 +69,18 @@ public class SamplePredictionsByScore {
 		tsvFile.close();
 		Prediction.setConfidenceMetric(Metric.PCAConfidence);
 		List<Prediction> predictions = null;
-		System.out.println("BindingsWithoutLinks = " + bindingsWithoutLinks);
-		if (bindingsWithoutLinks)
+		System.out.println("BindingsWithoutLinks = " + mode);
+		switch (mode) {
+		case "functional" :
+			predictions = JointPredictions.getPredictionsWithoutFunctionalViolations(queries, trainingDataset, targetDataset, 0.9, true);
+			break;
+		case "wikilinks":			
+			// Omit predictions for which there is no wikilink connecting the entities.
 			predictions = JointPredictions.getPredictionsWithoutLinks(queries, trainingDataset, targetDataset, true);
-		else
+			break;
+		case "default" : default :
 			predictions = JointPredictions.getPredictions(queries, trainingDataset, targetDataset, true);
-		
+		}
 		int predictionsConsidered = 0;
 		System.out.println(predictions.size() + " predictions");
 		for (Prediction prediction : predictions) {

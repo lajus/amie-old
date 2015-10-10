@@ -21,8 +21,8 @@ import amie.rules.Rule;
 
 /**
  * This class defines objects that take rules extracted from a training 
- * source and produce a sample of predictions: triples that are not in the
- * training source.
+ * KB and produce a sample of the predictions made by the rules, i.e., triples 
+ * that are not in the training source.
  * 
  * @author lgalarra
  *

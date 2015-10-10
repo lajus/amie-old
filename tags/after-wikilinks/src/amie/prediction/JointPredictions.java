@@ -163,6 +163,42 @@ public class JointPredictions {
 		
 		return result;
 	}
+	
+	/**
+	 * Returns the list of all the predictions made by the given rules on the training dataset.
+	 * It excludes predictions that violate functional constraints.
+	 * @param queries
+	 * @param trainingDataset
+	 * @param targetDataset
+	 * @param functionalityThreshold Relations with a functionality equal or greater than this value are assumed functional.
+	 * @param notInTraining Exclude predictions in the training set.
+	 * @return
+	 */
+	public static List<Prediction> getPredictionsWithoutFunctionalViolations(
+			List<Rule> queries, FactDatabase trainingDataset,
+			FactDatabase targetDataset, double functionalityThreshold, boolean notInTraining) {
+		List<Prediction> result = new ArrayList<>();
+		Map<Triple<ByteString, ByteString, ByteString>, List<Query>> predictions =
+				findPredictionsForRules(queries, trainingDataset, targetDataset, notInTraining);
+		for (Triple<ByteString, ByteString, ByteString> t : predictions.keySet()) {
+			Prediction prediction = new Prediction(t);
+			prediction.getRules().addAll(predictions.get(t));
+			ByteString triple[] = prediction.getTriple();
+			
+			int eval = Evaluator.evaluate(triple, trainingDataset, targetDataset);
+			if(eval == 0) { 
+				prediction.setHitInTarget(true);
+			}
+			
+			if(trainingDataset.count(triple) > 0) {
+				prediction.setHitInTraining(true);
+			}
+			
+			result.add(prediction);
+		}
+		
+		return result;
+	}
 
 
 	public static void main(String[] args) throws IOException {

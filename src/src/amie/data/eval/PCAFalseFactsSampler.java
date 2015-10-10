@@ -17,6 +17,13 @@ import amie.data.KB;
 import amie.rules.AMIEParser;
 import amie.rules.Rule;
 
+/**
+ * It computes a sample of the facts assumed false by the PCA for a given
+ * set of rules mined from a KB.
+ * 
+ * @author galarrag
+ *
+ */
 public class PCAFalseFactsSampler {
 
 	private KB db;

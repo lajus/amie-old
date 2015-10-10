@@ -23,6 +23,10 @@ public class Evaluator {
 	 */
 	public static int evaluate(ByteString[] triple, 
 			KB training, KB target) {
+		//If we know something else about the triple, PCA says it is false
+		if (triple == null) {
+			System.out.println("Triple is null");			
+		}
 		// TODO Auto-generated method stub
 		int returnVal = 3;
 		ByteString[] head = Rule.fullyUnboundTriplePattern1();
@@ -34,11 +38,6 @@ public class Evaluator {
 		int boundVarPos = 
 				training.functionality(triple[1]) 
 				> training.inverseFunctionality(triple[1]) ? 0 : 2;
-
-		//If we know something else about the triple, PCA says it is false
-		if (triple == null) {
-			System.out.println("Triple is null");			
-		}
 		
 		if (target == null) {
 			System.out.println("Target is null");						

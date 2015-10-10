@@ -3180,7 +3180,7 @@ public class KB {
 	// ---------------------------------------------------------------------------
 	
 	/**
-	 * Returns a new FactDatabase containing the triples that are present in 
+	 * Returns a new KB containing the triples that are present in 
 	 * the KBs.
 	 * @param otherKb
 	 * @return

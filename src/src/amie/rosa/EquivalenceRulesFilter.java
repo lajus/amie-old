@@ -153,7 +153,7 @@ public class EquivalenceRulesFilter {
 					double pcaConf1 = (double)rules.get(i).getSupport() / (double)rules.get(i).getPcaBodySize();
 					double pcaConf2 = (double)rules.get(j).getSupport() / (double)rules.get(j).getPcaBodySize();
 					System.out.println(KB.toString(rules.get(i).getHead()) + " <=> " + KB.toString(rules.get(i).getBody().get(0)) + "\t" + intersection  + "\t" + union + "\t" + pcaConf1 + "\t" + pcaConf2);
-					//System.out.println(FactDatabase.toString(rules.get(i).getHead()) + " <=> " + FactDatabase.toString(rules.get(i).getBody().get(0)));					
+					//System.out.println(KB.toString(rules.get(i).getHead()) + " <=> " + KB.toString(rules.get(i).getBody().get(0)));					
 					break;
 				}
 			}

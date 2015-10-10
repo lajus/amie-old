@@ -15,10 +15,14 @@ import javatools.datatypes.Pair;
 
 import amie.data.KB;
 
+/**
+ * For each relation r of a given KB, it takes a sample of the entities x in the domain of the relation r
+ * and outputs all the facts of the form r(x,y)
+ * @author galarrag
+ *
+ */
 public class EntitiesRelationSampler {
 
-	
-	
 	/**
 	 * @param args
 	 * @throws IOException 
