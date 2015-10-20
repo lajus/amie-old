@@ -584,6 +584,46 @@ public class KB {
 		else 
 			return inverseFunctionality(relation);
 	}
+	
+	/**
+	 * It returns the variance of the number of objects associated to a single 
+	 * subject.
+	 * @param relation
+	 * @return
+	 */
+	public double inverseVariance(ByteString relation) {
+		// First calculate the average
+		double avg = 1.0 / inverseFunctionality(relation);
+		// Now compute the formula
+		double sum = 0.0;
+		Map<ByteString, IntHashMap<ByteString>> targetMap = 
+				predicate2object2subject.get(relation);
+		for (ByteString object : targetMap.keySet()) {
+			sum += Math.pow(avg - targetMap.get(object).size(), 2.0);
+		}
+		
+		return sum / targetMap.size();
+	}
+
+	/**
+	 * It returns the variance of the number of subjects associated to a single
+	 * object.
+	 * @param relation
+	 * @return
+	 */
+	public double variance(ByteString relation) {
+		// First calculate the average
+		double avg = 1.0 / functionality(relation);
+		// Now compute the formula
+		double sum = 0.0;
+		Map<ByteString, IntHashMap<ByteString>> targetMap = 
+				predicate2subject2object.get(relation);
+		for (ByteString subject : targetMap.keySet()) {
+			sum += Math.pow(avg - targetMap.get(subject).size(), 2.0);
+		}
+		
+		return sum / targetMap.size();
+	}
 
 	// ---------------------------------------------------------------------------
 	// Statistics
@@ -3216,12 +3256,14 @@ public class KB {
 		
 		if (detailRelations) {
 			System.out.println("Relation\tTriples\tFunctionality"
-					+ "\tInverse functionality\tNumber of subjects"
-					+ "\tNumber of objects");
+					+ "\tInverse functionality\tVariance\tInverse Variance"
+					+ "\tNumber of subjects\tNumber of objects");
 			for(ByteString relation: relationSize.keys()){
 				System.out.println(relation + "\t" + relationSize.get(relation) + 
 						"\t" + functionality(relation) + 
 						"\t" + inverseFunctionality(relation) + 
+						"\t" + variance(relation) +
+						"\t" + inverseVariance(relation) +
 						"\t" + predicate2subject2object.get(relation).size() +
 						"\t" + predicate2object2subject.get(relation).size());
 			}

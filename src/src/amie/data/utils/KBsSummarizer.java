@@ -9,7 +9,9 @@ import javatools.datatypes.ByteString;
 import amie.data.KB;
 
 /**
- * Summarize 2 KBs and print their common relations.
+ * Summarize 2 KBs and print their common relations. It also accepts
+ * a single KB. In that case, the program just prints the info of a one KB 
+ * 
  * @author galarrag
  *
  */
@@ -18,27 +20,33 @@ public class KBsSummarizer {
 	public static void main(String args[]) throws IOException {
 		KB db1 = new KB();
 		db1.load(new File(args[0]));
-		KB db2 = new KB();
-		db2.load(new File(args[1]));
-		
+		KB db2 = null;
+		if (args.length > 1) {
+			db2 = new KB();
+			db2.load(new File(args[1]));	
+		}		
 		Set<ByteString> relationsInCommon = new LinkedHashSet<ByteString>();
 		
 		Set<ByteString> relationsDb1 = db1.selectDistinct(ByteString.of("?p"), 
 				KB.triples(KB.triple(ByteString.of("?s"), 
 						ByteString.of("?p"), ByteString.of("?o"))));
-		Set<ByteString> relationsDb2 = db2.selectDistinct(ByteString.of("?p"), 
-				KB.triples(KB.triple(ByteString.of("?s"), 
-						ByteString.of("?p"), ByteString.of("?o"))));
-		
-		for (ByteString relation : relationsDb1) {
-			if (relationsDb2.contains(relation)) {
-				relationsInCommon.add(relation);
+		if (db2 != null) {
+			Set<ByteString> relationsDb2 = db2.selectDistinct(ByteString.of("?p"), 
+					KB.triples(KB.triple(ByteString.of("?s"), 
+							ByteString.of("?p"), ByteString.of("?o"))));
+			
+			for (ByteString relation : relationsDb1) {
+				if (relationsDb2.contains(relation)) {
+					relationsInCommon.add(relation);
+				}
 			}
 		}
 		
-		db1.summarize(false);
-		System.out.println();
-		db2.summarize(false);
-		System.out.println(relationsInCommon);
+		db1.summarize(true);
+		if (db2 != null) {
+			System.out.println();
+			db2.summarize(true);
+			System.out.println(relationsInCommon);
+		}
 	}
 }
