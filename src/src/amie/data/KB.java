@@ -2,7 +2,10 @@ package amie.data;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1305,7 +1309,7 @@ public class KB {
 	 * @param triples
 	 * @return
 	 */
-	protected boolean exists(List<CharSequence[]> triples) {
+	public boolean exists(List<CharSequence[]> triples) {
 		return (existsBS(triples(triples)));
 	}
 
@@ -1315,7 +1319,7 @@ public class KB {
 	 * @param triples
 	 * @return
 	 */
-	protected boolean existsBS(List<ByteString[]> triples) {
+	public boolean existsBS(List<ByteString[]> triples) {
 		if (triples.isEmpty())
 			return (false);
 		if (triples.size() == 1)
@@ -3268,5 +3272,73 @@ public class KB {
 						"\t" + predicate2object2subject.get(relation).size());
 			}
 		}
+	}
+	
+	/**
+	 * It outputs information about the distribution of the number of properties per
+	 * instance in relations.
+	 * @param useSignatureTypes
+	 */
+	public void summarizeDistributions(boolean useSignatureTypes) {
+		summarize(true);
+		System.out.println();
+		List<ByteString> ommittedRelations = Arrays.asList(ByteString.of("rdf:type"),
+				ByteString.of("rdfs:domain"), ByteString.of("rdfs:range"));
+		PrintWriter writer = null;
+		try {
+			writer = new PrintWriter("sample.txt", "UTF-8");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for (ByteString relation : relationSize.keys()) {
+			if (ommittedRelations.contains(relation))
+				continue;
+			
+			System.out.println(relation);
+			IntHashMap<Integer> distribution = new IntHashMap<>();
+			Map<ByteString, IntHashMap<ByteString>> theMap = null;
+			boolean isFunctional = isFunctional(relation);
+			if (isFunctional) {
+				theMap = predicate2subject2object.get(relation);
+			} else {
+				theMap = predicate2object2subject.get(relation);
+			}
+			
+			if (useSignatureTypes) {				
+				Set<ByteString> instances = null;
+				if (isFunctional) {
+					instances = amie.data.U.getDomainSet(this, relation);
+					// We still intersect them with the entities we have in the KB
+					//instances.retainAll(subjectSize);
+				} else {
+					// We still intersect them with the entities we have in the KB					
+					instances = amie.data.U.getRangeSet(this, relation);
+					//instances.retainAll(objectSize);
+				}
+				// Now count the instances without instances of the relation.
+				for (ByteString instance : instances) {
+					if (!theMap.containsKey(instance)) {
+						distribution.increase(0);
+						if (Math.random() >= 0.9) {
+							if (isFunctional)
+								writer.write(instance + "\t" + relation + "\t" + "NULL\n");
+							else
+								writer.write("NULL" + "\t" + relation + "\t" + instance + "\n");
+						}
+					}
+				}				
+			}
+			for (ByteString argument : theMap.keySet()) {
+				distribution.increase(theMap.get(argument).size());
+			}
+			amie.U.printHistogramAndCumulativeDistribution(distribution);
+			System.out.println();
+		}
+		
+		writer.close();
 	}
 }

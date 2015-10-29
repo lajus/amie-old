@@ -43,7 +43,7 @@ public class FactsFilter {
 		}
 		
 		for(int i = start; i < args.length; ++i){
-			if(args[i].startsWith("-t")){
+			if(args[i].startsWith(":t")){
 				trimFiles.add(new File(args[i].substring(2)));
 			}else{
 				factsFiles.add(new File(args[i]));
@@ -88,15 +88,12 @@ public class FactsFilter {
 			for(ByteString predicate: predicates){
 				IntHashMap<ByteString> objects = subjectsMap.get(predicate);
 				for(ByteString object: objects){
-					int nTimes = objects.get(object);
-					for(int k = 0; k < nTimes; ++k){
-						out.append(subject);
-						out.append('\t');
-						out.append(predicate);
-						out.append('\t');
-						out.append(object);
-						out.append('\n');
-					}
+					out.append(subject);
+					out.append('\t');
+					out.append(predicate);
+					out.append('\t');
+					out.append(object);
+					out.append('\n');
 				}
 			}
 		}

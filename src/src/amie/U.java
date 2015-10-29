@@ -19,6 +19,22 @@ public class U {
 	}
 	
 	/**
+	 * Prints a histogram as well as the probability that X > Xi
+	 * for each Xi in the histogram.
+	 * @param histogram
+	 */
+	public static void printHistogramAndCumulativeDistribution(IntHashMap<Integer> histogram) {
+		double total = 1.0;
+		double accum = 0.0;
+		double sum = histogram.computeSum();
+		for (Integer key : histogram.keys()) {
+			double prob = histogram.get(key) / sum;
+			accum += prob;
+			System.out.println(key + "\t" + histogram.get(key) + "\t" + prob + "\t" + (total - accum));
+		}
+	}
+	
+	/**
 	 * It constructs a histogram based on a multimap.
 	 * @param map
 	 * @return

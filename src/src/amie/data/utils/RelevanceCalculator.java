@@ -49,13 +49,21 @@ public class RelevanceCalculator {
 			for (String entity : allEntities) {
 				double nFacts = 1;
 				int wikiLength = wikiLengthMap.get(entity);
+				if (wikiLength <= 0) {
+					wikiLength = 2;
+				}
 				int ingoingLinks = ingoingLinksMap.get(entity);
+				if (ingoingLinks <= 0) {
+					ingoingLinks = 2;
+				}
 				if (kb != null) {
 					nFacts = kb.count(ByteString.of(entity), ByteString.of("?p"), ByteString.of("?o"));
 				}
 				
-				double coefficient = (Math.log10(wikiLength) + 3) * (ingoingLinks + 1) * (nFacts + 1);
-				System.out.println(entity + "\t<hasRelevance>\t" + coefficient);
+				double coefficient = (Math.log10(wikiLength)) * (ingoingLinks) * (nFacts);
+				//double coefficient = (Math.log10(wikiLength + 3)) * (nFacts);				
+				System.out.println(entity + "\t<hasRelevance>\t" + coefficient);				
+				//System.out.println(entity + "\t<hasRelevance>\t" + coefficient + "\t" + wikiLength + "\t" + ingoingLinks + "\t" + nFacts);
 			}
 		}
 	}

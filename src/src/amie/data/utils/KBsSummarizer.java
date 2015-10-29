@@ -17,6 +17,8 @@ import amie.data.KB;
  */
 public class KBsSummarizer {
 	
+	public static boolean ShowDistribution = true;
+	
 	public static void main(String args[]) throws IOException {
 		KB db1 = new KB();
 		db1.load(new File(args[0]));
@@ -42,10 +44,19 @@ public class KBsSummarizer {
 			}
 		}
 		
-		db1.summarize(true);
+		if (ShowDistribution) {
+			db1.summarizeDistributions(true);
+		} else {
+			db1.summarize(true);
+		}
+		
 		if (db2 != null) {
 			System.out.println();
-			db2.summarize(true);
+			if (ShowDistribution) {
+				db2.summarizeDistributions(true);
+			} else {
+				db2.summarize(true);	
+			}
 			System.out.println(relationsInCommon);
 		}
 	}
