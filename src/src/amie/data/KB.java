@@ -3341,4 +3341,8 @@ public class KB {
 		
 		writer.close();
 	}
+	
+	public boolean containsRelation(ByteString relation) {
+		return relationSize.contains(relation);
+	}
 }
