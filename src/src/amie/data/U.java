@@ -311,4 +311,13 @@ public class U {
 	    			+ "\t" + getRelationRange(d, relation));
 	    }
 	}
+
+	/**
+	 * Returns all present data types in the given KB
+	 * @param kb
+	 */
+	public static Set<ByteString> getAllTypes(KB kb) {
+		List<ByteString[]> query = KB.triples(KB.triple("?x", KB.typeRelation, "?type"));		
+		return new LinkedHashSet<ByteString>(kb.selectDistinct(ByteString.of("?type"), query));	
+	}
 }

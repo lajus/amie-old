@@ -1344,7 +1344,6 @@ public class Rule {
 
     public String getBasicRuleString() {
         DecimalFormat df = new DecimalFormat("#.#########");
-        DecimalFormat df1 = new DecimalFormat("#.##");
         StringBuilder strBuilder = new StringBuilder();
         strBuilder.append(getRuleString());
 
@@ -1801,8 +1800,6 @@ public class Rule {
             mappings.put(head[2], canonicalObjectExp);
             Rule.bind(mappings, antecedentClone);
 
-//            commonAntecendent.addAll(antecedentClone);
-//            commonAntecendent.add(atom);
             for (ByteString[] atom : antecedentClone) {
             	boolean repeated = false;
             	for (ByteString[] otherAtom : commonAntecendent) {
