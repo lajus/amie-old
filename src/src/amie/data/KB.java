@@ -46,22 +46,22 @@ public class KB {
 	// ---------------------------------------------------------------------------
 
 	/** Index */
-	protected final Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> subject2predicate2object = new IdentityHashMap<ByteString, Map<ByteString, IntHashMap<ByteString>>>();
+	protected final Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> subject2relation2object = new IdentityHashMap<ByteString, Map<ByteString, IntHashMap<ByteString>>>();
 
 	/** Index */
-	protected final Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> predicate2object2subject = new IdentityHashMap<ByteString, Map<ByteString, IntHashMap<ByteString>>>();
+	protected final Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> relation2object2subject = new IdentityHashMap<ByteString, Map<ByteString, IntHashMap<ByteString>>>();
 
 	/** Index */
-	protected final Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> object2subject2predicate = new IdentityHashMap<ByteString, Map<ByteString, IntHashMap<ByteString>>>();
+	protected final Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> object2subject2relation = new IdentityHashMap<ByteString, Map<ByteString, IntHashMap<ByteString>>>();
 
 	/** Index */
-	protected final Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> predicate2subject2object = new IdentityHashMap<ByteString, Map<ByteString, IntHashMap<ByteString>>>();
+	protected final Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> relation2subject2object = new IdentityHashMap<ByteString, Map<ByteString, IntHashMap<ByteString>>>();
 
 	/** Index */
-	protected final Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> object2predicate2subject = new IdentityHashMap<ByteString, Map<ByteString, IntHashMap<ByteString>>>();
+	protected final Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> object2relation2subject = new IdentityHashMap<ByteString, Map<ByteString, IntHashMap<ByteString>>>();
 
 	/** Index */
-	protected final Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> subject2object2predicate = new IdentityHashMap<ByteString, Map<ByteString, IntHashMap<ByteString>>>();
+	protected final Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> subject2object2relation = new IdentityHashMap<ByteString, Map<ByteString, IntHashMap<ByteString>>>();
 
 	/** Number of facts per subject */
 	protected final IntHashMap<ByteString> subjectSize = new IntHashMap<ByteString>();
@@ -97,6 +97,11 @@ public class KB {
 	// ---------------------------------------------------------------------------
 	// Constants
 	// ---------------------------------------------------------------------------
+	
+	/** X rdf:type Class **/
+	public static final String typeRelation = "rdf:type";
+	
+	public static final ByteString typeRelationBS = ByteString.of(typeRelation);
 
 	/** (X differentFrom Y Z ...) predicate */
 	public static final String DIFFERENTFROMstr = "differentFrom";
@@ -198,13 +203,13 @@ public class KB {
 	 * @return TRUE if the KB was changed, i.e., the fact did not exist before.
 	 */	
 	protected boolean add(ByteString subject, ByteString relation, ByteString object) {
-		if (!add(subject, relation, object, subject2predicate2object))
+		if (!add(subject, relation, object, subject2relation2object))
 			return (false);
-		add(relation, object, subject, predicate2object2subject);
-		add(object, subject, relation, object2subject2predicate);
-		add(relation, subject, object, predicate2subject2object);
-		add(object, relation, subject, object2predicate2subject);
-		add(subject, object, relation, subject2object2predicate);
+		add(relation, object, subject, relation2object2subject);
+		add(object, subject, relation, object2subject2relation);
+		add(relation, subject, object, relation2subject2object);
+		add(object, relation, subject, object2relation2subject);
+		add(subject, object, relation, subject2object2relation);
 		synchronized (subjectSize) {
 			subjectSize.increase(subject);
 		}
@@ -332,14 +337,14 @@ public class KB {
 	 */
 	public void buildOverlapTables() {
 		for (ByteString r1 : relationSize) {
-			Set<ByteString> subjects1 = predicate2subject2object.get(r1)
+			Set<ByteString> subjects1 = relation2subject2object.get(r1)
 					.keySet();
-			Set<ByteString> objects1 = predicate2object2subject.get(r1)
+			Set<ByteString> objects1 = relation2object2subject.get(r1)
 					.keySet();
 			for (ByteString r2 : relationSize) {
-				Set<ByteString> subjects2 = predicate2subject2object.get(r2)
+				Set<ByteString> subjects2 = relation2subject2object.get(r2)
 						.keySet();
-				Set<ByteString> objects2 = predicate2object2subject.get(r2)
+				Set<ByteString> objects2 = relation2object2subject.get(r2)
 						.keySet();
 
 				if (!r1.equals(r2)) {
@@ -503,7 +508,7 @@ public class KB {
 		if (relation.equals(EQUALSbs)) {
 			return 1.0;
 		} else {
-			return ((double) predicate2subject2object.get(relation).size() / relationSize
+			return ((double) relation2subject2object.get(relation).size() / relationSize
 					.get(relation));
 		}
 	}
@@ -524,7 +529,7 @@ public class KB {
 		if (relation.equals(EQUALSbs)) {
 			return 1.0;
 		} else {
-			return ((double) predicate2object2subject.get(relation).size() / relationSize
+			return ((double) relation2object2subject.get(relation).size() / relationSize
 					.get(relation));			
 		}
 	}
@@ -601,7 +606,7 @@ public class KB {
 		// Now compute the formula
 		double sum = 0.0;
 		Map<ByteString, IntHashMap<ByteString>> targetMap = 
-				predicate2object2subject.get(relation);
+				relation2object2subject.get(relation);
 		for (ByteString object : targetMap.keySet()) {
 			sum += Math.pow(avg - targetMap.get(object).size(), 2.0);
 		}
@@ -621,7 +626,7 @@ public class KB {
 		// Now compute the formula
 		double sum = 0.0;
 		Map<ByteString, IntHashMap<ByteString>> targetMap = 
-				predicate2subject2object.get(relation);
+				relation2subject2object.get(relation);
 		for (ByteString subject : targetMap.keySet()) {
 			sum += Math.pow(avg - targetMap.get(subject).size(), 2.0);
 		}
@@ -675,9 +680,9 @@ public class KB {
 	public int relationColumnSize(ByteString relation, Column column) {
 		switch (column) {
 		case Subject:
-			return predicate2subject2object.get(relation).size();
+			return relation2subject2object.get(relation).size();
 		case Object:
-			return predicate2object2subject.get(relation).size();
+			return relation2object2subject.get(relation).size();
 		default:
 			throw new IllegalArgumentException(
 					"Argument column can be 0 (subject) or 2 (object)");
@@ -799,22 +804,22 @@ public class KB {
 		}		
 		if (triple[1].equals(EXISTSbs)) {
 			if (isVariable(triple[0])) 
-				return (new IntHashMap<ByteString>(get(subject2predicate2object, triple[2]).keySet()));
+				return (new IntHashMap<ByteString>(get(subject2relation2object, triple[2]).keySet()));
 			else 
-				return (new IntHashMap<ByteString>(get(predicate2subject2object, triple[0]).keySet()));
+				return (new IntHashMap<ByteString>(get(relation2subject2object, triple[0]).keySet()));
 		}		
 		if (triple[1].equals(EXISTSINVbs)) {
 			if (isVariable(triple[0])) 
-				return (new IntHashMap<ByteString>(get(object2predicate2subject, triple[2]).keySet()));
+				return (new IntHashMap<ByteString>(get(object2relation2subject, triple[2]).keySet()));
 			else 
-				return (new IntHashMap<ByteString>(get(predicate2object2subject, triple[0]).keySet()));
+				return (new IntHashMap<ByteString>(get(relation2object2subject, triple[0]).keySet()));
 		}
 		
 		if (isVariable(triple[0]))
-			return (get(predicate2object2subject, triple[1], triple[2]));
+			return (get(relation2object2subject, triple[1], triple[2]));
 		if (isVariable(triple[1]))
-			return (get(object2subject2predicate, triple[2], triple[0]));
-		return (get(subject2predicate2object, triple[0], triple[1]));
+			return (get(object2subject2relation, triple[2], triple[0]));
+		return (get(subject2relation2object, triple[0], triple[1]));
 	}
 
 	/**
@@ -842,12 +847,12 @@ public class KB {
 		if (fact[1] == EQUALSbs)
 			return (equalTo(fact));
 		if (fact[1] == EXISTSbs) 
-			return (get(predicate2subject2object, fact[0])
+			return (get(relation2subject2object, fact[0])
 					.containsKey(fact[2]));
 		if (fact[1] == EXISTSINVbs)
-			return (get(predicate2object2subject, fact[0])
+			return (get(relation2object2subject, fact[0])
 					.containsKey(fact[2]));
-		return (get(subject2predicate2object, fact[0], fact[1])
+		return (get(subject2relation2object, fact[0], fact[1])
 				.contains(fact[2]));
 	}
 
@@ -904,7 +909,7 @@ public class KB {
 					"Cannot query with differentFrom: " + toString(triple));
 		if (triple[1].equals(EQUALSbs)) {
 			Map<ByteString, IntHashMap<ByteString>> result = new HashMap<>();
-			for (ByteString entity : subject2object2predicate.keySet()) {
+			for (ByteString entity : subject2object2relation.keySet()) {
 				IntHashMap<ByteString> innerResult = new IntHashMap<>();
 				innerResult.add(entity);
 				result.put(entity, innerResult);
@@ -913,8 +918,8 @@ public class KB {
 		}
 		if (triple[1].equals(EXISTSbs) || triple[1].equals(EXISTSINVbs)) {
 			Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> map = 
-					triple[1].equals(EXISTSbs) ? predicate2subject2object
-							: predicate2object2subject;
+					triple[1].equals(EXISTSbs) ? relation2subject2object
+							: relation2object2subject;
 			Map<ByteString, IntHashMap<ByteString>> result = new HashMap<>();
 			for (ByteString relation : map.keySet()) {
 				IntHashMap<ByteString> innerResult = new IntHashMap<>();
@@ -928,25 +933,25 @@ public class KB {
 		case 0:
 			switch (pos2) {
 			case 1:
-				return (get(object2subject2predicate, triple[2]));
+				return (get(object2subject2relation, triple[2]));
 			case 2:
-				return (get(predicate2subject2object, triple[1]));
+				return (get(relation2subject2object, triple[1]));
 			}
 			break;
 		case 1:
 			switch (pos2) {
 			case 0:
-				return get(object2predicate2subject, triple[2]);
+				return get(object2relation2subject, triple[2]);
 			case 2:
-				return get(subject2predicate2object, triple[0]);
+				return get(subject2relation2object, triple[0]);
 			}
 			break;
 		case 2:
 			switch (pos2) {
 			case 0:
-				return get(predicate2object2subject, triple[1]);
+				return get(relation2object2subject, triple[1]);
 			case 1:
-				return get(subject2object2predicate, triple[0]);
+				return get(subject2object2relation, triple[0]);
 			}
 			break;
 		}
@@ -990,13 +995,13 @@ public class KB {
 			switch (varPos2) {
 			case 1 :
 				if (varPos3 == 2)
-					return subject2predicate2object;
+					return subject2relation2object;
 				else
 					throw new IllegalArgumentException("Invalid combination of variables in " + toString(triple)
 							+ " pos1 = " + varPos1 + " pos2=" + varPos2 + " pos3=" + varPos3);
 			case 2 :
 				if (varPos3 == 1)
-					return subject2object2predicate;
+					return subject2object2relation;
 				else
 					throw new IllegalArgumentException("Invalid combination of variables in " + toString(triple)
 							+ " pos1 = " + varPos1 + " pos2=" + varPos2 + " pos3=" + varPos3);
@@ -1008,13 +1013,13 @@ public class KB {
 			switch (varPos2) {
 			case 0 :
 				if (varPos3 == 2)
-					return predicate2subject2object;
+					return relation2subject2object;
 				else 
 					throw new IllegalArgumentException("Invalid combination of variables in " + toString(triple)
 								+ " pos1 = " + varPos1 + " pos2=" + varPos2 + " pos3=" + varPos3);
 			case 2 :
 				if (varPos3 == 0) 
-					return predicate2object2subject;
+					return relation2object2subject;
 				else
 					throw new IllegalArgumentException("Invalid combination of variables in " + toString(triple)
 							+ " pos1 = " + varPos1 + " pos2=" + varPos2 + " pos3=" + varPos3);					
@@ -1026,13 +1031,13 @@ public class KB {
 			switch (varPos2) {
 			case 0 :
 				if (varPos3 == 1)
-					return object2subject2predicate;
+					return object2subject2relation;
 				else
 					throw new IllegalArgumentException("Invalid combination of variables in " + toString(triple)
 							+ " pos1 = " + varPos1 + " pos2=" + varPos2 + " pos3=" + varPos3);
 			case 1 :
 				if (varPos3 == 0)
-					return object2predicate2subject;
+					return object2relation2subject;
 				else
 					throw new IllegalArgumentException("Invalid combination of variables in " + toString(triple)
 							+ " pos1 = " + varPos1 + " pos2=" + varPos2 + " pos3=" + varPos3);
@@ -1053,15 +1058,15 @@ public class KB {
 			return (1);
 		if (triple[1].equals(EXISTSbs)) {
 			if (isVariable(triple[2]))
-				return get(predicate2subject2object, triple[0]).size();
+				return get(relation2subject2object, triple[0]).size();
 			else 
-				return get(subject2predicate2object, triple[2]).size();
+				return get(subject2relation2object, triple[2]).size();
 		}
 		if (triple[1].equals(EXISTSINVbs)) {
 			if (isVariable(triple[2]))
-				return get(predicate2object2subject, triple[0]).size();
+				return get(relation2object2subject, triple[0]).size();
 			else
-				return get(object2predicate2subject, triple[2]).size();
+				return get(object2relation2subject, triple[2]).size();
 		}
 		return (resultsOneVariable(triple).size());
 	}
@@ -1074,18 +1079,18 @@ public class KB {
 		if (triple[1].equals(DIFFERENTFROMbs))
 			return (Long.MAX_VALUE);
 		if (triple[1].equals(EQUALSbs))
-			return (subject2predicate2object.size());
+			return (subject2relation2object.size());
 		if (triple[1].equals(EXISTSbs)) {
 			long count = 0;
 			for (ByteString relation : relationSize) {
-				count += get(predicate2subject2object, relation).size();
+				count += get(relation2subject2object, relation).size();
 			}
 			return count;
 		}
 		if (triple[1].equals(EXISTSINVbs)) {
 			long count = 0;
 			for (ByteString relation : relationSize) {
-				count += get(predicate2object2subject, relation).size();
+				count += get(relation2object2subject, relation).size();
 			}
 			return count;
 		}			
@@ -1927,28 +1932,28 @@ public class KB {
 				// ?x loves ?y
 				if (isVariable(triple[2]))
 					return (new IntHashMap<ByteString>(get(
-							predicate2subject2object, triple[1])));
+							relation2subject2object, triple[1])));
 				// ?x ?r Elvis
 				else
 					return (new IntHashMap<ByteString>(get(
-							object2subject2predicate, triple[2])));
+							object2subject2relation, triple[2])));
 			case 1: // We want the most frequent predicates
 				// Elvis ?r ?y
 				if (isVariable(triple[2]))
 					return (new IntHashMap<ByteString>(get(
-							subject2predicate2object, triple[0])));
+							subject2relation2object, triple[0])));
 				// ?x ?r Elvis
 				else
 					return new IntHashMap<ByteString>(get(
-							object2predicate2subject, triple[2]));
+							object2relation2subject, triple[2]));
 			case 2: // we want the most frequent objects
 				// Elvis ?r ?y
 				if (isVariable(triple[1]))
 					return new IntHashMap<ByteString>(get(
-							subject2object2predicate, triple[0]));
+							subject2object2relation, triple[0]));
 				// ?x loves ?y
 				return (new IntHashMap<ByteString>(get(
-						predicate2object2subject, triple[1])));
+						relation2object2subject, triple[1])));
 			}
 		case 3:
 			return (pos == 0 ? subjectSize : pos == 1 ? relationSize
@@ -3176,10 +3181,10 @@ public class KB {
 	 */
 	public IntHashMap<ByteString> getRelationsBiggerOrEqualThan(int threshold) {	
 		IntHashMap<ByteString> relationsBiggerThan = new IntHashMap<ByteString>();
-		for (ByteString relation : predicate2subject2object.keySet()) {
+		for (ByteString relation : relation2subject2object.keySet()) {
 			int size = 0;		
 			Map<ByteString, IntHashMap<ByteString>> tail = 
-					predicate2subject2object.get(relation);
+					relation2subject2object.get(relation);
 			for (ByteString subject : tail.keySet()) {
 				size += tail.get(subject).size();
 				if (size >= threshold) {
@@ -3202,8 +3207,8 @@ public class KB {
 	@Override
 	public String toString() {
 		StringBuilder strBuilder = new StringBuilder();
-		for (ByteString v1 : subject2predicate2object.keySet()) {
-			Map<ByteString, IntHashMap<ByteString>> tail = subject2predicate2object.get(v1);
+		for (ByteString v1 : subject2relation2object.keySet()) {
+			Map<ByteString, IntHashMap<ByteString>> tail = subject2relation2object.get(v1);
 			for (ByteString v2 : tail.keySet()) {
 				for (ByteString v3 : tail.get(v2)) {
 					strBuilder.append(v1);
@@ -3232,9 +3237,9 @@ public class KB {
 	public KB intersect(KB otherKb) {
 		ByteString[] triple = new ByteString[3];
 		KB result = new KB();
-		for (ByteString subject : subject2predicate2object.keySet()) {
+		for (ByteString subject : subject2relation2object.keySet()) {
 			triple[0] = subject;
-			Map<ByteString, IntHashMap<ByteString>> tail = subject2predicate2object.get(subject);			
+			Map<ByteString, IntHashMap<ByteString>> tail = subject2relation2object.get(subject);			
 			for (ByteString predicate : tail.keySet()) {
 				triple[1] = predicate;
 				for (ByteString object : tail.get(predicate)) {
@@ -3268,8 +3273,8 @@ public class KB {
 						"\t" + inverseFunctionality(relation) + 
 						"\t" + variance(relation) +
 						"\t" + inverseVariance(relation) +
-						"\t" + predicate2subject2object.get(relation).size() +
-						"\t" + predicate2object2subject.get(relation).size());
+						"\t" + relation2subject2object.get(relation).size() +
+						"\t" + relation2object2subject.get(relation).size());
 			}
 		}
 	}
@@ -3303,9 +3308,9 @@ public class KB {
 			Map<ByteString, IntHashMap<ByteString>> theMap = null;
 			boolean isFunctional = isFunctional(relation);
 			if (isFunctional) {
-				theMap = predicate2subject2object.get(relation);
+				theMap = relation2subject2object.get(relation);
 			} else {
-				theMap = predicate2object2subject.get(relation);
+				theMap = relation2object2subject.get(relation);
 			}
 			
 			if (useSignatureTypes) {				
@@ -3344,5 +3349,18 @@ public class KB {
 	
 	public boolean containsRelation(ByteString relation) {
 		return relationSize.contains(relation);
+	}
+
+	/**
+	 * Outputs statistics about the types (classes) present in the KB.
+	 */
+	public void summarizeTypes() {
+		if (relation2object2subject.containsKey(typeRelationBS)) {
+			Map<ByteString, IntHashMap<ByteString>> map = 
+					relation2object2subject.get(typeRelationBS);
+			for (ByteString type : map.keySet()) {
+				System.out.println(type + "\t" + map.get(type).size());
+			}
+		}
 	}
 }

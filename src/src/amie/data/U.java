@@ -79,7 +79,7 @@ public class U {
 	 * @return
 	 */
 	public static Set<ByteString> getMaterializedTypesForEntity(KB source, ByteString entity){
-		List<ByteString[]> query = KB.triples(KB.triple(entity, "rdf:type", "?x"));
+		List<ByteString[]> query = KB.triples(KB.triple(entity, KB.typeRelation, "?x"));
 		return source.selectDistinct(ByteString.of("?x"), query);
 	}
 	
@@ -167,7 +167,7 @@ public class U {
 	 * @return
 	 */
 	public static Set<ByteString> getAllEntitiesForType(KB source, ByteString type) {
-		List<ByteString[]> query = KB.triples(KB.triple("?x", "rdf:type", type));		
+		List<ByteString[]> query = KB.triples(KB.triple("?x", KB.typeRelation, type));		
 		return new LinkedHashSet<ByteString>(source.selectDistinct(ByteString.of("?x"), query));	
 	}
 	
@@ -182,7 +182,7 @@ public class U {
 		Set<ByteString> result = new LinkedHashSet<ByteString>();
 		if (domainType != null) 
 			result.addAll(getAllEntitiesForType(source, domainType));
-		result.addAll(source.predicate2subject2object.get(relation).keySet());
+		result.addAll(source.relation2subject2object.get(relation).keySet());
 		return result;
 	}
 	
@@ -197,7 +197,7 @@ public class U {
 		Set<ByteString> result = new LinkedHashSet<ByteString>();
 		if (rangeType != null) 
 			result.addAll(getAllEntitiesForType(source, rangeType));
-		result.addAll(source.predicate2object2subject.get(relation).keySet());
+		result.addAll(source.relation2object2subject.get(relation).keySet());
 		return result;
 	}
 	
@@ -214,8 +214,8 @@ public class U {
 		sourceEntities.addAll(source1.objectSize);
 		for(ByteString entity: sourceEntities){
 			//Print all facts of the source ontology
-			Map<ByteString, IntHashMap<ByteString>> tail1 = source1.subject2predicate2object.get(entity);
-			Map<ByteString, IntHashMap<ByteString>> tail2 = source2.subject2predicate2object.get(entity);
+			Map<ByteString, IntHashMap<ByteString>> tail1 = source1.subject2relation2object.get(entity);
+			Map<ByteString, IntHashMap<ByteString>> tail2 = source2.subject2relation2object.get(entity);
 			if(tail2 == null)
 				continue;
 						
@@ -236,7 +236,7 @@ public class U {
 			for(ByteString entity: source2.objectSize){
 				if(sourceEntities.contains(entity)) continue;
 				
-				Map<ByteString, IntHashMap<ByteString>> tail2 = source2.subject2predicate2object.get(entity);
+				Map<ByteString, IntHashMap<ByteString>> tail2 = source2.subject2relation2object.get(entity);
 				if(tail2 == null) continue;
 				
 				//Print all facts in the target ontology
@@ -259,8 +259,8 @@ public class U {
 				+ "\tRelation1-objects\tRelation2-subjects\tRelation2-objects"
 				+ "\tSubject-Subject\tSubject-Object\tObject-Subject\tObject-Object");
 		for(ByteString r1: source.relationSize){
-			Set<ByteString> subjects1 = source.predicate2subject2object.get(r1).keySet();
-			Set<ByteString> objects1 = source.predicate2object2subject.get(r1).keySet();
+			Set<ByteString> subjects1 = source.relation2subject2object.get(r1).keySet();
+			Set<ByteString> objects1 = source.relation2object2subject.get(r1).keySet();
 			int nSubjectsr1 = subjects1.size();
 			int nObjectsr1 = objects1.size();
 			for(ByteString r2: source.relationSize){
@@ -268,8 +268,8 @@ public class U {
 					continue;				
 				System.out.print(r1 + "\t");
 				System.out.print(r2 + "\t");
-				Set<ByteString> subjects2 = source.predicate2subject2object.get(r2).keySet();
-				Set<ByteString> objects2 = source.predicate2object2subject.get(r2).keySet();
+				Set<ByteString> subjects2 = source.relation2subject2object.get(r2).keySet();
+				Set<ByteString> objects2 = source.relation2object2subject.get(r2).keySet();
 				int nSubjectr2 = subjects2.size();
 				int nObjectsr2 = objects2.size();
 				System.out.print(nSubjectsr1 + "\t" + nObjectsr1 + "\t" + nSubjectr2 + "\t" + nObjectsr2 + "\t");

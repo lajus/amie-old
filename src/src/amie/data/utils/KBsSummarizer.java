@@ -19,6 +19,8 @@ public class KBsSummarizer {
 	
 	public static boolean ShowDistribution = true;
 	
+	public static boolean showTypesStatistics = true;
+	
 	public static void main(String args[]) throws IOException {
 		KB db1 = new KB();
 		db1.load(new File(args[0]));
@@ -50,7 +52,15 @@ public class KBsSummarizer {
 			db1.summarize(true);
 		}
 		
+		if (showTypesStatistics) {
+			db1.summarizeTypes();
+		}
+		
 		if (db2 != null) {
+			if (showTypesStatistics) {
+				db2.summarizeTypes();
+			}
+			
 			System.out.println();
 			if (ShowDistribution) {
 				db2.summarizeDistributions(true);
