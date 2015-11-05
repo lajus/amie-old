@@ -97,11 +97,6 @@ public class KB {
 	// ---------------------------------------------------------------------------
 	// Constants
 	// ---------------------------------------------------------------------------
-	
-	/** X rdf:type Class **/
-	public static final String typeRelation = "rdf:type";
-	
-	public static final ByteString typeRelationBS = ByteString.of(typeRelation);
 
 	/** (X differentFrom Y Z ...) predicate */
 	public static final String DIFFERENTFROMstr = "differentFrom";
@@ -3355,9 +3350,9 @@ public class KB {
 	 * Outputs statistics about the types (classes) present in the KB.
 	 */
 	public void summarizeTypes() {
-		if (relation2object2subject.containsKey(typeRelationBS)) {
+		if (relation2object2subject.containsKey(amie.data.U.typeRelationBS)) {
 			Map<ByteString, IntHashMap<ByteString>> map = 
-					relation2object2subject.get(typeRelationBS);
+					relation2object2subject.get(amie.data.U.typeRelationBS);
 			for (ByteString type : map.keySet()) {
 				System.out.println(type + "\t" + map.get(type).size());
 			}

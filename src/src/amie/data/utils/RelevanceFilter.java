@@ -45,20 +45,12 @@ public class RelevanceFilter {
 			});
 		}
 		
-		KB kb = new KB();
-		kb.load(new File(args[1]));
-
-		double topPercentage = 0.05;
-		if (args.length > 2)
-			topPercentage = Double.parseDouble(args[2]);
+		String[] subarray = new String[args.length - 1];
+		System.arraycopy(args, 1, subarray, 0, args.length - 1);
+		KB kb = amie.data.U.loadFiles(subarray);
 		
-		long top = Math.round(topPercentage * relevanceList.size());
 		HashMap<ByteString, Double> relevanceMap = new HashMap<>();
-		
-		System.out.println(top);
-		System.out.println("A sample of the top 10 entities");
-		System.out.println(relevanceList.subList(0,  10));
-		for (Triple<String, String, Double> t : relevanceList.subList(0, 10000)) {
+		for (Triple<String, String, Double> t : relevanceList.subList(0, 20000)) {
 			if (t.third.isNaN()) {
 				System.err.println(t.first + " is Nan");
 				System.exit(1);
@@ -75,7 +67,7 @@ public class RelevanceFilter {
 			ByteString[] query2 = KB.triple(s, relation, o);
 			Map<ByteString, IntHashMap<ByteString>> bindings = null;
 			boolean inversed = false;
-			if (kb.isFunctional(relation)) {				
+			if (kb.isFunctional(relation) || relation.equals(amie.data.U.typeRelationBS)) {				
 				bindings = kb.resultsTwoVariables(s, o, query2);
 			} else {
 				inversed = true;

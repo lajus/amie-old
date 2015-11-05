@@ -21,6 +21,32 @@ import javatools.datatypes.IntHashMap;
  *
  */
 public class U {
+	
+	/** X rdf:type Class **/
+	public static final String typeRelation = "rdf:type";
+	
+	public static final ByteString typeRelationBS = ByteString.of(typeRelation);
+	
+	/** Class1 rdfs:subClassOf Class2 **/
+	public static final String subclassRelation = "rdfs:subClassOf";
+	
+	public static final ByteString subclassRelationBS = ByteString.of(subclassRelation);
+	
+	/** relation1 rdfs:subPropertyOf relation2 **/
+	public static final String subpropertyRelation = "rdfs:subPropertyOf";
+	
+	public static final ByteString subpropertyRelationBS = ByteString.of(subpropertyRelation);
+	
+	/** Class rdfs:domain relation **/
+	public static final String domainRelation = "rdfs:domain";
+	
+	public static final ByteString domainRelationBS = ByteString.of(domainRelation);
+	
+	/** Class rdfs:domain range **/
+	public static final String rangeRelation = "rdfs:range";
+	
+	public static final ByteString rangeRelationBS = ByteString.of(rangeRelation);
+
 
 	/**
 	 * Returns the domain of a given relation in a knowledge base
@@ -29,14 +55,14 @@ public class U {
 	 * @return
 	 */
 	public static ByteString getRelationDomain(KB source, ByteString relation){
-		List<ByteString[]> query = KB.triples(KB.triple(relation, "rdfs:domain", "?x"));
+		List<ByteString[]> query = KB.triples(KB.triple(relation, domainRelation, "?x"));
 		Set<ByteString> domains = source.selectDistinct(ByteString.of("?x"), query);
 		if(!domains.isEmpty()){
 			return domains.iterator().next();
 		}
 		
 		//Try looking for the superproperty
-		List<ByteString[]> query2 = KB.triples(KB.triple(relation, "rdfs:subPropertyOf", "?y"), 
+		List<ByteString[]> query2 = KB.triples(KB.triple(relation, subpropertyRelation, "?y"), 
 				KB.triple("?y", "rdfs:domain", "?x"));
 		
 		domains = source.selectDistinct(ByteString.of("?x"), query2);
@@ -54,14 +80,14 @@ public class U {
 	 * @return
 	 */
 	public static ByteString getRelationRange(KB source, ByteString relation){
-		List<ByteString[]> query = KB.triples(KB.triple(relation, "rdfs:range", "?x"));
+		List<ByteString[]> query = KB.triples(KB.triple(relation, rangeRelation, "?x"));
 		Set<ByteString> ranges = source.selectDistinct(ByteString.of("?x"), query);
 		if(!ranges.isEmpty()){
 			return ranges.iterator().next();
 		}
 		
 		//Try looking for the superproperty
-		List<ByteString[]> query2 = KB.triples(KB.triple(relation, "rdfs:subPropertyOf", "?y"), 
+		List<ByteString[]> query2 = KB.triples(KB.triple(relation, subpropertyRelation, "?y"), 
 				KB.triple("?y", "rdfs:range", "?x"));
 		
 		ranges = source.selectDistinct(ByteString.of("?x"), query2);
@@ -79,7 +105,7 @@ public class U {
 	 * @return
 	 */
 	public static Set<ByteString> getMaterializedTypesForEntity(KB source, ByteString entity){
-		List<ByteString[]> query = KB.triples(KB.triple(entity, KB.typeRelation, "?x"));
+		List<ByteString[]> query = KB.triples(KB.triple(entity, typeRelation, "?x"));
 		return source.selectDistinct(ByteString.of("?x"), query);
 	}
 	
@@ -90,7 +116,7 @@ public class U {
 	 * @return
 	 */
 	public static boolean isLeafDatatype(KB source, ByteString type){
-		List<ByteString[]> query = KB.triples(KB.triple("?x", "rdfs:subClassOf", type));		
+		List<ByteString[]> query = KB.triples(KB.triple("?x", subclassRelation, type));		
 		return source.countDistinct(ByteString.of("?x"), query) == 0;
 	}
 	
@@ -136,7 +162,7 @@ public class U {
 	 * @return
 	 */
 	public static Set<ByteString> getSuperTypes(KB source, ByteString type){
-		List<ByteString[]> query = KB.triples(KB.triple(type, "rdfs:subClassOf", "?x"));		
+		List<ByteString[]> query = KB.triples(KB.triple(type, subclassRelation, "?x"));		
 		return new LinkedHashSet<ByteString>(source.selectDistinct(ByteString.of("?x"), query));
 	}
 	
@@ -167,8 +193,17 @@ public class U {
 	 * @return
 	 */
 	public static Set<ByteString> getAllEntitiesForType(KB source, ByteString type) {
-		List<ByteString[]> query = KB.triples(KB.triple("?x", KB.typeRelation, type));		
+		List<ByteString[]> query = KB.triples(KB.triple("?x", typeRelation, type));		
 		return new LinkedHashSet<ByteString>(source.selectDistinct(ByteString.of("?x"), query));	
+	}
+	
+	/**
+	 * Returns all present data types in the given KB
+	 * @param kb
+	 */
+	public static Set<ByteString> getAllTypes(KB kb) {
+		List<ByteString[]> query = KB.triples(KB.triple("?x", typeRelation, "?type"));		
+		return new LinkedHashSet<ByteString>(kb.selectDistinct(ByteString.of("?type"), query));	
 	}
 	
 	/**
@@ -184,6 +219,17 @@ public class U {
 			result.addAll(getAllEntitiesForType(source, domainType));
 		result.addAll(source.relation2subject2object.get(relation).keySet());
 		return result;
+	}
+	
+	/**
+	 * Get all the immediate subtypes of a given type.
+	 * @param source
+	 * @param type
+	 * @return
+	 */
+	public static Set<ByteString> getSubtypes(KB source, ByteString type) {
+		List<ByteString[]> query = KB.triples(KB.triple(ByteString.of("?x"), subclassRelation, type));		
+		return new LinkedHashSet<ByteString>(source.selectDistinct(ByteString.of("?x"), query));	
 	}
 	
 	/**
@@ -207,7 +253,7 @@ public class U {
 	 * @param source2
 	 * @param withObjs
 	 */
-	private static void coalesce(KB source1, 
+	public static void coalesce(KB source1, 
 			KB source2, boolean withObjs) {
 		Set<ByteString> sourceEntities = new LinkedHashSet<>();
 		sourceEntities.addAll(source1.subjectSize);
@@ -253,7 +299,7 @@ public class U {
 	 * 
 	 * @param source
 	 */
-	private static void printOverlapTable(KB source) {
+	public static void printOverlapTable(KB source) {
 		//for each pair of relations, print the overlap table
 		System.out.println("Relation1\tRelation2\tRelation1-subjects"
 				+ "\tRelation1-objects\tRelation2-subjects\tRelation2-objects"
@@ -280,6 +326,24 @@ public class U {
 			}
 		}		
 	}
+	
+	
+	/**
+	 * Returns a KB with the content of all the files referenced in the string array.
+	 * @param args
+	 * @return
+	 * @throws IOException
+	 */
+	public static KB loadFiles(String args[]) throws IOException {
+		// Load the data
+		KB kb = new KB();
+		List<File> files = new ArrayList<File>();
+		for (int i = 0; i < args.length; ++i) {
+			files.add(new File(args[i]));
+		}
+		kb.load(files);
+		return kb;
+	}
 
 	/**
 	 * 
@@ -297,6 +361,7 @@ public class U {
 		
 		return overlap;
 	}
+
 	
 	public static void main(String args[]) throws IOException{
 		KB d = new KB();
@@ -310,14 +375,5 @@ public class U {
 	    	System.out.println(relation + "\t" + getRelationDomain(d, relation) 
 	    			+ "\t" + getRelationRange(d, relation));
 	    }
-	}
-
-	/**
-	 * Returns all present data types in the given KB
-	 * @param kb
-	 */
-	public static Set<ByteString> getAllTypes(KB kb) {
-		List<ByteString[]> query = KB.triples(KB.triple("?x", KB.typeRelation, "?type"));		
-		return new LinkedHashSet<ByteString>(kb.selectDistinct(ByteString.of("?type"), query));	
 	}
 }

@@ -13,6 +13,8 @@ import javatools.filehandlers.TSVFile;
 
 public class RelevanceCalculator {
 
+	enum RelevanceMetric { Wikilength, NumberOfFacts, IngoingLinks, JointMeasure }
+	
 	/**
 	 * For each entity in an input KB (given as a TSV file), it outputs the relevance
 	 * of the entities based on the formula:
@@ -23,11 +25,17 @@ public class RelevanceCalculator {
 	 */
 	public static void main(String[] args) throws IOException {
 		try(TSVFile tsv = new TSVFile(new File(args[0]))) {
+			RelevanceMetric relevanceMetric = RelevanceMetric.NumberOfFacts;
 			KB kb = null;
 			if (args.length > 1) {
 				kb = new KB();
 				kb.load(new File(args[1]));
 			}
+			
+			if (args.length > 2) {
+				relevanceMetric = RelevanceMetric.valueOf(args[2]);
+			}
+			
 			
 			IntHashMap<String> ingoingLinksMap = new IntHashMap<>();
 			IntHashMap<String> wikiLengthMap = new IntHashMap<>();
@@ -58,12 +66,25 @@ public class RelevanceCalculator {
 				}
 				if (kb != null) {
 					nFacts = kb.count(ByteString.of(entity), ByteString.of("?p"), ByteString.of("?o"));
+					nFacts += kb.count(ByteString.of("?s"), ByteString.of("?p"), ByteString.of(entity));
 				}
 				
-				double coefficient = (Math.log10(wikiLength)) * (ingoingLinks) * (nFacts);
-				//double coefficient = (Math.log10(wikiLength + 3)) * (nFacts);				
-				System.out.println(entity + "\t<hasRelevance>\t" + coefficient);				
-				//System.out.println(entity + "\t<hasRelevance>\t" + coefficient + "\t" + wikiLength + "\t" + ingoingLinks + "\t" + nFacts);
+				double coefficient = 0.0;
+				switch (relevanceMetric) {
+				case Wikilength :					
+					coefficient = wikiLength;
+					break;
+				case JointMeasure :					
+					coefficient = (Math.log10(wikiLength)) * (ingoingLinks) * (nFacts);
+					break;
+				case NumberOfFacts :
+					coefficient = nFacts;
+					break;
+				case IngoingLinks :
+					coefficient = ingoingLinks;
+					break;
+				}
+				System.out.println(entity + "\t<hasRelevance>\t" + coefficient);								
 			}
 		}
 	}
