@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -120,11 +121,23 @@ public class KB {
 	/** r(y', X) exists for some y', predicate */
 	public static final String EXISTSINVstr = "existsInv";
 	
+	/** r(y', X) exists for some y', predicate */
+	public static final ByteString EXISTSINVbs = ByteString.of(EXISTSINVstr);	
+	
+	/** r(X, y') does NOT exists for some y', predicate */
+	public static final String NOTEXISTSstr = "~exists";
+	
+	/** r(X, y') does NOT exists for some y', predicate */
+	public static final ByteString NOTEXISTSbs = ByteString.of(NOTEXISTSstr);
+	
+	/** r(y', X) does NOT exists for some y', predicate */
+	public static final String NOTEXISTSINVstr = "~existsInv";
+	
+	/** r(y', X) does NOT exists for some y', predicate */
+	public static final ByteString NOTEXISTSINVbs = ByteString.of(NOTEXISTSINVstr);
+	
 	/** Variable sign (as defined in SPARQL) **/
 	public static final char VariableSign = '?';
-	
-	/** r(y', X) exists for some y', predicate */
-	public static final ByteString EXISTSINVbs = ByteString.of(EXISTSINVstr);
 
 	/** Identifiers for the overlap maps */
 	public static final int SUBJECT2SUBJECT = 0;
@@ -810,6 +823,30 @@ public class KB {
 				return (new IntHashMap<ByteString>(get(relation2object2subject, triple[0]).keySet()));
 		}
 		
+		if (triple[1].equals(NOTEXISTSbs)) {
+			Set<ByteString> values = new LinkedHashSet<>();
+			if (isVariable(triple[0])) {
+				values.addAll(relationSize);
+				values.removeAll(get(subject2relation2object, triple[2]).keySet());
+			} else {
+				values.addAll(subjectSize);
+				values.removeAll(get(relation2subject2object, triple[0]).keySet());
+			}			
+			return new IntHashMap<>(values);
+		}
+		
+		if (triple[1].equals(NOTEXISTSINVbs)) {
+			Set<ByteString> values = new LinkedHashSet<>();
+			if (isVariable(triple[0])) {
+				values.addAll(relationSize);
+				values.removeAll(get(object2relation2subject, triple[2]).keySet());
+			} else { 
+				values.addAll(objectSize);
+				values.removeAll(get(relation2object2subject, triple[0]).keySet());
+			}
+			return new IntHashMap<>(values);
+		}
+		
 		if (isVariable(triple[0]))
 			return (get(relation2object2subject, triple[1], triple[2]));
 		if (isVariable(triple[1]))
@@ -846,6 +883,12 @@ public class KB {
 					.containsKey(fact[2]));
 		if (fact[1] == EXISTSINVbs)
 			return (get(relation2object2subject, fact[0])
+					.containsKey(fact[2]));
+		if (fact[1] == NOTEXISTSbs) 
+			return (!get(relation2subject2object, fact[0])
+					.containsKey(fact[2]));
+		if (fact[1] == NOTEXISTSINVbs)
+			return (!get(relation2object2subject, fact[0])
 					.containsKey(fact[2]));
 		return (get(subject2relation2object, fact[0], fact[1])
 				.contains(fact[2]));
@@ -922,6 +965,20 @@ public class KB {
 				result.put(relation, innerResult);
 			}
 			return (result);
+		}
+		
+		if (triple[1].equals(NOTEXISTSbs) || triple[1].equals(NOTEXISTSINVbs)) {
+			Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> map = 
+					triple[1].equals(NOTEXISTSbs) ? relation2subject2object
+							: relation2object2subject;
+			Map<ByteString, IntHashMap<ByteString>> result = new HashMap<>();
+			for (ByteString relation : map.keySet()) {
+				Set<ByteString> uMap = triple[1].equals(NOTEXISTSbs) ? 
+						new LinkedHashSet<>(subjectSize) : new LinkedHashSet<>(objectSize);				
+				uMap.removeAll(map.get(relation).keySet());	
+				result.put(relation, new IntHashMap<>(uMap));
+			}	
+			return result;
 		}
 		
 		switch (pos1) {
@@ -1063,6 +1120,19 @@ public class KB {
 			else
 				return get(object2relation2subject, triple[2]).size();
 		}
+		if (triple[1].equals(NOTEXISTSbs)) {
+			if (isVariable(triple[2]))
+				return subjectSize.size() - get(relation2subject2object, triple[0]).size();
+			else
+				return relationSize.size() - get(subject2relation2object, triple[2]).size();
+		}
+		if (triple[1].equals(NOTEXISTSINVbs)) {
+			if (isVariable(triple[2]))
+				return objectSize.size() - get(relation2object2subject, triple[0]).size();
+			else
+				return relationSize.size() - get(object2relation2subject, triple[2]).size();
+		}
+			
 		return (resultsOneVariable(triple).size());
 	}
 
@@ -1088,7 +1158,17 @@ public class KB {
 				count += get(relation2object2subject, relation).size();
 			}
 			return count;
-		}			
+		}
+		if (triple[1].equals(NOTEXISTSbs) || triple[1].equals(NOTEXISTSINVbs)) {			
+			Map<ByteString, IntHashMap<ByteString>> resultTwoVars = 
+					resultsTwoVariables(triple[0], triple[2], triple);
+			long count = 0;
+			for (ByteString relation : resultTwoVars.keySet()) {
+				count += resultTwoVars.get(relation).size();
+			}
+			return count;
+		}
+		
 		if (!isVariable(triple[0]))
 			return (long) (subjectSize.get(triple[0], 0));
 		if (!isVariable(triple[1])) {

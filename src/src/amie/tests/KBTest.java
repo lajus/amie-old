@@ -1,82 +1,91 @@
 package amie.tests;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import javatools.datatypes.ByteString;
 import amie.data.KB;
+import javatools.datatypes.ByteString;
+import javatools.datatypes.IntHashMap;
+import junit.framework.TestCase;
 
-public class KBTest {
+public class KBTest extends TestCase {
+	KB kb = new KB();
 	
-	public static void case3(KB source){
-		List<ByteString[]> q1 = KB.triples(KB.triple("?s29","rdf:type","<wikicategory_American_television_actors>"), KB.triple("?o29","rdf:type","<wikicategory_American_television_actors>"),  KB.triple("?o29","<isMarriedTo>","?s29"), KB.triple("?s29","<isMarriedTo>","?o29"));
-		List<ByteString[]> q2 = KB.triples(KB.triple("?o29","<isMarriedTo>","?s29"), KB.triple("?s29","<isMarriedTo>","?o29"));
-		List<ByteString[]> q3 = KB.triples(KB.triple("?o29","<isMarriedTo>","?s29"), KB.triple("?s29","<isMarriedTo>","?x"));
-		List<ByteString[]> q4 = KB.triples(KB.triple("?s29","rdf:type","<wikicategory_American_television_actors>"), KB.triple("?o29","rdf:type","<wikicategory_American_television_actors>"),  KB.triple("?o29","<isMarriedTo>","?s29"), KB.triple("?s29","<isMarriedTo>","?x"));
-
-		long t1, t2;
-		t1 = System.currentTimeMillis();
-		source.difference(ByteString.of("?s29"), q4, q1);
-		t2 = System.currentTimeMillis();
-		
-		System.out.println("With types: " + (((double)(t2 - t1)) / 1000) + " seconds");
-		
-		t1 = System.currentTimeMillis();
-		source.difference(ByteString.of("?s29"), q3, q2);
-		t2 = System.currentTimeMillis();
-		
-		System.out.println("Without types: " + (((double)(t2 - t1)) / 1000) + " seconds");		
+	protected void setUp() throws Exception {
+		super.setUp();
+		kb.add(KB.triple("<Luis>", "<wasBornIn>", "<Guayaquil>"));
+		kb.add(KB.triple("<Thomas>", "<wasBornIn>", "<Munich>"));
+		kb.add(KB.triple("<Antoine>", "<wasBornIn>", "<Colmar>"));
+		kb.add(KB.triple("<Oana>", "<livesIn>", "<Paris>"));
+		kb.add(KB.triple("<Luis>", "<livesIn>", "<Paris>"));
+		kb.add(KB.triple("<Thomas>", "<livesIn>", "<Paris>"));
+		kb.add(KB.triple("<Antoine>", "<livesIn>", "<Paris>"));
+		kb.add(KB.triple("<Ambar>", "<worksAt>", "<ESPOL>"));
+		kb.add(KB.triple("<Luis>", "<worksAt>", "<Telecom>"));
+		kb.add(KB.triple("<Thomas>", "<worksAt>", "<Telecom>"));
+		kb.add(KB.triple("<Antoine>", "<worksAt>", "<Telecom>"));		
+		kb.add(KB.triple("<Telecom>", "<isLocatedIn>", "<Paris>"));
 	}
 	
-	public static void case1(KB source){
-		List<ByteString[]> q52 = KB.triples(KB.triple("?o34","rdf:type","<wikicategory_American_films>"), KB.triple("?s6815","?p","?s34"));
-		List<ByteString[]> q51 = KB.triples(KB.triple("?s6815","?p","?s34"));
-		long t1, t2;
-		t1 = System.currentTimeMillis();
-		source.countProjectionBindings(KB.triple("?s34","<directed>","?o34"), q52, ByteString.of("?s34"));
-		t2 = System.currentTimeMillis();
-		System.out.println("With types: " + (((double)(t2 - t1)) / 1000) + " seconds");
-
-		t1 = System.currentTimeMillis();
-		source.countProjectionBindings(KB.triple("?s34","<directed>","?o34"), q51, ByteString.of("?s34"));
-		t2 = System.currentTimeMillis();
-		System.out.println("Without types: " + (((double)(t2 - t1)) / 1000) + " seconds");
+	public void testNegationCountOneVar() {
+		assert(kb.count(KB.triple("<hasChild>", KB.NOTEXISTSstr, "?x")) == 6);
+		assert(kb.count(KB.triple("<hasChild>", KB.NOTEXISTSINVbs, "?x")) == 6);
 	}
 	
-	public static void case2(KB source){
-		List<ByteString[]> q52 = KB.triples(KB.triple("?o25","rdf:type","<wordnet_university_108286163>"), KB.triple("?s25", "<hasAcademicAdvisor>", "?o235"), KB.triple("?o235", "<worksAt>", "?o25"), KB.triple("?o235","?p","?o25"));
-		List<ByteString[]> q51 = KB.triples(KB.triple("?s25", "<hasAcademicAdvisor>", "?o235"), KB.triple("?o235", "<worksAt>", "?o25"), KB.triple("?o235","?p","?o25"));
-		long t1, t2;
-		t1 = System.currentTimeMillis();
-		source.countProjectionBindings(KB.triple("?s25","<worksAt>","?o25"), q52, ByteString.of("?s25"));
-		t2 = System.currentTimeMillis();
-		System.out.println("With types: " + (((double)(t2 - t1)) / 1000) + " seconds");
-
-		t1 = System.currentTimeMillis();
-		source.countProjectionBindings(KB.triple("?s25","<worksAt>","?o25"), q51, ByteString.of("?s25"));
-		t2 = System.currentTimeMillis();
-		System.out.println("Without types: " + (((double)(t2 - t1)) / 1000) + " seconds");
+	public void testContains() {
+		assertFalse(kb.contains(KB.triple("<wasBornIn>", KB.NOTEXISTSstr, "<Antoine>")));
+		assertTrue(kb.contains(KB.triple("<wasBornIn>", KB.NOTEXISTSstr, "<Ambar>")));
+		assertTrue(kb.contains(KB.triple("<wasBornIn>", KB.NOTEXISTSINVstr, "<Paris>")));
+		assertTrue(kb.contains(KB.triple("<locatedIn>", KB.NOTEXISTSINVstr, "<Munich>")));
+		assertTrue(kb.contains(KB.triple("<locatedIn>", KB.NOTEXISTSINVstr, "<Cuenca>")));
 	}
 	
-	public static void case4(KB source){
-		long t1, t2;
-		List<ByteString[]> q52 = KB.triples(KB.triple("?a","<dbo:subregion>","?b"), KB.triple("?k", "<dbo:location>", "?a"), KB.triple("?b","<dbo:country>","?k"));		
-		t1 = System.currentTimeMillis();
-		long result = source.countDistinctPairs(ByteString.of("?a"), ByteString.of("?b"), q52);
-		t2 = System.currentTimeMillis();
-		System.out.println("Result " + result + ", Running time: " + (((double)(t2 - t1)) / 1000) + " seconds");
+	public void testValuesOneVar1() {
+		Set<ByteString> values = kb.resultsOneVariable(KB.triple("<worksAt>", KB.NOTEXISTSbs, "?x"));
+		assertEquals(2, values.size());
+		assertTrue(values.contains(ByteString.of("<Oana>")));
+		assertTrue(values.contains(ByteString.of("<Telecom>")));
 	}
 	
-	public static void main(String[] args) throws IOException{
-		KB source = new KB();
+	public void testValuesOneVar2() {
+		Set<ByteString> values = kb.resultsOneVariable(KB.triple("?x", KB.NOTEXISTSbs, "<Luis>"));
+		assertEquals(1, values.size());
+		assertTrue(values.contains(ByteString.of("<isLocatedIn>")));
+	}
+	
+	public void testValuesOneVar3() {
+		kb.add(KB.triple("<Guayaquil>", "<rdf:type>", "<City>"));
+		kb.add(KB.triple("<Munich>", "<rdf:type>", "<City>"));
+		kb.add(KB.triple("<Colmar>", "<rdf:type>", "<City>"));		
+		kb.add(KB.triple("<Paris>", "<rdf:type>", "<City>"));		
+		Set<ByteString> values = kb.selectDistinct(ByteString.of("?x"), 
+				KB.triples(KB.triple("<wasBornIn>", KB.NOTEXISTSINVbs, "?x"),
+						KB.triple("?x", "<rdf:type>", "<City>")));
+		assertEquals(1, values.size());
+		assertTrue(values.contains(ByteString.of("<Paris>")));
+	}
+	
+	public void testValuesTwoVars() {
+		kb.add(KB.triple("<Guayaquil>", "<rdf:type>", "<City>"));
+		kb.add(KB.triple("<Munich>", "<rdf:type>", "<City>"));
+		kb.add(KB.triple("<Colmar>", "<rdf:type>", "<City>"));		
+		kb.add(KB.triple("<Paris>", "<rdf:type>", "<City>"));	
+		kb.add(KB.triple("<Luis>", "<rdf:type>", "<Person>"));
+		kb.add(KB.triple("<Antoine>", "<rdf:type>", "<Person>"));
+		kb.add(KB.triple("<Ambar>", "<rdf:type>", "<Person>"));		
+		kb.add(KB.triple("<Oana>", "<rdf:type>", "<Person>"));	
+		kb.add(KB.triple("<Thomas>", "<rdf:type>", "<Person>"));
+		Map<ByteString, IntHashMap<ByteString>> values = kb.selectDistinct(ByteString.of("?x"), ByteString.of("?y"),
+				KB.triples(KB.triple("?x", KB.NOTEXISTSbs, "?y"),
+						KB.triple("?y", "<rdf:type>", "<Person>")));
+		assertTrue(values.containsKey(ByteString.of("<wasBornIn>")));
+		assertTrue(values.get(ByteString.of("<wasBornIn>")).containsKey(ByteString.of("<Ambar>")));
 		
-		source.load(new File(args[0]));
-		
-		//case1(source);
-		//case2(source);
-		//case3(source);
-		case4(source);
+		values = kb.selectDistinct(ByteString.of("?x"), ByteString.of("?y"),
+				KB.triples(KB.triple("?x", KB.NOTEXISTSINVbs, "?y"),
+						KB.triple("?y", "<rdf:type>", "<City>")));
+		assertTrue(values.containsKey(ByteString.of("<wasBornIn>")));
+		assertTrue(values.get(ByteString.of("<wasBornIn>")).containsKey(ByteString.of("<Paris>")));
 	}
 
 }

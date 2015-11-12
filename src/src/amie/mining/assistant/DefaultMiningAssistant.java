@@ -367,6 +367,9 @@ public class DefaultMiningAssistant extends MiningAssistant{
 			}
 		}
 	}
+	
+	@Override
+	public void getTypeSpecializedAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {}
 
 	/**
 	 * It determines whether the rule contains an expensive query patterns of the forms

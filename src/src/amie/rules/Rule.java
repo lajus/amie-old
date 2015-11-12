@@ -1208,6 +1208,22 @@ public class Rule {
         newQuery.triples.add(copyNewEdge);
         return newQuery;
     }
+    
+    /**
+     * It returns a new rule where the last atom is replaced by a
+     * type constraint with the given subtype. 
+     * @param subtype
+     * @param cardinality
+     * @return
+     */
+    public Rule specializeTypeAtom(ByteString subtype, double cardinality) {
+		Rule newRule = new Rule(this.getHead(), this.getBody(), cardinality);
+		ByteString[] lastTriple = newRule.getLastTriplePattern();
+		lastTriple[1] = amie.data.U.typeRelationBS;
+		lastTriple[2] = subtype;
+		newRule.setFunctionalVariablePosition(functionalVariablePosition);
+		return newRule;
+	}
 
     /**
      * The alternative hash code for the parents of the rule. The alternative
@@ -1279,27 +1295,8 @@ public class Rule {
     }
 
     public String getRuleString() {
-        //Guarantee that atoms in rules are output in the same order across runs of the program
-        class TripleComparator implements Comparator<ByteString[]> {
-
-            public int compare(ByteString[] t1, ByteString[] t2) {
-                int predicateCompare = t1[1].toString().compareTo(t2[1].toString());
-                if (predicateCompare == 0) {
-                    int objectCompare = t1[2].toString().compareTo(t2[2].toString());
-                    if (objectCompare == 0) {
-                        return t1[0].toString().compareTo(t2[0].toString());
-                    }
-                    return objectCompare;
-                }
-
-                return predicateCompare;
-            }
-        }
-
-        TreeSet<ByteString[]> sortedBody = new TreeSet<ByteString[]>(new TripleComparator());
-        sortedBody.addAll(getAntecedent());
         StringBuilder strBuilder = new StringBuilder();
-        for (ByteString[] pattern : sortedBody) {
+        for (ByteString[] pattern : sortBody()) {
             if (pattern[1].equals(KB.DIFFERENTFROMbs)) {
                 continue;
             }
@@ -1321,13 +1318,60 @@ public class Rule {
 
         return strBuilder.toString();
     }
+    
+    public Collection<ByteString[]> sortBody() {
+    	   //Guarantee that atoms in rules are output in the same order across runs of the program
+        class TripleComparator implements Comparator<ByteString[]> {
 
-    public String getFullRuleString() {
-        DecimalFormat df = new DecimalFormat("#.#########");
-        DecimalFormat df1 = new DecimalFormat("#.##");
+            public int compare(ByteString[] t1, ByteString[] t2) {
+                int predicateCompare = t1[1].toString().compareTo(t2[1].toString());
+                if (predicateCompare == 0) {
+                    int objectCompare = t1[2].toString().compareTo(t2[2].toString());
+                    if (objectCompare == 0) {
+                        return t1[0].toString().compareTo(t2[0].toString());
+                    }
+                    return objectCompare;
+                }
+
+                return predicateCompare;
+            }
+        }
+
+        TreeSet<ByteString[]> sortedBody = new TreeSet<ByteString[]>(new TripleComparator());
+        sortedBody.addAll(getAntecedent());
+        return sortedBody;
+    }
+    
+    public String getDatalogRuleString() {
         StringBuilder strBuilder = new StringBuilder();
-        strBuilder.append(getRuleString());
+        for (ByteString[] pattern : sortBody()) {
+            if (pattern[1].equals(KB.DIFFERENTFROMbs)) {
+                continue;
+            }
+            strBuilder.append(pattern[1]);
+            strBuilder.append("(");
+            strBuilder.append(pattern[0]);
+            strBuilder.append(",");
+            strBuilder.append(pattern[2]);
+            strBuilder.append(")");
+        }
 
+        strBuilder.append(" => ");
+        ByteString[] head = triples.get(0);
+        strBuilder.append(head[1]);
+        strBuilder.append("(");
+        strBuilder.append(head[0]);
+        strBuilder.append(",");
+        strBuilder.append(head[2]);
+        strBuilder.append(")");
+
+        return strBuilder.toString();
+    }
+    
+    private void addFullFields(StringBuilder strBuilder) {
+    	DecimalFormat df = new DecimalFormat("#.#########");
+        DecimalFormat df1 = new DecimalFormat("#.##");
+        
         strBuilder.append("\t" + df.format(getHeadCoverage()));
         strBuilder.append("\t" + df.format(getStdConfidence()));
         strBuilder.append("\t" + df.format(getPcaConfidence()));
@@ -1338,15 +1382,10 @@ public class Rule {
         strBuilder.append("\t" + _stdConfidenceUpperBound);
         strBuilder.append("\t" + _pcaConfidenceUpperBound);
         strBuilder.append("\t" + _pcaConfidenceEstimation);
-
-        return strBuilder.toString();
     }
-
-    public String getBasicRuleString() {
-        DecimalFormat df = new DecimalFormat("#.#########");
-        StringBuilder strBuilder = new StringBuilder();
-        strBuilder.append(getRuleString());
-
+    
+    private void addBasicFields(StringBuilder strBuilder) {
+    	DecimalFormat df = new DecimalFormat("#.#########");
         strBuilder.append("\t" + df.format(getHeadCoverage()));
         strBuilder.append("\t" + df.format(getStdConfidence()));
         strBuilder.append("\t" + df.format(getPcaConfidence()));
@@ -1354,7 +1393,26 @@ public class Rule {
         strBuilder.append("\t" + getBodySize());
         strBuilder.append("\t" + df.format(getPcaBodySize()));
         strBuilder.append("\t" + getFunctionalVariable());
+    }
+    
+    public String getDatalogFullRuleString() {
+    	StringBuilder strBuilder = new StringBuilder();
+        strBuilder.append(getDatalogRuleString());
+        addFullFields(strBuilder);
+        return strBuilder.toString();
+    }
+    
+    public String getFullRuleString() {
+        StringBuilder strBuilder = new StringBuilder();
+        strBuilder.append(getRuleString());
+        addFullFields(strBuilder);
+        return strBuilder.toString();
+    }
 
+    public String getBasicRuleString() {
+        StringBuilder strBuilder = new StringBuilder();
+        strBuilder.append(getRuleString());
+        addBasicFields(strBuilder);
         return strBuilder.toString();
     }
 

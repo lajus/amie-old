@@ -422,7 +422,7 @@ public class MiningAssistant{
 				Rule candidate = new Rule(succedent, cardinality);
 				candidate.setFunctionalVariablePosition(countVarPos);
 				registerHeadRelation(candidate);
-				if(canAddInstantiatedAtoms() && !relation.equals(KB.EQUALSbs)){
+				if (canAddInstantiatedAtoms() && !relation.equals(KB.EQUALSbs)){
 					getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
 				}
 				
@@ -620,7 +620,8 @@ public class MiningAssistant{
 	 * @param danglingEdges 
 	 * @param output
 	 */
-	public void getInstantiatedAtoms(Rule rule, double minSupportThreshold, Collection<Rule> danglingEdges, Collection<Rule> output) {
+	public void getInstantiatedAtoms(Rule rule, double minSupportThreshold, 
+			Collection<Rule> danglingEdges, Collection<Rule> output) {
 		if (!canAddInstantiatedAtoms()) {
 			return;
 		}
@@ -644,6 +645,35 @@ public class MiningAssistant{
 					throw new IllegalArgumentException("The query " + rule.getRuleString() + " does not contain fresh variables in the last triple pattern.");
 				}
 				getInstantiatedAtoms(candidate, candidate, lastTriplePatternIndex, danglingPosition, minSupportThreshold, output);
+			}
+		}
+	}
+	
+	/**
+	 * Returns all candidates obtained by replacing the type of the last atom with a subclass. If the last
+	 * atom added to the rule is not a type constraint, i.e, [?x rdf:type C] the method does nothing.
+	 * @param rule
+	 * @param minSupportThreshold
+	 * @param output
+	 */
+	public void getTypeSpecializedAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
+		ByteString[] lastAtom = rule.getLastRealTriplePattern();
+		if (!lastAtom[1].equals(amie.data.U.typeRelationBS))
+			return;
+		
+		if (KB.isVariable(lastAtom[2]))
+			return;
+		
+		ByteString typeToSpecialize = lastAtom[2];
+		Set<ByteString> subtypes = amie.data.U.getSubtypes(this.kbSchema, typeToSpecialize);
+		for (ByteString subtype : subtypes) {
+			lastAtom[2] = subtype;
+			long support = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
+			lastAtom[2] = typeToSpecialize;
+			if (support >= minSupportThreshold) {
+				Rule newRule = rule.specializeTypeAtom(subtype, support);
+				newRule.setParent(rule);
+				output.add(newRule);
 			}
 		}
 	}

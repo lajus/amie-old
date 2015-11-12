@@ -1,6 +1,9 @@
 package amie.data.utils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Set;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -19,9 +22,13 @@ public class ComputeTypeDeductiveClosure {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
+		// It loads the properties from the file ../conf/schema_properties
+		amie.data.U.loadSchemaConf();
+		System.out.println("Assuming " + amie.data.U.typeRelation + " as type relation");
 		KB kb = U.loadFiles(args);
 		Map<ByteString, IntHashMap<ByteString>> allEntitiesAndTypes = 
 				kb.resultsTwoVariables("?s", "?o", new String[]{"?s", amie.data.U.typeRelation, "?o"});
+		PrintWriter pw = new PrintWriter(new File("/home/lgalarra/AMIE/Data/wikidata/inferredtypes.tsv"));
 		for (ByteString entity : allEntitiesAndTypes.keySet()) {
 			Set<ByteString> superTypes = new LinkedHashSet<>();
 			for (ByteString type : allEntitiesAndTypes.get(entity)) {
@@ -29,7 +36,7 @@ public class ComputeTypeDeductiveClosure {
 			}
 			// And be sure we add only the new ones
 			superTypes.removeAll(allEntitiesAndTypes.get(entity));
-			output(entity, superTypes);
+			output(entity, superTypes, pw);
 		}
 	}
 
@@ -37,10 +44,11 @@ public class ComputeTypeDeductiveClosure {
 	 * Outputs statements of the form entity rdf:type type in TSV format
 	 * @param entity
 	 * @param superTypes
+	 * @throws FileNotFoundException 
 	 */
-	private static void output(ByteString entity, Set<ByteString> superTypes) {
+	private static void output(ByteString entity, Set<ByteString> superTypes, PrintWriter pw) {
 		for (ByteString type : superTypes) {
-			System.out.println(entity + "\t" + amie.data.U.typeRelation + "\t" + type);
+			pw.println(entity + "\t" + amie.data.U.typeRelation + "\t" + type);
 		}
 	}
 }

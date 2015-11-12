@@ -2,6 +2,9 @@ package amie.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -23,30 +26,50 @@ import javatools.datatypes.IntHashMap;
 public class U {
 	
 	/** X rdf:type Class **/
-	public static final String typeRelation = "rdf:type";
+	public static String typeRelation = "rdf:type";
 	
-	public static final ByteString typeRelationBS = ByteString.of(typeRelation);
+	public static ByteString typeRelationBS = ByteString.of(typeRelation);
 	
 	/** Class1 rdfs:subClassOf Class2 **/
-	public static final String subclassRelation = "rdfs:subClassOf";
+	public static String subClassRelation = "rdfs:subClassOf";
 	
-	public static final ByteString subclassRelationBS = ByteString.of(subclassRelation);
+	public static ByteString subClassRelationBS = ByteString.of(subClassRelation);
 	
 	/** relation1 rdfs:subPropertyOf relation2 **/
-	public static final String subpropertyRelation = "rdfs:subPropertyOf";
+	public static String subPropertyRelation = "rdfs:subPropertyOf";
 	
-	public static final ByteString subpropertyRelationBS = ByteString.of(subpropertyRelation);
+	public static ByteString subPropertyRelationBS = ByteString.of(subPropertyRelation);
 	
 	/** Class rdfs:domain relation **/
-	public static final String domainRelation = "rdfs:domain";
+	public static String domainRelation = "rdfs:domain";
 	
-	public static final ByteString domainRelationBS = ByteString.of(domainRelation);
+	public static ByteString domainRelationBS = ByteString.of(domainRelation);
 	
 	/** Class rdfs:domain range **/
-	public static final String rangeRelation = "rdfs:range";
+	public static String rangeRelation = "rdfs:range";
 	
-	public static final ByteString rangeRelationBS = ByteString.of(rangeRelation);
-
+	public static ByteString rangeRelationBS = ByteString.of(rangeRelation);
+	
+	public static void loadSchemaConf() {
+		try {
+			List<String> lines = Files.readAllLines(Paths.get("conf/schema_properties"),
+			        Charset.defaultCharset());
+			for (String line : lines) {
+				String[] lineParts = line.split("=");
+				if (lineParts.length < 2)
+					continue;
+				try {
+					amie.data.U.class.getField(lineParts[0]).set(null, lineParts[1]);
+				} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
+						| SecurityException e) {
+					e.printStackTrace();
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
 
 	/**
 	 * Returns the domain of a given relation in a knowledge base
@@ -62,7 +85,7 @@ public class U {
 		}
 		
 		//Try looking for the superproperty
-		List<ByteString[]> query2 = KB.triples(KB.triple(relation, subpropertyRelation, "?y"), 
+		List<ByteString[]> query2 = KB.triples(KB.triple(relation, subPropertyRelation, "?y"), 
 				KB.triple("?y", "rdfs:domain", "?x"));
 		
 		domains = source.selectDistinct(ByteString.of("?x"), query2);
@@ -87,7 +110,7 @@ public class U {
 		}
 		
 		//Try looking for the superproperty
-		List<ByteString[]> query2 = KB.triples(KB.triple(relation, subpropertyRelation, "?y"), 
+		List<ByteString[]> query2 = KB.triples(KB.triple(relation, subPropertyRelation, "?y"), 
 				KB.triple("?y", "rdfs:range", "?x"));
 		
 		ranges = source.selectDistinct(ByteString.of("?x"), query2);
@@ -116,7 +139,7 @@ public class U {
 	 * @return
 	 */
 	public static boolean isLeafDatatype(KB source, ByteString type){
-		List<ByteString[]> query = KB.triples(KB.triple("?x", subclassRelation, type));		
+		List<ByteString[]> query = KB.triples(KB.triple("?x", subClassRelation, type));		
 		return source.countDistinct(ByteString.of("?x"), query) == 0;
 	}
 	
@@ -162,7 +185,7 @@ public class U {
 	 * @return
 	 */
 	public static Set<ByteString> getSuperTypes(KB source, ByteString type){
-		List<ByteString[]> query = KB.triples(KB.triple(type, subclassRelation, "?x"));		
+		List<ByteString[]> query = KB.triples(KB.triple(type, subClassRelation, "?x"));		
 		return new LinkedHashSet<ByteString>(source.selectDistinct(ByteString.of("?x"), query));
 	}
 	
@@ -175,12 +198,25 @@ public class U {
 	public static Set<ByteString> getAllSuperTypes(KB source, ByteString type) {
 		Set<ByteString> resultSet = new LinkedHashSet<ByteString>();
 		Queue<ByteString> queue = new LinkedList<>();
-		queue.addAll(getSuperTypes(source, type));
+		Set<ByteString> seenTypes = new LinkedHashSet<>();
+		Set<ByteString> superTypes = getSuperTypes(source, type);
+		queue.addAll(superTypes);
+		seenTypes.addAll(superTypes);
 		
-		while(!queue.isEmpty()){
+		while (!queue.isEmpty()) {
 			ByteString currentType = queue.poll();
 			resultSet.add(currentType);
-			queue.addAll(getSuperTypes(source, currentType));
+			superTypes = getSuperTypes(source, currentType);
+			boolean proceed = true;
+			for (ByteString st : superTypes) {
+				if (seenTypes.contains(st)) {
+					proceed = false;
+				} else {
+					seenTypes.add(st);
+				}
+			}
+			if (proceed)
+				queue.addAll(superTypes);
 		}
 		
 		return resultSet;
@@ -228,7 +264,7 @@ public class U {
 	 * @return
 	 */
 	public static Set<ByteString> getSubtypes(KB source, ByteString type) {
-		List<ByteString[]> query = KB.triples(KB.triple(ByteString.of("?x"), subclassRelation, type));		
+		List<ByteString[]> query = KB.triples(KB.triple(ByteString.of("?x"), subClassRelation, type));		
 		return new LinkedHashSet<ByteString>(source.selectDistinct(ByteString.of("?x"), query));	
 	}
 	
@@ -360,6 +396,45 @@ public class U {
 		}
 		
 		return overlap;
+	}
+	
+	public static IntHashMap<Integer> getTypedHistogram(KB kb, ByteString relation) {
+		IntHashMap<Integer> hist = new IntHashMap<>();
+		List<ByteString[]> query = null;
+		String queryVar = null;
+		String existVar = null;
+		ByteString targetType = null;
+		if (kb.isFunctional(relation)) {
+			queryVar = "?s";
+			existVar = "?o";
+			query = KB.triples(KB.triple("?s", relation, "?o"));
+			targetType = getRelationDomain(kb, relation);
+		} else {
+			queryVar = "?o";
+			existVar = "?s";
+			query = KB.triples(KB.triple("?o", relation, "?s"));
+			targetType = getRelationRange(kb, relation);
+		}
+		System.out.println(targetType);
+		if (targetType == null) {
+			return hist;
+		}
+		
+		Set<ByteString> effectiveDomain = kb.selectDistinct(ByteString.of(queryVar), query);
+		Set<ByteString> theorethicalDomain = getAllEntitiesForType(kb, targetType);
+		effectiveDomain.retainAll(theorethicalDomain);
+		for (ByteString entity : effectiveDomain) {
+			long val;
+			if (kb.isFunctional(relation)) {
+				val = kb.count(KB.triple(entity, relation, ByteString.of(existVar)));
+			} else {
+				val = kb.count(KB.triple(ByteString.of(queryVar), relation, entity));
+			}
+			hist.increase((int)val);
+		}
+		kb.selectDistinct(ByteString.of(existVar), query);
+		
+		return hist;		
 	}
 
 	

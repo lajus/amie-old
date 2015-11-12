@@ -1,0 +1,5 @@
+subPropertyRelation=rdfs:subPropertyOf
+typeRelation=rdf:type
+subClassRelation=rdfs:subClassOf
+domainRelation=rdfs:domain
+rangeRelation=rdfs:range

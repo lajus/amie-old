@@ -101,6 +101,12 @@ public class AMIE {
      * If true, print the rules as they are discovered.
      */
     private boolean realTime;
+    
+    /**
+     * If true, AMIE outputs rules using the datalog notation
+     * otherwise its default [subject, relation, object] notation
+     */
+    private boolean datalogNotation;
 
     /** Fields required to measure the system performance **/
     
@@ -162,6 +168,7 @@ public class AMIE {
         this.pruningMetric = metric;
         this.nThreads = nThreads;
         this.realTime = true;
+        this.datalogNotation = false;
         this.seeds = null;
         /** System performance **/
         this._specializationTime = 0l;
@@ -187,7 +194,15 @@ public class AMIE {
     	this.realTime = realTime;
     }
     
-    public Collection<ByteString> getSeeds() {
+    public boolean isDatalogNotation() {
+		return datalogNotation;
+	}
+
+	public void setDatalogNotation(boolean datalogNotation) {
+		this.datalogNotation = datalogNotation;
+	}
+
+	public Collection<ByteString> getSeeds() {
     	return seeds;
     }
     
@@ -332,7 +347,10 @@ public class AMIE {
                     while (lastConsumedIndex == consumeList.size() - 1) {
                         conditionVariable.await();
                         for (int i = lastConsumedIndex + 1; i < consumeList.size(); ++i) {
-                            System.out.println(consumeList.get(i).getFullRuleString());
+                        	if (datalogNotation)
+                                System.out.println(consumeList.get(i).getDatalogFullRuleString());
+                        	else                        		
+                        		System.out.println(consumeList.get(i).getFullRuleString());
                         }
 
                         lastConsumedIndex = consumeList.size() - 1;
@@ -493,6 +511,7 @@ public class AMIE {
                         assistant.getClosingAtoms(currentRule, threshold, temporalOutput);
                         assistant.getDanglingAtoms(currentRule, threshold, temporalOutputDanglingEdges);
                         assistant.getInstantiatedAtoms(currentRule, threshold, temporalOutputDanglingEdges, temporalOutput);
+                        assistant.getTypeSpecializedAtoms(currentRule, threshold, temporalOutput);
                         
                         long timeStamp2 = System.currentTimeMillis();
                         this._specializationTime += (timeStamp2 - timeStamp1);
@@ -728,6 +747,7 @@ public class AMIE {
         int maxDepth = 3;
         int recursivityLimit = 3;
         boolean realTime = true;
+        boolean datalogOutput = true;
         boolean countAlwaysOnSubject = false;
         double minMetricValue = 0.0;
         boolean allowConstants = false;
@@ -787,6 +807,11 @@ public class AMIE {
                 .withDescription("Print the rules at the end and not while they are discovered. "
                 		+ "Default: false")
                 .create("oute");
+        
+        Option datalogNotationOpt = OptionBuilder.withArgName("datalog-output")
+                .withDescription("Print rules using the datalog notation "
+                		+ "Default: false")
+                .create("datalog");
 
         Option bodyExcludedOpt = OptionBuilder.withArgName("body-excluded-relations")
                 .hasArg()
@@ -946,6 +971,7 @@ public class AMIE {
         options.addOption(fullOp);
         options.addOption(extraFileOp);
         options.addOption(miningTechniqueOp);
+        options.addOption(datalogNotationOpt);
 
         try {
             cli = parser.parse(options, args);
@@ -1265,6 +1291,7 @@ public class AMIE {
         countAlwaysOnSubject = cli.hasOption("caos");
         realTime = !cli.hasOption("oute");
         enforceConstants = cli.hasOption("fconst");
+        datalogOutput = cli.hasOption("datalog");
 
         // These configurations override others
         if (onlyOutput) {
@@ -1310,6 +1337,7 @@ public class AMIE {
         
         AMIE miner = new AMIE(mineAssistant, minInitialSup, minMetricValue, metric, nThreads);
         miner.setRealTime(realTime);
+        miner.setDatalogNotation(datalogOutput);
         miner.setSeeds(headTargetRelations);
         miner._setSourcesLoadingTime(sourcesLoadingTime);
 
@@ -1358,32 +1386,34 @@ public class AMIE {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-    	  AMIE miner = AMIE.getInstance(args);
-
-          Announce.doing("Starting the mining phase");
-
-          long time = System.currentTimeMillis();
-          List<Rule> rules = null;
-
-          rules = miner.mine();
-
-          if (!miner.isRealTime()) {
-              Rule.printRuleHeaders();
-              for (Rule rule : rules) {
-                  System.out.println(rule.getFullRuleString());
-              }
-          }
-
-          if (miner.isVerbose()) {
-              System.out.println("Specialization time: " + (miner._getSpecializationTime() / 1000.0) + "s");
-              System.out.println("Scoring time: " + (miner._getScoringTime() / 1000.0) + "s");
-              System.out.println("Queueing and duplicate elimination: " + (miner._getQueueingAndDuplicateElimination() / 1000.0) + "s");
-              System.out.println("Approximation time: " + (miner._getApproximationTime() / 1000.0) + "s");
-          }
-
-          long miningTime = System.currentTimeMillis() - time;
-          System.out.println("Mining done in " + NumberFormatter.formatMS(miningTime));
-          Announce.done("Total time " + NumberFormatter.formatMS(miningTime + miner._getSourcesLoadingTime()));
-          System.out.println(rules.size() + " rules mined.");
+    	amie.data.U.loadSchemaConf();
+    	System.out.println("Assuming " + amie.data.U.typeRelation + " as type relation");
+		AMIE miner = AMIE.getInstance(args);
+	
+	    Announce.doing("Starting the mining phase");
+	
+	    long time = System.currentTimeMillis();
+	    List<Rule> rules = null;
+	
+	    rules = miner.mine();
+	
+	    if (!miner.isRealTime()) {
+	    	Rule.printRuleHeaders();
+	        for (Rule rule : rules) {
+	        	System.out.println(rule.getFullRuleString());
+	        }
+	    }
+	
+	      if (miner.isVerbose()) {
+	          System.out.println("Specialization time: " + (miner._getSpecializationTime() / 1000.0) + "s");
+	          System.out.println("Scoring time: " + (miner._getScoringTime() / 1000.0) + "s");
+	          System.out.println("Queueing and duplicate elimination: " + (miner._getQueueingAndDuplicateElimination() / 1000.0) + "s");
+	          System.out.println("Approximation time: " + (miner._getApproximationTime() / 1000.0) + "s");
+	      }
+	
+	      long miningTime = System.currentTimeMillis() - time;
+	      System.out.println("Mining done in " + NumberFormatter.formatMS(miningTime));
+	      Announce.done("Total time " + NumberFormatter.formatMS(miningTime + miner._getSourcesLoadingTime()));
+	      System.out.println(rules.size() + " rules mined.");
     }
 }
