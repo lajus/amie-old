@@ -28,7 +28,7 @@ public class ComputeTypeDeductiveClosure {
 		KB kb = U.loadFiles(args);
 		Map<ByteString, IntHashMap<ByteString>> allEntitiesAndTypes = 
 				kb.resultsTwoVariables("?s", "?o", new String[]{"?s", amie.data.U.typeRelation, "?o"});
-		PrintWriter pw = new PrintWriter(new File("/home/lgalarra/AMIE/Data/wikidata/inferredtypes.tsv"));
+		PrintWriter pw = new PrintWriter(new File("inferredTypes.tsv"));
 		for (ByteString entity : allEntitiesAndTypes.keySet()) {
 			Set<ByteString> superTypes = new LinkedHashSet<>();
 			for (ByteString type : allEntitiesAndTypes.get(entity)) {
