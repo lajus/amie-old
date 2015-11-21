@@ -1387,7 +1387,7 @@ public class AMIE {
      */
     public static void main(String[] args) throws Exception {
     	amie.data.U.loadSchemaConf();
-    	System.out.println("Assuming " + amie.data.U.typeRelation + " as type relation");
+    	System.out.println("Assuming " + amie.data.U.typeRelationBS + " as type relation");
 		AMIE miner = AMIE.getInstance(args);
 	
 	    Announce.doing("Starting the mining phase");

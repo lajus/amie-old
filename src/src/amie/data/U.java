@@ -60,13 +60,14 @@ public class U {
 					continue;
 				try {
 					amie.data.U.class.getField(lineParts[0]).set(null, lineParts[1]);
+					amie.data.U.class.getField(lineParts[0] + "BS").set(null, ByteString.of(lineParts[1]));
 				} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
 						| SecurityException e) {
 					e.printStackTrace();
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println("Using the default schema relations");
 		}
 		
 	}
@@ -404,6 +405,7 @@ public class U {
 		String queryVar = null;
 		String existVar = null;
 		ByteString targetType = null;
+	
 		if (kb.isFunctional(relation)) {
 			queryVar = "?s";
 			existVar = "?o";
@@ -415,7 +417,7 @@ public class U {
 			query = KB.triples(KB.triple("?o", relation, "?s"));
 			targetType = getRelationRange(kb, relation);
 		}
-		System.out.println(targetType);
+		
 		if (targetType == null) {
 			return hist;
 		}
@@ -436,9 +438,20 @@ public class U {
 		
 		return hist;		
 	}
+	
+	public static IntHashMap<ByteString> getTypesCount(KB kb) {
+		List<ByteString[]> query = KB.triples(KB.triple("?s", typeRelation, "?o"));
+		Map<ByteString, IntHashMap<ByteString>> types2Instances = 
+				kb.selectDistinct(ByteString.of("?o"), ByteString.of("?s"), query);
+		IntHashMap<ByteString> result = new IntHashMap<>();
+		for (ByteString type : types2Instances.keySet()) {
+			result.put(type, types2Instances.get(type).size());
+		}
+		return result;
+	}
 
 	
-	public static void main(String args[]) throws IOException{
+	public static void main(String args[]) throws IOException {
 		KB d = new KB();
 	    ArrayList<File> files = new ArrayList<File>();
 	    for(String file: args)
@@ -450,5 +463,18 @@ public class U {
 	    	System.out.println(relation + "\t" + getRelationDomain(d, relation) 
 	    			+ "\t" + getRelationRange(d, relation));
 	    }
+	}
+
+	/**
+	 * It returns all the entities that occur as subjects or objects
+	 * in the KB
+	 * @param kb
+	 * @return
+	 */
+	public static IntHashMap<ByteString> getAllEntities(KB kb) {
+		IntHashMap<ByteString> result = new IntHashMap<>();
+		result.addAll(kb.subjectSize);
+		result.addAll(kb.objectSize);
+		return result;
 	}
 }

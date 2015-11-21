@@ -15,15 +15,7 @@ public class RelevanceCalculator {
 
 	enum RelevanceMetric { Wikilength, NumberOfFacts, IngoingLinks, JointMeasure }
 	
-	/**
-	 * For each entity in an input KB (given as a TSV file), it outputs the relevance
-	 * of the entities based on the formula:
-	 * 
-	 * log(wiki-length) * (ingoing-links + 2) * (number-facts) 
-	 * @param args
-	 * @throws IOException
-	 */
-	public static void main(String[] args) throws IOException {
+	private static void calculateRelevanceFromAdditionalFile(String[] args) throws IOException {
 		try(TSVFile tsv = new TSVFile(new File(args[0]))) {
 			RelevanceMetric relevanceMetric = RelevanceMetric.NumberOfFacts;
 			KB kb = null;
@@ -87,6 +79,31 @@ public class RelevanceCalculator {
 				System.out.println(entity + "\t<hasRelevance>\t" + coefficient);								
 			}
 		}
+	}
+	
+	private static void calculateRelevance(String args[]) throws IOException {
+		KB kb = amie.data.U.loadFiles(args);
+		IntHashMap<ByteString> allEntities = amie.data.U.getAllEntities(kb);
+		for (ByteString entity : allEntities) {
+			System.out.println(entity + "\t<hasRelevance>\t" + allEntities.get(entity));
+		}
+	}
+	
+	/**
+	 * For each entity in an input KB (given as a TSV file), it outputs the relevance
+	 * of the entities based on the formula:
+	 * 
+	 * log(wiki-length) * (ingoing-links + 2) * (number-facts) 
+	 * @param args
+	 * @throws IOException
+	 */
+	public static void main(String[] args) throws IOException {
+		if (args.length > 2) {
+			calculateRelevanceFromAdditionalFile(args);
+		} else {
+			calculateRelevance(args);
+		}
+
 	}
 	
 	private static String extractInteger(String xsdInteger) {

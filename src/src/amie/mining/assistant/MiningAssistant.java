@@ -666,7 +666,6 @@ public class MiningAssistant{
 		
 		ByteString typeToSpecialize = lastAtom[2];
 		Set<ByteString> subtypes = amie.data.U.getSubtypes(this.kbSchema, typeToSpecialize);
-		System.out.println(rule + " Specializing " + typeToSpecialize);
 		for (ByteString subtype : subtypes) {
 			lastAtom[2] = subtype;
 			long support = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
@@ -928,7 +927,6 @@ public class MiningAssistant{
 		boolean addIt = true;
 		
 		if(candidate.containsLevel2RedundantSubgraphs()) {
-			System.out.println(candidate + " did not passed");
 			return false;
 		}		
 		
@@ -954,11 +952,9 @@ public class MiningAssistant{
 				}		
 			}
 		}else{
-			System.out.println(candidate + " did not passed");
 			return false;
 		}
 		
-		System.out.println(candidate + " passed: " + addIt);
 		return addIt;
 	}
 

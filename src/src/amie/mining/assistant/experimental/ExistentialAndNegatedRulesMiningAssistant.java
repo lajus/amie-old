@@ -3,12 +3,12 @@ package amie.mining.assistant.experimental;
 import java.util.Arrays;
 import java.util.Collection;
 
+import javatools.datatypes.ByteString;
+import javatools.datatypes.IntHashMap;
 import amie.data.KB;
 import amie.mining.ConfidenceMetric;
 import amie.mining.assistant.MiningAssistant;
 import amie.rules.Rule;
-import javatools.datatypes.ByteString;
-import javatools.datatypes.IntHashMap;
 
 /**
  * This mining assistant drives the AMIE algorithm so that it outputs rules of the forms
@@ -56,13 +56,18 @@ public class ExistentialAndNegatedRulesMiningAssistant extends MiningAssistant {
 					&& this.headExcludedRelations.contains(relation)) {
 				continue;
 			}
-			
+						
 			if (relation.equals(KB.EQUALSbs) || 
 					relation.equals(KB.DIFFERENTFROMbs))
 				continue;
 			
 			newEdge1[0] = relation;
 			newEdge2[0] = relation;
+			
+			// Ignore small relations
+			if (kb.relationSize(relation) < minSupportThreshold) 
+				continue;
+			
 			if (kb.isFunctional(relation)) {
 				newEdge1[1] = KB.NOTEXISTSbs;			
 				newEdge2[1] = KB.EXISTSbs;
@@ -120,7 +125,6 @@ public class ExistentialAndNegatedRulesMiningAssistant extends MiningAssistant {
 			} else if (head[1].equals(KB.NOTEXISTSINVbs) || head[1].equals(KB.EXISTSINVbs)) {
 				typeToEnforce = amie.data.U.getRelationRange(source, head[0]);
 			}
-			System.out.println(rule + " " + head[0] + " enforcing " + typeToEnforce);
 			
 			if (typeToEnforce != null) {
 				ByteString[] newEdge = rule.fullyUnboundTriplePattern();
@@ -129,7 +133,6 @@ public class ExistentialAndNegatedRulesMiningAssistant extends MiningAssistant {
 				newEdge[2] = typeToEnforce;
 				rule.getTriples().add(newEdge);
 				long support = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
-				System.out.println(rule + " has support " + support + " " + rule.getFunctionalVariable());
 				rule.getTriples().remove(rule.getTriples().size() - 1);
 				if (support >= minSupportThreshold) {
 					Rule newRule = rule.addAtom(newEdge, support);
