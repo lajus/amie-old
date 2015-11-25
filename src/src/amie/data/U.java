@@ -2,10 +2,13 @@ package amie.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -50,6 +53,12 @@ public class U {
 	
 	public static ByteString rangeRelationBS = ByteString.of(rangeRelation);
 	
+	public static List<ByteString> schemaRelationsBS = Arrays.asList(typeRelationBS, subClassRelationBS, 
+			subPropertyRelationBS, domainRelationBS, rangeRelationBS);
+	
+	public static List<String> schemaRelations = Arrays.asList(typeRelation, subClassRelation, 
+			subPropertyRelation, domainRelation, rangeRelation);
+	
 	public static void loadSchemaConf() {
 		try {
 			List<String> lines = Files.readAllLines(Paths.get("conf/schema_properties"),
@@ -70,6 +79,26 @@ public class U {
 			System.err.println("Using the default schema relations");
 		}
 		
+	}
+	
+	/**
+	 * True if the relation is a special RDF/RDFS relation such as
+	 * rdf:type
+	 * @param relation
+	 * @return
+	 */
+	public static boolean isSchemaRelation(ByteString relation) {
+		return schemaRelationsBS.contains(relation);
+	}
+	
+	/**
+	 * True if the relation is a special RDF/RDFS relation such as
+	 * rdf:type
+	 * @param relation
+	 * @return
+	 */
+	public static boolean isSchemaRelation(String relation) {
+		return schemaRelations.contains(relation);
 	}
 
 	/**
@@ -270,6 +299,39 @@ public class U {
 	}
 	
 	/**
+	 * Get all subtypes of a given type.
+	 * @param source
+	 * @param type
+	 * @return
+	 */
+	public static Set<ByteString> getAllSubtypes(KB source, ByteString type) {
+		Set<ByteString> resultSet = new LinkedHashSet<ByteString>();
+		Queue<ByteString> queue = new LinkedList<>();
+		Set<ByteString> seenTypes = new LinkedHashSet<>();
+		Set<ByteString> subTypes = getSubtypes(source, type);
+		queue.addAll(subTypes);
+		seenTypes.addAll(subTypes);
+		
+		while (!queue.isEmpty()) {
+			ByteString currentType = queue.poll();
+			resultSet.add(currentType);
+			subTypes = getSubtypes(source, currentType);
+			boolean proceed = true;
+			for (ByteString st : subTypes) {
+				if (seenTypes.contains(st)) {
+					proceed = false;
+				} else {
+					seenTypes.add(st);
+				}
+			}
+			if (proceed)
+				queue.addAll(subTypes);
+		}
+		
+		return resultSet;
+	}
+	
+	/**
 	 * Gets all the entities of the type of the given relation's range.
 	 * @param source
 	 * @param relation
@@ -381,6 +443,31 @@ public class U {
 		kb.load(files);
 		return kb;
 	}
+	
+	/**
+	 * Returns a KB with the content of all the files referenced in the string array.
+	 * @param args
+	 * @return
+	 * @throws IOException
+	 * @throws SecurityException 
+	 * @throws NoSuchMethodException 
+	 * @throws InvocationTargetException 
+	 * @throws IllegalArgumentException 
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
+	 */
+	public static KB loadFiles(String args[], Class kbSubclass) 
+			throws IOException, InstantiationException, IllegalAccessException, 
+			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		// Load the data
+		KB kb = (KB) kbSubclass.getConstructor().newInstance();
+		List<File> files = new ArrayList<File>();
+		for (int i = 0; i < args.length; ++i) {
+			files.add(new File(args[i]));
+		}
+		kb.load(files);
+		return kb;
+	}
 
 	/**
 	 * 
@@ -399,7 +486,7 @@ public class U {
 		return overlap;
 	}
 	
-	public static IntHashMap<Integer> getTypedHistogram(KB kb, ByteString relation) {
+	public static IntHashMap<Integer> getHistogramOnDomain(KB kb, ByteString relation) {
 		IntHashMap<Integer> hist = new IntHashMap<>();
 		List<ByteString[]> query = null;
 		String queryVar = null;
@@ -439,6 +526,42 @@ public class U {
 		return hist;		
 	}
 	
+	public static IntHashMap<Integer> getHistogramOnDomain(KB kb,
+			ByteString relation, ByteString domainType) {
+		IntHashMap<Integer> hist = new IntHashMap<>();
+		List<ByteString[]> query = null;
+		String queryVar = null;
+		String existVar = null;
+	
+		if (kb.isFunctional(relation)) {
+			queryVar = "?s";
+			existVar = "?o";
+			query = KB.triples(KB.triple("?s", relation, "?o"), 
+							   KB.triple(ByteString.of("?s"), 
+									   amie.data.U.typeRelationBS, domainType));
+		} else {
+			queryVar = "?o";
+			existVar = "?s";
+			query = KB.triples(KB.triple("?o", relation, "?s"),
+					 		   KB.triple(ByteString.of("?o"), 
+					 				   amie.data.U.typeRelationBS, domainType));
+		}
+				
+		Set<ByteString> effectiveDomain = kb.selectDistinct(ByteString.of(queryVar), query);
+		for (ByteString entity : effectiveDomain) {
+			long val;
+			if (kb.isFunctional(relation)) {
+				val = kb.count(KB.triple(entity, relation, ByteString.of(existVar)));
+			} else {
+				val = kb.count(KB.triple(ByteString.of(queryVar), relation, entity));
+			}
+			hist.increase((int)val);
+		}
+		kb.selectDistinct(ByteString.of(existVar), query);
+		
+		return hist;	
+	}
+	
 	public static IntHashMap<ByteString> getTypesCount(KB kb) {
 		List<ByteString[]> query = KB.triples(KB.triple("?s", typeRelation, "?o"));
 		Map<ByteString, IntHashMap<ByteString>> types2Instances = 
@@ -476,5 +599,23 @@ public class U {
 		result.addAll(kb.subjectSize);
 		result.addAll(kb.objectSize);
 		return result;
+	}
+
+	public static Set<ByteString> getEntitiesWithCardinality(KB kb, ByteString relation, int intValue) {
+		Map<ByteString, IntHashMap<ByteString>> results = null;
+		List<ByteString[]> query = KB.triples(KB.triple(ByteString.of("?s"), 
+				relation, ByteString.of("?o")));
+		if (kb.isFunctional(relation)) {
+			results = kb.selectDistinct(ByteString.of("?s"), ByteString.of("?o"), query);
+		} else {
+			results = kb.selectDistinct(ByteString.of("?o"), ByteString.of("?s"), query);			
+		}
+		Set<ByteString> entities = new LinkedHashSet<>();
+		for (ByteString e : results.keySet()) {
+			if (results.get(e).size() == intValue) {
+				entities.add(e);
+			}
+		}
+		return entities;
 	}
 }
