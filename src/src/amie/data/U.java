@@ -264,7 +264,7 @@ public class U {
 	}
 	
 	/**
-	 * Returns all present data types in the given KB
+	 * Returns all present data types in the given KB.
 	 * @param kb
 	 */
 	public static Set<ByteString> getAllTypes(KB kb) {
@@ -286,6 +286,24 @@ public class U {
 		result.addAll(source.relation2subject2object.get(relation).keySet());
 		return result;
 	}
+	
+	/**
+	 * Gets all the entities of the given type that occur as subjects in the relation.
+	 * @param source
+	 * @param relation
+	 * @return
+	 */
+	public static Set<ByteString> getDomainSet(KB source, ByteString relation, 
+			ByteString domainType) {
+		List<ByteString[]> query = null;
+		String queryVar = "?s";
+		query = KB.triples(KB.triple("?s", relation, "?o"), 
+						   KB.triple(ByteString.of(queryVar), 
+								   amie.data.U.typeRelationBS, domainType));
+		
+		return source.selectDistinct(ByteString.of(queryVar), query);		
+	}
+
 	
 	/**
 	 * Get all the immediate subtypes of a given type.
@@ -344,6 +362,24 @@ public class U {
 			result.addAll(getAllEntitiesForType(source, rangeType));
 		result.addAll(source.relation2object2subject.get(relation).keySet());
 		return result;
+	}
+	
+
+	/**
+	 * Gets all the entities of the given type that occur as objects in the relation.
+	 * @param source
+	 * @param relation
+	 * @return
+	 */
+	public static Set<ByteString> getRangeSet(KB source, ByteString relation, 
+			ByteString rangeType) {
+		List<ByteString[]> query = null;
+		String queryVar = "?o";
+		query = KB.triples(KB.triple("?s", relation, "?o"), 
+						   KB.triple(ByteString.of(queryVar), 
+								   amie.data.U.typeRelationBS, rangeType));
+		
+		return source.selectDistinct(ByteString.of(queryVar), query);		
 	}
 	
 	/**
@@ -486,6 +522,15 @@ public class U {
 		return overlap;
 	}
 	
+	/**
+	 * Compute a histogram on the theorethical domain of the relation (all the instances
+	 * of the type defined as domain of the relation). This function looks at the most functional
+	 * side, that is, if the relation is more inverse functional than functional it will calculate
+	 * the histogram on the inverse relation (meaning it will provide a histogram of the range).
+	 * @param kb
+	 * @param relation
+	 * @return
+	 */
 	public static IntHashMap<Integer> getHistogramOnDomain(KB kb, ByteString relation) {
 		IntHashMap<Integer> hist = new IntHashMap<>();
 		List<ByteString[]> query = null;
@@ -526,6 +571,16 @@ public class U {
 		return hist;		
 	}
 	
+	/**
+	 * Computes a histogram for relation on a given type (all the instances
+	 * of the provided type). The type must be a subclass of the domain of the relation.
+	 * This function looks at the most functional side of the relation, that is, if the relation 
+	 * is more inverse functional than functional it will calculate the histogram on the 
+	 * inverse relation (meaning it will provide a histogram of the range).
+	 * @param kb
+	 * @param relation
+	 * @return
+	 */
 	public static IntHashMap<Integer> getHistogramOnDomain(KB kb,
 			ByteString relation, ByteString domainType) {
 		IntHashMap<Integer> hist = new IntHashMap<>();
@@ -562,6 +617,11 @@ public class U {
 		return hist;	
 	}
 	
+	/**
+	 * It returns a map containing the number of instances of each class in the KB.
+	 * @param kb
+	 * @return
+	 */
 	public static IntHashMap<ByteString> getTypesCount(KB kb) {
 		List<ByteString[]> query = KB.triples(KB.triple("?s", typeRelation, "?o"));
 		Map<ByteString, IntHashMap<ByteString>> types2Instances = 
@@ -590,7 +650,7 @@ public class U {
 
 	/**
 	 * It returns all the entities that occur as subjects or objects
-	 * in the KB
+	 * in the KB.
 	 * @param kb
 	 * @return
 	 */
@@ -601,7 +661,15 @@ public class U {
 		return result;
 	}
 
-	public static Set<ByteString> getEntitiesWithCardinality(KB kb, ByteString relation, int intValue) {
+	/**
+	 * It returns all the entities that have 'cardinality' different number of values
+	 * for the given relation.
+	 * @param kb
+	 * @param relation
+	 * @param cardinality
+	 * @return
+	 */
+	public static Set<ByteString> getEntitiesWithCardinality(KB kb, ByteString relation, int cardinality) {
 		Map<ByteString, IntHashMap<ByteString>> results = null;
 		List<ByteString[]> query = KB.triples(KB.triple(ByteString.of("?s"), 
 				relation, ByteString.of("?o")));
@@ -612,7 +680,7 @@ public class U {
 		}
 		Set<ByteString> entities = new LinkedHashSet<>();
 		for (ByteString e : results.keySet()) {
-			if (results.get(e).size() == intValue) {
+			if (results.get(e).size() == cardinality) {
 				entities.add(e);
 			}
 		}
