@@ -20,7 +20,7 @@ public class TrivialRelevanceCalculator {
 			int nFacts = (int) kb.count(entity, ByteString.of("?p"), ByteString.of("?o"));
 			nFacts += kb.count(ByteString.of("?s"), ByteString.of("?p"), ByteString.of(entity));
 			
-			System.out.println(entity + "\t<hasRelevance>\t" + nFacts);								
+			System.out.println(entity + "\t<hasNumberOfFacts>\t" + nFacts);								
 		}
 	}
 }

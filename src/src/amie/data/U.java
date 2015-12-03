@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -659,6 +659,67 @@ public class U {
 		result.addAll(kb.subjectSize);
 		result.addAll(kb.objectSize);
 		return result;
+	}
+	
+	/**
+	 * It returns the number of facts where the given entity participates as
+	 * a subject or object.
+	 * @param kb
+	 * @param entity
+	 * @return
+	 */
+	public static int numberOfFacts(KB kb, ByteString entity) {
+		ByteString[] querySubject = KB.triple(entity, ByteString.of("?r"), ByteString.of("?o")); 
+		ByteString[] queryObject = KB.triple(ByteString.of("?s"), ByteString.of("?r"), entity); 
+		return (int)kb.count(querySubject) + (int)kb.count(queryObject);
+	}
+	
+	/**
+	 * It returns the number of facts where the given entity participates as
+	 * a subject or object.
+	 * @param kb
+	 * @param entity
+	 * @param omittedRelations These relations are not counted as facts.
+	 * @return
+	 */
+	public static int numberOfFacts(KB kb, ByteString entity, Collection<ByteString> omittedRelations) {
+		ByteString[] querySubject = KB.triple(entity, ByteString.of("?r"), ByteString.of("?o")); 
+		ByteString[] queryObject = KB.triple(ByteString.of("?s"), ByteString.of("?r"), entity); 
+		Map<ByteString, IntHashMap<ByteString>> relationsSubject = 
+				kb.resultsTwoVariables(ByteString.of("?r"), ByteString.of("?o"), querySubject);
+		Map<ByteString, IntHashMap<ByteString>> relationsObject = 
+				kb.resultsTwoVariables(ByteString.of("?r"), ByteString.of("?s"), queryObject);
+		int count1 = 0;
+		int count2 = 0;
+		for (ByteString relation : relationsSubject.keySet()) {
+			if (!omittedRelations.contains(relation))
+				count1 += relationsSubject.get(relation).size();
+		}
+		
+		for (ByteString relation : relationsObject.keySet()) {
+			if (!omittedRelations.contains(relation))
+				count1 += relationsObject.get(relation).size();
+		}
+
+		return count1 + count2;
+	}
+	
+	/**
+	 * Returns true if the relation is defined as a function.
+	 * @return
+	 */
+	public static boolean isFunction(KB kb, ByteString relation) {
+		return kb.contains(relation, ByteString.of("<isFunction>"), ByteString.of("TRUE"));
+	}
+	
+	/**
+	 * Returns true if the relation is defined as compulsory for all members 
+	 * of its domain (this function assumes relations are always analyzed from 
+	 * their most functional side.
+	 * @return
+	 */
+	public static boolean isMandatory(KB kb, ByteString relation) {
+		return kb.contains(relation, ByteString.of("<isMandatory>"), ByteString.of("TRUE"));
 	}
 
 	/**
