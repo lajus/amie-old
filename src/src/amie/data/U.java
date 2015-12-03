@@ -61,7 +61,11 @@ public class U {
 	
 	public static void loadSchemaConf() {
 		try {
-			List<String> lines = Files.readAllLines(Paths.get("conf/schema_properties"),
+			String schemaPath = System.getProperty("schema");
+			if (schemaPath == null) {
+				schemaPath = "conf/schema_properties";
+			}
+			List<String> lines = Files.readAllLines(Paths.get(schemaPath),
 			        Charset.defaultCharset());
 			for (String line : lines) {
 				String[] lineParts = line.split("=");

@@ -515,8 +515,12 @@ public class KB {
 		if (relation.equals(EQUALSbs)) {
 			return 1.0;
 		} else {
-			return ((double) relation2subject2object.get(relation).size() / relationSize
+			if (relation2subject2object.containsKey(relation)) {
+				return ((double) relation2subject2object.get(relation).size() / relationSize
 					.get(relation));
+			} else {
+				throw new IllegalArgumentException("The relation " + relation + " was not found in the KB");
+			}
 		}
 	}
 
@@ -536,8 +540,12 @@ public class KB {
 		if (relation.equals(EQUALSbs)) {
 			return 1.0;
 		} else {
-			return ((double) relation2object2subject.get(relation).size() / relationSize
-					.get(relation));			
+			if (relation2object2subject.containsKey(relation)) {
+				return ((double) relation2object2subject.get(relation).size() / relationSize
+						.get(relation));
+			} else {
+				throw new IllegalArgumentException("The relation " + relation + " was not found in the KB");
+			}
 		}
 	}
 

@@ -8,6 +8,18 @@ import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Triple;
 
 public class U {
+	
+	/**
+	 * Outputs a list of objects separated by tabs in one line.
+	 * @param list
+	 */
+	public static <T> void tsvOutput(List<T> line) {
+		for (int i = 0; i < line.size() - 1; ++i) {
+			System.out.print(line.get(i) + "\t");
+		}	
+		System.out.println(line.get(line.size() - 1));
+	}
+	
 	/**
 	 * Prints a IntHashMap representing a histogram.
 	 * @param histogram
