@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidParameterException;
@@ -3335,6 +3336,58 @@ public class KB {
 		return result;
 	}
 	
+	/** Deletion **/
+	
+	/*** Delete a triple ***/
+	public boolean delete(CharSequence subject, CharSequence predicate, CharSequence object) {
+		return delete(compress(subject), compress(predicate), compress(object));
+	}
+	
+	/**
+	 * Removes the given triple from the in-memory KB.
+	 * @param subject
+	 * @param predicate
+	 * @param object
+	 * @return
+	 */
+	public boolean delete(ByteString subject, ByteString predicate, ByteString object) {
+		if (contains(subject, predicate, object)) {
+			subjectSize.decrease(subject);
+			relationSize.decrease(predicate);
+			objectSize.decrease(object);
+			removeFromIndex(subject, predicate, object, subject2relation2object);
+			removeFromIndex(subject, object, predicate, subject2object2relation);
+			removeFromIndex(predicate, subject, object, relation2subject2object);
+			removeFromIndex(predicate, object, subject, relation2object2subject);
+			removeFromIndex(object, subject, predicate, object2subject2relation);
+			removeFromIndex(object, predicate, subject, object2relation2subject);
+			--size;
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/** Remove a triple from an index **/
+	protected void removeFromIndex(
+			ByteString s1,
+			ByteString s2,
+			ByteString s3,
+			Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> index) {
+		Map<ByteString, IntHashMap<ByteString>> imap2 = index.get(s1);
+		IntHashMap<ByteString> imap3 = imap2.get(s2);
+		if (imap3 == null) {
+			System.out.println("Problem for prediction " + s1 + " " + s2 + " " + s3);
+		}
+		imap3.remove(s3);
+		if (imap3.isEmpty()) {
+			imap2.remove(s2);
+			if (imap2.isEmpty()) {
+				index.remove(s1);
+			}
+		}
+	}
+	
 	/**
 	 * It outputs statistical information about the KB.
 	 * @param detailRelations If true, print also information about the relations
@@ -3427,6 +3480,25 @@ public class KB {
 		}
 		
 		writer.close();
+	}
+	
+	public void dump() {
+		dump(System.out);
+	}
+	
+	/**
+	 * Dump the contents of the in-memory KB in TSV format into a PrintStream
+	 * @param out
+	 */
+	public void dump(PrintStream out) {
+		for (ByteString subject : subject2relation2object.keySet()) {
+			Map<ByteString, IntHashMap<ByteString>> iMap = subject2relation2object.get(subject);
+			for (ByteString relation : iMap.keySet()) {
+				for (ByteString object : iMap.get(relation)) {
+					out.println(subject + "\t" + relation + "\t" + object);
+				}
+			}
+		}
 	}
 	
 	public boolean containsRelation(ByteString relation) {
