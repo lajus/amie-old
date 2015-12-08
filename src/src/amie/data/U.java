@@ -162,7 +162,7 @@ public class U {
 	 * @return
 	 */
 	public static Set<ByteString> getMaterializedTypesForEntity(KB source, ByteString entity){
-		List<ByteString[]> query = KB.triples(KB.triple(entity, typeRelation, "?x"));
+		List<ByteString[]> query = KB.triples(KB.triple(entity, typeRelationBS, ByteString.of("?x")));
 		return source.selectDistinct(ByteString.of("?x"), query);
 	}
 	
