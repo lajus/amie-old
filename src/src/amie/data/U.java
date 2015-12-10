@@ -485,6 +485,27 @@ public class U {
 	}
 	
 	/**
+	 * Returns a KB with the content of all the files referenced in the string array
+	 * starting from a given position.
+	 * @param args
+	 * @return
+	 * @throws IOException
+	 */
+	public static KB loadFiles(String args[], int fromIndex) throws IOException {
+		if (fromIndex >= args.length)
+			throw new IllegalArgumentException("Index " + fromIndex + 
+					" equal or bigger than size of the array.");
+		// Load the data
+		KB kb = new KB();
+		List<File> files = new ArrayList<File>();
+		for (int i = fromIndex; i < args.length; ++i) {
+			files.add(new File(args[i]));
+		}
+		kb.load(files);
+		return kb;
+	}
+	
+	/**
 	 * Returns a KB with the content of all the files referenced in the string array.
 	 * @param args
 	 * @return
