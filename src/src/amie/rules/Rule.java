@@ -871,6 +871,8 @@ public class Rule {
      * getRuleString, getFullRuleString and getBasicRuleString.
      */
     public String toString() {
+        
+        
         StringBuilder stringBuilder = new StringBuilder();
         for (ByteString[] pattern : triples) {
             stringBuilder.append(pattern[0]);
