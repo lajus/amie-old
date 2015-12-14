@@ -316,6 +316,10 @@ public class MiningAssistant{
 				new Double(query.getSupport())) == null;		
 	}
 	
+	public boolean registerHeadRelation(ByteString relation, double cardinality){		
+		return headCardinalities.put(relation.toString(), cardinality) == null;		
+	}
+	
 	public long getHeadCardinality(Rule query){
 		return headCardinalities.get(query.getHeadRelation()).longValue();
 	}
