@@ -479,13 +479,15 @@ public class MiningAssistant{
 			for(ByteString joinVariable: joinVariables){					
 				newEdge[joinPosition] = joinVariable;
 				rule.getTriples().add(newEdge);
-				IntHashMap<ByteString> promisingRelations = kb.frequentBindingsOf(newEdge[1], rule.getFunctionalVariable(), rule.getTriples());
+				IntHashMap<ByteString> promisingRelations = kb.frequentBindingsOf(newEdge[1], 
+						rule.getFunctionalVariable(), rule.getTriples());
 				rule.getTriples().remove(nPatterns);
 				
 				int danglingPosition = (joinPosition == 0 ? 2 : 0);
 				boolean boundHead = !KB.isVariable(rule.getTriples().get(0)[danglingPosition]);
 				for(ByteString relation: promisingRelations){
-					if(bodyExcludedRelations != null && bodyExcludedRelations.contains(relation))
+					if (this.bodyExcludedRelations != null && 
+							this.bodyExcludedRelations.contains(relation))
 						continue;
 					//Here we still have to make a redundancy check						
 					int cardinality = promisingRelations.get(relation);
@@ -1043,7 +1045,7 @@ public class MiningAssistant{
 		ByteString[] danglingEdge = queryWithDanglingEdge.getTriples().get(danglingAtomPosition);
 		IntHashMap<ByteString> constants = kb.frequentBindingsOf(danglingEdge[danglingPositionInEdge], 
 				queryWithDanglingEdge.getFunctionalVariable(), queryWithDanglingEdge.getTriples());
-		for(ByteString constant: constants){
+		for (ByteString constant: constants){
 			int cardinality = constants.get(constant);
 			if(cardinality >= minSupportThreshold){
 				ByteString[] lastPatternCopy = queryWithDanglingEdge.getLastTriplePattern().clone();

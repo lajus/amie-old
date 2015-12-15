@@ -27,7 +27,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		this.allowConstants = false;
 		this.bodyExcludedRelations = Arrays.asList(amie.data.U.typeRelationBS, 
 				amie.data.U.subClassRelationBS, amie.data.U.domainRelationBS, 
-				amie.data.U.rangeRelationBS);
+				amie.data.U.rangeRelationBS, isCompleteBS, isIncompleteBS);
 	}
 
 	@Override
@@ -39,6 +39,8 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	
 	@Override
 	public void setHeadExcludedRelations(java.util.Collection<ByteString> headExcludedRelations) {};
+	
+	public void setBodyExcludedRelations(java.util.Collection<ByteString> bodyExcludedRelations) {};
 	
 	@Override
 	protected void buildInitialQueries(IntHashMap<ByteString> relations, double minSupportThreshold, Collection<Rule> output) {
@@ -83,6 +85,34 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 				output.add(candidateComplete);
 			}
 		}
+	}
+	
+	@Override
+	public void getInstantiatedAtoms(Rule rule, double minSupportThreshold, 
+			Collection<Rule> danglingEdges, Collection<Rule> output) {
+		List<Rule> rulestoAlwaysSpecialize = new ArrayList<>();
+		for (Rule r : danglingEdges) {
+			ByteString[] head = rule.getHead();
+			ByteString completenessRel = head[2];
+			ByteString[] lastAtom = r.getLastRealTriplePattern();
+			String relationStr = lastAtom[1].toString();
+			if (relationStr.startsWith("hasNumberOfValues")) {
+				rulestoAlwaysSpecialize.add(r);
+			}
+			
+			ByteString originalVar = lastAtom[2];
+			lastAtom[2] = completenessRel;
+			long cardinality = kb.countDistinct(r.getFunctionalVariable(), r.getTriples());
+			lastAtom[2] = originalVar;
+			if (cardinality < minSupportThreshold)
+				continue;
+			
+			Rule candidate = r.instantiateConstant(2, completenessRel, cardinality);
+			output.add(candidate);			
+		}		
+		danglingEdges.removeAll(rulestoAlwaysSpecialize);
+		super.getInstantiatedAtoms(rule, minSupportThreshold, danglingEdges, output);
+
 	}
 	
 	@Override
