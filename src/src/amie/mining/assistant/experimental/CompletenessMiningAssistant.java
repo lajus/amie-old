@@ -1,16 +1,15 @@
 package amie.mining.assistant.experimental;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
-import javatools.datatypes.ByteString;
-import javatools.datatypes.IntHashMap;
 import amie.data.KB;
 import amie.mining.assistant.MiningAssistant;
 import amie.rules.Rule;
+import javatools.datatypes.ByteString;
+import javatools.datatypes.IntHashMap;
 
 public class CompletenessMiningAssistant extends MiningAssistant {
 
@@ -20,12 +19,15 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	
 	public static final ByteString isCompleteBS = ByteString.of(isComplete);
 	
-	public static final ByteString isIncompleteBS = ByteString.of(isCompleteBS);
+	public static final ByteString isIncompleteBS = ByteString.of(isIncomplete);
 
 	
 	public CompletenessMiningAssistant(KB dataSource) {
 		super(dataSource);
 		this.allowConstants = false;
+		this.bodyExcludedRelations = Arrays.asList(amie.data.U.typeRelationBS, 
+				amie.data.U.subClassRelationBS, amie.data.U.domainRelationBS, 
+				amie.data.U.rangeRelationBS);
 	}
 
 	@Override
@@ -37,7 +39,6 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	
 	@Override
 	public void setHeadExcludedRelations(java.util.Collection<ByteString> headExcludedRelations) {};
-
 	
 	@Override
 	protected void buildInitialQueries(IntHashMap<ByteString> relations, double minSupportThreshold, Collection<Rule> output) {
@@ -50,56 +51,36 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 				registerHeadRelation(relation, (double) relations.get(relation));
 				continue;
 			}
-			
 			ByteString[] succedentComplete = newEdge.clone();
+			ByteString domain = null;
+			if (this.kbSchema != null) {
+				if (this.kb.isFunctional(relation)) {
+					domain = amie.data.U.getRelationDomain(this.kbSchema, relation);
+				} else {
+					domain = amie.data.U.getRelationRange(this.kbSchema, relation);
+				}
+			}
 			
+			List<ByteString[]> queryArray = new ArrayList<>();
+			if (domain != null)
+				queryArray.add(KB.triple(succedentComplete[0], amie.data.U.typeRelationBS, domain));
+						
 			succedentComplete[1]  = isCompleteBS;
 			succedentComplete[2] = relation;
+			queryArray.add(succedentComplete);
 			int countVarPos = 0;
-			long cardinalityComplete = kb.count(succedentComplete);
+			long cardinalityComplete = kb.countDistinct(succedentComplete[0], queryArray);
 			
-			if (cardinalityComplete >= minSupportThreshold) {			
-				Rule candidateComplete = new Rule(succedentComplete, cardinalityComplete);				
+			if (cardinalityComplete >= minSupportThreshold) {
+				Rule candidateComplete = null;
+				if (domain == null) {
+					candidateComplete = new Rule(succedentComplete, cardinalityComplete);				
+				} else {
+					queryArray.remove(1);
+					candidateComplete = new Rule(succedentComplete, queryArray, cardinalityComplete);
+				}
 				candidateComplete.setFunctionalVariablePosition(countVarPos);
 				output.add(candidateComplete);
-			}
-		}
-	}
-	
-
-	public void getTypeSpecializedAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
-		ByteString[] lastAtom = rule.getLastRealTriplePattern();
-		ByteString[] head = rule.getHead();
-		if (!lastAtom[1].equals(amie.data.U.typeRelationBS))
-			return;
-		
-		Set<ByteString> subtypes = null;
-		if (KB.isVariable(lastAtom[2])) {
-			ByteString targetRelation = head[2];
-			subtypes = new LinkedHashSet<>();
-			ByteString domain = null;
-			if (kb.isFunctional(targetRelation)) {
-				domain = amie.data.U.getRelationDomain(kbSchema, head[2]);
-			} else {
-				domain = amie.data.U.getRelationRange(kbSchema, head[2]);
-			}
-			if (domain != null) {
-				subtypes.add(domain);
-			}
-		} else {
-			ByteString typeToSpecialize = lastAtom[2];			
-			subtypes = amie.data.U.getSubtypes(this.kbSchema, typeToSpecialize);
-		}		
-
-		ByteString originalValue = lastAtom[2];
-		for (ByteString subtype : subtypes) {
-			lastAtom[2] = subtype;
-			long support = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
-			lastAtom[2] = originalValue;
-			if (support >= minSupportThreshold) {
-				Rule newRule = rule.specializeTypeAtom(subtype, support);
-				newRule.setParent(rule);
-				output.add(newRule);
 			}
 		}
 	}

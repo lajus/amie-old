@@ -661,6 +661,9 @@ public class MiningAssistant{
 	 * @param output
 	 */
 	public void getTypeSpecializedAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
+		if (this.kbSchema == null)
+			return;
+		
 		ByteString[] lastAtom = rule.getLastRealTriplePattern();
 		if (!lastAtom[1].equals(amie.data.U.typeRelationBS))
 			return;
