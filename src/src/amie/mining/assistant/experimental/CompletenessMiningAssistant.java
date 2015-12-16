@@ -88,6 +88,11 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	}
 	
 	@Override
+	public void getTypeSpecializedAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
+		
+	}
+	
+	@Override
 	public void getInstantiatedAtoms(Rule rule, double minSupportThreshold, 
 			Collection<Rule> danglingEdges, Collection<Rule> output) {
 		List<Rule> rulestoAlwaysSpecialize = new ArrayList<>();

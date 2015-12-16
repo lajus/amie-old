@@ -22,6 +22,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.naming.OperationNotSupportedException;
+
 import javatools.administrative.Announce;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
@@ -147,6 +149,23 @@ public class KB {
 	public static final int OBJECT2OBJECT = 4;
 	
 	public enum Column { Subject, Relation, Object };
+	
+	public static final String hasNumberOfValuesEquals = "hasNumberOfValuesEquals";
+	
+	public static final String hasNumberOfValuesEqualsInv = "hasNumberOfValuesEqualsInv";
+	
+	public static final ByteString hasNumberOfValuesEqualsBS = ByteString.of(hasNumberOfValuesEquals);
+	
+	public static final ByteString hasNumberOfValuesEqualsInvBS = ByteString.of(hasNumberOfValuesEqualsInv);
+	
+	public static final String hasNumberOfValuesGreaterThan = "hasNumberOfValuesGreaterThan";
+	
+	public static final String hasNumberOfValuesGreaterThanInv = "hasNumberOfValuesGreaterThanInv";
+	
+	public static final ByteString hasNumberOfValuesGreaterThanBS = ByteString.of(hasNumberOfValuesGreaterThan);
+	
+	public static final ByteString hasNumberOfValuesGreaterThanInvBS = ByteString.of(hasNumberOfValuesGreaterThanInv);
+	
 	
 	// ---------------------------------------------------------------------------
 	// Loading
@@ -898,10 +917,64 @@ public class KB {
 		if (fact[1] == NOTEXISTSINVbs)
 			return (!get(relation2object2subject, fact[0])
 					.containsKey(fact[2]));
+		Pair<ByteString, Integer> cardinalityRelation = 
+				parseCardinalityRelation(fact[1]);
+		if (cardinalityRelation != null) {
+			if (cardinalityRelation.first.equals(hasNumberOfValuesEqualsBS)) {
+				if (get(subject2relation2object, fact[0]).containsKey(fact[2])) {
+					return get(subject2relation2object, fact[0]).get(fact[2]).size() 
+							== cardinalityRelation.second.intValue();
+				} else {
+					return cardinalityRelation.second == 0;
+				}
+			} else if (cardinalityRelation.first.equals(hasNumberOfValuesEqualsInvBS)) {
+				if (get(object2relation2subject, fact[0]).containsKey(fact[2])) {
+					return get(object2relation2subject, fact[0]).get(fact[2]).size() 
+					== cardinalityRelation.second.intValue();
+				} else {
+					return cardinalityRelation.second == 0;
+				}
+			} else if (cardinalityRelation.first.equals(hasNumberOfValuesGreaterThanBS)) {
+				if (get(subject2relation2object, fact[0]).containsKey(fact[2])) {
+					return get(subject2relation2object, fact[0]).get(fact[2]).size() 
+							> cardinalityRelation.second.intValue();
+				} else {
+					return false;
+				}								
+			} else if (cardinalityRelation.first.equals(hasNumberOfValuesGreaterThanInvBS)) {
+				if (get(object2relation2subject, fact[0]).containsKey(fact[2])) {
+					return get(object2relation2subject, fact[0]).get(fact[2]).size() 
+							> cardinalityRelation.second.intValue();
+				} else { 
+					return false;
+				}
+			}
+		}
 		return (get(subject2relation2object, fact[0], fact[1])
 				.contains(fact[2]));
 	}
 
+	private static final String cardinalityRelationsRegex = "(" + 
+			hasNumberOfValuesEquals + "|" + hasNumberOfValuesGreaterThan + "|" +
+			hasNumberOfValuesEqualsInv + "|" + hasNumberOfValuesGreaterThanInv + ")([0-9]+)";
+	
+	private static final Pattern cardinalityRelationsRegexPattern = 
+			Pattern.compile(cardinalityRelationsRegex);
+
+	/**
+	 * Determines whether the relation has 
+	 * @param byteString
+	 * @return
+	 */
+	private Pair<ByteString, Integer> parseCardinalityRelation(ByteString relation) {
+		Matcher m = cardinalityRelationsRegexPattern.matcher(relation);
+		if (m.matches()) {
+			return new Pair<>(ByteString.of(m.group(1)), 
+					Integer.parseInt(m.group(2)));
+		} else {
+			return null;
+		}
+	}
 
 	/**
 	 * Returns the results of a triple query pattern with two variables as a map
@@ -1110,8 +1183,9 @@ public class KB {
 	/** 
 	 * Returns the number of distinct results of the triple pattern query 
 	 * with 1 variable.
+	 * @throws OperationNotSupportedException 
 	 **/
-	protected long countOneVariable(ByteString... triple) {
+	protected long countOneVariable(ByteString... triple)  {
 		if (triple[1].equals(DIFFERENTFROMbs))
 			return (Long.MAX_VALUE);
 		if (triple[1].equals(EQUALSbs))
@@ -1139,6 +1213,42 @@ public class KB {
 				return objectSize.size() - get(relation2object2subject, triple[0]).size();
 			else
 				return relationSize.size() - get(object2relation2subject, triple[2]).size();
+		}
+		
+		Pair<ByteString, Integer> compositeRelation = parseCardinalityRelation(triple[1]);				
+		if (compositeRelation != null) {			
+			if (compositeRelation.first.equals(hasNumberOfValuesEqualsBS)
+					|| compositeRelation.first.equals(hasNumberOfValuesEqualsInv)) {
+				
+				Map<ByteString, IntHashMap<ByteString>> map = 
+						compositeRelation.first.equals(hasNumberOfValuesEqualsBS) ?
+						get(this.relation2subject2object, triple[2]) :
+						get(this.relation2object2subject, triple[2]);				
+				long count = 0;
+				for (ByteString s : map.keySet()) {
+					if (map.containsKey(s)) {
+						if (map.get(s).size() == compositeRelation.second.intValue())
+							++count; 
+					} else {
+						if (compositeRelation.second.intValue() == 0)
+							++count;
+					}
+				}
+				return count;
+			} else {
+				Map<ByteString, IntHashMap<ByteString>> map = 
+						compositeRelation.first.equals(hasNumberOfValuesGreaterThanBS) ?
+						get(this.relation2subject2object, triple[2]) :
+						get(this.relation2object2subject, triple[2]);
+				long count = 0;
+				for (ByteString s : map.keySet()) {
+					if (map.containsKey(s)) {
+						if (map.get(s).size() > compositeRelation.second.intValue())
+							++count; 
+					}
+				}
+				return count;
+			}
 		}
 			
 		return (resultsOneVariable(triple).size());
@@ -1707,7 +1817,8 @@ public class KB {
 			if (numVariables == 3) {
 				return resultsThreeVariables(var1, var2, var3, first);
 			} else {
-				throw new UnsupportedOperationException("Selection over variables not occuring in the query is not supported");
+				throw new UnsupportedOperationException("Selection over"
+						+ " variables not occuring in the query is not supported");
 			}
 		}
 		
@@ -1853,7 +1964,8 @@ public class KB {
 			// Three variables (only supported if varpos==2 and projPos==0)
 			if (projPos != 0)
 				throw new UnsupportedOperationException(
-						"frequentBindingsOf on most general triple is only possible with projection variable in position 1: "
+						"frequentBindingsOf on most general triple is only possible "
+						+ "with projection variable in position 1: "
 								+ toString(query));
 
 			// Two variables
