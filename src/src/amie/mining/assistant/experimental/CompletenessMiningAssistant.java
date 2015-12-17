@@ -10,6 +10,7 @@ import amie.mining.assistant.MiningAssistant;
 import amie.rules.Rule;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
+import javatools.datatypes.Pair;
 
 public class CompletenessMiningAssistant extends MiningAssistant {
 
@@ -88,37 +89,49 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	}
 	
 	@Override
-	public void getTypeSpecializedAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
-		
+	public void getDanglingAtoms(Rule rule, double minSupportThreshold, java.util.Collection<Rule> output) {
+		if (rule.isClosed() && rule.getLength() == maxDepth - 1) {
+			// We'll force a cardinality atom at the end
+			ByteString[] head = rule.getHead();
+			ByteString targetRelation = head[2];
+		} else {
+			super.getDanglingAtoms(rule, minSupportThreshold, output);
+		}
 	}
 	
 	@Override
-	public void getInstantiatedAtoms(Rule rule, double minSupportThreshold, 
-			Collection<Rule> danglingEdges, Collection<Rule> output) {
-		List<Rule> rulestoAlwaysSpecialize = new ArrayList<>();
-		for (Rule r : danglingEdges) {
-			ByteString[] head = rule.getHead();
-			ByteString completenessRel = head[2];
-			ByteString[] lastAtom = r.getLastRealTriplePattern();
-			String relationStr = lastAtom[1].toString();
-			if (relationStr.startsWith("hasNumberOfValues")) {
-				rulestoAlwaysSpecialize.add(r);
+	public void getTypeSpecializedAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
+		if (rule.getRealLength() >= maxDepth) {
+			return;
+		}
+			
+		ByteString[] lastAtom = rule.getLastRealTriplePattern();
+		Pair<ByteString, Integer> compositeRelation = KB.parseCardinalityRelation(lastAtom[1]);
+		if (compositeRelation == null) {
+			super.getTypeSpecializedAtoms(rule, minSupportThreshold, output);
+		} else {
+			ByteString oldRelation = lastAtom[1];
+			int newCard = compositeRelation.second.intValue() - 1;
+			ByteString newRelation = null;
+			if (newCard >= 0) {
+				newRelation = ByteString.of(compositeRelation.first.toString() + newCard);
+			} else {
+				newRelation = ByteString.of(compositeRelation.first.toString().replace("GreaterThan", "Equals") + "0");
 			}
-			
-			ByteString originalVar = lastAtom[2];
-			lastAtom[2] = completenessRel;
-			long cardinality = kb.countDistinct(r.getFunctionalVariable(), r.getTriples());
-			lastAtom[2] = originalVar;
-			if (cardinality < minSupportThreshold)
-				continue;
-			
-			Rule candidate = r.instantiateConstant(2, completenessRel, cardinality);
-			output.add(candidate);			
-		}		
-		danglingEdges.removeAll(rulestoAlwaysSpecialize);
-		super.getInstantiatedAtoms(rule, minSupportThreshold, danglingEdges, output);
-
+			lastAtom[1] = newRelation;
+			long cardinality = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
+			lastAtom[1] = oldRelation;
+			if (cardinality >= minSupportThreshold) {
+				ByteString[] newAtom = lastAtom.clone();
+				newAtom[1] = ByteString.of(compositeRelation.first.toString() 
+						+ (compositeRelation.second.intValue() + 1));				
+				Rule candidate = rule.addAtom(newAtom, cardinality);
+				candidate.setParent(rule);
+				output.add(candidate);
+			}
+		}
 	}
+	
 	
 	@Override
 	protected void getInstantiatedAtoms(Rule queryWithDanglingEdge, Rule parentQuery, 

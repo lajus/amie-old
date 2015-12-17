@@ -874,6 +874,47 @@ public class KB {
 			return new IntHashMap<>(values);
 		}
 		
+		Pair<ByteString, Integer> cardinalityRelation = 
+				parseCardinalityRelation(triple[1]);
+		if (cardinalityRelation != null) {
+			if (isVariable(triple[2])) {
+				throw new UnsupportedOperationException("The relation " + triple[1] 
+						+ " does not support variables in the object position");
+			}
+			IntHashMap<ByteString> results = new IntHashMap<>();
+			if (cardinalityRelation.first.equals(hasNumberOfValuesEqualsBS) 
+					|| cardinalityRelation.first.equals(hasNumberOfValuesEqualsInvBS)) {
+				Map<ByteString, IntHashMap<ByteString>> map = 
+						cardinalityRelation.first.equals(hasNumberOfValuesEqualsBS) ?
+								get(relation2subject2object, triple[2]) :
+								get(relation2object2subject, triple[2]);			
+				if (cardinalityRelation.second.intValue() > 0) {
+					for (ByteString entity : map.keySet()) {
+						if (map.get(entity).size() == cardinalityRelation.second.intValue())
+							results.increase(entity);
+					}
+				} else {
+					IntHashMap<ByteString> set = cardinalityRelation.first.equals(hasNumberOfValuesEqualsBS) ?
+							subjectSize : objectSize;
+					for (ByteString entity : set) {
+						if (!map.containsKey(entity)) {
+							results.increase(entity);
+						}
+					}
+				}
+			} else {
+				Map<ByteString, IntHashMap<ByteString>> map = 
+						cardinalityRelation.first.equals(hasNumberOfValuesGreaterThanBS) ?
+								get(relation2subject2object, triple[2]) :
+								get(relation2object2subject, triple[2]);	
+				for (ByteString entity : map.keySet()) {
+					if (map.get(entity).size() > cardinalityRelation.second.intValue())
+						results.increase(entity);
+				}
+			}
+			return results;
+		}
+		
 		if (isVariable(triple[0]))
 			return (get(relation2object2subject, triple[1], triple[2]));
 		if (isVariable(triple[1]))
@@ -966,7 +1007,7 @@ public class KB {
 	 * @param byteString
 	 * @return
 	 */
-	private Pair<ByteString, Integer> parseCardinalityRelation(ByteString relation) {
+	public static Pair<ByteString, Integer> parseCardinalityRelation(ByteString relation) {
 		Matcher m = cardinalityRelationsRegexPattern.matcher(relation);
 		if (m.matches()) {
 			return new Pair<>(ByteString.of(m.group(1)), 
@@ -1225,13 +1266,19 @@ public class KB {
 						get(this.relation2subject2object, triple[2]) :
 						get(this.relation2object2subject, triple[2]);				
 				long count = 0;
-				for (ByteString s : map.keySet()) {
-					if (map.containsKey(s)) {
+				if (compositeRelation.second.intValue() > 0) {
+					for (ByteString s : map.keySet()) {
 						if (map.get(s).size() == compositeRelation.second.intValue())
 							++count; 
-					} else {
-						if (compositeRelation.second.intValue() == 0)
+					}
+				} else {
+					IntHashMap<ByteString> set =
+					compositeRelation.first.equals(hasNumberOfValuesEqualsBS) ? 
+							subjectSize : objectSize;
+					for (ByteString s : set) {
+						if (!map.containsKey(s)) {
 							++count;
+						}
 					}
 				}
 				return count;
@@ -3420,6 +3467,54 @@ public class KB {
 	}
 	
 	// ---------------------------------------------------------------------------
+	// Cardinality functions
+	// ---------------------------------------------------------------------------
+
+	/**
+	 * Given a relation returns the maximal number of object values such that
+	 * the right cumulative distribution of values is higher than threshold. For example given
+	 * the histogram {1: 3, 2: 4, 3: 5} and the right cumulative distribution 
+	 * {0: 12, 1: 9, 2: 5} for the number of nationalities of people
+	 * maximalCardinality(<isCitizenOf>, 5) would return 2 as this is the 
+	 * maximal entry in the cumulative distribution that is  above the provided threshold (10)
+	 * @param relation
+	 * @param threshold
+	 * @return
+	 */
+	public int maximalCardinality(ByteString relation, long threshold) {
+		Map<ByteString, IntHashMap<ByteString>> map = 
+				get(relation2subject2object, relation);
+		return maximaCardinality(relation, threshold, map);
+	}
+	
+	public int maximalCardinalityInv(ByteString relation, long threshold) {
+		Map<ByteString, IntHashMap<ByteString>> map = 
+				get(relation2object2subject, relation);
+		return maximaCardinality(relation, threshold, map);
+	}
+	
+	private int maximaCardinality(ByteString relation, long threshold, 
+			Map<ByteString, IntHashMap<ByteString>> map) {
+		IntHashMap<Integer> histogram = new IntHashMap<>();
+		for (ByteString subject : map.keySet()) {
+			for (int i = 0; i < map.get(subject).size(); ++i) {
+				histogram.increase(i);	
+			}
+		}
+		System.out.println(histogram);
+		List<Integer> keys = histogram.decreasingKeys();
+		Collections.sort(keys);
+		Collections.reverse(keys);
+		for (int i : keys) {
+			if (histogram.get(i) >= threshold) {
+				return i;
+			}
+		}
+		
+		return -1;
+	}
+	
+	// ---------------------------------------------------------------------------
 	// Utilities
 	// ---------------------------------------------------------------------------
 	
@@ -3598,6 +3693,7 @@ public class KB {
 		dump(System.out);
 	}
 	
+	
 	/**
 	 * Dump the contents of the in-memory KB in TSV format into a PrintStream
 	 * @param out
@@ -3613,6 +3709,11 @@ public class KB {
 		}
 	}
 	
+	/**
+	 * Returns true if the KB contains at least one fact with this relation
+	 * @param relation
+	 * @return
+	 */
 	public boolean containsRelation(ByteString relation) {
 		return relationSize.contains(relation);
 	}

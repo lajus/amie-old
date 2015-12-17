@@ -2146,6 +2146,7 @@ public class Rule {
         return bodyRelations;
     }
     
+    
     public static void main(String[] args) {
     	ByteString[] atom = new ByteString[]{ByteString.of("?s"), ByteString.of("?r"), ByteString.of("?o") };
     	ByteString[] constant1 = new ByteString[]{ByteString.of("Luis"), ByteString.of("livesIn"), ByteString.of("Ecuador") };
