@@ -94,6 +94,12 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			// We'll force a cardinality atom at the end
 			ByteString[] head = rule.getHead();
 			ByteString targetRelation = head[2];
+			int maxCardinality;
+			if (this.kb.isFunctional(head[1])) {
+				maxCardinality = kb.maximalCardinality(targetRelation, (int)minSupportThreshold);
+			} else {
+				
+			}
 		} else {
 			super.getDanglingAtoms(rule, minSupportThreshold, output);
 		}
