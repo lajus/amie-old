@@ -1212,6 +1212,19 @@ public class Rule {
     }
     
     /**
+     * Constructs a new rule identical to the calling one except that 
+     * the last atom is replaced by the argument.
+     * @param newAtom
+     * @return
+     */
+	public Rule replaceLastAtom(ByteString[] newAtom, double cardinality) {
+		Rule newRule = new Rule(this, cardinality);
+		int ruleSize = newRule.getLength();
+		newRule.getTriples().set(ruleSize, newAtom.clone());
+		return newRule;
+	}
+    
+    /**
      * It returns a new rule where the last atom is replaced by a
      * type constraint with the given subtype. 
      * @param subtype
@@ -2154,4 +2167,6 @@ public class Rule {
     	System.out.println(isUnifiable(atom, constant1));
     	System.out.println(isUnifiable(atom2, constant1));
     }
+
+
 }

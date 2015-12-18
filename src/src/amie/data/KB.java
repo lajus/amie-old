@@ -3501,7 +3501,6 @@ public class KB {
 				histogram.increase(i);	
 			}
 		}
-		System.out.println(histogram);
 		List<Integer> keys = histogram.decreasingKeys();
 		Collections.sort(keys);
 		Collections.reverse(keys);
