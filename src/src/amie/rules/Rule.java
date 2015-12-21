@@ -290,7 +290,7 @@ public class Rule {
         this.support = cardinality;
         this.hashSupport = (int) cardinality;
         this.parent = null;
-        this.triples.add(headAtom);
+        this.triples.add(headAtom.clone());
         this.functionalVariablePosition = 0;
         this.bodySize = 0;
         computeHeadKey();
