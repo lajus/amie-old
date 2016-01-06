@@ -1,5 +1,8 @@
 package amie;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +12,8 @@ import javatools.datatypes.Triple;
 
 public class U {
 	
+	private static Object clone;
+
 	/**
 	 * Outputs a list of objects separated by tabs in one line.
 	 * @param list
@@ -79,5 +84,18 @@ public class U {
 	 */
 	public static ByteString[] toArray(Triple<ByteString, ByteString, ByteString> triple) {
 		return new ByteString[] { triple.first, triple.second, triple.third};
+	}
+	
+	/**
+	 * Performs a deep clone of the given list, i.e., it returns a new list where 
+	 * each element has been cloned.
+	 * @param collection
+	 */
+	public static <T> List<T[]> deepClone(List<T[]> collection) {
+		List<T[]> newList = new ArrayList<>(collection.size());
+		for (T[] t : collection) {
+			newList.add(t.clone());
+		}
+		return newList;
 	}
 }

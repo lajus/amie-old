@@ -67,7 +67,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			List<ByteString[]> queryArray = new ArrayList<>();
 			if (domain != null)
 				queryArray.add(KB.triple(succedent[0], amie.data.U.typeRelationBS, domain));
-						
+			
 			succedent[1]  = isCompleteBS;
 			succedent[2] = relation;
 			queryArray.add(succedent);

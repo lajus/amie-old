@@ -19,6 +19,7 @@ import java.util.TreeSet;
 
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
+import amie.U;
 import amie.data.KB;
 
 /**
@@ -54,14 +55,14 @@ public class Rule {
     double support;
 
     /**
-     * In AMIE the cardinality may change when the rule is enhanced with
+     * In AMIE the support may change when the rule is enhanced with
      * "special" atoms such as the DIFFERENTFROMbs database command. Since the
-     * cardinality is used in the hashCode function (good to garantee balanced
+     * cardinality is used in the hashCode function (good to guarantee balanced
      * hash tables), we store the first computed cardinality of the query.
-     * Unlike the real cardinality, this values remains constant since the
+     * Unlike the real cardinality, this values remains constant from the
      * creation of the object.
      */
-    long hashSupport;
+    long initialSupport;
 
     /**
      * String unique key for the head of the query
@@ -265,7 +266,7 @@ public class Rule {
         this.triples = new ArrayList<>();
         this.headKey = null;
         this.support = -1;
-        this.hashSupport = 0;
+        this.initialSupport = 0;
         this.parent = null;
         this.bodySize = -1;
         this.highestVariable = 'a';
@@ -288,7 +289,7 @@ public class Rule {
     public Rule(ByteString[] headAtom, double cardinality) {
         this.triples = new ArrayList<>();
         this.support = cardinality;
-        this.hashSupport = (int) cardinality;
+        this.initialSupport = (int) cardinality;
         this.parent = null;
         this.triples.add(headAtom.clone());
         this.functionalVariablePosition = 0;
@@ -311,12 +312,9 @@ public class Rule {
      * @param support
      */
     public Rule(Rule otherQuery, double support) {
-        triples = new ArrayList<>();
-        for (ByteString[] sequence : otherQuery.triples) {
-            triples.add(sequence.clone());
-        }
+        triples = U.deepClone(otherQuery.triples);
         this.support = support;
-        this.hashSupport = (int) support;
+        this.initialSupport = (int) support;
         this.pcaBodySize = otherQuery.pcaBodySize;
         this.bodySize = otherQuery.bodySize;
         this.bodyMinusHeadSize = otherQuery.bodyMinusHeadSize;
@@ -370,7 +368,7 @@ public class Rule {
 
         computeHeadKey();
         this.support = cardinality;
-        this.hashSupport = (int) cardinality;
+        this.initialSupport = (int) cardinality;
         this.functionalVariablePosition = 0;
         this.parent = null;
         this.bodySize = -1;
@@ -524,7 +522,7 @@ public class Rule {
      * @return
      */
     public long getHashCardinality() {
-        return hashSupport;
+        return initialSupport;
     }
 
     /**
@@ -1261,7 +1259,7 @@ public class Rule {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (int) hashSupport;
+        result = prime * result + (int) initialSupport;
         result = prime * result + (int) getRealLength();
         result = prime * result + ((headKey == null) ? 0 : headKey.hashCode());
         return result;
@@ -1368,7 +1366,7 @@ public class Rule {
             strBuilder.append(pattern[0]);
             strBuilder.append(",");
             strBuilder.append(pattern[2]);
-            strBuilder.append(")");
+            strBuilder.append(") ");
         }
 
         strBuilder.append(" => ");

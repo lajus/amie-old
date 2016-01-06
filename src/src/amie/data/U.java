@@ -772,4 +772,15 @@ public class U {
 		}
 		return entities;
 	}
+
+	/**
+	 * Determines if the first class is a superclass of the second.
+	 * @param typeI
+	 * @param typeII
+	 * @return
+	 */
+	public static boolean isSuperType(KB kb, ByteString typeI, ByteString typeII) {
+		Set<ByteString> st1 = getSuperTypes(kb, typeII);
+		return st1.contains(typeI);
+	}
 }

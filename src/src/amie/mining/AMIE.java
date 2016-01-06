@@ -143,14 +143,6 @@ public class AMIE {
      */
     private long _sourcesLoadingTime;
 
-    /**
-     * Rules of the form A ^ B ^ C => D are output if their immediate parents,
-     * e.g., A ^ B => D and A ^ C => D and A ^ C => D have higher confidence. If
-     * this option is enabled the check is extended also to parents of degree 2,
-     * e.g., A => D B => D, C => D.
-     *
-     */
-    private boolean _checkParentsOfDegree2;
 
     /**
      *
@@ -481,7 +473,7 @@ public class AMIE {
                         this._approximationTime += (System.currentTimeMillis() - timeStamp1);
                         if (ruleSatisfiesConfidenceBounds) {
                             this.resultsLock.lock();
-                            setAdditionalParents2(currentRule);
+                            setAdditionalParents(currentRule);
                             this.resultsLock.unlock();
                             // Calculate the metrics
                             assistant.calculateConfidenceMetrics(currentRule);
@@ -579,7 +571,7 @@ public class AMIE {
          *
          * @param currentQuery
          */
-        private void setAdditionalParents2(Rule currentQuery) {
+        private void setAdditionalParents(Rule currentQuery) {
             int parentHashCode = currentQuery.alternativeParentHashCode();
             Set<Rule> candidateParents = indexedOutputSet.get(parentHashCode);
             if (candidateParents != null) {
@@ -591,12 +583,7 @@ public class AMIE {
                 List<List<ByteString[]>> parentsOfSizeI = new ArrayList<>();
                 Rule.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), 
                 		queryPattern.get(0), queryPattern.size() - 2, parentsOfSizeI);
-                if (_checkParentsOfDegree2) {
-                    if (queryPattern.size() > 3) {
-                        Rule.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), 
-                        		queryPattern.get(0), queryPattern.size() - 3, parentsOfSizeI);
-                    }
-                }
+
                 for (List<ByteString[]> parent : parentsOfSizeI) {
                     for (Rule candidate : candidateParents) {
                         List<ByteString[]> candidateParentPattern = candidate.getRealTriples();
@@ -642,10 +629,6 @@ public class AMIE {
             return _approximationTime;
         }
 
-    }
-
-    public void setCheckParentsOfDegree2(boolean booleanVal) {
-        this._checkParentsOfDegree2 = booleanVal;
     }
 
     /**
