@@ -18,10 +18,13 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	
 	public static final String isIncomplete = "isIncomplete";
 	
+	public static final String isRelevant = "<isRelevant>";
+	
 	public static final ByteString isCompleteBS = ByteString.of(isComplete);
 	
 	public static final ByteString isIncompleteBS = ByteString.of(isIncomplete);
-
+	
+	public static final ByteString isRelevantBS = ByteString.of(isRelevant);
 	
 	public CompletenessMiningAssistant(KB dataSource) {
 		super(dataSource);
@@ -44,7 +47,8 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	public void setBodyExcludedRelations(java.util.Collection<ByteString> bodyExcludedRelations) {};
 	
 	@Override
-	protected void buildInitialQueries(IntHashMap<ByteString> relations, double minSupportThreshold, Collection<Rule> output) {
+	protected void buildInitialQueries(IntHashMap<ByteString> relations, 
+			double minSupportThreshold, Collection<Rule> output) {
 		Rule query = new Rule();
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		
@@ -107,62 +111,14 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}
 	}
 	
-	@Override
+	/**@Override
 	public void getDanglingAtoms(Rule rule, double minSupportThreshold, java.util.Collection<Rule> output) {
-		if (rule.getLength() < 3 && !containsCardinalityAtom(rule)) {
-			// We'll force a cardinality atom at the end
-			ByteString[] head = rule.getHead();
-			ByteString targetRelation = head[2];
-			int maxCardinality;
-			String cardinalityRelation = null;
-			String gtRelation = null;
-			if (this.kb.isFunctional(head[2])) {
-				cardinalityRelation = KB.hasNumberOfValuesEquals;
-				gtRelation = KB.hasNumberOfValuesGreaterThan;
-			} else {
-				maxCardinality = kb.maximalCardinalityInv(targetRelation, 
-						(int)minSupportThreshold);
-				cardinalityRelation = KB.hasNumberOfValuesEqualsInv;
-				gtRelation = KB.hasNumberOfValuesGreaterThanInv;
-			}
-			
-			maxCardinality = kb.maximalCardinality(targetRelation, 
-					(int)minSupportThreshold);
-			if (maxCardinality == -1) {
-				// Proceed as usual
-				super.getDanglingAtoms(rule, minSupportThreshold, output);
-			} else {
-				gtRelation = gtRelation + maxCardinality;
-			}
-
-			ByteString[] newAtom = head.clone();
-			long cardinality = 0;
-			// First rule
-			if (head[1].equals(isCompleteBS)) {
-				newAtom[1] = ByteString.of(gtRelation);
-				rule.getTriples().add(newAtom);
-				cardinality = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
-				rule.getTriples().remove(rule.getTriples().size() - 1);			
-				if (cardinality >= minSupportThreshold) {
-					Rule candidate = rule.addAtom(newAtom, cardinality);
-					output.add(candidate);
-				}
-			}
-			
-			// Second rule
-			cardinalityRelation = cardinalityRelation + "0";
-			newAtom[1] = ByteString.of(cardinalityRelation);
-			rule.getTriples().add(newAtom);
-			cardinality = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
-			rule.getTriples().remove(rule.getTriples().size() - 1);			
-			if (cardinality >= minSupportThreshold) {
-				Rule candidate = rule.addAtom(newAtom, cardinality);
-				output.add(candidate);
-			}
-		} else {
+		// Proceed with the standard addition of dangling atoms once the compulsory atoms
+		// have been added.
+		if (containsCardinalityAtom(rule) || containsRelevanceAtom(rule)) {
 			super.getDanglingAtoms(rule, minSupportThreshold, output);
 		}
-	}
+	}**/
 	
 	/**
 	 * Returns true if the rule contains a cardinality constraint 
@@ -182,7 +138,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 
 	@Override
 	public void getTypeSpecializedAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
-		if (rule.getRealLength() >= maxDepth) {
+		if (rule.getRealLength() >= this.maxDepth) {
 			return;
 		}
 			
@@ -192,24 +148,25 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			super.getTypeSpecializedAtoms(rule, minSupportThreshold, output);
 		} else {
 			ByteString oldRelation = lastAtom[1];
-			int newCard = compositeRelation.second.intValue() - 1;
-			ByteString newRelation = null;
-			if (oldRelation.toString().startsWith(KB.hasNumberOfValuesEquals)) {
+			// Do not specialize the equals relation
+			if (oldRelation.toString().startsWith(KB.hasNumberOfValuesEquals)) 
 				return;
-			} else {
-				if (newCard >= 0) {
-					newRelation = ByteString.of(compositeRelation.first.toString() + newCard);
-				} else {
-					return;
-				}
-			}
+			
+			ByteString targetRelation = lastAtom[2];
+			int maximalCardinality = kb.maximalCardinality(targetRelation, (long)minSupportThreshold);
+			int newCard = compositeRelation.second.intValue() + 1;
+			if (newCard > maximalCardinality)
+				return;
+			
+				
+				
+			ByteString newRelation = ByteString.of(compositeRelation.first.toString() + newCard);
 			lastAtom[1] = newRelation;
 			long cardinality = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
 			lastAtom[1] = oldRelation;
 			if (cardinality >= minSupportThreshold) {
 				ByteString[] newAtom = lastAtom.clone();
-				newAtom[1] = ByteString.of(compositeRelation.first.toString() 
-						+ (compositeRelation.second.intValue() + 1));				
+				newAtom[1] = newRelation;				
 				Rule candidate = rule.replaceLastAtom(newAtom, cardinality);
 				candidate.setParent(rule);
 				output.add(candidate);
@@ -217,20 +174,83 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}
 	}
 	
-	
-	@Override
-	protected void getInstantiatedAtoms(Rule queryWithDanglingEdge, Rule parentQuery, 
-			int danglingAtomPosition, int danglingPositionInEdge, double minSupportThreshold, Collection<Rule> output) {
-		ByteString lastAtom[] = queryWithDanglingEdge.getLastRealTriplePattern();
-		// We leave the specialization of the type relation to the type instantiation atom
-		if (lastAtom[1].equals(amie.data.U.typeRelationBS)) 
-			return;
+	private void addCardinalityAtom(Rule rule, double minSupportThreshold, Collection<Rule> output) {
+		// We'll force a cardinality atom at the end
+		ByteString[] head = rule.getHead();
+		ByteString targetRelation = head[2];
+		int startCardinality = 0;
+		String cardinalityRelation = null;
+		String gtRelation = null;
+		if (this.kb.isFunctional(targetRelation)) {
+			cardinalityRelation = KB.hasNumberOfValuesEquals;
+			gtRelation = KB.hasNumberOfValuesGreaterThan;
+		} else {
+			cardinalityRelation = KB.hasNumberOfValuesEqualsInv;
+			gtRelation = KB.hasNumberOfValuesGreaterThanInv;
+		}
 		
-		super.getInstantiatedAtoms(queryWithDanglingEdge, 
-				parentQuery, danglingAtomPosition, danglingPositionInEdge, 
-				minSupportThreshold, output);
+		gtRelation = gtRelation + startCardinality;
+		cardinalityRelation = cardinalityRelation + startCardinality;
+
+		ByteString[] newAtom = head.clone();
+		long cardinality = 0;
+		// First rule
+		if (head[1].equals(isCompleteBS)) {
+			newAtom[1] = ByteString.of(gtRelation);
+			rule.getTriples().add(newAtom);
+			cardinality = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
+			rule.getTriples().remove(rule.getTriples().size() - 1);			
+			if (cardinality >= minSupportThreshold) {
+				Rule candidate = rule.addAtom(newAtom, cardinality);
+				output.add(candidate);
+			}
+		}
+		
+		// Second rule
+		newAtom[1] = ByteString.of(cardinalityRelation);
+		rule.getTriples().add(newAtom);
+		cardinality = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
+		rule.getTriples().remove(rule.getTriples().size() - 1);			
+		if (cardinality >= minSupportThreshold) {
+			Rule candidate = rule.addAtom(newAtom, cardinality);
+			output.add(candidate);
+		}
 	}
 	
+	@Override
+	public void getInstantiatedAtoms(Rule parentRule, double minSupportThreshold, 
+		Collection<Rule> danglingEdges, Collection<Rule> output) {
+		
+		if (!containsRelevanceAtom(parentRule)) {
+			ByteString[] relevanceAtom = new ByteString[]{parentRule.getFunctionalVariable(), 
+					isRelevantBS, ByteString.of("TRUE")};
+			
+			parentRule.getTriples().add(relevanceAtom);
+			long support = kb.countDistinct(relevanceAtom[0], parentRule.getTriples());
+			parentRule.getTriples().remove(parentRule.getTriples().size() - 1);
+			if (support > minSupportThreshold) {
+				Rule candidate = parentRule.addAtom(relevanceAtom, support);
+				candidate.setParent(parentRule);
+				output.add(candidate);
+			}
+		}
+		
+		if (!containsCardinalityAtom(parentRule)) {
+			addCardinalityAtom(parentRule, minSupportThreshold, output);
+		}
+	}
+	
+	
+	private boolean containsRelevanceAtom(Rule parentQuery) {
+		for (ByteString[] atom : parentQuery.getTriples()) {
+			if (atom[1].equals(isRelevantBS)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	@Override
 	public double computePCAConfidence(Rule rule) {
 		List<ByteString[]> antecedent = new ArrayList<ByteString[]>();

@@ -3416,6 +3416,32 @@ public class KB {
 	}
 	
 	/**
+	 * It returns all the entities that occur as subjects or objects
+	 * in the KB.
+	 * @param kb
+	 * @return
+	 */
+	public Collection<ByteString> getAllEntities() {
+		Collection<ByteString> result = new ArrayList<>();
+		result.addAll(subjectSize);
+		result.addAll(objectSize);
+		return result;
+	}
+	
+	/**
+	 * It returns all the entities and the number of facts where they occur.
+	 * @param kb
+	 * @return
+	 */
+	public IntHashMap<ByteString> getEntitiesOccurrences() {
+		IntHashMap<ByteString> result = new IntHashMap<>();
+		result.addAll(subjectSize);
+		result.addAll(objectSize);
+		return result;
+	}
+	
+	
+	/**
 	 * Return all the relations (and their sizes) that are bigger than the given
 	 * threshold.
 	 * @param threshold

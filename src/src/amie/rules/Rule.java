@@ -1218,7 +1218,7 @@ public class Rule {
 	public Rule replaceLastAtom(ByteString[] newAtom, double cardinality) {
 		Rule newRule = new Rule(this, cardinality);
 		int ruleSize = newRule.getLength();
-		newRule.getTriples().set(ruleSize, newAtom.clone());
+		newRule.getTriples().set(ruleSize - 1, newAtom.clone());
 		return newRule;
 	}
     

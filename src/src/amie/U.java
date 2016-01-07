@@ -1,8 +1,6 @@
 package amie;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -11,8 +9,6 @@ import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Triple;
 
 public class U {
-	
-	private static Object clone;
 
 	/**
 	 * Outputs a list of objects separated by tabs in one line.

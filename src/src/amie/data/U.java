@@ -673,18 +673,6 @@ public class U {
 	    }
 	}
 
-	/**
-	 * It returns all the entities that occur as subjects or objects
-	 * in the KB.
-	 * @param kb
-	 * @return
-	 */
-	public static IntHashMap<ByteString> getAllEntities(KB kb) {
-		IntHashMap<ByteString> result = new IntHashMap<>();
-		result.addAll(kb.subjectSize);
-		result.addAll(kb.objectSize);
-		return result;
-	}
 	
 	/**
 	 * It returns the number of facts where the given entity participates as
