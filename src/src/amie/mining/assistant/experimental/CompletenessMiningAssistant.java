@@ -100,10 +100,10 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			if (cardinalityIncomplete >= minSupportThreshold) {
 				Rule candidateIncomplete = null;
 				if (domain == null) {
-					candidateIncomplete = new Rule(succedent, cardinalityComplete);				
+					candidateIncomplete = new Rule(succedent, cardinalityIncomplete);				
 				} else {
 					queryArray.remove(1);
-					candidateIncomplete = new Rule(succedent, queryArray, cardinalityComplete);
+					candidateIncomplete = new Rule(succedent, queryArray, cardinalityIncomplete);
 				}
 				candidateIncomplete.setFunctionalVariablePosition(countVarPos);
 				output.add(candidateIncomplete);
@@ -120,28 +120,9 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}
 	}**/
 	
-	/**
-	 * Returns true if the rule contains a cardinality constraint 
-	 * atom.
-	 * @param rule
-	 * @return
-	 */
-	private boolean containsCardinalityAtom(Rule rule) {
-		List<ByteString[]> triples = rule.getTriples();
-		for (int i = triples.size() - 1; i >= 0; --i) {
-			if (KB.parseCardinalityRelation(triples.get(i)[1]) != null)
-				return true;
-		}
-		
-		return false;
-	}
 
 	@Override
 	public void getTypeSpecializedAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
-		if (rule.getRealLength() >= this.maxDepth) {
-			return;
-		}
-			
 		ByteString[] lastAtom = rule.getLastRealTriplePattern();
 		Pair<ByteString, Integer> compositeRelation = KB.parseCardinalityRelation(lastAtom[1]);
 		if (compositeRelation == null) {
@@ -221,7 +202,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	public void getInstantiatedAtoms(Rule parentRule, double minSupportThreshold, 
 		Collection<Rule> danglingEdges, Collection<Rule> output) {
 		
-		if (!containsRelevanceAtom(parentRule)) {
+		if (!containsAtomWithRelation(parentRule)) {
 			ByteString[] relevanceAtom = new ByteString[]{parentRule.getFunctionalVariable(), 
 					isRelevantBS, ByteString.of("TRUE")};
 			
@@ -240,12 +221,38 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}
 	}
 	
+	@Override
+	protected boolean testLength(Rule candidate) {
+		int length = maxDepth;
+		if (candidate.containsRelation(amie.data.U.typeRelationBS)) ++length;
+		if (candidate.containsRelation(isRelevantBS)) ++length;
+		if (containsCardinalityAtom(candidate)) ++length;
+		
+		return candidate.getRealLength() < length;
+	}
 	
-	private boolean containsRelevanceAtom(Rule parentQuery) {
+	
+	private boolean containsAtomWithRelation(Rule parentQuery) {
 		for (ByteString[] atom : parentQuery.getTriples()) {
 			if (atom[1].equals(isRelevantBS)) {
 				return true;
 			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Returns true if the rule contains a cardinality constraint 
+	 * atom.
+	 * @param rule
+	 * @return
+	 */
+	private boolean containsCardinalityAtom(Rule rule) {
+		List<ByteString[]> triples = rule.getTriples();
+		for (int i = triples.size() - 1; i >= 0; --i) {
+			if (KB.parseCardinalityRelation(triples.get(i)[1]) != null)
+				return true;
 		}
 		
 		return false;
