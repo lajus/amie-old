@@ -53,7 +53,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 				if(candidate.getRedundantAtoms().isEmpty()){
 					candidate.setHeadCoverage((double)cardinality / headCardinalities.get(candidate.getHeadRelation()));
 					candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
-					candidate.setParent(originalQuery);					
+					candidate.addParent(originalQuery);					
 					output.add(candidate);
 				}
 			}
@@ -138,7 +138,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 								if(!candidate.isRedundantRecursive()){
 									candidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate.getHeadRelation()));
 									candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
-									candidate.setParent(query);
+									candidate.addParent(query);
 									output.add(candidate);
 								}
 							}
@@ -250,7 +250,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 						
 						candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
 						candidate.setSupportRatio((double)candidate.getSupport() / (double)getTotalCount(candidate));
-						candidate.setParent(query);
+						candidate.addParent(query);
 						if (canAddInstantiatedAtoms()) {
 							// Pruning by maximum length for the \mathcal{O}_E operator.
 							if (this.exploitMaxLengthOption) {

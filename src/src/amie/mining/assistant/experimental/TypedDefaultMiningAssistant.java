@@ -90,14 +90,14 @@ public class TypedDefaultMiningAssistant extends DefaultMiningAssistant {
 						if(cardinality >= minSupportThreshold){
 							Rule newCandidate = new Rule(candidate, cardinality);
 							newCandidate.getLastTriplePattern()[2] = type;
-							newCandidate.setParent(query);
+							newCandidate.addParent(query);
 							output.add(newCandidate);
 						}
 					}
 				}else{
 					if(candidate != query){
 						output.add(candidate);
-						candidate.setParent(query);
+						candidate.addParent(query);
 					}
 				}
 				candidate.getTriples().remove(candidate.getTriples().size() - 1);

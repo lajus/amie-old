@@ -187,7 +187,7 @@ public class MiningAssistant{
 		subclassPattern[1] = subPropertyString;
 		this.subclassQuery = new Rule(subclassPattern, 0);
 		this.countAlwaysOnSubject = false;
-		this.verbose = true;
+		this.verbose = false;
 		this.exploitMaxLengthOption = true;
 		this.enableQueryRewriting = true;
 		this.enablePerfectRules = true;
@@ -502,7 +502,7 @@ public class MiningAssistant{
 						
 						candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
 						candidate.setSupportRatio((double)candidate.getSupport() / (double)getTotalCount(candidate));
-						candidate.setParent(rule);
+						candidate.addParent(rule);
 						if (!enforceConstants) {
 							output.add(candidate);
 						}
@@ -604,7 +604,7 @@ public class MiningAssistant{
 								if(!candidate.isRedundantRecursive()){
 									candidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate.getHeadRelation()));
 									candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
-									candidate.setParent(rule);
+									candidate.addParent(rule);
 									output.add(candidate);
 								}
 							}
@@ -681,7 +681,7 @@ public class MiningAssistant{
 			lastAtom[2] = typeToSpecialize;
 			if (support >= minSupportThreshold) {
 				Rule newRule = rule.specializeTypeAtom(subtype, support);
-				newRule.setParent(rule);
+				newRule.addParent(rule);
 				output.add(newRule);
 			}
 		}
@@ -1056,7 +1056,7 @@ public class MiningAssistant{
 				if(candidate.getRedundantAtoms().isEmpty()){
 					candidate.setHeadCoverage((double)cardinality / headCardinalities.get(candidate.getHeadRelation()));
 					candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
-					candidate.setParent(parentQuery);					
+					candidate.addParent(parentQuery);					
 					output.add(candidate);
 				}
 			}
@@ -1233,8 +1233,8 @@ public class MiningAssistant{
 		return verbose;
 	}
 
-	public void setVerbose(boolean silent) {
-		this.verbose = silent;
+	public void setVerbose(boolean verbose) {
+		this.verbose = verbose;
 	}
 
 	public boolean isExploitMaxLengthOption() {

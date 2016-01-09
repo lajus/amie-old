@@ -112,16 +112,16 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 						Rule newCandidate = new Rule(candidate, cardinality);
 						newCandidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(newCandidate.getHeadRelation()));
 						newCandidate.setSupportRatio((double)cardinality / (double)kb.size());
-						newCandidate.setParent(query);
+						newCandidate.addParent(query);
 						newCandidate.getLastTriplePattern()[2] = type;
-						newCandidate.setParent(query);
+						newCandidate.addParent(query);
 						output.add(newCandidate);
 					}
 				}
 				
 				if (candidate != query) {
 					output.add(candidate);
-					candidate.setParent(query);
+					candidate.addParent(query);
 				}
 				candidate.getTriples().remove(candidate.getTriples().size() - 1);
 			}
@@ -156,7 +156,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 				Rule candidate1 = query.addAtom(newEdge, (int)cardinality);
 				candidate1.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate1.getHeadRelation()));
 				candidate1.setSupportRatio((double)cardinality / (double)kb.size());
-				candidate1.setParent(query);			
+				candidate1.addParent(query);			
 				output.add(candidate1);	
 			}
 			
@@ -168,7 +168,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 				Rule candidate2 = query.addAtom(newEdge, (int)cardinality);
 				candidate2.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate2.getHeadRelation()));
 				candidate2.setSupportRatio((double)cardinality / (double)kb.size());
-				candidate2.setParent(query);			
+				candidate2.addParent(query);			
 				output.add(candidate2);	
 			}
 		}

@@ -206,7 +206,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 							if(!candidate.isRedundantRecursive()){
 								candidate.setHeadCoverage((double)cardinality / (double)this.headCardinalities.get(candidate.getHeadRelation()));
 								candidate.setSupportRatio((double)cardinality / (double)this.kb.size());
-								candidate.setParent(rule);
+								candidate.addParent(rule);
 								output.add(candidate);
 							}
 						}
@@ -361,7 +361,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 					
 					candidate.setHeadCoverage(candidate.getSupport() / this.headCardinalities.get(candidate.getHeadRelation()));
 					candidate.setSupportRatio(candidate.getSupport() / this.kb.size());
-					candidate.setParent(query);	
+					candidate.addParent(query);	
 					output.add(candidate);
 				}
 			}
@@ -450,7 +450,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 				if(candidate.getRedundantAtoms().isEmpty()){
 					candidate.setHeadCoverage((double)cardinality / headCardinalities.get(candidate.getHeadRelation()));
 					candidate.setSupportRatio((double)cardinality / (double)kb.size());
-					candidate.setParent(parentQuery);
+					candidate.addParent(parentQuery);
 					output.add(candidate);
 				}
 			}

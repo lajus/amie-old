@@ -136,7 +136,7 @@ public class ExistentialAndNegatedRulesMiningAssistant extends MiningAssistant {
 				rule.getTriples().remove(rule.getTriples().size() - 1);
 				if (support >= minSupportThreshold) {
 					Rule newRule = rule.addAtom(newEdge, support);
-					newRule.setParent(rule);
+					newRule.addParent(rule);
 					output.add(newRule);
 				}
 			}

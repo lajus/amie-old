@@ -1171,14 +1171,12 @@ public class Rule {
     }
 
     /**
-     * Sets the rule's parent rule.
+     * Adds a parent to the rule.
      *
      * @param parent
      */
-    public void setParent(Rule parent) {
-        if (parent != null) {
-            ancestors.add(parent);
-        }
+    public void addParent(Rule parent) {
+    	ancestors.add(parent);
     }
 
     /**
@@ -1294,17 +1292,17 @@ public class Rule {
         return QueryEquivalenceChecker.areEquivalent(triples, other.triples);
     }
 
-    public static void printRuleBasicHeaders() {
-        System.out.println("Rule\tHead Coverage\tStd Confidence\t"
-                + "PCA Confidence\tPositive Examples\tBody size\tPCA Body size\t"
-                + "Functional variable");
-    }
-
-    public static void printRuleHeaders() {
-        System.out.println("Rule\tHead Coverage\tStd Confidence\t"
-                + "PCA Confidence\tPositive Examples\tBody size\tPCA Body size\t"
-                + "Functional variable\tStd. Lower Bound\tPCA Lower Bound\t"
-                + "PCA Conf estimation");
+    public static void printRuleHeaders(boolean verbose) {
+        if (verbose) {
+	    	System.out.println("Rule\tHead Coverage\tStd Confidence\t"
+	                + "PCA Confidence\tPositive Examples\tBody size\tPCA Body size\t"
+	                + "Functional variable\tStd. Lower Bound\tPCA Lower Bound\t"
+	                + "PCA Conf estimation");
+        } else {
+        	System.out.println("Rule\tHead Coverage\tStd Confidence\t"
+                    + "PCA Confidence\tPositive Examples\tBody size\tPCA Body size\t"
+                    + "Functional variable");
+        }
     }
 
     public String getRuleString() {
@@ -1381,6 +1379,16 @@ public class Rule {
         return strBuilder.toString();
     }
     
+    public String getDatalogBasicRuleString() {
+    	StringBuilder strBuilder = new StringBuilder();
+        strBuilder.append(getDatalogRuleString());
+        addBasicFields(strBuilder);
+        for (Rule r : getAllAncestors())
+        	strBuilder.append(", " + r.getDatalogRuleString());
+        return strBuilder.toString();
+	}
+
+    
     private void addFullFields(StringBuilder strBuilder) {
     	DecimalFormat df = new DecimalFormat("#.#########");
         DecimalFormat df1 = new DecimalFormat("#.##");
@@ -1419,6 +1427,8 @@ public class Rule {
         StringBuilder strBuilder = new StringBuilder();
         strBuilder.append(getRuleString());
         addFullFields(strBuilder);
+        for (Rule r : getAllAncestors())
+        	strBuilder.append(", " + r.getDatalogRuleString());
         return strBuilder.toString();
     }
 
@@ -2165,6 +2175,5 @@ public class Rule {
     	System.out.println(isUnifiable(atom, constant1));
     	System.out.println(isUnifiable(atom2, constant1));
     }
-
 
 }

@@ -149,7 +149,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 				ByteString[] newAtom = lastAtom.clone();
 				newAtom[1] = newRelation;				
 				Rule candidate = rule.replaceLastAtom(newAtom, cardinality);
-				candidate.setParent(rule);
+				candidate.addParent(rule);
 				output.add(candidate);
 			}
 		}
@@ -211,7 +211,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			parentRule.getTriples().remove(parentRule.getTriples().size() - 1);
 			if (support > minSupportThreshold) {
 				Rule candidate = parentRule.addAtom(relevanceAtom, support);
-				candidate.setParent(parentRule);
+				candidate.addParent(parentRule);
 				output.add(candidate);
 			}
 		}
@@ -228,7 +228,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		if (candidate.containsRelation(isRelevantBS)) ++length;
 		if (containsCardinalityAtom(candidate)) ++length;
 		
-		return candidate.getRealLength() < length;
+		return candidate.getRealLength() <= length;
 	}
 	
 	

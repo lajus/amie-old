@@ -332,17 +332,26 @@ public class AMIE {
 
         @Override
         public void run() {
-            Rule.printRuleHeaders();
+            Rule.printRuleHeaders(isVerbose());
             while (!finished) {
                 consumeLock.lock();
                 try {
                     while (lastConsumedIndex == consumeList.size() - 1) {
                         conditionVariable.await();
                         for (int i = lastConsumedIndex + 1; i < consumeList.size(); ++i) {
-                        	if (datalogNotation)
-                                System.out.println(consumeList.get(i).getDatalogFullRuleString());
-                        	else                        		
-                        		System.out.println(consumeList.get(i).getFullRuleString());
+                        	if (datalogNotation) {
+                        		if (isVerbose()) {
+                        			System.out.println(consumeList.get(i).getDatalogFullRuleString());
+                        		} else {
+                        			System.out.println(consumeList.get(i).getDatalogBasicRuleString());
+                        		}
+                        	} else {     
+                        		if (isVerbose()) {
+                        			System.out.println(consumeList.get(i).getFullRuleString());
+                        		} else {
+                        			System.out.println(consumeList.get(i).getBasicRuleString());                        			
+                        		}
+                        	}
                         }
 
                         lastConsumedIndex = consumeList.size() - 1;
@@ -587,7 +596,7 @@ public class AMIE {
                     for (Rule candidate : candidateParents) {
                         List<ByteString[]> candidateParentPattern = candidate.getRealTriples();
                         if (QueryEquivalenceChecker.areEquivalent(parent, candidateParentPattern)) {
-                            currentQuery.setParent(candidate);
+                            currentQuery.addParent(candidate);
                         }
                     }
                 }
@@ -1380,7 +1389,7 @@ public class AMIE {
 	    rules = miner.mine();
 	
 	    if (!miner.isRealTime()) {
-	    	Rule.printRuleHeaders();
+	    	Rule.printRuleHeaders(miner.isVerbose());
 	        for (Rule rule : rules) {
 	        	System.out.println(rule.getFullRuleString());
 	        }
