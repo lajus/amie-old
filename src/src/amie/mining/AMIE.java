@@ -298,6 +298,7 @@ public class AMIE {
         if (realTime) {
             consumerObj.finish();
             consumerThread.interrupt();
+            consumerThread.join();
         }
 
         return result;
@@ -577,28 +578,36 @@ public class AMIE {
          * X is a subset of X' (in other words X' => Y' is a more specific version
          * of X => Y)
          *
-         * @param currentQuery
+         * @param currentRule
          */
-        private void setAdditionalParents(Rule currentQuery) {
-            int parentHashCode = currentQuery.alternativeParentHashCode();
+        private void setAdditionalParents(Rule currentRule) {
+            int parentHashCode = currentRule.alternativeParentHashCode();
             Set<Rule> candidateParents = indexedOutputSet.get(parentHashCode);
             if (candidateParents != null) {
-                List<ByteString[]> queryPattern = currentQuery.getRealTriples();
+                List<ByteString[]> queryPattern = currentRule.getRealTriples();
                 // No need to look for parents of rules of size 2
                 if (queryPattern.size() <= 2) {
                     return;
                 }
-                List<List<ByteString[]>> parentsOfSizeI = new ArrayList<>();
-                Rule.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), 
-                		queryPattern.get(0), queryPattern.size() - 2, parentsOfSizeI);
-
-                for (List<ByteString[]> parent : parentsOfSizeI) {
-                    for (Rule candidate : candidateParents) {
-                        List<ByteString[]> candidateParentPattern = candidate.getRealTriples();
-                        if (QueryEquivalenceChecker.areEquivalent(parent, candidateParentPattern)) {
-                            currentQuery.addParent(candidate);
-                        }
-                    }
+                int i = 2;
+                // Go up until you find a parent that was output
+                while (queryPattern.size() - i > 0) {
+                	// Check for parents of a given size
+	                List<List<ByteString[]>> parentsOfSizeI = new ArrayList<>();
+	                Rule.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), 
+	                		queryPattern.get(0), queryPattern.size() - i, parentsOfSizeI);
+	
+	                for (List<ByteString[]> parent : parentsOfSizeI) {
+	                    for (Rule candidate : candidateParents) {
+	                        List<ByteString[]> candidateParentPattern = candidate.getRealTriples();
+	                        if (QueryEquivalenceChecker.areEquivalent(parent, candidateParentPattern)) {
+	                            if (!currentRule.containsParent(candidate)) {
+	                            	currentRule.addParent(candidate);
+	                            }
+	                        }
+	                    }
+	                }
+	                ++i;
                 }
             }
         }

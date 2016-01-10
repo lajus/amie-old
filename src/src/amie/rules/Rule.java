@@ -1176,7 +1176,11 @@ public class Rule {
      * @param parent
      */
     public void addParent(Rule parent) {
-    	ancestors.add(parent);
+    	this.ancestors.add(parent);
+    }
+    
+    public boolean containsParent(Rule parent) {
+    	return this.ancestors.contains(parent); 
     }
 
     /**
@@ -1383,8 +1387,9 @@ public class Rule {
     	StringBuilder strBuilder = new StringBuilder();
         strBuilder.append(getDatalogRuleString());
         addBasicFields(strBuilder);
-        for (Rule r : getAllAncestors())
+        for (Rule r : getAncestors()) {
         	strBuilder.append(", " + r.getDatalogRuleString());
+        }
         return strBuilder.toString();
 	}
 
@@ -1427,8 +1432,6 @@ public class Rule {
         StringBuilder strBuilder = new StringBuilder();
         strBuilder.append(getRuleString());
         addFullFields(strBuilder);
-        for (Rule r : getAllAncestors())
-        	strBuilder.append(", " + r.getDatalogRuleString());
         return strBuilder.toString();
     }
 
@@ -1963,9 +1966,6 @@ public class Rule {
             combination.addAll(fixedPrefix);
             combination.add(antecedent.get(i));
             output.add(combination);
-        }
-        if (windowSize > 1) {
-            getParentsOfSize(antecedent.subList(1, antecedent.size()), head, windowSize, output);
         }
     }
 

@@ -134,13 +134,19 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 				return;
 			
 			ByteString targetRelation = lastAtom[2];
-			int maximalCardinality = kb.maximalCardinality(targetRelation, (long)minSupportThreshold);
-			int newCard = compositeRelation.second.intValue() + 1;
-			if (newCard > maximalCardinality)
-				return;
-			
-				
-				
+			int newCard = -1;
+			if (rule.getHead()[1].equals(isCompleteBS)) {
+				int maximalCardinality = kb.maximalRightCumulativeCardinality(targetRelation, 
+						(long)minSupportThreshold);
+				newCard = compositeRelation.second.intValue() + 1;
+				if (newCard > maximalCardinality)
+					return;
+			} else {
+				newCard = compositeRelation.second.intValue() - 1;
+				if (newCard == 0)
+					return;
+			}
+								
 			ByteString newRelation = ByteString.of(compositeRelation.first.toString() + newCard);
 			lastAtom[1] = newRelation;
 			long cardinality = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
@@ -159,25 +165,43 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		// We'll force a cardinality atom at the end
 		ByteString[] head = rule.getHead();
 		ByteString targetRelation = head[2];
-		int startCardinality = 0;
-		String cardinalityRelation = null;
-		String gtRelation = null;
+		int startCardinality = -1;
+		String equalityRelation = null;
+		String inequalityRelation = null;				
 		if (this.kb.isFunctional(targetRelation)) {
-			cardinalityRelation = KB.hasNumberOfValuesEquals;
-			gtRelation = KB.hasNumberOfValuesGreaterThan;
+			equalityRelation = KB.hasNumberOfValuesEquals;
+			inequalityRelation = head[1].equals(isCompleteBS) ? 
+					KB.hasNumberOfValuesGreaterThan : KB.hasNumberOfValuesSmallerThan;
 		} else {
-			cardinalityRelation = KB.hasNumberOfValuesEqualsInv;
-			gtRelation = KB.hasNumberOfValuesGreaterThanInv;
+			equalityRelation = KB.hasNumberOfValuesEqualsInv;
+			inequalityRelation =  head[1].equals(isCompleteBS) ? 
+					KB.hasNumberOfValuesGreaterThanInv : KB.hasNumberOfValuesSmallerThanInv;
 		}
 		
-		gtRelation = gtRelation + startCardinality;
-		cardinalityRelation = cardinalityRelation + startCardinality;
+		if (head[1].equals(isIncompleteBS)) {
+			startCardinality = kb.maximalCardinality(targetRelation);
+		} else {
+			startCardinality = 0;
+		}
+		
+		inequalityRelation = inequalityRelation + startCardinality;
+		equalityRelation = equalityRelation + startCardinality;
 
 		ByteString[] newAtom = head.clone();
 		long cardinality = 0;
 		// First rule
+		newAtom[1] = ByteString.of(inequalityRelation);
+		rule.getTriples().add(newAtom);
+		cardinality = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
+		rule.getTriples().remove(rule.getTriples().size() - 1);			
+		if (cardinality >= minSupportThreshold) {
+			Rule candidate = rule.addAtom(newAtom, cardinality);
+			output.add(candidate);
+		}
+		
+		// Second rule
 		if (head[1].equals(isCompleteBS)) {
-			newAtom[1] = ByteString.of(gtRelation);
+			newAtom[1] = ByteString.of(equalityRelation);
 			rule.getTriples().add(newAtom);
 			cardinality = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
 			rule.getTriples().remove(rule.getTriples().size() - 1);			
@@ -185,16 +209,6 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 				Rule candidate = rule.addAtom(newAtom, cardinality);
 				output.add(candidate);
 			}
-		}
-		
-		// Second rule
-		newAtom[1] = ByteString.of(cardinalityRelation);
-		rule.getTriples().add(newAtom);
-		cardinality = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
-		rule.getTriples().remove(rule.getTriples().size() - 1);			
-		if (cardinality >= minSupportThreshold) {
-			Rule candidate = rule.addAtom(newAtom, cardinality);
-			output.add(candidate);
 		}
 	}
 	
