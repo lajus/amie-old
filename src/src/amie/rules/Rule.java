@@ -1387,9 +1387,9 @@ public class Rule {
     	StringBuilder strBuilder = new StringBuilder();
         strBuilder.append(getDatalogRuleString());
         addBasicFields(strBuilder);
-        for (Rule r : getAncestors()) {
+        /**for (Rule r : getAncestors()) {
         	strBuilder.append(", " + r.getDatalogRuleString());
-        }
+        }**/
         return strBuilder.toString();
 	}
 
