@@ -3,13 +3,17 @@ package amie.mining.assistant.experimental;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import amie.data.KB;
 import amie.mining.assistant.MiningAssistant;
+import amie.rules.QueryEquivalenceChecker;
 import amie.rules.Rule;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
+import javatools.datatypes.MultiMap;
 import javatools.datatypes.Pair;
 
 public class CompletenessMiningAssistant extends MiningAssistant {
@@ -263,13 +267,70 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	 * @return
 	 */
 	private boolean containsCardinalityAtom(Rule rule) {
+		return indexOfCardinalityAtom(rule) != -1;
+	}
+	
+	@Override
+	public void setAdditionalParents(Rule currentRule, MultiMap<Integer, Rule> indexedOutputSet) {
+		int idxOfRelationAtom = currentRule.firstIndexOfRelation(amie.data.U.typeRelationBS);
+		int idxOfCardinalityRelation = indexOfCardinalityAtom(currentRule);
+		if (idxOfRelationAtom == -1 && idxOfCardinalityRelation == -1)
+			super.setAdditionalParents(currentRule, indexedOutputSet);
+		
+        int parentHashCode = currentRule.alternativeParentHashCode();
+        Set<Rule> candidateParents = indexedOutputSet.get(parentHashCode);
+        
+        // First check if there are no a parents of the same size caused by
+        // specialization operators. For example if the current rule is
+        // A: livesIn(x, Paris), type(x, Architect) => isFamous(x, true) derived from 
+        // B: type(x, Architect) => isFamous(x, true) but in other thread we have mined the rule
+        // C: livesIn(x, Paris) (x, Person) => isFamous(x, true), then we need to make the bridge between
+        // A and C (namely C is also a father of A)
+       
+        
+    }
+	
+	/**private List<Rule> findSpecializationParentsOfSameSize(Rule currentRule, Set<Rule> candidateParents) {
+		int idxOfRelationAtom = currentRule.firstIndexOfRelation(amie.data.U.typeRelationBS);
+		int idxOfCardinalityRelation = indexOfCardinalityAtom(currentRule);
+        List<Rule> parents = new ArrayList<>();
+		List<ByteString[]> currentRuleTriples = new ArrayList<>();
+        Collections.copy(currentRuleTriples, currentRule.getTriples());
+        currentRuleTriples.remove(idxOfRelationAtom);
+        ByteString[] typeAtomInCurrentRule = currentRuleTriples.get(idxOfRelationAtom);
+        ByteString typeInCurrentRule = typeAtomInCurrentRule[2];
+        
+        for (Rule candidateParent : candidateParents) {
+        	if (candidateParent.getLength() != currentRule.getLength())
+        		continue;
+        	
+    		List<ByteString[]> candidateParentTriples = new ArrayList<>(); 
+    		Collections.copy(candidateParentTriples, 
+    				candidateParent.getTriples());
+    		int indexOfTypeAtomInCandidate = candidateParent.firstIndexOfRelation(amie.data.U.typeRelationBS);
+    		if (indexOfTypeAtomInCandidate == -1)
+    			continue;
+    		
+    		ByteString[] typeAtomInCandidate = candidateParentTriples.get(indexOfTypeAtomInCandidate);
+    		ByteString typeInCandidate = typeAtomInCandidate[2];
+    		candidateParentTriples.remove(indexOfTypeAtomInCandidate);
+    		if (QueryEquivalenceChecker.areEquivalent(candidateParentTriples, currentRuleTriples) &&
+    				(amie.data.U.isSuperType(kb, typeInCandidate, typeInCurrentRule) && )) {
+    			parents.add(candidateParent);
+    		}
+    	}
+        
+        return parents;
+	}**/
+
+	private int indexOfCardinalityAtom(Rule rule) {
 		List<ByteString[]> triples = rule.getTriples();
 		for (int i = triples.size() - 1; i >= 0; --i) {
 			if (KB.parseCardinalityRelation(triples.get(i)[1]) != null)
-				return true;
+				return i;
 		}
 		
-		return false;
+		return -1;
 	}
 
 	@Override

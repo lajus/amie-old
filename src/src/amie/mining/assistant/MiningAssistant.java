@@ -8,9 +8,11 @@ import java.util.Set;
 
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
+import javatools.datatypes.MultiMap;
 import javatools.datatypes.Pair;
 import amie.data.KB;
 import amie.mining.ConfidenceMetric;
+import amie.rules.QueryEquivalenceChecker;
 import amie.rules.Rule;
 
 /**
@@ -1145,7 +1147,40 @@ public class MiningAssistant{
 		
 		return candidate.getStdConfidence();
 	}
-
+	
+	/**
+     * It finds all potential parents of a rule in the output set of indexed
+     * rules. A rule X => Y is a parent of rule X'=> Y' if Y = Y' and
+     * X is a subset of X' (in other words X' => Y' is a more specific version
+     * of X => Y)
+     *
+     * @param currentRule
+     */
+    public void setAdditionalParents(Rule currentRule, MultiMap<Integer, Rule> indexedOutputSet) {
+        List<ByteString[]> queryPattern = currentRule.getTriples();
+        // No need to look for parents of rules of size 2
+        if (queryPattern.size() <= 2) {
+            return;
+        }
+        int offset = 1;
+        // Go up until you find a parent that was output
+        while (queryPattern.size() - offset > 1) {
+        	int currentLength = queryPattern.size() - offset;
+            int parentHashCode = Rule.headAndLengthHashCode(currentRule.getHeadKey(), currentLength);
+            // Give all the rules of size 'currentLength' and the same head atom (potential parents)
+            Set<Rule> candidateParentsOfCurrentLength = indexedOutputSet.get(parentHashCode);
+            
+            if (candidateParentsOfCurrentLength != null) {
+	            for (Rule parent : candidateParentsOfCurrentLength) {
+	                if (parent.subsumes(currentRule)) {
+	                	currentRule.addParent(parent);
+	                }
+	            }
+        	}
+            ++offset;
+        }
+    }
+    
 	public void setAllowConstants(boolean allowConstants) {
 		// TODO Auto-generated method stub
 		this.allowConstants = allowConstants;

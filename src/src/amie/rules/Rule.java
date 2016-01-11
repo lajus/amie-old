@@ -408,7 +408,7 @@ public class Rule {
      * to the atoms do alter the query.
      * @return
      */
-    public List<ByteString[]> getRealTriples() {
+    public List<ByteString[]> getCleanTriples() {
         List<ByteString[]> resultList = new ArrayList<>();
         for (ByteString[] triple : triples) {
             if (!triple[1].equals(KB.DIFFERENTFROMbs)) {
@@ -467,6 +467,7 @@ public class Rule {
 
         return cloneList;
     }
+   
 
     protected void setTriples(ArrayList<ByteString[]> triples) {
         this.triples = triples;
@@ -869,19 +870,7 @@ public class Rule {
      * getRuleString, getFullRuleString and getBasicRuleString.
      */
     public String toString() {
-        
-        
-        StringBuilder stringBuilder = new StringBuilder();
-        for (ByteString[] pattern : triples) {
-            stringBuilder.append(pattern[0]);
-            stringBuilder.append(" ");
-            stringBuilder.append(pattern[1]);
-            stringBuilder.append(" ");
-            stringBuilder.append(pattern[2]);
-            stringBuilder.append("  ");
-        }
-
-        return stringBuilder.toString();
+        return getRuleString();
     }
 
     /**
@@ -1176,7 +1165,8 @@ public class Rule {
      * @param parent
      */
     public void addParent(Rule parent) {
-    	this.ancestors.add(parent);
+    	if (!this.ancestors.contains(parent))
+    		this.ancestors.add(parent);
     }
     
     public boolean containsParent(Rule parent) {
@@ -1248,9 +1238,15 @@ public class Rule {
      * @return
      */
     public int alternativeParentHashCode() {
+    	String hk = getHeadKey();
+        return headAndLengthHashCode(hk, getRealLength());
+    }
+    
+    public static int headAndLengthHashCode(String headKey, int length) {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((getHeadKey() == null) ? 0 : getHeadKey().hashCode());
+        result = prime * result + (headKey == null ? 0 : headKey.hashCode());
+        result = prime * result + length;
         return result;
     }
 
@@ -1263,7 +1259,7 @@ public class Rule {
         int result = 1;
         result = prime * result + (int) initialSupport;
         result = prime * result + (int) getRealLength();
-        result = prime * result + ((headKey == null) ? 0 : headKey.hashCode());
+        result = prime * result + (headKey == null ? 0 : headKey.hashCode());
         return result;
     }
 
@@ -1387,9 +1383,9 @@ public class Rule {
     	StringBuilder strBuilder = new StringBuilder();
         strBuilder.append(getDatalogRuleString());
         addBasicFields(strBuilder);
-        /**for (Rule r : getAncestors()) {
+        for (Rule r : getAncestors()) {
         	strBuilder.append(", " + r.getDatalogRuleString());
-        }**/
+        }
         return strBuilder.toString();
 	}
 
@@ -1519,6 +1515,11 @@ public class Rule {
         return ancestors;
     }
 
+    /**
+     * It gathers ancestors in a recursive fashion
+     * @param q
+     * @param output
+     */
     private void gatherAncestors(Rule q, Set<Rule> output) {
         if (q.ancestors == null
                 || q.ancestors.isEmpty()) {
@@ -1924,16 +1925,44 @@ public class Rule {
     }
 
     public boolean containsRelation(ByteString relation) {
-        for (ByteString[] triple : triples) {
-            if (triple[1].equals(relation)) {
-                return true;
+        return Rule.containsRelation(triples, relation);
+    }
+    
+    public int firstIndexOfRelation(ByteString relation) {
+    	return firstIndexOfRelation(triples, relation);
+    }
+    
+    /**
+     * If returns true if the list of triples contains an atom
+     * using the given relation.
+     * @param triples
+     * @param relation
+     * @return
+     */
+    public static boolean containsRelation(List<ByteString[]> triples, 
+    		ByteString relation) {
+    	return firstIndexOfRelation(triples, relation) != -1;
+	}
+    
+    /**
+     * It returns the index of the first atom using the relation.
+     * @param triples
+     * @param relation
+     * @return the index of the atom containing the relation or -1 if such atom
+     * does not exist.
+     */
+    public static int firstIndexOfRelation(List<ByteString[]> triples, 
+    		ByteString relation) {
+    	for (int i = 0; i < triples.size(); ++i) {
+            if (triples.get(i)[1].equals(relation)) {
+                return i;
             }
         }
 
-        return false;
+        return -1;    	
     }
 
-    public int containsRelationTimes(ByteString relation) {
+    public int numberOfAtomsWithRelation(ByteString relation) {
         int count = 0;
         for (ByteString[] triple : triples) {
             if (triple[1].equals(relation)) {
@@ -1944,28 +1973,33 @@ public class Rule {
     }
 
     /**
-     * Given the antecedent and the succedent of a rule as sets of atoms, it
+     * Given a rule as a set of atoms, it
      * returns the combinations of atoms of size 'i' that are "parents" of the
      * current rule, i.e., subsets of atoms of the original rule.
      *
      * @param antecedent
      * @param head
      */
-    public static void getParentsOfSize(List<ByteString[]> antecedent,
-            ByteString[] head,
+    public static void getParentsOfSize(List<ByteString[]> queryPattern,
             int windowSize, List<List<ByteString[]>> output) {
-        int fixedSubsetSize = windowSize - 1;
-        if (antecedent.size() < windowSize) {
+        List<ByteString[]> antecedent = queryPattern.subList(1, queryPattern.size());
+    	int newAntecedentSize = windowSize - 1; // -1 because of the head 
+        
+        if (queryPattern.size() >= windowSize) {
             return;
         }
-        List<ByteString[]> fixedPrefix = antecedent.subList(0, fixedSubsetSize);
-        for (int i = fixedSubsetSize; i < antecedent.size(); ++i) {
-            List<ByteString[]> combination = new ArrayList<>();
+        
+        List<int[]> combinations = telecom.util.collections.Collections.subsetsOfSize(antecedent.size(), 
+        		newAntecedentSize);
+        ByteString[] head = queryPattern.get(0);
+        for (int[] combination : combinations) {
+            List<ByteString[]> combinationList = new ArrayList<>();
             // Add the head atom.
-            combination.add(head);
-            combination.addAll(fixedPrefix);
-            combination.add(antecedent.get(i));
-            output.add(combination);
+            combinationList.add(head);
+            for (int idx : combination) {
+            	combinationList.add(antecedent.get(idx));
+            }
+            output.add(combinationList);
         }
     }
 
@@ -2167,13 +2201,48 @@ public class Rule {
         return bodyRelations;
     }
     
+    /**
+     * It returns true if the atoms of the current are a superset for the
+     * atoms of the rule sent as argument.
+     * @param someRule
+     * @return
+     */
+    public boolean subsumes(Rule someRule) {
+		if (someRule.getLength() <= getLength())
+			return false;
+		
+		List<int[]> combinations = telecom.util.collections.Collections.subsetsOfSize(
+				someRule.getLength() - 1, getLength() - 1);
+		List<ByteString[]> targetAntecedent = someRule.getAntecedent();
+		for (int[] cmb : combinations) {
+			List<ByteString[]> subsetOfAtoms = new ArrayList<>();
+			subsetOfAtoms.add(someRule.getHead());
+			for (int idx : cmb) {
+				subsetOfAtoms.add(targetAntecedent.get(idx));
+			}
+			if (QueryEquivalenceChecker.areEquivalent(subsetOfAtoms, triples))
+				return true;
+		}
+		
+		return false;
+	}
+    
     
     public static void main(String[] args) {
-    	ByteString[] atom = new ByteString[]{ByteString.of("?s"), ByteString.of("?r"), ByteString.of("?o") };
-    	ByteString[] constant1 = new ByteString[]{ByteString.of("Luis"), ByteString.of("livesIn"), ByteString.of("Ecuador") };
-    	ByteString[] atom2 = new ByteString[]{ByteString.of("?s"), ByteString.of("implies"), ByteString.of("?o") };
-    	System.out.println(isUnifiable(atom, constant1));
-    	System.out.println(isUnifiable(atom2, constant1));
+    	Rule rule1 = new Rule(KB.triple("?a", "livesIn", "?x"), 
+    			KB.triples(KB.triple("?a", "wasBornIn", "?x"), KB.triple("?a", "diedIn", "?x")), 4);
+
+    	Rule rule2 = new Rule(KB.triple("?a", "livesIn", "?x"), 
+    			KB.triples(KB.triple("?a", "diedIn", "?x")), 1);
+
+    	Rule rule3 = new Rule(KB.triple("?x", "livesIn", "?z"), 
+    			KB.triples(KB.triple("?x", "wasBornIn", "?z")), 1);
+    	
+    	Rule rule4 = new Rule(KB.triple("?x", "livesIn", "?z"), 
+    			KB.triples(KB.triple("?x", "wasBorn", "?h")), 1);
+    	System.out.println(rule2.subsumes(rule1));
+    	System.out.println(rule3.subsumes(rule1));
+    	System.out.println(rule4.subsumes(rule1));
     }
 
 }

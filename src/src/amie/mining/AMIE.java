@@ -483,7 +483,7 @@ public class AMIE {
                         this._approximationTime += (System.currentTimeMillis() - timeStamp1);
                         if (ruleSatisfiesConfidenceBounds) {
                             this.resultsLock.lock();
-                            setAdditionalParents(currentRule);
+                            assistant.setAdditionalParents(currentRule, indexedOutputSet);
                             this.resultsLock.unlock();
                             // Calculate the metrics
                             assistant.calculateConfidenceMetrics(currentRule);
@@ -569,46 +569,6 @@ public class AMIE {
 
             synchronized (this.done) {
                 this.done = true;
-            }
-        }
-
-        /**
-         * It finds all potential parents of a rule in the output set of indexed
-         * rules. A rule X => Y is a parent of rule X'=> Y' if Y = Y' and
-         * X is a subset of X' (in other words X' => Y' is a more specific version
-         * of X => Y)
-         *
-         * @param currentRule
-         */
-        private void setAdditionalParents(Rule currentRule) {
-            int parentHashCode = currentRule.alternativeParentHashCode();
-            Set<Rule> candidateParents = indexedOutputSet.get(parentHashCode);
-            if (candidateParents != null) {
-                List<ByteString[]> queryPattern = currentRule.getRealTriples();
-                // No need to look for parents of rules of size 2
-                if (queryPattern.size() <= 2) {
-                    return;
-                }
-                int i = 2;
-                // Go up until you find a parent that was output
-                while (queryPattern.size() - i > 0) {
-                	// Check for parents of a given size
-	                List<List<ByteString[]>> parentsOfSizeI = new ArrayList<>();
-	                Rule.getParentsOfSize(queryPattern.subList(1, queryPattern.size()), 
-	                		queryPattern.get(0), queryPattern.size() - i, parentsOfSizeI);
-	
-	                for (List<ByteString[]> parent : parentsOfSizeI) {
-	                    for (Rule candidate : candidateParents) {
-	                        List<ByteString[]> candidateParentPattern = candidate.getRealTriples();
-	                        if (QueryEquivalenceChecker.areEquivalent(parent, candidateParentPattern)) {
-	                            if (!currentRule.containsParent(candidate)) {
-	                            	currentRule.addParent(candidate);
-	                            }
-	                        }
-	                    }
-	                }
-	                ++i;
-                }
             }
         }
 
