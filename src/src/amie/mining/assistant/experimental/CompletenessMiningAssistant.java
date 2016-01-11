@@ -276,9 +276,6 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		int idxOfCardinalityRelation = indexOfCardinalityAtom(currentRule);
 		if (idxOfRelationAtom == -1 && idxOfCardinalityRelation == -1)
 			super.setAdditionalParents(currentRule, indexedOutputSet);
-		
-        int parentHashCode = currentRule.alternativeParentHashCode();
-        Set<Rule> candidateParents = indexedOutputSet.get(parentHashCode);
         
         // First check if there are no a parents of the same size caused by
         // specialization operators. For example if the current rule is
@@ -286,42 +283,100 @@ public class CompletenessMiningAssistant extends MiningAssistant {
         // B: type(x, Architect) => isFamous(x, true) but in other thread we have mined the rule
         // C: livesIn(x, Paris) (x, Person) => isFamous(x, true), then we need to make the bridge between
         // A and C (namely C is also a father of A)
-       
-        
+        int offset = 0;
+        List<ByteString[]> queryPattern = currentRule.getTriples();
+        // Go up until you find a parent that was output
+        while (queryPattern.size() - offset > 1) {
+        	int currentLength = queryPattern.size() - offset;
+            int parentHashCode = Rule.headAndLengthHashCode(currentRule.getHeadKey(), currentLength);
+            // Give all the rules of size 'currentLength' and the same head atom (potential parents)
+            Set<Rule> candidateParentsOfCurrentLength = indexedOutputSet.get(parentHashCode);
+            
+            if (candidateParentsOfCurrentLength != null) {
+	            for (Rule parent : candidateParentsOfCurrentLength) {
+	                if (parent.subsumes(currentRule) 
+	                		|| subsumesWithSpecialAtoms(parent, currentRule)) {
+	                	currentRule.addParent(parent);	                	
+	                }
+	            }
+        	}
+            ++offset;
+        }  
     }
 	
-	/**private List<Rule> findSpecializationParentsOfSameSize(Rule currentRule, Set<Rule> candidateParents) {
-		int idxOfRelationAtom = currentRule.firstIndexOfRelation(amie.data.U.typeRelationBS);
-		int idxOfCardinalityRelation = indexOfCardinalityAtom(currentRule);
-        List<Rule> parents = new ArrayList<>();
-		List<ByteString[]> currentRuleTriples = new ArrayList<>();
-        Collections.copy(currentRuleTriples, currentRule.getTriples());
-        currentRuleTriples.remove(idxOfRelationAtom);
-        ByteString[] typeAtomInCurrentRule = currentRuleTriples.get(idxOfRelationAtom);
-        ByteString typeInCurrentRule = typeAtomInCurrentRule[2];
-        
-        for (Rule candidateParent : candidateParents) {
-        	if (candidateParent.getLength() != currentRule.getLength())
-        		continue;
-        	
-    		List<ByteString[]> candidateParentTriples = new ArrayList<>(); 
-    		Collections.copy(candidateParentTriples, 
-    				candidateParent.getTriples());
-    		int indexOfTypeAtomInCandidate = candidateParent.firstIndexOfRelation(amie.data.U.typeRelationBS);
-    		if (indexOfTypeAtomInCandidate == -1)
-    			continue;
-    		
-    		ByteString[] typeAtomInCandidate = candidateParentTriples.get(indexOfTypeAtomInCandidate);
-    		ByteString typeInCandidate = typeAtomInCandidate[2];
-    		candidateParentTriples.remove(indexOfTypeAtomInCandidate);
-    		if (QueryEquivalenceChecker.areEquivalent(candidateParentTriples, currentRuleTriples) &&
-    				(amie.data.U.isSuperType(kb, typeInCandidate, typeInCurrentRule) && )) {
-    			parents.add(candidateParent);
-    		}
-    	}
-        
-        return parents;
-	}**/
+	private boolean subsumesWithSpecialAtoms(Rule parent, Rule currentRule) {
+		int idxOfTypeAtomRule = currentRule.firstIndexOfRelation(amie.data.U.typeRelationBS);
+		int idxOfCardinalityAtomRule = indexOfCardinalityAtom(currentRule);
+		int idxOfTypeAtomParent = parent.firstIndexOfRelation(amie.data.U.typeRelationBS);
+		int idxOfCardinalityAtomParent = indexOfCardinalityAtom(parent);
+				
+		if (idxOfTypeAtomRule != -1 && idxOfTypeAtomParent != -1) {
+			ByteString[] typeAtomInRule = currentRule.getTriples().get(idxOfTypeAtomRule);
+			ByteString[] typeAtomInParent = currentRule.getTriples().get(idxOfTypeAtomParent);
+			List<ByteString[]> triplesParent = parent.getTriplesCopy();
+			List<ByteString[]> triplesRule = currentRule.getTriplesCopy();
+			triplesParent.remove(idxOfTypeAtomParent);
+			triplesRule.remove(idxOfTypeAtomRule);
+			Rule newRule = new Rule(currentRule.getHead(), triplesRule.subList(1, triplesRule.size()), 0);
+			Rule newParent = new Rule(parent.getHead(), triplesParent.subList(1, triplesParent.size()), 0);
+			if (typeAtomInParent[2].equals(typeAtomInRule[2]) || 
+					amie.data.U.isSuperType(this.kbSchema, typeAtomInParent[2], typeAtomInRule[2])) {
+				return subsumesWithSpecialAtoms(newParent, newRule);
+			}
+		}
+		
+		if (idxOfCardinalityAtomRule != -1 && idxOfCardinalityAtomParent != -1) {
+			ByteString[] cardinalityAtomInRule = currentRule.getTriples().get(idxOfCardinalityAtomRule);
+			ByteString[] cardinalityAtomInParent = currentRule.getTriples().get(idxOfCardinalityAtomParent);
+			List<ByteString[]> triplesParent = parent.getTriplesCopy();
+			List<ByteString[]> triplesRule = currentRule.getTriplesCopy();
+			triplesParent.remove(idxOfCardinalityAtomParent);
+			triplesRule.remove(idxOfCardinalityAtomRule);
+			Rule newRule = new Rule(currentRule.getHead(), triplesRule.subList(1, triplesRule.size()), 0);
+			Rule newParent = new Rule(parent.getHead(), triplesParent.subList(1, triplesParent.size()), 0);
+			if (Arrays.equals(cardinalityAtomInParent, cardinalityAtomInRule) || 
+					subsumesCardinalityAtom(cardinalityAtomInParent, cardinalityAtomInRule)) {
+				return subsumesWithSpecialAtoms(newParent, newRule);
+			}
+		}
+		
+		return QueryEquivalenceChecker.areEquivalent(parent.getTriples(), currentRule.getTriples())
+				|| parent.subsumes(currentRule);
+	}
+
+	private boolean subsumesCardinalityAtom(ByteString[] triplesParent, ByteString[] triplesRule) {
+		Pair<ByteString, Integer> relationPairParent = KB.parseCardinalityRelation(triplesParent[1]);
+		Pair<ByteString, Integer> relationPairRule = KB.parseCardinalityRelation(triplesRule[1]);
+		
+		List<ByteString> gtList = Arrays.asList(KB.hasNumberOfValuesGreaterThanBS, 
+				KB.hasNumberOfValuesGreaterThanInvBS);
+		
+		List<ByteString> stList = Arrays.asList(KB.hasNumberOfValuesSmallerThanBS, 
+				KB.hasNumberOfValuesSmallerThanInvBS);
+		
+		if (relationPairParent != null && relationPairRule != null) {
+			if (relationPairParent.first.equals(relationPairRule.first)) {
+				if (gtList.contains(relationPairParent.first)) {
+					return relationPairParent.second < relationPairRule.second;
+				} else if (relationPairParent.first.equals(relationPairRule.first) &&
+						stList.contains(relationPairParent)) {
+					return relationPairParent.second > relationPairRule.second;
+				}					
+			} else {
+				if (relationPairRule.first.equals(KB.hasNumberOfValuesGreaterThanBS) 
+						&& relationPairRule.second == 0) {
+					return relationPairParent.second == 0 && 
+							relationPairParent.equals(KB.hasNumberOfValuesEqualsBS);
+				} else if (relationPairRule.first.equals(KB.hasNumberOfValuesGreaterThanInvBS) 
+						&& relationPairRule.second == 0) {
+					return relationPairParent.second == 0 && 
+							relationPairParent.equals(KB.hasNumberOfValuesEqualsInvBS);
+				}
+			}
+		}
+		
+		return false;
+	}
 
 	private int indexOfCardinalityAtom(Rule rule) {
 		List<ByteString[]> triples = rule.getTriples();

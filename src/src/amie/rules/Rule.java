@@ -401,6 +401,11 @@ public class Rule {
     public List<ByteString[]> getTriples() {
         return triples;
     }
+    
+    public List<ByteString[]> getTriplesCopy() {
+    	List<ByteString[]> copyOfTriples = new ArrayList<>(triples);
+    	return copyOfTriples;
+    }
 
     /**
      * Returns the triples of a query except for those containing DIFFERENTFROM
