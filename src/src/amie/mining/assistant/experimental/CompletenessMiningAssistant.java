@@ -327,7 +327,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		
 		if (idxOfCardinalityAtomRule != -1 && idxOfCardinalityAtomParent != -1) {
 			ByteString[] cardinalityAtomInRule = currentRule.getTriples().get(idxOfCardinalityAtomRule);
-			ByteString[] cardinalityAtomInParent = currentRule.getTriples().get(idxOfCardinalityAtomParent);
+			ByteString[] cardinalityAtomInParent = parent.getTriples().get(idxOfCardinalityAtomParent);
 			List<ByteString[]> triplesParent = parent.getTriplesCopy();
 			List<ByteString[]> triplesRule = currentRule.getTriplesCopy();
 			triplesParent.remove(idxOfCardinalityAtomParent);
@@ -358,8 +358,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			if (relationPairParent.first.equals(relationPairRule.first)) {
 				if (gtList.contains(relationPairParent.first)) {
 					return relationPairParent.second < relationPairRule.second;
-				} else if (relationPairParent.first.equals(relationPairRule.first) &&
-						stList.contains(relationPairParent)) {
+				} else if (stList.contains(relationPairParent.first)) {
 					return relationPairParent.second > relationPairRule.second;
 				}					
 			} else {
@@ -400,5 +399,19 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		double support = rule.getSupport();
 		rule.setPcaBodySize(support + counterEvidence);
 		return rule.getPcaConfidence();
+	}
+	
+	public static void main(String args[]) {
+		CompletenessMiningAssistant assistant = new CompletenessMiningAssistant(new KB());
+		List<ByteString[]> ruleTriples = KB.triples(
+				KB.triple("?a", KB.hasNumberOfValuesSmallerThanInv + "1", "hasChild"), 
+				KB.triple("?l", "marriedTo", "?a"), KB.triple("?a", "marriedTo", "?l"));
+		ByteString[] head = KB.triple("?a", isIncomplete, "hasChild");
+		List<ByteString[]> parentTriples = KB.triples(
+				KB.triple("?a", KB.hasNumberOfValuesSmallerThanInv + "2", "hasChild"));
+		Rule parent = new Rule(head, parentTriples, 1);
+		Rule currentRule = new Rule(head, ruleTriples, 1);
+		System.out.println(parent.subsumes(currentRule));
+		System.out.println(assistant.subsumesWithSpecialAtoms(parent, currentRule));
 	}
 }

@@ -295,7 +295,16 @@ public class Rule {
         this.functionalVariablePosition = 0;
         this.bodySize = 0;
         computeHeadKey();
-        this.highestVariable = (char) (headAtom[2].charAt(1) + 1);
+        this.highestVariable = 'a';
+        if (KB.isVariable(headAtom[0])) {            
+        	char max = (char) Math.max((int)headAtom[0].charAt(1), (int)this.highestVariable);
+        	this.highestVariable = (char) (max + 1);
+        }        
+        
+        if (KB.isVariable(headAtom[2])) {
+        	char max = (char) Math.max((int)headAtom[2].charAt(1), (int)this.highestVariable);
+        	this.highestVariable = (char)(max + 1);
+        }                
         this._stdConfidenceUpperBound = 0.0;
         this._pcaConfidenceUpperBound = 0.0;
         this._pcaConfidenceEstimation = 0.0;
@@ -1388,9 +1397,6 @@ public class Rule {
     	StringBuilder strBuilder = new StringBuilder();
         strBuilder.append(getDatalogRuleString());
         addBasicFields(strBuilder);
-        for (Rule r : getAncestors()) {
-        	strBuilder.append(", " + r.getDatalogRuleString());
-        }
         return strBuilder.toString();
 	}
 
@@ -2215,6 +2221,10 @@ public class Rule {
     public boolean subsumes(Rule someRule) {
 		if (someRule.getLength() <= getLength())
 			return false;
+		
+		if (this.getAntecedent().isEmpty()) {
+			return Rule.areEquivalent(someRule.getHead(), getHead());
+		}
 		
 		List<int[]> combinations = telecom.util.collections.Collections.subsetsOfSize(
 				someRule.getLength() - 1, getLength() - 1);
