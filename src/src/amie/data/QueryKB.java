@@ -1,6 +1,8 @@
 package amie.data;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import javatools.datatypes.ByteString;
@@ -44,7 +46,7 @@ public class QueryKB {
 		
 		System.out.println(kb.maximalCardinality(ByteString.of("<hasChild>"), 1000));
 		System.out.println(kb.maximalCardinalityInv(ByteString.of("<hasChild>"), 1000));**/
-		KB kb = new KB();
+		/**KB kb = new KB();
 		kb.add("Jorge", "isCitizenOf", "Ecuador");
 		kb.add("Luis", "isCitizenOf", "Ecuador");
 		kb.add("Diana", "isCitizenOf", "Ecuador");
@@ -53,7 +55,13 @@ public class QueryKB {
 		kb.add("Diana", "wasBornIn", "Pinas");
 		System.out.println(kb.selectDistinct(ByteString.of("?s"), KB.triples(
 				KB.triple("?s", "isCitizenOf", "?x"), KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "1", "wasBornIn"))));
-		System.out.println(kb.count(KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "1", "wasBornIn"))); 
+		System.out.println(kb.count(KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "1", "wasBornIn"))); **/
+		KB kb = new KB();
+		kb.load(new File("/home/galarrag/Desktop/examples-conditional-keys/kb2.tsv"));
+		List<ByteString[]> q = KB.triples(KB.triple("?a",  "field",  "Databases"), KB.triple("?b", "field",  "Databases"), KB.triple("?a",  "zipCode", "?ob1"), 
+		KB.triple("?b", "zipCode",  "?ob1"), KB.triple("?a", "equals", "?b"));
+		System.out.println(kb.selectDistinct(ByteString.of("?a"), q));
+	
 
 	}
 }
