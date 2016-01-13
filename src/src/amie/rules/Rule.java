@@ -2202,7 +2202,7 @@ public class Rule {
      * no duplicates.
      * @return
      */
-    public List<ByteString> getBodyRelations() {
+    public List<ByteString> getBodyRelationsBS() {
         List<ByteString> bodyRelations = new ArrayList<>();
         for (ByteString[] atom : getBody()) {
             if (!bodyRelations.contains(atom[1])) {
@@ -2211,7 +2211,7 @@ public class Rule {
         }
         return bodyRelations;
     }
-    
+        
     /**
      * It returns true if the atoms of the current are a superset for the
      * atoms of the rule sent as argument.
