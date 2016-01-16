@@ -3,7 +3,6 @@ package amie.mining.assistant.experimental;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -23,6 +22,22 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	public static final String isIncomplete = "isIncomplete";
 	
 	public static final String isRelevant = "<isRelevant>";
+	
+	public static final String isRelevanthasWikiLength = "<isRelevanthasWikiLength>";
+	
+	public static final String isRelevanthasIngoingLinks = "<isRelevanthasIngoingLinks>";
+	
+	public static final String hasChanged = "<hasChanged>";
+	
+	public static final String hasNotChanged = "<hasNotChanged>";
+	
+	public static final ByteString isRelevanthasWikiLengthBS = ByteString.of(isRelevanthasWikiLength); 
+	
+	public static final ByteString isRelevanthasIngoingLinksBS = ByteString.of(isRelevanthasIngoingLinks); 
+	
+	public static final ByteString hasChangedBS = ByteString.of(hasChanged);
+	
+	public static final ByteString hasNotChangedBS = ByteString.of(hasNotChanged);
 	
 	public static final ByteString isCompleteBS = ByteString.of(isComplete);
 	
@@ -220,22 +235,57 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	public void getInstantiatedAtoms(Rule parentRule, double minSupportThreshold, 
 		Collection<Rule> danglingEdges, Collection<Rule> output) {
 		
-		if (!containsAtomWithRelation(parentRule)) {
-			ByteString[] relevanceAtom = new ByteString[]{parentRule.getFunctionalVariable(), 
-					isRelevantBS, ByteString.of("TRUE")};
-			
-			parentRule.getTriples().add(relevanceAtom);
-			long support = kb.countDistinct(relevanceAtom[0], parentRule.getTriples());
-			parentRule.getTriples().remove(parentRule.getTriples().size() - 1);
-			if (support > minSupportThreshold) {
-				Rule candidate = parentRule.addAtom(relevanceAtom, support);
-				candidate.addParent(parentRule);
-				output.add(candidate);
-			}
+		if (!parentRule.containsRelation(isRelevantBS)) {
+			addRelevanceAtom(parentRule, isRelevantBS, minSupportThreshold, output);
+		}
+		
+		if (!parentRule.containsRelation(isRelevanthasWikiLengthBS)) {
+			addRelevanceAtom(parentRule, isRelevanthasWikiLengthBS, minSupportThreshold, output);
+		}
+		
+		if (!parentRule.containsRelation(isRelevanthasIngoingLinksBS)) {
+			addRelevanceAtom(parentRule, isRelevanthasIngoingLinksBS, minSupportThreshold, output);
+		}
+		
+		if (!parentRule.containsRelation(hasNotChangedBS)) {
+			addChangedAtom(parentRule, hasNotChangedBS, minSupportThreshold, output);
 		}
 		
 		if (!containsCardinalityAtom(parentRule)) {
 			addCardinalityAtom(parentRule, minSupportThreshold, output);
+		}
+	}
+	
+	private void addChangedAtom(Rule parentRule, ByteString changeRelation, double minSupportThreshold,
+			Collection<Rule> output) {
+		ByteString[] head = parentRule.getHead();
+		ByteString targetRelation = head[2];
+		
+		ByteString[] changedAtom = new ByteString[]{parentRule.getFunctionalVariable(), 
+				changeRelation, targetRelation};
+		
+		parentRule.getTriples().add(changedAtom);
+		long support = kb.countDistinct(changedAtom[0], parentRule.getTriples());
+		parentRule.getTriples().remove(parentRule.getTriples().size() - 1);
+		if (support > minSupportThreshold) {
+			Rule candidate = parentRule.addAtom(changedAtom, support);
+			candidate.addParent(parentRule);
+			output.add(candidate);
+		}
+		
+	}
+
+	private void addRelevanceAtom(Rule parentRule, ByteString relevanceRelation, double minSupportThreshold, Collection<Rule> output) {
+		ByteString[] relevanceAtom = new ByteString[]{parentRule.getFunctionalVariable(), 
+				relevanceRelation, ByteString.of("TRUE")};
+		
+		parentRule.getTriples().add(relevanceAtom);
+		long support = kb.countDistinct(relevanceAtom[0], parentRule.getTriples());
+		parentRule.getTriples().remove(parentRule.getTriples().size() - 1);
+		if (support > minSupportThreshold) {
+			Rule candidate = parentRule.addAtom(relevanceAtom, support);
+			candidate.addParent(parentRule);
+			output.add(candidate);
 		}
 	}
 	
@@ -247,17 +297,6 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		if (containsCardinalityAtom(candidate)) ++length;
 		
 		return candidate.getRealLength() <= length;
-	}
-	
-	
-	private boolean containsAtomWithRelation(Rule parentQuery) {
-		for (ByteString[] atom : parentQuery.getTriples()) {
-			if (atom[1].equals(isRelevantBS)) {
-				return true;
-			}
-		}
-		
-		return false;
 	}
 	
 	/**

@@ -56,12 +56,9 @@ public class QueryKB {
 		System.out.println(kb.selectDistinct(ByteString.of("?s"), KB.triples(
 				KB.triple("?s", "isCitizenOf", "?x"), KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "1", "wasBornIn"))));
 		System.out.println(kb.count(KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "1", "wasBornIn"))); **/
-		KB kb = new KB();
-		kb.load(new File("/home/galarrag/Desktop/examples-conditional-keys/kb2.tsv"));
-		List<ByteString[]> q = KB.triples(KB.triple("?a",  "field",  "Databases"), KB.triple("?b", "field",  "Databases"), KB.triple("?a",  "zipCode", "?ob1"), 
-		KB.triple("?b", "zipCode",  "?ob1"), KB.triple("?a", "equals", "?b"));
+		KB kb = U.loadFiles(args);
+		List<ByteString[]> q = KB.triples(KB.triple("?a",  "isComplete",  "<hasCapital>"), KB.triple("?a", "hasNumberOfValuesEquals0",  "<hasCapital>")); 
 		System.out.println(kb.selectDistinct(ByteString.of("?a"), q));
-	
 
 	}
 }

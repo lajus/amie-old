@@ -507,9 +507,9 @@ public class KB {
 			if (line.endsWith("."))
 				line = Char17.cutLast(line);
 			String[] split = line.split("\t");
-			if (split.length == 3)
+			if (split.length == 3) {
 				add(split[0].trim(), split[1].trim(), split[2].trim());
-			else if (split.length == 4)
+			} else if (split.length == 4)
 				add(split[1].trim(), split[2].trim(), split[3].trim());
 		}
 

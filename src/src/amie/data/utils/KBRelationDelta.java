@@ -18,7 +18,9 @@ public class KBRelationDelta {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
+		// Old KB
 		KB db1 = new KB();
+		// New KB
 		KB db2 = new KB();
 		
 		db1.load(new File(args[0]));
@@ -57,8 +59,10 @@ public class KBRelationDelta {
 				String outcome = null;
 				if (s1.equals(s2)) {
 					outcome = "No change";
+					System.out.println(entity + "\t<hasNotChanged>\t" + relation);
 				} else if (s2.containsAll(s1)) {
 					outcome = "Addition";
+					System.out.println(entity + "\t<hasChanged>\t" + relation);
 				} else if (s1.containsAll(s2)) {
 					outcome = "Deletion";
 				} else {
