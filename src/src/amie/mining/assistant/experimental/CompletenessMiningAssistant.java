@@ -130,15 +130,6 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}
 	}
 	
-	/**@Override
-	public void getDanglingAtoms(Rule rule, double minSupportThreshold, java.util.Collection<Rule> output) {
-		// Proceed with the standard addition of dangling atoms once the compulsory atoms
-		// have been added.
-		if (containsCardinalityAtom(rule) || containsRelevanceAtom(rule)) {
-			super.getDanglingAtoms(rule, minSupportThreshold, output);
-		}
-	}**/
-	
 
 	@Override
 	public void getTypeSpecializedAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
@@ -155,8 +146,14 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			ByteString targetRelation = lastAtom[2];
 			int newCard = -1;
 			if (rule.getHead()[1].equals(isCompleteBS)) {
-				int maximalCardinality = kb.maximalRightCumulativeCardinality(targetRelation, 
+				int maximalCardinality = -1;
+				if (kb.isFunctional(targetRelation)) {
+					maximalCardinality = kb.maximalRightCumulativeCardinality(targetRelation, 
 						(long)minSupportThreshold);
+				} else {
+					maximalCardinality = kb.maximalRightCumulativeCardinalityInv(targetRelation, 
+							(long)minSupportThreshold);					
+				}
 				newCard = compositeRelation.second.intValue() + 1;
 				if (newCard > maximalCardinality)
 					return;
@@ -198,7 +195,11 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}
 		
 		if (head[1].equals(isIncompleteBS)) {
-			startCardinality = kb.maximalCardinality(targetRelation);
+			if (kb.isFunctional(targetRelation)) {
+				startCardinality = kb.maximalCardinality(targetRelation);
+			} else {
+				startCardinality = kb.maximalCardinalityInv(targetRelation);
+			}
 		} else {
 			startCardinality = 0;
 		}

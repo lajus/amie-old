@@ -438,6 +438,9 @@ public class KB {
 	 * @throws IOException
 	 */
 	public void load(List<File> files) throws IOException {
+		if (files.isEmpty())
+			return;
+		
 		long size = size();
 		long time = System.currentTimeMillis();
 		long memory = Runtime.getRuntime().freeMemory();
@@ -2970,10 +2973,10 @@ public class KB {
 	public static ByteString[] triple(String s) {
 		Matcher m = triplePattern.matcher(s);
 		if (m.find())
-			return (triple(m.group(2), m.group(1), m.group(3)));
+			return (triple(m.group(2).trim(), m.group(1).trim(), m.group(3).trim()));
 		m = amieTriplePattern.matcher(s);
 		if (!m.find())
-			return (triple(m.group(1), m.group(2), m.group(3)));
+			return (triple(m.group(1).trim(), m.group(2).trim(), m.group(3).trim()));
 		return (null);
 	}
 
@@ -2987,11 +2990,11 @@ public class KB {
 		Matcher m = triplePattern.matcher(s);
 		ArrayList<ByteString[]> result = new ArrayList<>();
 		while (m.find())
-			result.add(triple(m.group(2), m.group(1), m.group(3)));
+			result.add(triple(m.group(2).trim(), m.group(1).trim(), m.group(3).trim()));
 		if (result.isEmpty()) {
 			m = amieTriplePattern.matcher(s);
 			while (m.find())
-				result.add(triple(m.group(1), m.group(2), m.group(3)));
+				result.add(triple(m.group(1).trim(), m.group(2).trim(), m.group(3).trim()));
 		}
 		return (result);
 	}
@@ -3596,8 +3599,7 @@ public class KB {
 	 * @return
 	 */
 	public int maximalRightCumulativeCardinality(ByteString relation, long threshold) {
-		Map<ByteString, IntHashMap<ByteString>> map = 
-				get(relation2subject2object, relation);
+		Map<ByteString, IntHashMap<ByteString>> map = get(relation2subject2object, relation);
 		return maximalRightCumulativeCardinality(relation, threshold, map);
 	}
 	
@@ -3657,7 +3659,7 @@ public class KB {
 	 * @param map
 	 * @return
 	 */
-	private IntHashMap<Integer> buildHistogram(Map<ByteString, IntHashMap<ByteString>> map) {
+	public IntHashMap<Integer> buildHistogram(Map<ByteString, IntHashMap<ByteString>> map) {
 		IntHashMap<Integer> histogram = new IntHashMap<>();
 		for (ByteString subject : map.keySet()) {
 			histogram.increase(map.get(subject).size());

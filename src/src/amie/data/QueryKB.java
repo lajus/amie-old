@@ -59,6 +59,7 @@ public class QueryKB {
 		KB kb = U.loadFiles(args);
 		List<ByteString[]> q = KB.triples(KB.triple("?a",  "isComplete",  "<hasCapital>"), KB.triple("?a", "hasNumberOfValuesEquals0",  "<hasCapital>")); 
 		System.out.println(kb.selectDistinct(ByteString.of("?a"), q));
+		System.out.println(kb.buildHistogram(kb.relation2object2subject.get(ByteString.of("<produced>"))));
 
 	}
 }
