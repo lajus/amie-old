@@ -78,52 +78,21 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 				continue;
 			}
 			ByteString[] succedent = newEdge.clone();
-			ByteString domain = null;
-			if (this.kbSchema != null) {
-				if (this.kb.isFunctional(relation)) {
-					domain = amie.data.U.getRelationDomain(this.kbSchema, relation);
-				} else {
-					domain = amie.data.U.getRelationRange(this.kbSchema, relation);
-				}
-			}
-			
-			List<ByteString[]> queryArray = new ArrayList<>();
-			if (domain != null)
-				queryArray.add(KB.triple(succedent[0], amie.data.U.typeRelationBS, domain));
-			
 			succedent[1]  = isCompleteBS;
 			succedent[2] = relation;
-			queryArray.add(succedent);
 			int countVarPos = 0;
-			long cardinalityComplete = kb.countDistinct(succedent[0], queryArray);
+			long cardinalityComplete = kb.count(succedent);
 			
 			if (cardinalityComplete >= minSupportThreshold) {
-				Rule candidateComplete = null;
-				if (domain == null) {
-					candidateComplete = new Rule(succedent, cardinalityComplete);				
-				} else {
-					queryArray.remove(1);
-					candidateComplete = new Rule(succedent, queryArray, cardinalityComplete);
-				}
+				Rule candidateComplete =  new Rule(succedent, cardinalityComplete);
 				candidateComplete.setFunctionalVariablePosition(countVarPos);
 				output.add(candidateComplete);
 			}
 						
 			succedent[1] = isIncompleteBS;
-			queryArray = new ArrayList<>();
-			if (domain != null)
-				queryArray.add(KB.triple(succedent[0], amie.data.U.typeRelationBS, domain));
-			queryArray.add(succedent);
-			
-			long cardinalityIncomplete = kb.countDistinct(succedent[0], queryArray);
+			long cardinalityIncomplete = kb.count(succedent);
 			if (cardinalityIncomplete >= minSupportThreshold) {
-				Rule candidateIncomplete = null;
-				if (domain == null) {
-					candidateIncomplete = new Rule(succedent, cardinalityIncomplete);				
-				} else {
-					queryArray.remove(1);
-					candidateIncomplete = new Rule(succedent, queryArray, cardinalityIncomplete);
-				}
+				Rule candidateIncomplete = new Rule(succedent, cardinalityIncomplete);
 				candidateIncomplete.setFunctionalVariablePosition(countVarPos);
 				output.add(candidateIncomplete);
 			}
@@ -236,6 +205,10 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	public void getInstantiatedAtoms(Rule parentRule, double minSupportThreshold, 
 		Collection<Rule> danglingEdges, Collection<Rule> output) {
 		
+		if (!parentRule.containsRelation(amie.data.U.typeRelationBS)) {
+			addTypeAtom(parentRule, minSupportThreshold, output);
+		}
+		
 		if (!parentRule.containsRelation(isRelevantBS)) {
 			addRelevanceAtom(parentRule, isRelevantBS, minSupportThreshold, output);
 		}
@@ -257,6 +230,36 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}
 	}
 	
+	private void addTypeAtom(Rule parentRule, double minSupportThreshold, Collection<Rule> output) {
+		ByteString[] head = parentRule.getHead();
+		ByteString relation = head[2];
+		ByteString[] newEdge = head.clone();
+		newEdge[1] = amie.data.U.typeRelationBS;
+		ByteString domain = null;
+		if (this.kbSchema != null) {
+			if (this.kb.isFunctional(relation)) {
+				domain = amie.data.U.getRelationDomain(this.kbSchema, relation);
+			} else {
+				domain = amie.data.U.getRelationRange(this.kbSchema, relation);
+			}
+		}
+		
+		if (domain == null)
+			return;
+		
+		newEdge[2] = domain;
+		
+		parentRule.getTriples().add(newEdge);
+		long cardinalityComplete = kb.countDistinct(head[0], parentRule.getTriples());
+		parentRule.getTriples().remove(parentRule.getTriples().size() - 1);
+		
+		if (cardinalityComplete >= minSupportThreshold) {
+			Rule candidateComplete = parentRule.addAtom(newEdge, cardinalityComplete);
+			candidateComplete.addParent(parentRule);
+			output.add(candidateComplete);
+		}
+	}
+
 	private void addChangedAtom(Rule parentRule, ByteString changeRelation, double minSupportThreshold,
 			Collection<Rule> output) {
 		ByteString[] head = parentRule.getHead();
