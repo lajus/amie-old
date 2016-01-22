@@ -57,6 +57,7 @@ public class KBRelationDelta {
 			List<Thread> threads = new ArrayList<>();
 			for (int i = 0; i < Runtime.getRuntime().availableProcessors(); ++i) {
 				final ByteString relation = r2.poll();
+				System.out.println("Analyzing relation " + relation);
 				if (relation == null)
 					break;
 				
@@ -66,7 +67,7 @@ public class KBRelationDelta {
 				Thread t = new Thread(new Runnable() {
 					@Override
 					public void run() {
-						System.out.println("Analyzing relation " + relation);
+						System.out.println("Starting " + relation);
 						PrintWriter out = null;
 						try {
 							out = new PrintWriter(new FileWriter(new File(relation + ".hasChanged.tsv")));
@@ -122,7 +123,9 @@ public class KBRelationDelta {
 					}
 				});
 				
+				System.out.println("Starting the thread");
 				t.start();
+				System.out.println("Adding the thread to list of current threads");
 				threads.add(t);
 			}
 			
