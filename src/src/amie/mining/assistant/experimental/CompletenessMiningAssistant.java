@@ -146,10 +146,9 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}
 	}
 	
-	private void addCardinalityAtom(Rule rule, double minSupportThreshold, Collection<Rule> output) {
+	private void addCardinalityAtom(Rule rule, double minSupportThreshold, Collection<Rule> output, ByteString targetRelation) {
 		// We'll force a cardinality atom at the end
 		ByteString[] head = rule.getHead();
-		ByteString targetRelation = head[2];
 		int startCardinality = -1;
 		String equalityRelation = null;
 		String inequalityRelation = null;				
@@ -225,11 +224,66 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			addChangedAtom(parentRule, hasNotChangedBS, minSupportThreshold, output);
 		}
 		
-		if (!containsCardinalityAtom(parentRule)) {
-			addCardinalityAtom(parentRule, minSupportThreshold, output);
+		if (!containsCardinalityAtom(parentRule, parentRule.getHead()[2])) {
+			addCardinalityAtom(parentRule, minSupportThreshold, output, parentRule.getHead()[2]);
 		}
+		
+		addExistentialAtoms(parentRule, minSupportThreshold, output);
 	}
 	
+	private void addExistentialAtoms(Rule parentRule, double minSupportThreshold, Collection<Rule> output) {
+		if (this.kbSchema != null) {
+			ByteString targetRelation = parentRule.getHead()[2];
+			ByteString domain = null;
+			Set<ByteString> relations = null;
+			if (this.kb.isFunctional(targetRelation)) {
+				domain = amie.data.U.getRelationDomain(this.kbSchema, targetRelation);
+				if (domain != null) {
+					relations = kb.resultsOneVariable(KB.triple(ByteString.of("?s"),
+							amie.data.U.domainRelationBS, domain));
+				}
+			} else {
+				domain = amie.data.U.getRelationRange(this.kbSchema, targetRelation);
+				if (domain != null) {
+					relations = kb.resultsOneVariable(KB.triple(ByteString.of("?s"), 
+							amie.data.U.rangeRelation, domain));
+				}
+			}
+			
+			// Get the relations with the same domain
+			if (relations != null) {
+				ByteString[] atomDoesNotHave = KB.triple(parentRule.getFunctionalVariable(), 
+						ByteString.of(KB.hasNumberOfValuesSmallerThan + "1"), "?r");
+				ByteString[] atomDoesHave = KB.triple(parentRule.getFunctionalVariable(), 
+						ByteString.of(KB.hasNumberOfValuesGreaterThan + "0"), "?r");
+				for (ByteString relation : relations) {
+					atomDoesNotHave[2] = relation;
+					if (!parentRule.containsAtom(atomDoesNotHave) && 
+							!parentRule.containsAtom(atomDoesHave)) {
+						parentRule.getTriples().add(atomDoesNotHave);
+						long support = this.kb.countDistinct(parentRule.getFunctionalVariable(), parentRule.getTriples());
+						parentRule.getTriples().remove(parentRule.getTriples().size() - 1);
+						if (support >= minSupportThreshold) {
+							Rule newRule = parentRule.addAtom(atomDoesNotHave, support);
+							newRule.addParent(parentRule);
+							output.add(newRule);
+						}
+						
+						parentRule.getTriples().add(atomDoesHave);
+						support = this.kb.countDistinct(parentRule.getFunctionalVariable(), parentRule.getTriples());
+						parentRule.getTriples().remove(parentRule.getTriples().size() - 1);
+						if (support >= minSupportThreshold) {
+							Rule newRule = parentRule.addAtom(atomDoesHave, support);
+							newRule.addParent(parentRule);
+							output.add(newRule);
+						}
+					}
+				}
+			}
+		}
+		
+	}
+
 	private void addTypeAtom(Rule parentRule, double minSupportThreshold, Collection<Rule> output) {
 		ByteString[] head = parentRule.getHead();
 		ByteString relation = head[2];
@@ -298,10 +352,12 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		int length = maxDepth;
 		if (candidate.containsRelation(amie.data.U.typeRelationBS)) ++length;
 		if (candidate.containsRelation(isRelevantBS)) ++length;
-		if (containsCardinalityAtom(candidate)) ++length;
+		if (containsCardinalityAtom(candidate, candidate.getHead()[2])) ++length;
 		
 		return candidate.getRealLength() <= length;
 	}
+	
+	
 	
 	/**
 	 * Returns true if the rule contains a cardinality constraint 
@@ -309,8 +365,13 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	 * @param rule
 	 * @return
 	 */
-	private boolean containsCardinalityAtom(Rule rule) {
-		return indexOfCardinalityAtom(rule) != -1;
+	private boolean containsCardinalityAtom(Rule rule, ByteString targetRelation) {
+		int idx = indexOfCardinalityAtom(rule);
+		if (idx == -1) {
+			return true;
+		} else {
+			return rule.getTriples().get(idx)[2].equals(targetRelation);
+		}
 	}
 	
 	@Override

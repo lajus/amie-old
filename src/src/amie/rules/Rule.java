@@ -1943,6 +1943,15 @@ public class Rule {
     	return firstIndexOfRelation(triples, relation);
     }
     
+    public boolean containsAtom(ByteString[] atom) {
+		for (ByteString[] triple : triples) {
+			if (Arrays.equals(triple, atom))
+				return true;
+		}
+		
+		return false;
+	}
+    
     /**
      * If returns true if the list of triples contains an atom
      * using the given relation.

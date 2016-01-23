@@ -55,7 +55,7 @@ public class KBRelationDelta {
 		
 		while (r2.isEmpty()) {
 			List<Thread> threads = new ArrayList<>();
-			for (int i = 0; i < Runtime.getRuntime().availableProcessors(); ++i) {
+			for (int i = 0; i < Math.max(1, Runtime.getRuntime().availableProcessors() / 2); ++i) {
 				final ByteString relation = r2.poll();
 				System.out.println("Analyzing relation " + relation);
 				if (relation == null)
