@@ -53,7 +53,7 @@ public class KBRelationDelta {
 		
 		final Collection<ByteString> allEntitiesOldKB = db1.getAllEntities();
 		
-		while (r2.isEmpty()) {
+		while (!r2.isEmpty()) {
 			List<Thread> threads = new ArrayList<>();
 			for (int i = 0; i < Math.max(1, Runtime.getRuntime().availableProcessors() / 2); ++i) {
 				final ByteString relation = r2.poll();
@@ -109,10 +109,10 @@ public class KBRelationDelta {
 							String outcome = null;
 							if (s1.equals(s2)) {
 								outcome = "No change";
-								System.out.println(entity + "\t<hasNotChanged>\t" + relation);
+								out.println(entity + "\t<hasNotChanged>\t" + relation);
 							} else if (s2.containsAll(s1)) {
 								outcome = "Addition";
-								System.out.println(entity + "\t<hasChanged>\t" + relation);
+								out.println(entity + "\t<hasChanged>\t" + relation);
 							} else if (s1.containsAll(s2)) {
 								outcome = "Deletion";
 							} else {
