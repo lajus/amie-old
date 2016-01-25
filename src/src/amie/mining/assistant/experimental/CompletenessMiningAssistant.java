@@ -21,7 +21,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	
 	public static final String isIncomplete = "isIncomplete";
 	
-	public static final String isRelevant = "<isRelevant>";
+	public static final String isRelevant = "<isRelevanthasNumberOfFacts>";
 	
 	public static final String isRelevanthasWikiLength = "<isRelevanthasWikiLength>";
 	
@@ -114,7 +114,11 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			
 			ByteString targetRelation = lastAtom[2];
 			int newCard = -1;
-			if (rule.getHead()[1].equals(isCompleteBS)) {
+			ByteString[] head = rule.getHead(); 
+			if (head[1].equals(isCompleteBS)) {
+				if (!head[2].equals(lastAtom[2]))
+					return;
+					
 				int maximalCardinality = -1;
 				if (kb.isFunctional(targetRelation)) {
 					maximalCardinality = kb.maximalRightCumulativeCardinality(targetRelation, 
@@ -127,6 +131,8 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 				if (newCard > maximalCardinality)
 					return;
 			} else {
+				if (!head[2].equals(lastAtom[2]))
+					return;
 				newCard = compositeRelation.second.intValue() - 1;
 				if (newCard == 0)
 					return;
@@ -228,7 +234,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			addCardinalityAtom(parentRule, minSupportThreshold, output, parentRule.getHead()[2]);
 		}
 		
-		addExistentialAtoms(parentRule, minSupportThreshold, output);
+		//addExistentialAtoms(parentRule, minSupportThreshold, output);
 	}
 	
 	private void addExistentialAtoms(Rule parentRule, double minSupportThreshold, Collection<Rule> output) {
@@ -236,27 +242,35 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			ByteString targetRelation = parentRule.getHead()[2];
 			ByteString domain = null;
 			Set<ByteString> relations = null;
+			ByteString smallerThanRelation = ByteString.of(KB.hasNumberOfValuesSmallerThan + "1");
+			ByteString greaterThanRelation = ByteString.of(KB.hasNumberOfValuesGreaterThan + "0");
 			if (this.kb.isFunctional(targetRelation)) {
 				domain = amie.data.U.getRelationDomain(this.kbSchema, targetRelation);
 				if (domain != null) {
-					relations = kb.resultsOneVariable(KB.triple(ByteString.of("?s"),
+					relations = this.kbSchema.resultsOneVariable(KB.triple(ByteString.of("?s"),
 							amie.data.U.domainRelationBS, domain));
 				}
+				smallerThanRelation = ByteString.of(KB.hasNumberOfValuesSmallerThan + "1");
+				greaterThanRelation = ByteString.of(KB.hasNumberOfValuesGreaterThan + "0");
 			} else {
 				domain = amie.data.U.getRelationRange(this.kbSchema, targetRelation);
 				if (domain != null) {
-					relations = kb.resultsOneVariable(KB.triple(ByteString.of("?s"), 
-							amie.data.U.rangeRelation, domain));
+					relations = this.kbSchema.resultsOneVariable(KB.triple(ByteString.of("?s"), 
+							amie.data.U.rangeRelationBS, domain));
 				}
+				smallerThanRelation = ByteString.of(KB.hasNumberOfValuesSmallerThanInv + "1");
+				greaterThanRelation = ByteString.of(KB.hasNumberOfValuesGreaterThanInv + "0");
 			}
 			
 			// Get the relations with the same domain
 			if (relations != null) {
 				ByteString[] atomDoesNotHave = KB.triple(parentRule.getFunctionalVariable(), 
-						ByteString.of(KB.hasNumberOfValuesSmallerThan + "1"), "?r");
+						smallerThanRelation, "?r");
 				ByteString[] atomDoesHave = KB.triple(parentRule.getFunctionalVariable(), 
-						ByteString.of(KB.hasNumberOfValuesGreaterThan + "0"), "?r");
+						greaterThanRelation, "?r");
 				for (ByteString relation : relations) {
+					if (!this.kb.containsRelation(relation))
+						continue;
 					atomDoesNotHave[2] = relation;
 					if (!parentRule.containsAtom(atomDoesNotHave) && 
 							!parentRule.containsAtom(atomDoesHave)) {
@@ -368,7 +382,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	private boolean containsCardinalityAtom(Rule rule, ByteString targetRelation) {
 		int idx = indexOfCardinalityAtom(rule);
 		if (idx == -1) {
-			return true;
+			return false;
 		} else {
 			return rule.getTriples().get(idx)[2].equals(targetRelation);
 		}
