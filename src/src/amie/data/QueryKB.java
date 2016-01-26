@@ -57,9 +57,8 @@ public class QueryKB {
 				KB.triple("?s", "isCitizenOf", "?x"), KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "1", "wasBornIn"))));
 		System.out.println(kb.count(KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "1", "wasBornIn"))); **/
 		KB kb = U.loadFiles(args);
-		List<ByteString[]> q = KB.triples(KB.triple("?a",  "isComplete",  "<hasCapital>"), KB.triple("?a", "hasNumberOfValuesEquals0",  "<hasCapital>")); 
+		List<ByteString[]> q = KB.triples(KB.triple("?a",  "hasNumberOfValuesEquals0",  "<hasCapital>"), KB.triple("?a", "isComplete",  "<hasCapital>")); 
 		System.out.println(kb.selectDistinct(ByteString.of("?a"), q));
-		System.out.println(kb.buildHistogram(kb.relation2object2subject.get(ByteString.of("<produced>"))));
-
+		// hasNumberOfValuesEquals0(?a,<hasCapital>)  => isComplete(?a,<hasCapital>)
 	}
 }

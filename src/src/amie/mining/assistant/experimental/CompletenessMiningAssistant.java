@@ -50,7 +50,8 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		this.allowConstants = false;
 		this.bodyExcludedRelations = Arrays.asList(amie.data.U.typeRelationBS, 
 				amie.data.U.subClassRelationBS, amie.data.U.domainRelationBS, 
-				amie.data.U.rangeRelationBS, isCompleteBS, isIncompleteBS);
+				amie.data.U.rangeRelationBS, isCompleteBS, isIncompleteBS,
+				isRelevanthasWikiLengthBS, isRelevanthasIngoingLinksBS, isRelevantBS);
 	}
 
 	@Override
