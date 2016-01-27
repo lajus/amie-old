@@ -46,19 +46,25 @@ public class QueryKB {
 		
 		System.out.println(kb.maximalCardinality(ByteString.of("<hasChild>"), 1000));
 		System.out.println(kb.maximalCardinalityInv(ByteString.of("<hasChild>"), 1000));**/
-		/**KB kb = new KB();
+		KB kb = new KB();
 		kb.add("Jorge", "isCitizenOf", "Ecuador");
 		kb.add("Luis", "isCitizenOf", "Ecuador");
 		kb.add("Diana", "isCitizenOf", "Ecuador");
 		kb.add("Luis", "wasBornIn", "Guayaquil");
 		kb.add("Ambar", "wasBornIn", "Guayaquil");
 		kb.add("Diana", "wasBornIn", "Pinas");
+		//System.out.println(kb.selectDistinct(ByteString.of("?s"), KB.triples(
+		//		KB.triple("?s", "isCitizenOf", "?x"), KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "1", "wasBornIn"))));
+		System.out.println(kb.count(KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "1", "wasBornIn"))); 
 		System.out.println(kb.selectDistinct(ByteString.of("?s"), KB.triples(
-				KB.triple("?s", "isCitizenOf", "?x"), KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "1", "wasBornIn"))));
-		System.out.println(kb.count(KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "1", "wasBornIn"))); **/
-		KB kb = U.loadFiles(args);
-		List<ByteString[]> q = KB.triples(KB.triple("?a",  "hasNumberOfValuesEquals0",  "<hasCapital>"), KB.triple("?a", "isComplete",  "<hasCapital>")); 
-		System.out.println(kb.selectDistinct(ByteString.of("?a"), q));
-		// hasNumberOfValuesEquals0(?a,<hasCapital>)  => isComplete(?a,<hasCapital>)
+				KB.triple("?s", "isCitizenOf", "?x"), KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "2", "wasBornIn"))));
+		System.out.println(kb.selectDistinct(ByteString.of("?s"), KB.triples(KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "2", "wasBornIn"))));
+		System.out.println(kb.count(KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "2", "wasBornIn"))); 
+		/**KB kb = U.loadFiles(args);
+		List<ByteString[]> q = KB.triples(KB.triple("?a",  "hasNumberOfValuesEquals0",  "<hasCurrency>")); 
+		for (ByteString x : kb.selectDistinct(ByteString.of("?a"), q))
+			System.out.println(x);
+		
+		// hasNumberOfValuesEquals0(?a,<hasCapital>)  => isComplete(?a,<hasCapital>)**/
 	}
 }

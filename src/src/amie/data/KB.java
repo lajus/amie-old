@@ -921,27 +921,31 @@ public class KB {
 						cardinalityRelation.first.equals(hasNumberOfValuesGreaterThanBS) ?
 								get(relation2subject2object, triple[2]) :
 								get(relation2object2subject, triple[2]);	
+				
+				if (cardinalityRelation.second.intValue() == 0) {
+					return new IntHashMap<>(map.keySet());
+				}
+					
 				for (ByteString entity : map.keySet()) {
 					if (map.get(entity).size() > cardinalityRelation.second.intValue())
 						results.increase(entity);
 				}
 			} else {
+				IntHashMap<ByteString> set = cardinalityRelation.first.equals(hasNumberOfValuesSmallerThanBS) ?
+						subjectSize : objectSize;
 				Map<ByteString, IntHashMap<ByteString>> map = 
 						cardinalityRelation.first.equals(hasNumberOfValuesSmallerThanBS) ?
 								get(relation2subject2object, triple[2]) :
 								get(relation2object2subject, triple[2]);	
-				if (cardinalityRelation.second.intValue() > 1) {
-					for (ByteString entity : map.keySet()) {
+				for (ByteString entity : set) {
+					if (map.containsKey(entity)) {
+						if (cardinalityRelation.second.intValue() == 1)
+							continue;
+						
 						if (map.get(entity).size() < cardinalityRelation.second.intValue())
-							results.increase(entity);
-					}
-				} else {
-					IntHashMap<ByteString> set = cardinalityRelation.first.equals(hasNumberOfValuesSmallerThanBS) ?
-							subjectSize : objectSize;
-					for (ByteString entity : set) {
-						if (!map.containsKey(entity)) {
-							results.increase(entity);
-						}
+							results.increase(entity);	
+					} else {
+						results.increase(entity);
 					}
 				}
 			}
@@ -1028,14 +1032,14 @@ public class KB {
 					return get(subject2relation2object, fact[0]).get(fact[2]).size() 
 								< cardinalityRelation.second.intValue();
 				} else {
-					return cardinalityRelation.second == 1;
+					return true;
 				}
 			} else if (cardinalityRelation.first.equals(hasNumberOfValuesSmallerThanInvBS)) {
 				if (get(object2relation2subject, fact[0]).containsKey(fact[2])) {
 					return get(object2relation2subject, fact[0]).get(fact[2]).size() 
 							< cardinalityRelation.second.intValue();
 				} else {
-					return cardinalityRelation.second == 1;
+					return true;
 				}
 			}
 		}
@@ -1338,40 +1342,42 @@ public class KB {
 				return count;
 			} else if (compositeRelation.first.equals(hasNumberOfValuesGreaterThanBS)
 					|| compositeRelation.first.equals(hasNumberOfValuesGreaterThanInvBS)) {
+				// If it is 0, just return the size of the map
 				Map<ByteString, IntHashMap<ByteString>> map = 
 						compositeRelation.first.equals(hasNumberOfValuesGreaterThanBS) ?
 						get(this.relation2subject2object, triple[2]) :
 						get(this.relation2object2subject, triple[2]);
-				long count = 0;
-				for (ByteString s : map.keySet()) {
-					if (map.containsKey(s)) {
-						if (map.get(s).size() > compositeRelation.second.intValue())
-							++count; 
+				if (compositeRelation.second.intValue() == 0) {
+					return map.size();
+				} else {
+					long count = 0;
+					for (ByteString s : map.keySet()) {
+						if (map.containsKey(s)) {
+							if (map.get(s).size() > compositeRelation.second.intValue())
+								++count; 
+						}
 					}
+					return count;	
 				}
-				return count;
 			} else {
 				Map<ByteString, IntHashMap<ByteString>> map = 
 						compositeRelation.first.equals(hasNumberOfValuesSmallerThanBS) ?
 						get(this.relation2subject2object, triple[2]) :
 						get(this.relation2object2subject, triple[2]);
 				long count = 0;
-				if (compositeRelation.second.intValue() == 1) {
-					IntHashMap<ByteString> set =
+				IntHashMap<ByteString> set =
 					compositeRelation.first.equals(hasNumberOfValuesSmallerThanBS) ? 
 							subjectSize : objectSize;
-					for (ByteString s : set) {
-						if (!map.containsKey(s)) {
+				for (ByteString s : set) {					
+					if (map.containsKey(s)) {						
+						if (compositeRelation.second.intValue() == 1)
+							continue;
+						
+						if (map.get(s).size() < compositeRelation.second.intValue())
 							++count;
-						}
+					} else {
+						++count;
 					}
-				} else {
-					for (ByteString s : map.keySet()) {
-						if (map.containsKey(s)) {
-							if (map.get(s).size() < compositeRelation.second.intValue())
-								++count; 
-						}
-					}	
 				}
 				return count;
 			}
