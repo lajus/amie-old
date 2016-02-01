@@ -157,85 +157,87 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		// We'll force a cardinality atom at the end
 		ByteString[] head = rule.getHead();
 		int startCardinality = -1;
-		String equalityRelation = null;
 		String inequalityRelation = null;				
+		ByteString[] newAtom = head.clone();
+		long cardinality = 0;
 		if (this.kb.isFunctional(targetRelation)) {
-			equalityRelation = KB.hasNumberOfValuesEquals;
-			inequalityRelation = head[1].equals(isCompleteBS) ? 
-					KB.hasNumberOfValuesGreaterThan : KB.hasNumberOfValuesSmallerThan;
-		} else {
-			equalityRelation = KB.hasNumberOfValuesEqualsInv;
-			inequalityRelation =  head[1].equals(isCompleteBS) ? 
-					KB.hasNumberOfValuesGreaterThanInv : KB.hasNumberOfValuesSmallerThanInv;
-		}
-		
-		if (head[1].equals(isIncompleteBS)) {
-			if (kb.isFunctional(targetRelation)) {
-				startCardinality = kb.maximalCardinality(targetRelation);
+			if (head[1].equals(isCompleteBS)) {
+				inequalityRelation = KB.hasNumberOfValuesGreaterThan;
+				startCardinality  = 0;
 			} else {
-				startCardinality = kb.maximalCardinalityInv(targetRelation);
+				inequalityRelation = KB.hasNumberOfValuesSmallerThan;
+				startCardinality = kb.maximalCardinality(targetRelation) + 1;
 			}
 		} else {
-			startCardinality = 0;
+			if(head[1].equals(isCompleteBS)) {
+				inequalityRelation = KB.hasNumberOfValuesGreaterThanInv;
+				startCardinality = 0;
+			} else {				
+				startCardinality = kb.maximalCardinalityInv(targetRelation) + 1;
+				inequalityRelation = KB.hasNumberOfValuesSmallerThanInv;					
+			}
 		}
 		
 		inequalityRelation = inequalityRelation + startCardinality;
-		equalityRelation = equalityRelation + startCardinality;
-
-		ByteString[] newAtom = head.clone();
-		long cardinality = 0;
 		// First rule
 		newAtom[1] = ByteString.of(inequalityRelation);
+		
 		rule.getTriples().add(newAtom);
 		cardinality = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
 		rule.getTriples().remove(rule.getTriples().size() - 1);			
 		if (cardinality >= minSupportThreshold) {
 			Rule candidate = rule.addAtom(newAtom, cardinality);
 			output.add(candidate);
-		}
-		
-		// Second rule
-		if (head[1].equals(isCompleteBS)) {
-			newAtom[1] = ByteString.of(equalityRelation);
-			rule.getTriples().add(newAtom);
-			cardinality = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
-			rule.getTriples().remove(rule.getTriples().size() - 1);			
-			if (cardinality >= minSupportThreshold) {
-				Rule candidate = rule.addAtom(newAtom, cardinality);
-				output.add(candidate);
-			}
+			candidate.addParent(rule);
 		}
 	}
 	
 	@Override
 	public void getInstantiatedAtoms(Rule parentRule, double minSupportThreshold, 
 		Collection<Rule> danglingEdges, Collection<Rule> output) {
+		boolean extendRule = true;
+		if (parentRule.getHead()[1].equals(isIncompleteBS)) {
+			if (!containsCardinalityAtom(parentRule, parentRule.getHead()[2])) {
+				addCardinalityAtom(parentRule, minSupportThreshold, output, parentRule.getHead()[2]);
+				extendRule = false;
+				// Rules with incompleteness assertions are extended only when they have cardinality constraints
+			}
+		}		
 		
-		if (!parentRule.containsRelation(amie.data.U.typeRelationBS)) {
+		if (!parentRule.containsRelation(amie.data.U.typeRelationBS) && extendRule) {
 			addTypeAtom(parentRule, minSupportThreshold, output);
 		}
 		
-		if (!parentRule.containsRelation(isRelevantBS)) {
+		if (!parentRule.containsRelation(isRelevantBS) && extendRule) {
 			addRelevanceAtom(parentRule, isRelevantBS, minSupportThreshold, output);
 		}
 		
-		if (!parentRule.containsRelation(isRelevanthasWikiLengthBS)) {
+		if (!parentRule.containsRelation(isRelevanthasWikiLengthBS) && extendRule) {
 			addRelevanceAtom(parentRule, isRelevanthasWikiLengthBS, minSupportThreshold, output);
 		}
 		
-		if (!parentRule.containsRelation(isRelevanthasIngoingLinksBS)) {
+		if (!parentRule.containsRelation(isRelevanthasIngoingLinksBS) && extendRule) {
 			addRelevanceAtom(parentRule, isRelevanthasIngoingLinksBS, minSupportThreshold, output);
 		}
 		
-		if (!parentRule.containsRelation(hasNotChangedBS)) {
+		if (!parentRule.containsRelation(hasNotChangedBS) && extendRule) {
 			addChangedAtom(parentRule, hasNotChangedBS, minSupportThreshold, output);
 		}
 		
-		if (!containsCardinalityAtom(parentRule, parentRule.getHead()[2])) {
+		if (!containsCardinalityAtom(parentRule, parentRule.getHead()[2]) && extendRule) {
 			addCardinalityAtom(parentRule, minSupportThreshold, output, parentRule.getHead()[2]);
 		}
-		
-		//addExistentialAtoms(parentRule, minSupportThreshold, output);
+	}
+	
+	@Override
+	public void getDanglingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
+		if (rule.getHead()[1].equals(isIncompleteBS)) {
+			if (containsCardinalityAtom(rule, rule.getHead()[2])) {
+				super.getDanglingAtoms(rule, minSupportThreshold, output);
+			}
+		} else {
+			super.getDanglingAtoms(rule, minSupportThreshold, output);
+		}
 	}
 	
 	private void addExistentialAtoms(Rule parentRule, double minSupportThreshold, Collection<Rule> output) {

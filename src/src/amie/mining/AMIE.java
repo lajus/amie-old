@@ -19,11 +19,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javatools.administrative.Announce;
-import javatools.datatypes.ByteString;
-import javatools.datatypes.MultiMap;
-import javatools.parsers.NumberFormatter;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -37,8 +32,11 @@ import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
 import amie.mining.assistant.MiningAssistant;
 import amie.mining.assistant.RelationSignatureDefaultMiningAssistant;
-import amie.rules.QueryEquivalenceChecker;
 import amie.rules.Rule;
+import javatools.administrative.Announce;
+import javatools.datatypes.ByteString;
+import javatools.datatypes.MultiMap;
+import javatools.parsers.NumberFormatter;
 
 /**
  * Main class that implements the AMIE algorithm for rule mining 
