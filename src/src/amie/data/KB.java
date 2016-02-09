@@ -3598,15 +3598,17 @@ public class KB {
 	 * the right cumulative distribution of values is higher than threshold. For example given
 	 * the histogram {1: 3, 2: 4, 3: 5} and the right cumulative distribution 
 	 * {0: 12, 1: 9, 2: 5} for the number of nationalities of people
-	 * maximalCardinality(<isCitizenOf>, 5) would return 2 as this is the 
-	 * maximal entry in the cumulative distribution that is  above the provided threshold (10)
+	 * maximalRightCumulativeCardinality(<isCitizenOf>, 5, 3) would return 2 as this is the 
+	 * maximal entry in the cumulative distribution that is above the provided threshold (10)
+	 * and that is smaller than 3, the given limit.
 	 * @param relation
 	 * @param threshold
+	 * @param limit
 	 * @return
 	 */
-	public int maximalRightCumulativeCardinality(ByteString relation, long threshold) {
+	public int maximalRightCumulativeCardinality(ByteString relation, long threshold, int limit) {
 		Map<ByteString, IntHashMap<ByteString>> map = get(relation2subject2object, relation);
-		return maximalRightCumulativeCardinality(relation, threshold, map);
+		return maximalRightCumulativeCardinality(relation, threshold, map, limit);
 	}
 	
 	/**
@@ -3614,27 +3616,31 @@ public class KB {
 	 * the right cumulative distribution of values is higher than threshold. For example given
 	 * the histogram {1: 3, 2: 4, 3: 5} and the right cumulative distribution 
 	 * {0: 12, 1: 9, 2: 5} for the number of parents of people
-	 * maximalCardinality(<hasChild>, 5) would return 2 as this is the 
-	 * maximal entry in the cumulative distribution that is  above the provided threshold (10)
+	 * maximalCardinality(<hasChild>, 5, 3) would return 2 as this is the 
+	 * maximal entry in the cumulative distribution that is above the provided threshold (10)
+	 * and smaller than the given limit 3.
 	 * @param relation
 	 * @param threshold
+	 * @param limit
 	 * @return
 	 */
-	public int maximalRightCumulativeCardinalityInv(ByteString relation, long threshold) {
+	public int maximalRightCumulativeCardinalityInv(ByteString relation, long threshold, int limit) {
 		Map<ByteString, IntHashMap<ByteString>> map = 
 				get(relation2object2subject, relation);
-		return maximalRightCumulativeCardinality(relation, threshold, map);
+		return maximalRightCumulativeCardinality(relation, threshold, map, limit);
 	}
 	
 	private int maximalRightCumulativeCardinality(ByteString relation, long threshold, 
-			Map<ByteString, IntHashMap<ByteString>> map) {
+			Map<ByteString, IntHashMap<ByteString>> map, int iMaxThreshold) {
 		IntHashMap<Integer> histogram = buildCumulativeHistogram(map);
 		List<Integer> keys = histogram.decreasingKeys();
 		Collections.sort(keys);
-		Collections.reverse(keys);
-		for (int i : keys) {
-			if (histogram.get(i) >= threshold) {
-				return i;
+		int maxThreshold = histogram.get(iMaxThreshold);
+		for (int keyidx = iMaxThreshold + 1; keyidx < keys.size(); ++keyidx) {
+			int val = keys.get(keyidx);
+			int iValue = histogram.get(val);
+			if (iValue < maxThreshold && iValue >= threshold) {
+				return val;
 			}
 		}
 		
@@ -3685,10 +3691,45 @@ public class KB {
 		return maximalCardinality(relation, map);
 	}
 	
+	/**
+	 * Returns the maximal number of values smaller than limit than 
+	 * an entity can have for the given relation.
+	 * @param relation
+	 * @param threshold
+	 * @return
+	 */
+	public int maximalCardinality(ByteString relation, int limit) {
+		Map<ByteString, IntHashMap<ByteString>> map = 
+				get(relation2subject2object, relation);
+		return maximalCardinality(relation, map, limit);
+	}
+	
+	private int maximalCardinality(ByteString relation, 
+			Map<ByteString, IntHashMap<ByteString>> map, int limit) {
+		IntHashMap<Integer> histogram = buildHistogram(map);
+		List<Integer> keys = histogram.decreasingKeys();
+		Collections.sort(keys);
+		Collections.reverse(keys);
+		int idx = 0;
+		int val = 0xFFFF;
+		do {
+			val = keys.get(idx);
+			++idx;
+		} while (val >= limit && 
+				idx < keys.size());
+		return val;
+	}
+
 	public int maximalCardinalityInv(ByteString relation) {
 		Map<ByteString, IntHashMap<ByteString>> map = 
 				get(relation2object2subject, relation);
 		return maximalCardinality(relation, map);
+	}
+	
+	public int maximalCardinalityInv(ByteString relation, int limit) {
+		Map<ByteString, IntHashMap<ByteString>> map = 
+				get(relation2object2subject, relation);
+		return maximalCardinality(relation, map, limit);
 	}
 	
 	private int maximalCardinality(ByteString relation, Map<ByteString, IntHashMap<ByteString>> map) {

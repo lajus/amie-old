@@ -65,8 +65,8 @@ public class QueryKB {
 		/**for (ByteString e: kb.getAllEntities()) {
 			System.out.println(e);
 		}**/
-		List<ByteString[]> q = KB.triples(KB.triple("?a",  "hasNumberOfValuesSmallerThan1",  "<wasBornIn>"), 
-				KB.triple("?a",  "isComplete",  "<wasBornIn>")); 
+		List<ByteString[]> q = KB.triples(KB.triple("?a",  "hasNumberOfValuesSmallerThan1",  "<hasWonPrize>"), 
+				KB.triple("?a",  "isIncomplete",  "<hasWonPrize>")); 
 		for (ByteString x : kb.selectDistinct(ByteString.of("?a"), q))
 			System.out.println(x);
 		

@@ -120,23 +120,29 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 				if (!head[2].equals(lastAtom[2]))
 					return;
 					
-				int maximalCardinality = -1;
 				if (kb.isFunctional(targetRelation)) {
-					maximalCardinality = kb.maximalRightCumulativeCardinality(targetRelation, 
-						(long)minSupportThreshold);
+					newCard = kb.maximalRightCumulativeCardinality(targetRelation, 
+						(long)minSupportThreshold, compositeRelation.second.intValue());
 				} else {
-					maximalCardinality = kb.maximalRightCumulativeCardinalityInv(targetRelation, 
-							(long)minSupportThreshold);					
+					newCard = kb.maximalRightCumulativeCardinalityInv(targetRelation, 
+							(long)minSupportThreshold, compositeRelation.second.intValue());					
 				}
-				newCard = compositeRelation.second.intValue() + 1;
-				if (newCard > maximalCardinality)
+				if (newCard == -1)
 					return;
 			} else {
 				if (!head[2].equals(lastAtom[2]))
 					return;
-				newCard = compositeRelation.second.intValue() - 1;
+				if (kb.isFunctional(targetRelation)) {
+					newCard = kb.maximalCardinality(targetRelation, compositeRelation.second.intValue());
+				} else {
+					newCard = kb.maximalCardinalityInv(targetRelation, compositeRelation.second.intValue());
+				}
+				
 				if (newCard == 0)
 					return;
+				
+				if (newCard == compositeRelation.second.intValue())
+					++newCard;
 			}
 								
 			ByteString newRelation = ByteString.of(compositeRelation.first.toString() + newCard);

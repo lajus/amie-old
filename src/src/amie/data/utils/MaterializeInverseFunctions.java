@@ -4,7 +4,6 @@
  */
 package amie.data.utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -24,9 +23,7 @@ public class MaterializeInverseFunctions {
 	 */
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
-		KB db = new KB();
-		
-		db.load(new File(args[0]));
+		KB db = amie.data.U.loadFiles(args);
 		Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> map = 
 				db.resultsThreeVariables(ByteString.of("?s"), ByteString.of("?p"), ByteString.of("?o"),
 						KB.triple("?o", "?p", "?s"));
@@ -36,7 +33,7 @@ public class MaterializeInverseFunctions {
 				if(db.functionality(predicate) >= db.inverseFunctionality(predicate)){
 					for(ByteString subject: predicates.get(predicate))
 						System.out.println(subject + "\t" + predicate + "\t" + object);
-				}else{
+				} else {
 					for(ByteString subject: predicates.get(predicate))
 						System.out.println(object + "\t" + "<inv-" 
 					+ predicate.subSequence(1, predicate.length()) + "\t" + subject);					
