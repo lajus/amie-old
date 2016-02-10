@@ -24,6 +24,7 @@ public class MaterializeInverseFunctions {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		amie.data.U.loadSchemaConf();
+		System.out.println("Type relation: " + amie.data.U.typeRelation);
 		KB db = amie.data.U.loadFiles(args);
 		Map<ByteString, Map<ByteString, IntHashMap<ByteString>>> map = 
 				db.resultsThreeVariables(ByteString.of("?s"), ByteString.of("?p"), ByteString.of("?o"),
