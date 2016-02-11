@@ -452,7 +452,7 @@ public class MiningAssistant{
 			throw new IllegalArgumentException("This method expects a non-empty query");
 		}
 		//General case
-		if(!testLength(rule))
+		if(!isNotTooLong(rule))
 			return;
 		
 		if (exploitMaxLengthOption) {
@@ -466,7 +466,7 @@ public class MiningAssistant{
 		List<ByteString> joinVariables = null;
 		
 		//Then do it for all values
-		if(rule.isClosed()){
+		if(rule.isClosed(true)){
 			joinVariables = rule.getVariables();
 		}else{
 			joinVariables = rule.getOpenVariables();
@@ -558,14 +558,14 @@ public class MiningAssistant{
 		if(rule.isEmpty())
 			return;
 		
-		if(!testLength(rule))
+		if(!isNotTooLong(rule))
 			return;
 		
 		List<ByteString> sourceVariables = null;
 		List<ByteString> allVariables = rule.getVariables();
 		List<ByteString> openVariables = rule.getOpenVariables();
 		
-		if(rule.isClosed()){
+		if(rule.isClosed(true)){
 			sourceVariables = rule.getVariables();
 		}else{
 			sourceVariables = openVariables; 
@@ -591,7 +591,8 @@ public class MiningAssistant{
 						newEdge[closeCirclePosition] = variable;
 						
 						rule.getTriples().add(newEdge);
-						IntHashMap<ByteString> promisingRelations = kb.frequentBindingsOf(newEdge[1], rule.getFunctionalVariable(), rule.getTriples());
+						IntHashMap<ByteString> promisingRelations = 
+								kb.frequentBindingsOf(newEdge[1], rule.getFunctionalVariable(), rule.getTriples());
 						rule.getTriples().remove(nPatterns);
 						
 						for(ByteString relation: promisingRelations){
@@ -694,8 +695,20 @@ public class MiningAssistant{
 	 * @param candidate
 	 * @return
 	 */
-	protected boolean testLength(Rule candidate){
+	protected boolean isNotTooLong(Rule candidate) {
 		return candidate.getRealLength() < maxDepth;
+	}
+	
+	/**
+	 * Check whether the rule meets the syntactic language bias of the assistant object.
+	 * By default AMIE searches for closed rules, i.e., each variable occurs in at least 
+	 * two non-special atoms (relations such as DIFFERENTFROM are considered special and therefore
+	 * not counted).
+	 * @param candidate
+	 * @return
+	 */
+	public boolean shouldBeOutput(Rule candidate) {
+		return candidate.isClosed(true);
 	}
 	
 	/**
@@ -917,7 +930,8 @@ public class MiningAssistant{
 				candidate.setPcaEstimation(ratio);
 				if(ratio < minPcaConfidence) { 
 					if (!verbose) {
-						System.err.println("Query " + candidate + " discarded by functionality heuristic with ratio " + ratio);
+						System.err.println("Rule " + candidate + 
+								" discarded by functionality heuristic with ratio " + ratio);
 					}							
 					return false;
 				}
@@ -956,7 +970,7 @@ public class MiningAssistant{
 					ruleConfidence = candidate.getStdConfidence();
 				}
 				// Skyline technique on PCA confidence					
-				if (ancestors.get(i).isClosed() && 
+				if (shouldBeOutput(ancestors.get(i)) && 
 						ruleConfidence <= ancestorConfidence){
 					addIt = false;
 					break;
@@ -1010,15 +1024,15 @@ public class MiningAssistant{
 
 	/**
 	 * It computes a standard confidence upper bound for the rule.
-	 * @param query
+	 * @param rule
 	 * @return
 	 */
-	private double getStdConfidenceUpperBound(Rule query) {
-		int[] hardCaseInfo = kb.identifyHardQueryTypeI(query.getAntecedent());
+	private double getStdConfidenceUpperBound(Rule rule) {
+		int[] hardCaseInfo = kb.identifyHardQueryTypeI(rule.getAntecedent());
 		double denominator = 0.0;
 		ByteString[] triple = new ByteString[3];
 		triple[0] = ByteString.of("?xw");
-		triple[1] = query.getAntecedent().get(0)[1];
+		triple[1] = rule.getAntecedent().get(0)[1];
 		triple[2] = ByteString.of("?yw");
 		
 		if(hardCaseInfo[0] == 2){
@@ -1029,7 +1043,7 @@ public class MiningAssistant{
 			denominator = kb.countDistinct(ByteString.of("?yw"), KB.triples(triple));
 		}
 		
-		return query.getSupport() / denominator;
+		return rule.getSupport() / denominator;
 	}
 
 	/**
@@ -1140,7 +1154,7 @@ public class MiningAssistant{
 			try{
 				denominator = kb.countDistinct(candidate.getFunctionalVariable(), antecedent);
 				candidate.setBodySize(denominator);
-			}catch(UnsupportedOperationException e){
+			} catch(UnsupportedOperationException e) {
 				
 			}
 		}		

@@ -268,6 +268,16 @@ public class U {
 	}
 	
 	/**
+	 * Returns the number of instances of the given class in a KB
+	 * @param kb
+	 * @param type
+	 * @return
+	 */
+	public static long getNumberOfEntitiesForType(KB kb, ByteString type) {
+		return kb.count(ByteString.of("?s"), typeRelationBS, type);
+	}
+	
+	/**
 	 * Returns all present data types in the given KB.
 	 * @param kb
 	 */

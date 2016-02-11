@@ -208,7 +208,14 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 				extendRule = false;
 				// Rules with incompleteness assertions are extended only when they have cardinality constraints
 			}
-		}		
+		}
+		
+		ByteString[] lastAtom = parentRule.getLastRealTriplePattern();
+		if (!parentRule.containsRelation(KB.DIFFERENTFROMbs) && 
+				extendRule && lastAtom[1].equals(amie.data.U.typeRelationBS) 
+				&& !KB.isVariable(lastAtom[2])) {
+			addTypeNegationAtom(parentRule, minSupportThreshold, output);
+		}
 		
 		if (!parentRule.containsRelation(amie.data.U.typeRelationBS) && extendRule) {
 			addTypeAtom(parentRule, minSupportThreshold, output);
@@ -235,6 +242,46 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}
 	}
 	
+	private void addTypeNegationAtom(Rule parentRule, double minSupportThreshold, Collection<Rule> output) {
+		// First look for the instantiated atom
+		ByteString[] lastAtom = parentRule.getLastRealTriplePattern(); // We assume it is an instantiated type atom
+		ByteString[] atom1 = parentRule.fullyUnboundTriplePattern();
+		ByteString countVar = parentRule.getFunctionalVariable();
+		
+		atom1[0] = countVar;
+		atom1[1] = amie.data.U.typeRelationBS;
+		Set<ByteString> subtypes = amie.data.U.getSubtypes(this.kbSchema, lastAtom[2]);
+		ByteString[] atom2 = KB.triple(atom1[2], KB.DIFFERENTFROMbs, lastAtom[2]);
+		long baseCardinality = amie.data.U.getNumberOfEntitiesForType(this.kb, lastAtom[2]);
+		ByteString[] atom3 = atom2.clone();
+		List<ByteString[]> parentRuleTriples = parentRule.getTriples();
+		for (ByteString subtype : subtypes) {
+			long typeCardinality = amie.data.U.getNumberOfEntitiesForType(this.kb, subtype);
+			double ratio = (double) typeCardinality / baseCardinality;
+			if (typeCardinality < minSupportThreshold || ratio < 0.1)
+				continue;
+			
+			atom3[2] = subtype;
+			parentRuleTriples.add(atom1);
+			parentRuleTriples.add(atom2);
+			parentRuleTriples.add(atom3);
+			long cardinality = kb.countDistinct(countVar, parentRuleTriples);
+			parentRuleTriples.remove(parentRuleTriples.size() - 1);
+			parentRuleTriples.remove(parentRuleTriples.size() - 1);
+			parentRuleTriples.remove(parentRuleTriples.size() - 1);
+			if (cardinality >= minSupportThreshold) {
+				Rule candidate = parentRule.addAtoms(atom1, atom2, atom3, cardinality);
+				candidate.addParent(parentRule);
+				output.add(candidate);			
+			}	
+		}		
+	}
+	
+	@Override
+	public boolean shouldBeOutput(Rule candidate) {
+		return candidate.isClosed(false);
+	}
+
 	@Override
 	public void getDanglingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
 		if (rule.getHead()[1].equals(isIncompleteBS)) {
@@ -244,67 +291,6 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		} else {
 			super.getDanglingAtoms(rule, minSupportThreshold, output);
 		}
-	}
-	
-	private void addExistentialAtoms(Rule parentRule, double minSupportThreshold, Collection<Rule> output) {
-		if (this.kbSchema != null) {
-			ByteString targetRelation = parentRule.getHead()[2];
-			ByteString domain = null;
-			Set<ByteString> relations = null;
-			ByteString smallerThanRelation = ByteString.of(KB.hasNumberOfValuesSmallerThan + "1");
-			ByteString greaterThanRelation = ByteString.of(KB.hasNumberOfValuesGreaterThan + "0");
-			if (this.kb.isFunctional(targetRelation)) {
-				domain = amie.data.U.getRelationDomain(this.kbSchema, targetRelation);
-				if (domain != null) {
-					relations = this.kbSchema.resultsOneVariable(KB.triple(ByteString.of("?s"),
-							amie.data.U.domainRelationBS, domain));
-				}
-				smallerThanRelation = ByteString.of(KB.hasNumberOfValuesSmallerThan + "1");
-				greaterThanRelation = ByteString.of(KB.hasNumberOfValuesGreaterThan + "0");
-			} else {
-				domain = amie.data.U.getRelationRange(this.kbSchema, targetRelation);
-				if (domain != null) {
-					relations = this.kbSchema.resultsOneVariable(KB.triple(ByteString.of("?s"), 
-							amie.data.U.rangeRelationBS, domain));
-				}
-				smallerThanRelation = ByteString.of(KB.hasNumberOfValuesSmallerThanInv + "1");
-				greaterThanRelation = ByteString.of(KB.hasNumberOfValuesGreaterThanInv + "0");
-			}
-			
-			// Get the relations with the same domain
-			if (relations != null) {
-				ByteString[] atomDoesNotHave = KB.triple(parentRule.getFunctionalVariable(), 
-						smallerThanRelation, "?r");
-				ByteString[] atomDoesHave = KB.triple(parentRule.getFunctionalVariable(), 
-						greaterThanRelation, "?r");
-				for (ByteString relation : relations) {
-					if (!this.kb.containsRelation(relation))
-						continue;
-					atomDoesNotHave[2] = relation;
-					if (!parentRule.containsAtom(atomDoesNotHave) && 
-							!parentRule.containsAtom(atomDoesHave)) {
-						parentRule.getTriples().add(atomDoesNotHave);
-						long support = this.kb.countDistinct(parentRule.getFunctionalVariable(), parentRule.getTriples());
-						parentRule.getTriples().remove(parentRule.getTriples().size() - 1);
-						if (support >= minSupportThreshold) {
-							Rule newRule = parentRule.addAtom(atomDoesNotHave, support);
-							newRule.addParent(parentRule);
-							output.add(newRule);
-						}
-						
-						parentRule.getTriples().add(atomDoesHave);
-						support = this.kb.countDistinct(parentRule.getFunctionalVariable(), parentRule.getTriples());
-						parentRule.getTriples().remove(parentRule.getTriples().size() - 1);
-						if (support >= minSupportThreshold) {
-							Rule newRule = parentRule.addAtom(atomDoesHave, support);
-							newRule.addParent(parentRule);
-							output.add(newRule);
-						}
-					}
-				}
-			}
-		}
-		
 	}
 
 	private void addTypeAtom(Rule parentRule, double minSupportThreshold, Collection<Rule> output) {
@@ -371,7 +357,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	}
 	
 	@Override
-	protected boolean testLength(Rule candidate) {
+	protected boolean isNotTooLong(Rule candidate) {
 		int length = maxDepth;
 		if (candidate.containsRelation(amie.data.U.typeRelationBS)) ++length;
 		if (candidate.containsRelation(isRelevantBS)) ++length;
@@ -411,7 +397,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
         // C: livesIn(x, Paris) (x, Person) => isFamous(x, true), then we need to make the bridge between
         // A and C (namely C is also a father of A)
         int offset = 0;
-        List<ByteString[]> queryPattern = currentRule.getTriples();
+        List<ByteString[]> queryPattern = currentRule.getTriplesWithoutSpecialRelations();
         // Go up until you find a parent that was output
         while (queryPattern.size() - offset > 1) {
         	int currentLength = queryPattern.size() - offset;

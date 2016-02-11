@@ -422,7 +422,7 @@ public class Rule {
      * to the atoms do alter the query.
      * @return
      */
-    public List<ByteString[]> getCleanTriples() {
+    public List<ByteString[]> getTriplesWithoutSpecialRelations() {
         List<ByteString[]> resultList = new ArrayList<>();
         for (ByteString[] triple : triples) {
             if (!triple[1].equals(KB.DIFFERENTFROMbs)) {
@@ -491,7 +491,7 @@ public class Rule {
      * @return the mustBindVariables
      */
     public List<ByteString> getOpenVariables() {
-        IntHashMap<ByteString> histogram = variablesHistogram();
+        IntHashMap<ByteString> histogram = variablesHistogram(true);
         List<ByteString> variables = new ArrayList<ByteString>();
         for (ByteString var : histogram) {
             if (histogram.get(var) < 2) {
@@ -969,16 +969,15 @@ public class Rule {
     }
 
     /**
-     * Returns a histogram with the number of different atoms variables occur
-     * in. It discards pseudo-atoms containing the keywords DIFFERENTFROM and
-     * EQUALS.
-     *
+     * Returns a histogram with the number of different atoms variables occur in. 
+     * @param ignoreSpecialAtoms discards pseudo-atoms containing the keyword DIFFERENTFROM.
      * @return
      */
-    private IntHashMap<ByteString> variablesHistogram() {
+    private IntHashMap<ByteString> variablesHistogram(boolean ignoreSpecialAtoms) {
         IntHashMap<ByteString> varsHistogram = new IntHashMap<>();
         for (ByteString triple[] : triples) {
-            if (triple[1].equals(KB.DIFFERENTFROMbs)) {
+            if (triple[1].equals(KB.DIFFERENTFROMbs) 
+            		&& ignoreSpecialAtoms) {
                 continue;
             }
 
@@ -1033,15 +1032,19 @@ public class Rule {
     }
 
     /**
+     * 
+     * @param ignoreSpecialAtoms If true, atoms special atoms such as DIFFERENTFROM are ignored
+     * in the count.
      * @return boolean True if the rule is closed, i.e., each variable in the
      * rule occurs at least in two atoms.
+     * 
      */
-    public boolean isClosed() {
+    public boolean isClosed(boolean ignoreSpecialAtoms) {
         if (triples.isEmpty()) {
             return false;
         }
 
-        IntHashMap<ByteString> varsHistogram = variablesHistogram();
+        IntHashMap<ByteString> varsHistogram = variablesHistogram(ignoreSpecialAtoms);
 
         for (ByteString variable : varsHistogram) {
             if (varsHistogram.get(variable) < 2) {
@@ -1201,12 +1204,27 @@ public class Rule {
      * @return
      */
     public Rule addAtom(ByteString[] newAtom,
-            int cardinality, ByteString joinedVariable, ByteString danglingVariable) {
+            double cardinality, ByteString joinedVariable, ByteString danglingVariable) {
         Rule newQuery = new Rule(this, cardinality);
         ByteString[] copyNewEdge = newAtom.clone();
         newQuery.triples.add(copyNewEdge);
         return newQuery;
     }
+    
+    public Rule addAtoms(ByteString[] atom1, ByteString[] atom2, double cardinality) {
+		Rule newQuery = new Rule(this, cardinality);
+		newQuery.triples.add(atom1.clone());
+		newQuery.triples.add(atom2.clone());
+		return newQuery;
+	}
+    
+    public Rule addAtoms(ByteString[] atom1, ByteString[] atom2, ByteString[] atom3, double cardinality) {
+		Rule newQuery = new Rule(this, cardinality);
+		newQuery.triples.add(atom1.clone());
+		newQuery.triples.add(atom2.clone());
+		newQuery.triples.add(atom3.clone());
+		return newQuery;
+	}
 
     public Rule addAtom(ByteString[] newAtom, double cardinality) {
         Rule newQuery = new Rule(this, cardinality);
@@ -1323,6 +1341,10 @@ public class Rule {
         StringBuilder strBuilder = new StringBuilder();
         for (ByteString[] pattern : sortBody()) {
             if (pattern[1].equals(KB.DIFFERENTFROMbs)) {
+            	strBuilder.append(pattern[0]);
+                strBuilder.append("!=");
+                strBuilder.append(pattern[2]);
+                strBuilder.append(" ");
                 continue;
             }
             strBuilder.append(pattern[0]);
@@ -1371,6 +1393,10 @@ public class Rule {
         StringBuilder strBuilder = new StringBuilder();
         for (ByteString[] pattern : sortBody()) {
             if (pattern[1].equals(KB.DIFFERENTFROMbs)) {
+                strBuilder.append(pattern[0]);
+                strBuilder.append("!=");
+                strBuilder.append(pattern[2]);
+                strBuilder.append(" ");
                 continue;
             }
             strBuilder.append(pattern[1]);
@@ -1508,7 +1534,7 @@ public class Rule {
 
     private void cleanInequalityConstraints() {
         List<ByteString[]> toRemove = new ArrayList<>();
-        IntHashMap<ByteString> varHistogram = variablesHistogram();
+        IntHashMap<ByteString> varHistogram = variablesHistogram(true);
         for (ByteString[] triple : triples) {
             if (triple[1].equals(KB.DIFFERENTFROMbs)) {
                 int varPos = KB.firstVariablePos(triple);
@@ -1670,7 +1696,7 @@ public class Rule {
      * @return
      */
     public boolean containsLevel2RedundantSubgraphs() {
-        if (!isClosed() || triples.size() < 4 || triples.size() % 2 == 1) {
+        if (!isClosed(true) || triples.size() < 4 || triples.size() % 2 == 1) {
             return false;
         }
 
@@ -1689,7 +1715,7 @@ public class Rule {
     }
 
     public boolean containsDisallowedDiamond() {
-        if (!isClosed() || triples.size() < 4 || triples.size() % 2 == 1) {
+        if (!isClosed(true) || triples.size() < 4 || triples.size() % 2 == 1) {
             return false;
         }
 
@@ -1818,8 +1844,8 @@ public class Rule {
      * @return true if the rule has better confidence that its parent rules.
      */
     public boolean hasConfidenceGain() {
-        if (isClosed()) {
-            if (parent != null && parent.isClosed()) {
+        if (isClosed(true)) {
+            if (parent != null && parent.isClosed(true)) {
                 return getPcaConfidence() > parent.getPcaConfidence();
             } else {
                 return true;

@@ -36,7 +36,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 	
 	@Override
 	public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output) {		
-		if(query.isEmpty()){
+		if (query.isEmpty()) {
 			//Initial case
 			ByteString[] newEdge = query.fullyUnboundTriplePattern();
 			query.getTriples().add(newEdge);
@@ -48,7 +48,8 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 					continue;
 				}
 				
-				if(headExcludedRelations != null && headExcludedRelations.contains(relation)) {
+				if(headExcludedRelations != null && 
+						headExcludedRelations.contains(relation)) {
 					continue;
 				}
 				
@@ -64,9 +65,11 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 				}
 			}			
 			query.getTriples().remove(0);
-		}else{
+		} else {
 			super.getDanglingAtoms(query, minCardinality, output);
-			if(query.isClosed() && !query.containsRelation(ByteString.of(wikiLinkProperty)) && !query.containsRelation(typeString)){
+			if (query.isClosed(true) && 
+					!query.containsRelation(ByteString.of(wikiLinkProperty)) 
+					&& !query.containsRelation(typeString)){
 				//Add the types when the query is long enough
 				getSpecializationCandidates(query, minCardinality, output);
 			}
@@ -83,7 +86,8 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 			newEdge[0] = head[0];
 			newEdge[1] = typeString;				
 			query.getTriples().add(newEdge);
-			IntHashMap<ByteString> subjectTypes = kb.countProjectionBindings(query.getHead(), query.getAntecedent(), newEdge[2]);
+			IntHashMap<ByteString> subjectTypes = kb.countProjectionBindings(query.getHead(), 
+					query.getAntecedent(), newEdge[2]);
 			if(!subjectTypes.isEmpty()){
 				for(ByteString type: subjectTypes){
 					int cardinality = subjectTypes.get(type);
@@ -110,7 +114,8 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 					int cardinality = objectTypes.get(type);
 					if(cardinality >= minSupportThreshold){
 						Rule newCandidate = new Rule(candidate, cardinality);
-						newCandidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(newCandidate.getHeadRelation()));
+						newCandidate.setHeadCoverage((double)cardinality 
+								/ (double)headCardinalities.get(newCandidate.getHeadRelation()));
 						newCandidate.setSupportRatio((double)cardinality / (double)kb.size());
 						newCandidate.addParent(query);
 						newCandidate.getLastTriplePattern()[2] = type;
@@ -176,7 +181,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 		super.getClosingAtoms(query, minSupportThreshold, output);
 	}
 
-	protected boolean testLength(Rule candidate){
+	protected boolean isNotTooLong(Rule candidate){
 		boolean passed = candidate.getLengthWithoutTypesAndLinksTo(typeString, ByteString.of(wikiLinkProperty)) < maxDepth;
 		return passed;
 	}

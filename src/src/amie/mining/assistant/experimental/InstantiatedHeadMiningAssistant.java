@@ -110,7 +110,7 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 			}			
 			query.getTriples().remove(0);
 		} else {
-			if (!testLength(query)) {
+			if (!isNotTooLong(query)) {
 				return;
 			}
 			

@@ -107,7 +107,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 		if(rule.isEmpty())
 			return;
 		
-		if(!testLength(rule))
+		if(!isNotTooLong(rule))
 			return;
 		
 		List<ByteString> sourceVariables = null;
@@ -119,7 +119,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 			return;
 		}
 		
-		if(rule.isClosed()){
+		if(rule.isClosed(true)){
 			sourceVariables = allVariables;
 			targetVariables = allVariables;
 		}else{
@@ -233,7 +233,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 		}
 	
 	
-		if(!testLength(query))
+		if(!isNotTooLong(query))
 			return;
 					
 		// Pruning by maximum length for the \mathcal{O}_D operator.
@@ -263,7 +263,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 		List<ByteString> openVariables = query.getOpenVariables();
 		
 		//Then do it for all values
-		if(query.isClosed()) {				
+		if(query.isClosed(true)) {				
 			joinVariables = query.getVariables();
 		} else {
 			joinVariables = openVariables;

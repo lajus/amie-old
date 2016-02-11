@@ -73,7 +73,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 		if(query.isEmpty())
 			return;
 		
-		if(!testLength(query))
+		if(!isNotTooLong(query))
 			return;
 		
 		List<ByteString> sourceVariables = null;
@@ -81,7 +81,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 		List<ByteString> targetVariables = null;		
 		List<ByteString> openVariables = query.getOpenVariables();
 		
-		if(query.isClosed()){
+		if(query.isClosed(true)){
 			sourceVariables = allVariables;
 			targetVariables = allVariables;
 		}else{
@@ -195,7 +195,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 		List<ByteString> openVariables = query.getOpenVariables();
 		
 		//General case
-		if(!testLength(query))
+		if(!isNotTooLong(query))
 			return;
 		
 		//General case
@@ -212,7 +212,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 		List<ByteString> joinVariables = null;
 		
 		//Then do it for all values
-		if(query.isClosed()){
+		if(query.isClosed(true)){
 			joinVariables = query.getVariables();
 		}else{
 			joinVariables = query.getOpenVariables();

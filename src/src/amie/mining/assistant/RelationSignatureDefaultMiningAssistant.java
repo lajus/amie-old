@@ -45,7 +45,7 @@ public class RelationSignatureDefaultMiningAssistant extends DefaultMiningAssist
 	public boolean testConfidenceThresholds(Rule candidate) {
 		boolean queryChanged = false;
 		
-		if (!candidate.isClosed()){
+		if (!candidate.isClosed(true)){
 			return false;
 		}
 		

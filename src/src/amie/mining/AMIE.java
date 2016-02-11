@@ -473,7 +473,7 @@ public class AMIE {
                     // Check if the rule meets the language bias and confidence thresholds and
                     // decide whether to output it.
                     boolean outputRule = false;
-                    if (currentRule.isClosed()) {
+                    if (assistant.shouldBeOutput(currentRule)) {
                         long timeStamp1 = System.currentTimeMillis();
                         boolean ruleSatisfiesConfidenceBounds
                                 = assistant.calculateConfidenceBoundsAndApproximations(currentRule);

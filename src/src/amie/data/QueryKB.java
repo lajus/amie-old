@@ -46,13 +46,17 @@ public class QueryKB {
 		
 		System.out.println(kb.maximalCardinality(ByteString.of("<hasChild>"), 1000));
 		System.out.println(kb.maximalCardinalityInv(ByteString.of("<hasChild>"), 1000));**/
-		/**KB kb = new KB();
-		kb.add("Jorge", "isCitizenOf", "Ecuador");
+		KB kb = new KB();
+/**		kb.add("Jorge", "isCitizenOf", "Ecuador");
 		kb.add("Luis", "isCitizenOf", "Ecuador");
 		kb.add("Diana", "isCitizenOf", "Ecuador");
 		kb.add("Luis", "wasBornIn", "Guayaquil");
 		kb.add("Ambar", "wasBornIn", "Guayaquil");
 		kb.add("Diana", "wasBornIn", "Pinas"); **/
+		kb.add("Luis", "type", "Person");
+		kb.add("Nicanor", "type", "StuffedAnimal");
+		kb.add("Ambar", "type", "Person");
+		kb.add("Pepe", "type", "Dog");
 		//System.out.println(kb.selectDistinct(ByteString.of("?s"), KB.triples(
 		//		KB.triple("?s", "isCitizenOf", "?x"), KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "1", "wasBornIn"))));
 		/**System.out.println(kb.count(KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "1", "wasBornIn"))); 
@@ -61,12 +65,12 @@ public class QueryKB {
 		System.out.println(kb.selectDistinct(ByteString.of("?s"), KB.triples(KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "2", "wasBornIn")))); 
 		System.out.println(kb.count(KB.triple("?s", KB.hasNumberOfValuesSmallerThan + "2", "wasBornIn"))); **/
 		
-		KB kb = U.loadFiles(args);
+//		KB kb = U.loadFiles(args);
 		/**for (ByteString e: kb.getAllEntities()) {
 			System.out.println(e);
 		}**/
-		List<ByteString[]> q = KB.triples(KB.triple("?a",  "hasNumberOfValuesSmallerThan1",  "<hasWonPrize>"), 
-				KB.triple("?a",  "isIncomplete",  "<hasWonPrize>")); 
+		List<ByteString[]> q = KB.triples(KB.triple("?a", "type", "?x"), 
+				KB.triple("?x",  KB.DIFFERENTFROMstr,  "Person")); 
 		for (ByteString x : kb.selectDistinct(ByteString.of("?a"), q))
 			System.out.println(x);
 		

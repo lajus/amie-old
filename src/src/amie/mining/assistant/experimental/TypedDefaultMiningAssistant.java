@@ -106,7 +106,7 @@ public class TypedDefaultMiningAssistant extends DefaultMiningAssistant {
 	}
 
 	@Override
-	protected boolean testLength(Rule candidate) {
+	protected boolean isNotTooLong(Rule candidate) {
 		return candidate.getLengthWithoutTypes(typeString) < maxDepth;
 	}
 }
