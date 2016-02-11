@@ -1,8 +1,8 @@
 package amie.mining.assistant.experimental;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -253,7 +253,6 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		Set<ByteString> subtypes = amie.data.U.getSubtypes(this.kbSchema, lastAtom[2]);
 		ByteString[] atom2 = KB.triple(atom1[2], KB.DIFFERENTFROMbs, lastAtom[2]);
 		long baseCardinality = amie.data.U.getNumberOfEntitiesForType(this.kb, lastAtom[2]);
-		ByteString[] atom3 = atom2.clone();
 		List<ByteString[]> parentRuleTriples = parentRule.getTriples();
 		for (ByteString subtype : subtypes) {
 			long typeCardinality = amie.data.U.getNumberOfEntitiesForType(this.kb, subtype);
@@ -261,16 +260,13 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			if (typeCardinality < minSupportThreshold || ratio < 0.1)
 				continue;
 			
-			atom3[2] = subtype;
-			parentRuleTriples.add(atom1);
-			parentRuleTriples.add(atom2);
-			parentRuleTriples.add(atom3);
-			long cardinality = kb.countDistinct(countVar, parentRuleTriples);
-			parentRuleTriples.remove(parentRuleTriples.size() - 1);
-			parentRuleTriples.remove(parentRuleTriples.size() - 1);
-			parentRuleTriples.remove(parentRuleTriples.size() - 1);
+			atom2[2] = subtype;
+			Set<ByteString> supportSet = new LinkedHashSet<>(kb.selectDistinct(countVar, parentRuleTriples));
+			Set<ByteString> subTypeSet = amie.data.U.getAllEntitiesForType(this.kb, subtype);
+			supportSet.removeAll(subTypeSet);
+			long cardinality = supportSet.size();
 			if (cardinality >= minSupportThreshold) {
-				Rule candidate = parentRule.addAtoms(atom1, atom2, atom3, cardinality);
+				Rule candidate = parentRule.addAtoms(atom1, atom2, cardinality);
 				candidate.addParent(parentRule);
 				output.add(candidate);			
 			}	
@@ -502,15 +498,28 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 
 	@Override
 	public double computePCAConfidence(Rule rule) {
-		List<ByteString[]> antecedent = new ArrayList<ByteString[]>();
-		antecedent.addAll(rule.getTriples().subList(1, rule.getTriples().size()));
-		ByteString[] succedent = rule.getTriples().get(0);
-		ByteString[] negativeTriple = succedent.clone();
-		negativeTriple[1] = succedent[1].equals(isCompleteBS) ? isIncompleteBS : isCompleteBS;
-		antecedent.add(negativeTriple);
-		long counterEvidence = kb.countDistinct(rule.getFunctionalVariable(), antecedent);
+		Rule negativeRule = new Rule(rule, rule.getSupport());
+		ByteString[] succedent = negativeRule.getHead();
+		succedent[1] = succedent[1].equals(isCompleteBS) ? isIncompleteBS : isCompleteBS;
+		long counterEvidence = 0;
 		double support = rule.getSupport();
-		rule.setPcaBodySize(support + counterEvidence);
+		if (!rule.containsRelation(KB.DIFFERENTFROMbs)) {
+			counterEvidence = kb.countDistinct(succedent[0], negativeRule.getTriples());
+		} else {
+			// We have to calculate the support in a different way
+			int differentIdx = negativeRule.firstIndexOfRelation(KB.DIFFERENTFROMbs);
+			int typeIdx = differentIdx - 1;
+			ByteString[] differentAtom = negativeRule.getTriples().get(differentIdx);
+			ByteString[] typeAtom = negativeRule.getTriples().get(typeIdx);
+			negativeRule.getTriples().remove(differentAtom);
+			negativeRule.getTriples().remove(typeAtom);
+			Set<ByteString> negativeSupportSet = new LinkedHashSet<>(kb.selectDistinct(succedent[0], 
+					negativeRule.getTriples()));
+			Set<ByteString> typeSet = amie.data.U.getAllEntitiesForType(this.kb, differentAtom[2]);
+			negativeSupportSet.removeAll(typeSet);
+			counterEvidence = negativeSupportSet.size();
+		}
+		rule.setPcaBodySize(support + counterEvidence);			
 		return rule.getPcaConfidence();
 	}
 	
