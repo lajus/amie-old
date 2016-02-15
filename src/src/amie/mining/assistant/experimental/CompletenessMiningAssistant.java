@@ -138,11 +138,8 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 					newCard = kb.maximalCardinalityInv(targetRelation, compositeRelation.second.intValue());
 				}
 				
-				if (newCard == 0)
-					return;
-				
 				if (newCard == compositeRelation.second.intValue())
-					++newCard;
+					return;
 			}
 								
 			ByteString newRelation = ByteString.of(compositeRelation.first.toString() + newCard);
@@ -159,7 +156,8 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}
 	}
 	
-	private void addCardinalityAtom(Rule rule, double minSupportThreshold, Collection<Rule> output, ByteString targetRelation) {
+	private void addCardinalityAtom(Rule rule, double minSupportThreshold, 
+			Collection<Rule> output, ByteString targetRelation) {
 		// We'll force a cardinality atom at the end
 		ByteString[] head = rule.getHead();
 		int startCardinality = -1;
@@ -338,7 +336,8 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		
 	}
 
-	private void addRelevanceAtom(Rule parentRule, ByteString relevanceRelation, double minSupportThreshold, Collection<Rule> output) {
+	private void addRelevanceAtom(Rule parentRule, ByteString relevanceRelation,
+			double minSupportThreshold, Collection<Rule> output) {
 		ByteString[] relevanceAtom = new ByteString[]{parentRule.getFunctionalVariable(), 
 				relevanceRelation, ByteString.of("TRUE")};
 		
@@ -494,6 +493,12 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}
 		
 		return -1;
+	}
+	
+	@Override
+	public void calculateConfidenceMetrics(Rule candidate) {	
+		candidate.setBodySize((long)candidate.getSupport());
+		computePCAConfidence(candidate);
 	}
 
 	@Override

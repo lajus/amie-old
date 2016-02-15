@@ -3709,14 +3709,16 @@ public class KB {
 		IntHashMap<Integer> histogram = buildHistogram(map);
 		List<Integer> keys = histogram.decreasingKeys();
 		Collections.sort(keys);
-		Collections.reverse(keys);
-		int idx = 0;
-		int val = 0xFFFF;
-		do {
-			val = keys.get(idx);
-			++idx;
-		} while (val >= limit && 
-				idx < keys.size());
+		Object[] keysArray = keys.toArray();
+		int idx = Arrays.binarySearch(keysArray, limit);
+		int val = limit;
+		if (idx == -1) return val;
+		if (idx < -1) idx = -idx - 2;
+		while (val >= limit && 
+				idx >= 0) {
+			val = ((Integer)keysArray[idx]).intValue();
+			--idx;
+		} 
 		return val;
 	}
 
@@ -3955,5 +3957,9 @@ public class KB {
 				System.out.println(type + "\t" + map.get(type).size());
 			}
 		}
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(Arrays.binarySearch(new int[]{3, 4}, 1));
 	}
 }
