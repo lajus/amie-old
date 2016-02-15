@@ -3894,7 +3894,7 @@ public class KB {
 					instances = amie.data.U.getRangeSet(this, relation);
 					//instances.retainAll(objectSize);
 				}
-				// Now count the instances without instances of the relation.
+				// Now count the instances not occurring in the relation.
 				for (ByteString instance : instances) {
 					if (!theMap.containsKey(instance)) {
 						distribution.increase(0);
