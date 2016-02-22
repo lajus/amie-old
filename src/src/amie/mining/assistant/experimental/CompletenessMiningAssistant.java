@@ -1,5 +1,6 @@
 package amie.mining.assistant.experimental;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -21,7 +22,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	
 	public static final String isIncomplete = "isIncomplete";
 	
-	public static final String isRelevant = "<isRelevanthasNumberOfFacts>";
+	public static final String isRelevanthasNumberOfFacts = "<isRelevanthasNumberOfFacts>";
 	
 	public static final String isRelevanthasWikiLength = "<isRelevanthasWikiLength>";
 	
@@ -43,7 +44,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	
 	public static final ByteString isIncompleteBS = ByteString.of(isIncomplete);
 	
-	public static final ByteString isRelevantBS = ByteString.of(isRelevant);
+	public static final ByteString isRelevanthasNumberOfFactsBS = ByteString.of(isRelevanthasNumberOfFacts);
 	
 	public CompletenessMiningAssistant(KB dataSource) {
 		super(dataSource);
@@ -51,7 +52,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		this.bodyExcludedRelations = Arrays.asList(amie.data.U.typeRelationBS, 
 				amie.data.U.subClassRelationBS, amie.data.U.domainRelationBS, 
 				amie.data.U.rangeRelationBS, isCompleteBS, isIncompleteBS,
-				isRelevanthasWikiLengthBS, isRelevanthasIngoingLinksBS, isRelevantBS);
+				isRelevanthasWikiLengthBS, isRelevanthasIngoingLinksBS, isRelevanthasNumberOfFactsBS);
 	}
 
 	@Override
@@ -219,8 +220,8 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			addTypeAtom(parentRule, minSupportThreshold, output);
 		}
 		
-		if (!parentRule.containsRelation(isRelevantBS) && extendRule) {
-			addRelevanceAtom(parentRule, isRelevantBS, minSupportThreshold, output);
+		if (!parentRule.containsRelation(isRelevanthasNumberOfFactsBS) && extendRule) {
+			addRelevanceAtom(parentRule, isRelevanthasNumberOfFactsBS, minSupportThreshold, output);
 		}
 		
 		if (!parentRule.containsRelation(isRelevanthasWikiLengthBS) && extendRule) {
@@ -278,12 +279,20 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 
 	@Override
 	public void getDanglingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
+		Collection<Rule> tmpOutput = new ArrayList<>();
+		ByteString targetRelation = rule.getHead()[2];
 		if (rule.getHead()[1].equals(isIncompleteBS)) {
-			if (containsCardinalityAtom(rule, rule.getHead()[2])) {
-				super.getDanglingAtoms(rule, minSupportThreshold, output);
+			if (containsCardinalityAtom(rule, targetRelation)) {
+				super.getDanglingAtoms(rule, minSupportThreshold, tmpOutput);
 			}
 		} else {
-			super.getDanglingAtoms(rule, minSupportThreshold, output);
+			super.getDanglingAtoms(rule, minSupportThreshold, tmpOutput);
+		}
+		
+		// We will now remove any rule containing an atom involving with the explored relation
+		for (Rule r : tmpOutput) {
+			if (!r.containsRelation(targetRelation))
+				output.add(r);
 		}
 	}
 
@@ -353,12 +362,15 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	
 	@Override
 	protected boolean isNotTooLong(Rule candidate) {
-		int length = maxDepth;
-		if (candidate.containsRelation(amie.data.U.typeRelationBS)) ++length;
-		if (candidate.containsRelation(isRelevantBS)) ++length;
-		if (containsCardinalityAtom(candidate, candidate.getHead()[2])) ++length;
+		int maxLength = maxDepth;
+		if (candidate.containsRelation(amie.data.U.typeRelationBS)) ++maxLength;
+		if (candidate.containsRelation(KB.DIFFERENTFROMbs)) ++maxLength;
+		if (candidate.containsRelation(isRelevanthasNumberOfFactsBS)) ++maxLength;
+		if (candidate.containsRelation(isRelevanthasWikiLengthBS)) ++maxLength;
+		if (candidate.containsRelation(isRelevanthasIngoingLinksBS)) ++maxLength;
+		if (containsCardinalityAtom(candidate, candidate.getHead()[2])) ++maxLength;
 		
-		return candidate.getRealLength() <= length;
+		return candidate.getRealLength() <= maxLength;
 	}
 	
 	
