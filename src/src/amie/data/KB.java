@@ -3537,6 +3537,22 @@ public class KB {
 		return result;
 	}
 	
+
+	/**
+	 * It returns the number of facts for each of the entities in the
+	 * collection provided as argument.
+	 * @param kb
+	 * @return
+	 */
+	public IntHashMap<ByteString> getEntitiesOccurrences(Collection<ByteString> entities) {
+		IntHashMap<ByteString> result = new IntHashMap<>();
+		for (ByteString entity : entities) {
+			if (subjectSize.contains(entity)) result.add(entity, subjectSize.get(entity));
+			if (objectSize.contains(entity)) result.add(entity, objectSize.get(entity));
+		}
+		return result;
+	}
+	
 	
 	/**
 	 * Return all the relations (and their sizes) that are bigger than the given
@@ -3962,4 +3978,6 @@ public class KB {
 	public static void main(String[] args) {
 		System.out.println(Arrays.binarySearch(new int[]{3, 4}, 1));
 	}
+
+	
 }

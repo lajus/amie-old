@@ -21,6 +21,8 @@ public class WikidataCleaner {
 	public static final String labelProperty = "http://www.w3.org/2000/01/rdf-schema#label";
 	
 	public static final String wikidataPrefix = "http://www.wikidata.org/entity/";
+	
+	public static boolean withLabels = false;
 
 	/**
 	 * It parses a .nt file and returns a dictionary where the keys are Wikidata entity ids
@@ -55,7 +57,7 @@ public class WikidataCleaner {
 	/**
 	 * Given a wikidata file (triples subject, predicate, object), containing obscure ids for entities and relations,
 	 * it returns a more human readable version of the KB where the ids are replaced by strings of the form
-	 * id_[human_readable_name]. The replacement strings are stored in the maps sents as arguments.
+	 * [human_readable_name]_id. The replacement strings are stored in the maps sents as arguments.
 	 * @param file
 	 * @param relationsMap
 	 * @param entitiesMap
@@ -68,18 +70,38 @@ public class WikidataCleaner {
 			throws FileNotFoundException, IOException {
 		NxParser nxp = new NxParser(new FileInputStream(file), false);
 		
-		while (nxp.hasNext()) {
-			Node[] ns = nxp.next();
-			if (ns.length == 3) {
-				if (ns[0].toString().startsWith(wikidataPrefix) 
-						&& ns[2].toString().startsWith(wikidataPrefix)) {
-					String subject = entitiesMap.get(ns[0].toString());
-					String object = entitiesMap.get(ns[2].toString());
-					String relation = relationsMap.get(ns[1].toString().substring(0, ns[1].toString().length() - 1));
-					if (subject != null && object != null && relation != null) {
-						String cleanSubject = subject.replace(wikidataPrefix, "");
-						String cleanObject = object.replace(wikidataPrefix, "");
-						System.out.println(cleanSubject + "\t" + relation + "\t" + cleanObject);
+		if (withLabels) {
+			while (nxp.hasNext()) {
+				Node[] ns = nxp.next();
+				if (ns.length == 3) {
+					if (ns[0].toString().startsWith(wikidataPrefix) 
+							&& ns[2].toString().startsWith(wikidataPrefix)) {
+						String subject = entitiesMap.get(ns[0].toString());
+						String object = entitiesMap.get(ns[2].toString());
+						String relation = relationsMap.get(ns[1].toString().substring(0, ns[1].toString().length() - 1));
+						if (subject != null && object != null && relation != null) {
+							String cleanSubject = subject.replace(wikidataPrefix, "");
+							String cleanObject = object.replace(wikidataPrefix, "");
+							System.out.println(cleanSubject + "\t" + relation + "\t" + cleanObject);
+						}
+					}
+				}
+			}
+		} else {
+			while (nxp.hasNext()) {
+				Node[] ns = nxp.next();
+				if (ns.length == 3) {
+					if (ns[0].toString().startsWith(wikidataPrefix) ) {
+						String subject = entitiesMap.get(ns[0].toString());						
+						String object = entitiesMap.get(ns[2].toString());
+						if (object == null)
+							object = "\"" + ns[2].toN3() + "\"";
+						String relation = relationsMap.get(ns[1].toString().substring(0, ns[1].toString().length() - 1));
+						if (subject != null && relation != null) {
+							String cleanSubject = subject.replace(wikidataPrefix, "");
+							String cleanObject = object.replace(wikidataPrefix, "");
+							System.out.println(cleanSubject + "\t" + relation + "\t" + cleanObject);
+						}
 					}
 				}
 			}
@@ -87,10 +109,12 @@ public class WikidataCleaner {
 	}
 	
 	public static void main(String[] args) throws IOException {
+		withLabels = Boolean.parseBoolean(args[0]);
+		
 		// Build a map from property identifiers to more human readable names
-		Map<String, String> relationsMap = idsToNames(args[0]);
-		Map<String, String>	entitiesMap = idsToNames(args[1]);
+		Map<String, String> relationsMap = idsToNames(args[1]);
+		Map<String, String>	entitiesMap = idsToNames(args[2]);
 		// Parse the big file
-		cleanWikidata(args[2], relationsMap, entitiesMap);
+		cleanWikidata(args[3], relationsMap, entitiesMap);
 	}
 }

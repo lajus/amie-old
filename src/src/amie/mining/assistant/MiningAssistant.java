@@ -753,7 +753,7 @@ public class MiningAssistant{
 		if(hardQueryInfo != null){
 			double pcaConfUpperBound = getPcaConfidenceUpperBound(candidate);			
 			if(pcaConfUpperBound < this.minPcaConfidence){
-				if (!verbose) {
+				if (this.verbose) {
 					System.err.println("Query " + candidate + " discarded by PCA confidence upper bound " + pcaConfUpperBound);			
 				}
 				return false;
@@ -762,7 +762,7 @@ public class MiningAssistant{
 			double stdConfUpperBound = getStdConfidenceUpperBound(candidate);			
 			
 			if(stdConfUpperBound < this.minStdConfidence){
-				if (!verbose) {
+				if (this.verbose) {
 					System.err.println("Query " + candidate + " discarded by standard confidence upper bound " + stdConfUpperBound);
 				}
 				return false;
@@ -929,7 +929,7 @@ public class MiningAssistant{
 				ratio = (double)candidate.getSupport() / ratio;
 				candidate.setPcaEstimation(ratio);
 				if(ratio < minPcaConfidence) { 
-					if (!verbose) {
+					if (this.verbose) {
 						System.err.println("Rule " + candidate + 
 								" discarded by functionality heuristic with ratio " + ratio);
 					}							
