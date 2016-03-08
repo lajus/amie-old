@@ -10,9 +10,9 @@ public class QueryKB {
 
 	public static void main(String[] args) throws IOException {
 		KB kb = new KB();
-		kb.load(new File("/home/galarrag/Dropbox/workspace/ConditionalKeys/Data/Wikidata/domains/album/album.final.tsv"));
-		List<ByteString[]> query = KB.triples(KB.triple("?s", "freebase_identifier_p646", "?o"), 
-				KB.triple("?x", "freebase_identifier_p646", "?o"), KB.triple("?s", KB.DIFFERENTFROMstr, "?x"));
+		kb.load(new File("/home/galarrag/Dropbox/workspace/ConditionalKeys/Data/Wikidata/domains/village/village.final.tsv"));
+		List<ByteString[]> query = KB.triples(KB.triple("?s", "geonames_id_p1566", "?o"), 
+				KB.triple("?x", "geonames_id_p1566", "?o"), KB.triple("?s", KB.DIFFERENTFROMstr, "?x"));
 		System.out.println(kb.selectDistinct(ByteString.of("?s"), ByteString.of("?x"), query));
 		System.out.println(kb.selectDistinct(ByteString.of("?s"), ByteString.of("?o"), query));
 	}
