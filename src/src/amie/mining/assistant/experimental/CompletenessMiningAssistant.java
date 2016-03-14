@@ -65,6 +65,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	@Override
 	public void setHeadExcludedRelations(java.util.Collection<ByteString> headExcludedRelations) {};
 	
+	@Override
 	public void setBodyExcludedRelations(java.util.Collection<ByteString> bodyExcludedRelations) {};
 	
 	@Override

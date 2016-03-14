@@ -6,14 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import amie.data.KB;
+import amie.mining.ConfidenceMetric;
+import amie.rules.Rule;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import javatools.datatypes.MultiMap;
 import javatools.datatypes.Pair;
-import amie.data.KB;
-import amie.mining.ConfidenceMetric;
-import amie.rules.QueryEquivalenceChecker;
-import amie.rules.Rule;
 
 /**
  * Simpler miner assistant which implements all the logic required 
@@ -424,11 +423,12 @@ public class MiningAssistant{
 			if(cardinality >= minSupportThreshold){
 				ByteString[] succedent = newEdge.clone();
 				succedent[1] = relation;
-				int countVarPos = this.countAlwaysOnSubject? 0 : findCountingVariable(succedent);
+				int countVarPos = this.countAlwaysOnSubject ? 0 : findCountingVariable(succedent);
 				Rule candidate = new Rule(succedent, cardinality);
 				candidate.setFunctionalVariablePosition(countVarPos);
 				registerHeadRelation(candidate);
-				if (canAddInstantiatedAtoms() && !relation.equals(KB.EQUALSbs)){
+				if (canAddInstantiatedAtoms() && 
+						!relation.equals(KB.EQUALSbs)){
 					getInstantiatedAtoms(candidate, null, 0, countVarPos == 0 ? 2 : 0, minSupportThreshold, output);
 				}
 				
@@ -498,12 +498,15 @@ public class MiningAssistant{
 						Rule candidate = rule.addAtom(newEdge, cardinality);
 						if(candidate.containsUnifiablePatterns()){
 							//Verify whether dangling variable unifies to a single value (I do not like this hack)
-							if(boundHead && kb.countDistinct(newEdge[danglingPosition], candidate.getTriples()) < 2)
+							if(boundHead && 
+									kb.countDistinct(newEdge[danglingPosition], candidate.getTriples()) < 2)
 								continue;
 						}
 						
-						candidate.setHeadCoverage((double)candidate.getSupport() / headCardinalities.get(candidate.getHeadRelation()));
-						candidate.setSupportRatio((double)candidate.getSupport() / (double)getTotalCount(candidate));
+						candidate.setHeadCoverage((double)candidate.getSupport() 
+								/ headCardinalities.get(candidate.getHeadRelation()));
+						candidate.setSupportRatio((double)candidate.getSupport() 
+								/ (double)getTotalCount(candidate));
 						candidate.addParent(rule);
 						if (!enforceConstants) {
 							output.add(candidate);
@@ -605,8 +608,10 @@ public class MiningAssistant{
 							if(cardinality >= minSupportThreshold){										
 								Rule candidate = rule.addAtom(newEdge, cardinality);
 								if(!candidate.isRedundantRecursive()){
-									candidate.setHeadCoverage((double)cardinality / (double)headCardinalities.get(candidate.getHeadRelation()));
-									candidate.setSupportRatio((double)cardinality / (double)getTotalCount(candidate));
+									candidate.setHeadCoverage((double)cardinality 
+											/ (double)headCardinalities.get(candidate.getHeadRelation()));
+									candidate.setSupportRatio((double)cardinality 
+											/ (double)getTotalCount(candidate));
 									candidate.addParent(rule);
 									output.add(candidate);
 								}
@@ -651,9 +656,12 @@ public class MiningAssistant{
 				} else if (candidateFreshVariables.contains(lastTriplePattern[2])) {
 					danglingPosition = 2;
 				} else {
-					throw new IllegalArgumentException("The query " + rule.getRuleString() + " does not contain fresh variables in the last triple pattern.");
+					throw new IllegalArgumentException("The query " + rule.getRuleString() + 
+								" does not contain fresh variables in the last triple pattern.");
 				}
-				getInstantiatedAtoms(candidate, candidate, lastTriplePatternIndex, danglingPosition, minSupportThreshold, output);
+				getInstantiatedAtoms(candidate, candidate, 
+						lastTriplePatternIndex, danglingPosition, 
+						minSupportThreshold, output);
 			}
 		}
 	}
@@ -730,8 +738,7 @@ public class MiningAssistant{
 				return calculateConfidenceApproximationFor3Atoms(candidate);
 			} else if (realLength > 3) {
 				return calculateConfidenceApproximationForGeneralCase(candidate);
-			}
-				
+			}		
 		}
 		
 		return true;
@@ -754,7 +761,8 @@ public class MiningAssistant{
 			double pcaConfUpperBound = getPcaConfidenceUpperBound(candidate);			
 			if(pcaConfUpperBound < this.minPcaConfidence){
 				if (this.verbose) {
-					System.err.println("Query " + candidate + " discarded by PCA confidence upper bound " + pcaConfUpperBound);			
+					System.err.println("Query " + candidate + 
+							" discarded by PCA confidence upper bound " + pcaConfUpperBound);			
 				}
 				return false;
 			}
@@ -763,7 +771,8 @@ public class MiningAssistant{
 			
 			if(stdConfUpperBound < this.minStdConfidence){
 				if (this.verbose) {
-					System.err.println("Query " + candidate + " discarded by standard confidence upper bound " + stdConfUpperBound);
+					System.err.println("Query " + candidate + 
+							" discarded by standard confidence upper bound " + stdConfUpperBound);
 				}
 				return false;
 			}
