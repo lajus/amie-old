@@ -1,9 +1,6 @@
 package amie.mining.assistant.experimental;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import amie.data.KB;
 import amie.mining.ConfidenceMetric;
@@ -19,7 +16,7 @@ public class StarShapedMiningAssistant extends MiningAssistant {
 	public StarShapedMiningAssistant(KB dataSource) {
 		super(dataSource);
 		wrapped = new CompletenessMiningAssistant(dataSource);
-		this.maxDepth = 1;
+		this.maxDepth++;
 		this.recursivityLimit = 1;
 		this.confidenceMetric = ConfidenceMetric.StandardConfidence;
 	}
@@ -38,10 +35,22 @@ public class StarShapedMiningAssistant extends MiningAssistant {
 	}
 	
 	@Override
-	public void setRecursivityLimit(int recursitivityLimit) {}
+	public void setRecursivityLimit(int recursitivityLimit) {
+		System.err.println("StarShapedMiningAssistant: The recursivity limit for this class is fixed to 1 and cannot be changed.");
+	}
 	
 	@Override
 	public void getClosingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {}
+	
+	@Override
+	public void setMaxDepth(int maxAntecedentDepth) {
+		super.setMaxDepth(maxAntecedentDepth + 1);
+	};
+	
+	@Override
+	public int getMaxDepth() {
+		return this.maxDepth - 1;
+	}
 	
 	@Override
 	public void getDanglingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
@@ -65,11 +74,15 @@ public class StarShapedMiningAssistant extends MiningAssistant {
 			//Here we still have to make a redundancy check						
 			int cardinality = promisingRelations.get(relation);
 			if(cardinality >= minSupportThreshold) {
-				newEdge[1] = relation;
-				Rule candidate = rule.addAtom(newEdge, cardinality);
 				if(rule.containsRelation(relation) 
 						|| relation.equals(head[2])) {
 					continue;
+				}
+				
+				newEdge[1] = relation;
+				Rule candidate = rule.addAtom(newEdge, cardinality);
+				if (rule.getRealLength() == 2) {
+					System.out.println(candidate.getBasicRuleString());
 				}
 				
 				candidate.setHeadCoverage((double)candidate.getSupport() 
