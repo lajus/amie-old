@@ -1,6 +1,5 @@
 package amie.mining.assistant.experimental;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -46,6 +45,9 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	
 	public static final ByteString isRelevanthasNumberOfFactsBS = ByteString.of(isRelevanthasNumberOfFacts);
 	
+	private static final List<ByteString> functionalExceptions = Arrays.asList(ByteString.of("<hasChild>"), 
+			ByteString.of("<child_P40>"), ByteString.of("<spokenIn>"));
+	
 	public CompletenessMiningAssistant(KB dataSource) {
 		super(dataSource);
 		this.allowConstants = false;
@@ -53,6 +55,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 				amie.data.U.subClassRelationBS, amie.data.U.domainRelationBS, 
 				amie.data.U.rangeRelationBS, isCompleteBS, isIncompleteBS,
 				isRelevanthasWikiLengthBS, isRelevanthasIngoingLinksBS, isRelevanthasNumberOfFactsBS);
+		this.recursivityLimit = 1;
 	}
 
 	@Override
@@ -67,6 +70,24 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	
 	@Override
 	public void setBodyExcludedRelations(java.util.Collection<ByteString> bodyExcludedRelations) {};
+	
+	@Override
+	public void getClosingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output){}
+	
+	@Override
+	public void setRecursivityLimit(int recursitivityLimit) {
+		System.err.println(this.getClass().getName() 
+				+ ": The recursivity limit for this class is fixed to 1 and cannot be changed.");
+	}
+	
+	/**
+	 * It returns true if the relation must be treated as a functional relation.
+	 * @param relation
+	 * @return
+	 */
+	private boolean isFunctional(ByteString relation) {
+		return this.kb.isFunctional(relation) || functionalExceptions.contains(relation);
+	}
 	
 	@Override
 	protected void buildInitialQueries(IntHashMap<ByteString> relations, 
@@ -122,7 +143,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 				if (!head[2].equals(lastAtom[2]))
 					return;
 					
-				if (kb.isFunctional(targetRelation)) {
+				if (this.isFunctional(targetRelation)) {
 					newCard = kb.maximalRightCumulativeCardinality(targetRelation, 
 						(long)minSupportThreshold, compositeRelation.second.intValue());
 				} else {
@@ -134,7 +155,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			} else {
 				if (!head[2].equals(lastAtom[2]))
 					return;
-				if (kb.isFunctional(targetRelation)) {
+				if (this.isFunctional(targetRelation)) {
 					newCard = kb.maximalCardinality(targetRelation, compositeRelation.second.intValue());
 				} else {
 					newCard = kb.maximalCardinalityInv(targetRelation, compositeRelation.second.intValue());
@@ -166,7 +187,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		String inequalityRelation = null;				
 		ByteString[] newAtom = head.clone();
 		long cardinality = 0;
-		if (this.kb.isFunctional(targetRelation)) {
+		if (this.isFunctional(targetRelation)) {
 			if (head[1].equals(isCompleteBS)) {
 				inequalityRelation = KB.hasNumberOfValuesGreaterThan;
 				startCardinality  = 0;
@@ -275,25 +296,56 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	
 	@Override
 	public boolean shouldBeOutput(Rule candidate) {
-		return candidate.isClosed(false);
+		return candidate.getRealLength() > 1;
 	}
+	
+	public void addDanglingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
+		ByteString[] newEdge = rule.fullyUnboundTriplePattern();
+		ByteString[] head = rule.getHead();
+		//General case
+		if(!isNotTooLong(rule))
+			return;
+
+		int nPatterns = rule.getTriples().size();		
+		newEdge[0] = head[0];
+		rule.getTriples().add(newEdge);
+		IntHashMap<ByteString> promisingRelations = kb.frequentBindingsOf(newEdge[1], 
+				rule.getFunctionalVariable(), rule.getTriples());
+		rule.getTriples().remove(nPatterns);
+		
+		for(ByteString relation: promisingRelations){
+			if (this.bodyExcludedRelations != null && 
+					this.bodyExcludedRelations.contains(relation))
+				continue;
+			//Here we still have to make a redundancy check						
+			int cardinality = promisingRelations.get(relation);
+			if(cardinality >= minSupportThreshold) {
+				if(rule.containsRelation(relation) 
+						|| relation.equals(head[2])) {
+					continue;
+				}
+				
+				newEdge[1] = relation;
+				Rule candidate = rule.addAtom(newEdge, cardinality);
+				candidate.setHeadCoverage((double)candidate.getSupport() 
+						/ headCardinalities.get(candidate.getHeadRelation()));
+				candidate.setSupportRatio((double)candidate.getSupport() 
+						/ (double)getTotalCount(candidate));
+				candidate.addParent(rule);
+				output.add(candidate);
+			}
+		}
+	}	
 
 	@Override
 	public void getDanglingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
-		Collection<Rule> tmpOutput = new ArrayList<>();
 		ByteString targetRelation = rule.getHead()[2];
 		if (rule.getHead()[1].equals(isIncompleteBS)) {
 			if (containsCardinalityAtom(rule, targetRelation)) {
-				super.getDanglingAtoms(rule, minSupportThreshold, tmpOutput);
+				this.addDanglingAtoms(rule, minSupportThreshold, output);
 			}
 		} else {
-			super.getDanglingAtoms(rule, minSupportThreshold, tmpOutput);
-		}
-		
-		// We will now remove any rule containing an atom involving with the explored relation
-		for (Rule r : tmpOutput) {
-			if (!r.containsRelation(targetRelation))
-				output.add(r);
+			this.addDanglingAtoms(rule, minSupportThreshold, output);
 		}
 	}
 
@@ -304,7 +356,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		newEdge[1] = amie.data.U.typeRelationBS;
 		ByteString domain = null;
 		if (this.kbSchema != null) {
-			if (this.kb.isFunctional(relation)) {
+			if (this.isFunctional(relation)) {
 				domain = amie.data.U.getRelationDomain(this.kbSchema, relation);
 			} else {
 				domain = amie.data.U.getRelationRange(this.kbSchema, relation);

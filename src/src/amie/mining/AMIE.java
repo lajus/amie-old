@@ -10,6 +10,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -469,7 +470,6 @@ public class AMIE {
                         this.idle = false;
                         this.sharedCounter.decrementAndGet();
                     }
-
                     // Check if the rule meets the language bias and confidence thresholds and
                     // decide whether to output it.
                     boolean outputRule = false;
@@ -517,9 +517,9 @@ public class AMIE {
                         // Addition of the specializations to the queue
                         synchronized (queryPool) {
                             timeStamp1 = System.currentTimeMillis();
-                            queryPool.addAll(temporalOutput);
+                            queryPool.addAll(temporalOutput);                            
                             if (currentRule.getRealLength() < assistant.getMaxDepth() - 1) {
-                                queryPool.addAll(temporalOutputDanglingEdges);
+                                queryPool.addAll(temporalOutputDanglingEdges);                           	
                             }
 
                             timeStamp2 = System.currentTimeMillis();

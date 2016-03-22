@@ -81,10 +81,6 @@ public class StarShapedMiningAssistant extends MiningAssistant {
 				
 				newEdge[1] = relation;
 				Rule candidate = rule.addAtom(newEdge, cardinality);
-				if (rule.getRealLength() == 2) {
-					System.out.println(candidate.getBasicRuleString());
-				}
-				
 				candidate.setHeadCoverage((double)candidate.getSupport() 
 						/ headCardinalities.get(candidate.getHeadRelation()));
 				candidate.setSupportRatio((double)candidate.getSupport() 
@@ -104,7 +100,7 @@ public class StarShapedMiningAssistant extends MiningAssistant {
 	}
 	@Override
 	public double computePCAConfidence(Rule rule) {
-		return 0.0;
+		return this.wrapped.computePCAConfidence(rule);
 	}
 
 }

@@ -316,7 +316,7 @@ public class Rule {
     public Rule(ByteString[] head, List<ByteString[]> body, double cardinality) {
         triples = new ArrayList<ByteString[]>();
         triples.add(head.clone());
-        triples.addAll(body);
+        triples.addAll(U.deepClone(body));
         this.highestVariable = 96; // The character before letter 'a'
         this.highestVariableSuffix = 0;
         parseVariables();
@@ -1378,6 +1378,28 @@ public class Rule {
                 strBuilder.append(" ");
                 continue;
             }
+            strBuilder.append(pattern[0]);
+            strBuilder.append("  ");
+            strBuilder.append(pattern[1]);
+            strBuilder.append("  ");
+            strBuilder.append(pattern[2]);
+            strBuilder.append("  ");
+        }
+
+        strBuilder.append(" => ");
+        ByteString[] head = triples.get(0);
+        strBuilder.append(head[0]);
+        strBuilder.append("  ");
+        strBuilder.append(head[1]);
+        strBuilder.append("  ");
+        strBuilder.append(head[2]);
+
+        return strBuilder.toString();
+    }
+    
+    public String getRuleRawString() {
+        StringBuilder strBuilder = new StringBuilder();
+        for (ByteString[] pattern : getBody()) {
             strBuilder.append(pattern[0]);
             strBuilder.append("  ");
             strBuilder.append(pattern[1]);
