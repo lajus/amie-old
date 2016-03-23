@@ -10,10 +10,15 @@ public class QueryKB {
 
 	public static void main(String[] args) throws IOException {
 		KB kb = new KB();
-		kb.load(new File("/home/galarrag/Dropbox/workspace/ConditionalKeys/Data/Wikidata/domains/village/village.final.tsv"));
-		List<ByteString[]> query = KB.triples(KB.triple("?s", "geonames_id_p1566", "?o"), 
-				KB.triple("?x", "geonames_id_p1566", "?o"), KB.triple("?s", KB.DIFFERENTFROMstr, "?x"));
-		System.out.println(kb.selectDistinct(ByteString.of("?s"), ByteString.of("?x"), query));
-		System.out.println(kb.selectDistinct(ByteString.of("?s"), ByteString.of("?o"), query));
+		kb.load(new File("/home/lgalarra/AMIE/Data/yago3/yago3.trainingset.final.tsv"),
+				new File("/home/lgalarra/AMIE/Data/yago3/yagoTransitiveType.clean3.tsv"));
+		List<ByteString[]> query = KB.triples(KB.triple("?s", "rdf:type", "?o"), 
+				KB.triple("?s", "rdf:type", "<wikicat_Living_people>"), KB.triple("?s", "isComplete", "<diedIn>"));
+		List<ByteString[]> query1 = KB.triples(KB.triple("?s", "rdf:type", "?o"), 
+				KB.triple("?s", "rdf:type", "<wikicat_Living_people>"), KB.triple("?s", "isIncomplete", "<diedIn>"));
+		System.out.println(kb.countDistinct(ByteString.of("?s"), query));
+		System.out.println(kb.countDistinct(ByteString.of("?s"), query1));
+		System.out.println(kb.selectDistinct(ByteString.of("?s"), query));
+		System.out.println(kb.selectDistinct(ByteString.of("?s"), query1));
 	}
 }

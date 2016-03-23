@@ -495,6 +495,25 @@ public class U {
 	}
 	
 	/**
+	 * Returns a KB with the content of all the files referenced in the object array.
+	 * Each element of the array is converted to a string object
+	 * @param args
+	 * @return
+	 * @throws IOException
+	 */
+	public static KB loadFiles(Object args[]) throws IOException {
+		// Load the data
+		KB kb = new KB();
+		List<File> files = new ArrayList<File>();
+		for (int i = 0; i < args.length; ++i) {
+			files.add(new File((String)args[i]));
+		}
+		kb.load(files);
+		return kb;
+	}
+	
+	
+	/**
 	 * Returns a KB with the content of all the files referenced in the string array
 	 * starting from a given position.
 	 * @param args
