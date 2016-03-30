@@ -54,7 +54,8 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		this.bodyExcludedRelations = Arrays.asList(amie.data.U.typeRelationBS, 
 				amie.data.U.subClassRelationBS, amie.data.U.domainRelationBS, 
 				amie.data.U.rangeRelationBS, isCompleteBS, isIncompleteBS,
-				isRelevanthasWikiLengthBS, isRelevanthasIngoingLinksBS, isRelevanthasNumberOfFactsBS);
+				isRelevanthasWikiLengthBS, isRelevanthasIngoingLinksBS, isRelevanthasNumberOfFactsBS,
+				hasChangedBS, hasNotChangedBS);
 		this.recursivityLimit = 1;
 	}
 
@@ -447,8 +448,9 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	public void setAdditionalParents(Rule currentRule, MultiMap<Integer, Rule> indexedOutputSet) {
 		int idxOfRelationAtom = currentRule.firstIndexOfRelation(amie.data.U.typeRelationBS);
 		int idxOfCardinalityRelation = indexOfCardinalityAtom(currentRule);
-		if (idxOfRelationAtom == -1 && idxOfCardinalityRelation == -1)
+		if (idxOfRelationAtom == -1 && idxOfCardinalityRelation == -1) {
 			super.setAdditionalParents(currentRule, indexedOutputSet);
+		}
         
         // First check if there are no a parents of the same size caused by
         // specialization operators. For example if the current rule is
@@ -467,8 +469,10 @@ public class CompletenessMiningAssistant extends MiningAssistant {
             
             if (candidateParentsOfCurrentLength != null) {
 	            for (Rule parent : candidateParentsOfCurrentLength) {
-	                if (parent.subsumes(currentRule) 
-	                		|| subsumesWithSpecialAtoms(parent, currentRule)) {
+	            	boolean subsumes = parent.subsumes(currentRule);
+	            	boolean subsumesWithSpecialAtoms = subsumesWithSpecialAtoms(parent, currentRule);
+	            	
+	                if (subsumes || subsumesWithSpecialAtoms) {
 	                	currentRule.addParent(parent);	                	
 	                }
 	            }
@@ -485,15 +489,16 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 				
 		if (idxOfTypeAtomRule != -1 && idxOfTypeAtomParent != -1) {
 			ByteString[] typeAtomInRule = currentRule.getTriples().get(idxOfTypeAtomRule);
-			ByteString[] typeAtomInParent = currentRule.getTriples().get(idxOfTypeAtomParent);
-			List<ByteString[]> triplesParent = parent.getTriplesCopy();
+			ByteString[] typeAtomInParent = parent.getTriples().get(idxOfTypeAtomParent);
 			List<ByteString[]> triplesRule = currentRule.getTriplesCopy();
+			List<ByteString[]> triplesParent = parent.getTriplesCopy();
 			triplesParent.remove(idxOfTypeAtomParent);
 			triplesRule.remove(idxOfTypeAtomRule);
 			Rule newRule = new Rule(currentRule.getHead(), triplesRule.subList(1, triplesRule.size()), 0);
 			Rule newParent = new Rule(parent.getHead(), triplesParent.subList(1, triplesParent.size()), 0);
-			if (typeAtomInParent[2].equals(typeAtomInRule[2]) || 
-					amie.data.U.isSuperType(this.kbSchema, typeAtomInParent[2], typeAtomInRule[2])) {
+			boolean hasSameType = typeAtomInParent[2].equals(typeAtomInRule[2]);
+			boolean isSuperType = amie.data.U.isSuperType(this.kbSchema, typeAtomInParent[2], typeAtomInRule[2]);
+			if (hasSameType || isSuperType) {
 				return subsumesWithSpecialAtoms(newParent, newRule);
 			}
 		}

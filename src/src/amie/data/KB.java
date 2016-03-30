@@ -287,6 +287,26 @@ public class KB {
 		size++;
 		return (true);
 	}
+	
+
+	/**
+	 * Add all the facts of the given KB into the current one.
+	 * @param otherKb
+	 */
+	public int add(KB otherKb) {
+		int count = 0;
+		for (ByteString subject: otherKb.subject2relation2object.keySet()) {
+			Map<ByteString, IntHashMap<ByteString>> subjectMap = 
+					otherKb.subject2object2relation.get(subject);
+			for (ByteString relation : subjectMap.keySet()) {
+				for (ByteString object : subjectMap.get(relation)) {
+					if (this.add(subject, relation, object))
+						++count;
+				}
+			}
+		}
+		return count;
+	}
 
 	/** 
 	 * Returns the number of facts in the KB. 
@@ -3978,6 +3998,4 @@ public class KB {
 	public static void main(String[] args) {
 		System.out.println(Arrays.binarySearch(new int[]{3, 4}, 1));
 	}
-
-	
 }

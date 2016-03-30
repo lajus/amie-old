@@ -689,9 +689,9 @@ public class MiningAssistant{
 		for (ByteString subtype : subtypes) {
 			lastAtom[2] = subtype;
 			long support = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
-			lastAtom[2] = typeToSpecialize;
+			lastAtom[2] = typeToSpecialize;				
 			if (support >= minSupportThreshold) {
-				Rule newRule = rule.specializeTypeAtom(subtype, support);
+				Rule newRule = rule.specializeTypeAtom(subtype, support);				
 				newRule.addParent(rule);
 				output.add(newRule);
 			}
@@ -962,7 +962,7 @@ public class MiningAssistant{
 		
 		if(candidate.containsLevel2RedundantSubgraphs()) {
 			return false;
-		}		
+		}	
 		
 		if(candidate.getStdConfidence() >= minStdConfidence 
 				&& candidate.getPcaConfidence() >= minPcaConfidence){

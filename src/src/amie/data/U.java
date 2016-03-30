@@ -792,12 +792,12 @@ public class U {
 
 	/**
 	 * Determines if the first class is a superclass of the second.
-	 * @param typeI
-	 * @param typeII
+	 * @param parentType
+	 * @param childType
 	 * @return
 	 */
-	public static boolean isSuperType(KB kb, ByteString typeI, ByteString typeII) {
-		Set<ByteString> st1 = getSuperTypes(kb, typeII);
-		return st1.contains(typeI);
+	public static boolean isSuperType(KB kb, ByteString parentType, ByteString childType) {
+		Set<ByteString> st1 = getSuperTypes(kb, childType);
+		return st1.contains(parentType);
 	}
 }
