@@ -10,11 +10,11 @@ public class QueryKB {
 
 	public static void main(String[] args) throws IOException {
 		KB kb = new KB();
-		kb.load(new File("/home/lgalarra/AMIE/Data/yago3/yago3.trainingset.final.tsv"),
-				new File("/home/lgalarra/AMIE/Data/yago3/yagoTransitiveType.clean3.tsv"));
-		List<ByteString[]> query = KB.triples(KB.triple("?a", "hasNumberOfValuesSmallerThan9", "<hasParent>"), 
-				KB.triple("?a", "isIncomplete", "<hasParent>"));
+		kb.load(new File("/home/galarrag/workspace/Prediction/data/training-from-sampling/yago3/annotations/yago3.trainingset.final.tsv"),
+				new File("/home/galarrag/workspace/AMIE/Data/yago3/yagoFacts.clean.tsv"));
+		List<ByteString[]> query = KB.triples(KB.triple("?a", "hasNumberOfValuesSmallerThan1", "<isCitizenOf>"), 
+				KB.triple("?a", "isComplete", "<isCitizenOf>"));
 		System.out.println(kb.countDistinct(ByteString.of("?a"), query));
-		System.out.println(kb.selectDistinct(ByteString.of("?s"), query));
+		System.out.println(kb.selectDistinct(ByteString.of("?a"), query));
 	}
 }
