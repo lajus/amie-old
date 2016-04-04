@@ -297,7 +297,7 @@ public class KB {
 		int count = 0;
 		for (ByteString subject: otherKb.subject2relation2object.keySet()) {
 			Map<ByteString, IntHashMap<ByteString>> subjectMap = 
-					otherKb.subject2object2relation.get(subject);
+					otherKb.subject2relation2object.get(subject);
 			for (ByteString relation : subjectMap.keySet()) {
 				for (ByteString object : subjectMap.get(relation)) {
 					if (this.add(subject, relation, object))
@@ -3608,6 +3608,7 @@ public class KB {
 	@Override
 	public String toString() {
 		StringBuilder strBuilder = new StringBuilder();
+		int maxCount = 30;
 		for (ByteString v1 : subject2relation2object.keySet()) {
 			Map<ByteString, IntHashMap<ByteString>> tail = subject2relation2object.get(v1);
 			for (ByteString v2 : tail.keySet()) {
@@ -3618,6 +3619,9 @@ public class KB {
 					strBuilder.append("\t");					
 					strBuilder.append(v3);					
 					strBuilder.append("\n");
+					if (maxCount >= 30)
+						break;
+					++maxCount;
 				}
 			}
 		}
