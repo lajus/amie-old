@@ -17,9 +17,9 @@ import amie.data.KB;
  */
 public class KBsSummarizer {
 	
-	public static boolean ShowDistribution = true;
+	public static boolean ShowDistribution = false;
 	
-	public static boolean showTypesStatistics = true;
+	public static boolean showTypesStatistics = false;
 	
 	public static void main(String args[]) throws IOException {
 		KB db1 = new KB();
