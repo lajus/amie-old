@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -33,6 +33,7 @@ import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
 import amie.mining.assistant.MiningAssistant;
 import amie.mining.assistant.RelationSignatureDefaultMiningAssistant;
+import amie.rules.Metric;
 import amie.rules.Rule;
 import javatools.administrative.Announce;
 import javatools.datatypes.ByteString;
@@ -49,6 +50,11 @@ import javatools.parsers.NumberFormatter;
  */
 public class AMIE {
 
+    /**
+     * Default standard confidence threshold
+     */
+    private static final double DEFAULT_STD_CONFIDENCE = 0.0;
+	
     /**
      * Default PCA confidence threshold
      */
@@ -101,11 +107,6 @@ public class AMIE {
      */
     private boolean realTime;
     
-    /**
-     * If true, AMIE outputs rules using the datalog notation
-     * otherwise its default [subject, relation, object] notation
-     */
-    private boolean datalogNotation;
 
     /** Fields required to measure the system performance **/
     
@@ -141,6 +142,13 @@ public class AMIE {
      * Time spent loading the KB into memory.
      */
     private long _sourcesLoadingTime;
+    
+    /**
+     * Column headers
+     */
+    public static final List<String> headers = Arrays.asList("Rule", "Head Coverage", "Std Confidence", 
+    		"PCA Confidence", "Positive Examples", "Body size", "PCA Body size",
+            "Functional variable", "Std. Lower Bound", "PCA Lower Bound", "PCA Conf estimation");
 
 
     /**
@@ -159,7 +167,6 @@ public class AMIE {
         this.pruningMetric = metric;
         this.nThreads = nThreads;
         this.realTime = true;
-        this.datalogNotation = false;
         this.seeds = null;
         /** System performance **/
         this._specializationTime = 0l;
@@ -184,14 +191,6 @@ public class AMIE {
     public void setRealTime(boolean realTime) {
     	this.realTime = realTime;
     }
-    
-    public boolean isDatalogNotation() {
-		return datalogNotation;
-	}
-
-	public void setDatalogNotation(boolean datalogNotation) {
-		this.datalogNotation = datalogNotation;
-	}
 
 	public Collection<ByteString> getSeeds() {
     	return seeds;
@@ -332,28 +331,15 @@ public class AMIE {
 
         @Override
         public void run() {
-            Rule.printRuleHeaders(isVerbose());
+            AMIE.printRuleHeaders(assistant);
             while (!finished) {
                 consumeLock.lock();
                 try {
                     while (lastConsumedIndex == consumeList.size() - 1) {
                         conditionVariable.await();
                         for (int i = lastConsumedIndex + 1; i < consumeList.size(); ++i) {
-                        	if (datalogNotation) {
-                        		if (isVerbose()) {
-                        			System.out.println(consumeList.get(i).getDatalogFullRuleString());
-                        		} else {
-                        			System.out.println(consumeList.get(i).getDatalogBasicRuleString());
-                        		}
-                        	} else {     
-                        		if (isVerbose()) {
-                        			System.out.println(consumeList.get(i).getFullRuleString());
-                        		} else {
-                        			System.out.println(consumeList.get(i).getBasicRuleString());                        			
-                        		}
-                        	}
+                        	System.out.println(assistant.formatRule(consumeList.get(i)));
                         }
-
                         lastConsumedIndex = consumeList.size() - 1;
                     }
                 } catch (InterruptedException e) {
@@ -696,7 +682,7 @@ public class AMIE {
         List<File> schemaFiles = new ArrayList<File>();
 
         CommandLine cli = null;
-        double minStdConf = 0.0;
+        double minStdConf = DEFAULT_STD_CONFIDENCE;
         double minPCAConf = DEFAULT_PCA_CONFIDENCE;
         int minSup = DEFAULT_SUPPORT;
         int minInitialSup = DEFAULT_INITIAL_SUPPORT;
@@ -713,6 +699,7 @@ public class AMIE {
         boolean verbose = false;
         boolean enforceConstants = false;
         boolean avoidUnboundTypeAtoms = true;
+        boolean ommitStdConfidence = false;
         /** System performance measure **/
         boolean exploitMaxLengthForRuntime = true;
         boolean enableQueryRewriting = true;
@@ -898,6 +885,10 @@ public class AMIE {
                 		+ "standard (traditional) and solidary (experimental)")
                 .hasArg()
                 .create("mt");
+        
+        Option calculateStdConfidenceOp = OptionBuilder.withArgName("ommit-std-conf")
+        		.withDescription("Do not calculate standard confidence")
+        		.create("ostd");
 
         options.addOption(stdConfThresholdOpt);
         options.addOption(supportOpt);
@@ -929,6 +920,7 @@ public class AMIE {
         options.addOption(extraFileOp);
         options.addOption(miningTechniqueOp);
         options.addOption(datalogNotationOpt);
+        options.addOption(calculateStdConfidenceOp);
 
         try {
             cli = parser.parse(options, args);
@@ -1249,6 +1241,7 @@ public class AMIE {
         realTime = !cli.hasOption("oute");
         enforceConstants = cli.hasOption("fconst");
         datalogOutput = cli.hasOption("datalog");
+        ommitStdConfidence = cli.hasOption("ostd");
 
         // These configurations override others
         if (onlyOutput) {
@@ -1289,12 +1282,13 @@ public class AMIE {
         mineAssistant.setEnableQueryRewriting(enableQueryRewriting);
         mineAssistant.setEnablePerfectRules(enablePerfectRulesPruning);
         mineAssistant.setVerbose(verbose);
+        mineAssistant.setOmmitStdConfidence(ommitStdConfidence);
+        mineAssistant.setDatalogNotation(datalogOutput);
 
         System.out.println(mineAssistant.getDescription());
         
         AMIE miner = new AMIE(mineAssistant, minInitialSup, minMetricValue, metric, nThreads);
         miner.setRealTime(realTime);
-        miner.setDatalogNotation(datalogOutput);
         miner.setSeeds(headTargetRelations);
         miner._setSourcesLoadingTime(sourcesLoadingTime);
 
@@ -1336,6 +1330,20 @@ public class AMIE {
        
         return miner;
     }
+    
+	private static void printRuleHeaders(MiningAssistant assistant) {
+		List<String> finalHeaders = new ArrayList<>(headers);
+		if (assistant.isOmmitStdConfidence()) {
+			finalHeaders.removeAll(Arrays.asList("Std Confidence", "Body size"));
+		}
+				
+		if (!assistant.isVerbose()) {
+			finalHeaders.removeAll(Arrays.asList("Std. Lower Bound", "PCA Lower Bound", "PCA Conf estimation"));
+        }
+		
+    	System.out.println(telecom.util.collections.Collections.implode("\t", finalHeaders));
+	}
+
 
 	/**
 	 * AMIE's main program
@@ -1346,6 +1354,7 @@ public class AMIE {
     	amie.data.U.loadSchemaConf();
     	System.out.println("Assuming " + amie.data.U.typeRelationBS + " as type relation");
 		AMIE miner = AMIE.getInstance(args);
+		MiningAssistant assistant = miner.getAssistant();
 	
 	    Announce.doing("Starting the mining phase");
 	
@@ -1355,9 +1364,9 @@ public class AMIE {
 	    rules = miner.mine();
 	
 	    if (!miner.isRealTime()) {
-	    	Rule.printRuleHeaders(miner.isVerbose());
+	    	AMIE.printRuleHeaders(assistant);
 	        for (Rule rule : rules) {
-	        	System.out.println(rule.getFullRuleString());
+	        	System.out.println(assistant.formatRule(rule));
 	        }
 	    }
 	
@@ -1373,4 +1382,5 @@ public class AMIE {
 	      Announce.done("Total time " + NumberFormatter.formatMS(miningTime + miner._getSourcesLoadingTime()));
 	      System.out.println(rules.size() + " rules mined.");
     }
+
 }

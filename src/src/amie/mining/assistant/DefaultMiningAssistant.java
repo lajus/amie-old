@@ -652,12 +652,6 @@ public class DefaultMiningAssistant extends MiningAssistant{
 		return candidate.getStdConfidence();
 	}
 	
-	@Override
-	public void calculateConfidenceMetrics(Rule candidate) {
-		computeStandardConfidence(candidate);
-		computePCAConfidence(candidate);
-	}
-	
 	public static void main(String[] args) throws IOException {
 		KB db = new KB();
 		//db.load(new File("/home/galarrag/workspace/AMIE/Data/yago2s/yagoFacts.decoded.compressed.ttl"));

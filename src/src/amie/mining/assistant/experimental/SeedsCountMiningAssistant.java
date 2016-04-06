@@ -10,8 +10,8 @@ import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Pair;
 import amie.data.KB;
-import amie.mining.ConfidenceMetric;
 import amie.mining.assistant.MiningAssistant;
+import amie.rules.ConfidenceMetric;
 import amie.rules.Rule;
 
 public class SeedsCountMiningAssistant extends MiningAssistant {

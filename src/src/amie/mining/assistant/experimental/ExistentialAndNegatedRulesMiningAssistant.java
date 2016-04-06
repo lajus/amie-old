@@ -6,8 +6,8 @@ import java.util.Collection;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import amie.data.KB;
-import amie.mining.ConfidenceMetric;
 import amie.mining.assistant.MiningAssistant;
+import amie.rules.ConfidenceMetric;
 import amie.rules.Rule;
 
 /**

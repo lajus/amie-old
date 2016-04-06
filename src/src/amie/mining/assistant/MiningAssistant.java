@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 import amie.data.KB;
-import amie.mining.ConfidenceMetric;
+import amie.rules.ConfidenceMetric;
+import amie.rules.Metric;
 import amie.rules.Rule;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
@@ -165,6 +166,18 @@ public class MiningAssistant{
 	 * Confidence metric used to assess the quality of rules.
 	 */
 	protected ConfidenceMetric confidenceMetric;
+
+	
+	/**
+	 * Do not calculate standard confidence.
+	 */
+	protected boolean ommitStdConfidence;
+	
+    /**
+     * If true, AMIE outputs rules using the datalog notation
+     * otherwise its default [subject, relation, object] notation
+     */
+    protected boolean datalogNotation;
 	
 	
 	/**
@@ -193,6 +206,8 @@ public class MiningAssistant{
 		this.enableQueryRewriting = true;
 		this.enablePerfectRules = true;
 		this.confidenceMetric = ConfidenceMetric.PCAConfidence;
+		this.datalogNotation = false;
+		this.ommitStdConfidence = false;
 		buildRelationsDictionary();
 		
 	}	
@@ -540,7 +555,11 @@ public class MiningAssistant{
 	 * @param candidate
 	 */
 	public void calculateConfidenceMetrics(Rule candidate) {		
-		computeStandardConfidence(candidate);
+		if (this.ommitStdConfidence) {
+			candidate.setBodySize((long)candidate.getSupport() * 2);
+		} else {
+			computeStandardConfidence(candidate);
+		}
 		computePCAConfidence(candidate);
 	}
 
@@ -1204,6 +1223,35 @@ public class MiningAssistant{
         }
     }
     
+    /**
+     * It returns a string representation of the rule depending on the assistant configurations
+     * @param rule
+     * @return
+     */
+	public String formatRule(Rule rule) {
+		StringBuilder result = new StringBuilder();
+		Metric[] metrics2Ommit = new Metric[0];
+		if (this.ommitStdConfidence) {
+			metrics2Ommit = new Metric[]{Metric.StandardConfidence, Metric.BodySize};
+		}
+		
+		if (this.datalogNotation) {
+    		if (this.verbose) {
+    			result.append(rule.getDatalogFullRuleString(metrics2Ommit));
+    		} else {
+    			result.append(rule.getDatalogBasicRuleString(metrics2Ommit));
+    		}
+    	} else {     
+    		if (isVerbose()) {
+    			result.append(rule.getFullRuleString(metrics2Ommit));
+    		} else {
+    			result.append(rule.getBasicRuleString(metrics2Ommit));                        			
+    		}
+    	}
+		
+		return result.toString();
+	}
+    
 	public void setAllowConstants(boolean allowConstants) {
 		// TODO Auto-generated method stub
 		this.allowConstants = allowConstants;
@@ -1325,5 +1373,21 @@ public class MiningAssistant{
 
 	public void setConfidenceMetric(ConfidenceMetric confidenceMetric) {
 		this.confidenceMetric = confidenceMetric;
+	}
+
+	public void setOmmitStdConfidence(boolean ommitStdConfidence) {
+		this.ommitStdConfidence = ommitStdConfidence;
+	}
+
+	public boolean isOmmitStdConfidence() {
+		return this.ommitStdConfidence;
+	}
+
+	public boolean isDatalogNotation() {
+		return datalogNotation;
+	}
+
+	public void setDatalogNotation(boolean datalogNotation) {
+		this.datalogNotation = datalogNotation;
 	}
 }

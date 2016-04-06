@@ -3,8 +3,8 @@ package amie.mining.assistant.experimental;
 import java.util.Collection;
 
 import amie.data.KB;
-import amie.mining.ConfidenceMetric;
 import amie.mining.assistant.MiningAssistant;
+import amie.rules.ConfidenceMetric;
 import amie.rules.Rule;
 import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;

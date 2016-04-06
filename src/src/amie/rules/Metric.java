@@ -1,4 +1,4 @@
-package amie.mining;
+package amie.rules;
 
 /**
  * Rule metrics defined by AMIE

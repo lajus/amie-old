@@ -1355,19 +1355,6 @@ public class Rule {
         return QueryEquivalenceChecker.areEquivalent(triples, other.triples);
     }
 
-    public static void printRuleHeaders(boolean verbose) {
-        if (verbose) {
-	    	System.out.println("Rule\tHead Coverage\tStd Confidence\t"
-	                + "PCA Confidence\tPositive Examples\tBody size\tPCA Body size\t"
-	                + "Functional variable\tStd. Lower Bound\tPCA Lower Bound\t"
-	                + "PCA Conf estimation");
-        } else {
-        	System.out.println("Rule\tHead Coverage\tStd Confidence\t"
-                    + "PCA Confidence\tPositive Examples\tBody size\tPCA Body size\t"
-                    + "Functional variable");
-        }
-    }
-
     public String getRuleString() {
         StringBuilder strBuilder = new StringBuilder();
         for (ByteString[] pattern : sortBody()) {
@@ -1442,7 +1429,7 @@ public class Rule {
         return sortedBody;
     }
     
-    public String getDatalogRuleString() {
+    public String getDatalogRuleString(Metric... metrics2Ommit) {
         StringBuilder strBuilder = new StringBuilder();
         for (ByteString[] pattern : sortBody()) {
             if (pattern[1].equals(KB.DIFFERENTFROMbs)) {
@@ -1472,59 +1459,95 @@ public class Rule {
         return strBuilder.toString();
     }
     
-    public String getDatalogBasicRuleString() {
+    public String getDatalogBasicRuleString(Metric... metrics2Ommit) {
     	StringBuilder strBuilder = new StringBuilder();
-        strBuilder.append(getDatalogRuleString());
+        strBuilder.append(getDatalogRuleString(metrics2Ommit));
         addBasicFields(strBuilder);
         return strBuilder.toString();
 	}
 
     
-    private void addFullFields(StringBuilder strBuilder) {
+    private void addFullFields(StringBuilder strBuilder, Metric... metrics2Ommit) {    	
     	DecimalFormat df = new DecimalFormat("#.#########");
         DecimalFormat df1 = new DecimalFormat("#.##");
-        
-        strBuilder.append("\t" + df.format(getHeadCoverage()));
-        strBuilder.append("\t" + df.format(getStdConfidence()));
-        strBuilder.append("\t" + df.format(getPcaConfidence()));
-        strBuilder.append("\t" + df1.format(getSupport()));
-        strBuilder.append("\t" + df1.format(getBodySize()));
-        strBuilder.append("\t" + df1.format(getPcaBodySize()));
-        strBuilder.append("\t" + getFunctionalVariable());
-        strBuilder.append("\t" + _stdConfidenceUpperBound);
-        strBuilder.append("\t" + _pcaConfidenceUpperBound);
-        strBuilder.append("\t" + _pcaConfidenceEstimation);
+        if (metrics2Ommit.length == 0) {
+	        strBuilder.append("\t" + df.format(getHeadCoverage()));
+	        strBuilder.append("\t" + df.format(getStdConfidence()));
+	        strBuilder.append("\t" + df.format(getPcaConfidence()));
+	        strBuilder.append("\t" + df1.format(getSupport()));
+	        strBuilder.append("\t" + df1.format(getBodySize()));
+	        strBuilder.append("\t" + df1.format(getPcaBodySize()));
+	        strBuilder.append("\t" + getFunctionalVariable());
+	        strBuilder.append("\t" + _stdConfidenceUpperBound);
+	        strBuilder.append("\t" + _pcaConfidenceUpperBound);
+	        strBuilder.append("\t" + _pcaConfidenceEstimation);
+        } else {
+        	List<Metric> metricsList = Arrays.asList(metrics2Ommit);
+        	if (!metricsList.contains(Metric.HeadCoverage))
+        		strBuilder.append("\t" + df.format(getHeadCoverage()));
+	        if (!metricsList.contains(Metric.StandardConfidence))
+	        	strBuilder.append("\t" + df.format(getStdConfidence()));
+	        if (!metricsList.contains(Metric.PCAConfidence))
+	        	strBuilder.append("\t" + df.format(getPcaConfidence()));
+	        if (!metricsList.contains(Metric.Support))
+	        	strBuilder.append("\t" + df1.format(getSupport()));
+	        if (!metricsList.contains(Metric.BodySize))	        
+	        	strBuilder.append("\t" + df1.format(getBodySize()));
+	        if (!metricsList.contains(Metric.PCABodySize))
+	        	strBuilder.append("\t" + df1.format(getPcaBodySize()));
+	        strBuilder.append("\t" + getFunctionalVariable());
+	        strBuilder.append("\t" + _stdConfidenceUpperBound);
+	        strBuilder.append("\t" + _pcaConfidenceUpperBound);
+	        strBuilder.append("\t" + _pcaConfidenceEstimation);
+        }
     }
     
-    private void addBasicFields(StringBuilder strBuilder) {
+    private void addBasicFields(StringBuilder strBuilder, Metric... metrics2Ommit) {
     	DecimalFormat df = new DecimalFormat("#.#########");
-        strBuilder.append("\t" + df.format(getHeadCoverage()));
-        strBuilder.append("\t" + df.format(getStdConfidence()));
-        strBuilder.append("\t" + df.format(getPcaConfidence()));
-        strBuilder.append("\t" + df.format(getSupport()));
-        strBuilder.append("\t" + getBodySize());
-        strBuilder.append("\t" + df.format(getPcaBodySize()));
-        strBuilder.append("\t" + getFunctionalVariable());
+    	if (metrics2Ommit.length == 0) {
+	        strBuilder.append("\t" + df.format(getHeadCoverage()));
+	        strBuilder.append("\t" + df.format(getStdConfidence()));
+	        strBuilder.append("\t" + df.format(getPcaConfidence()));
+	        strBuilder.append("\t" + df.format(getSupport()));
+	        strBuilder.append("\t" + getBodySize());
+	        strBuilder.append("\t" + df.format(getPcaBodySize()));
+	        strBuilder.append("\t" + getFunctionalVariable());
+    	} else {
+        	List<Metric> metricsList = Arrays.asList(metrics2Ommit);
+        	if (!metricsList.contains(Metric.HeadCoverage))
+        		strBuilder.append("\t" + df.format(getHeadCoverage()));
+	        if (!metricsList.contains(Metric.StandardConfidence))
+	        	strBuilder.append("\t" + df.format(getStdConfidence()));
+	        if (!metricsList.contains(Metric.PCAConfidence))
+	        	strBuilder.append("\t" + df.format(getPcaConfidence()));
+	        if (!metricsList.contains(Metric.Support))
+	        	strBuilder.append("\t" + df.format(getSupport()));
+	        if (!metricsList.contains(Metric.BodySize))	        
+	        	strBuilder.append("\t" + getBodySize());
+	        if (!metricsList.contains(Metric.PCABodySize))
+	        	strBuilder.append("\t" + df.format(getPcaBodySize()));
+	        strBuilder.append("\t" + getFunctionalVariable());    		
+    	}
     }
     
-    public String getDatalogFullRuleString() {
+    public String getDatalogFullRuleString(Metric... metrics2Ommit) {
     	StringBuilder strBuilder = new StringBuilder();
-        strBuilder.append(getDatalogRuleString());
-        addFullFields(strBuilder);
+        strBuilder.append(getDatalogRuleString(metrics2Ommit));
+        addFullFields(strBuilder, metrics2Ommit);
         return strBuilder.toString();
     }
     
-    public String getFullRuleString() {
+    public String getFullRuleString(Metric... metrics2Ommit) {
         StringBuilder strBuilder = new StringBuilder();
         strBuilder.append(getRuleString());
-        addFullFields(strBuilder);
+        addFullFields(strBuilder, metrics2Ommit);
         return strBuilder.toString();
     }
 
-    public String getBasicRuleString() {
+    public String getBasicRuleString(Metric... metrics2Ommit) {
         StringBuilder strBuilder = new StringBuilder();
         strBuilder.append(getRuleString());
-        addBasicFields(strBuilder);
+        addBasicFields(strBuilder, metrics2Ommit);
         return strBuilder.toString();
     }
 
