@@ -716,7 +716,6 @@ public class AMIE {
         Collection<ByteString> bodyTargetRelations = null;
         KB targetSource = null;
         KB schemaSource = null;
-        String miningTechniqueStr = "standard";
         int nThreads = nProcessors; // By default use as many threads as processors.
         HelpFormatter formatter = new HelpFormatter();
 
@@ -880,12 +879,6 @@ public class AMIE {
                 .hasArg()
                 .create("ef");
 
-        Option miningTechniqueOp = OptionBuilder.withArgName("mining-technique")
-                .withDescription("AMIE offers 2 multi-threading strategies: "
-                		+ "standard (traditional) and solidary (experimental)")
-                .hasArg()
-                .create("mt");
-        
         Option calculateStdConfidenceOp = OptionBuilder.withArgName("ommit-std-conf")
         		.withDescription("Do not calculate standard confidence")
         		.create("ostd");
@@ -918,7 +911,6 @@ public class AMIE {
         options.addOption(onlyOutputEnhancementOp);
         options.addOption(fullOp);
         options.addOption(extraFileOp);
-        options.addOption(miningTechniqueOp);
         options.addOption(datalogNotationOpt);
         options.addOption(calculateStdConfidenceOp);
 
@@ -1082,13 +1074,6 @@ public class AMIE {
             }
         }
 
-        if (cli.hasOption("mt")) {
-            miningTechniqueStr = cli.getOptionValue("mt").toLowerCase();
-            if (!miningTechniqueStr.equals("solidary")
-                    && !miningTechniqueStr.equals("standard")) {
-                miningTechniqueStr = "standard";
-            }
-        }
 
         avoidUnboundTypeAtoms = cli.hasOption("auta");
         exploitMaxLengthForRuntime = !cli.hasOption("deml");

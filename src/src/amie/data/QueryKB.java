@@ -26,9 +26,13 @@ public class QueryKB {
 				KB.triple("?a", "isIncomplete", "<isMarriedTo>"));
 		List<ByteString[]> query1 = KB.triples(KB.triple("?a", "hasNumberOfValuesSmallerThan1", "<isMarriedTo>"),
 				KB.triple("?a", "isComplete", "<isMarriedTo>"));
+		List<ByteString[]> query2 = KB.triples(KB.triple("?a", "<isLocatedIn>", "?b"),
+				KB.triple("?b", "<isLocatedIn>", "?a"),
+				KB.triple("?a", "<hasCapital>", "?b"));
+		
 		System.out.println(kb.countDistinct(ByteString.of("?a"), query));
 		System.out.println(kb.countDistinct(ByteString.of("?a"), query1));
-//		System.out.println(kb.countDistinct(ByteString.of("?a"), query));
-//		System.out.println(kb.selectDistinct(ByteString.of("?a"), query));
+		System.out.println(kb.selectDistinct(ByteString.of("?a"), ByteString.of("?b"), query2));
+
 	}
 }
