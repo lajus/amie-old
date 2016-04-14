@@ -224,12 +224,16 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	public void getInstantiatedAtoms(Rule parentRule, double minSupportThreshold, 
 		Collection<Rule> danglingEdges, Collection<Rule> output) {
 		boolean extendRule = true;
-		if (parentRule.getHead()[1].equals(isIncompleteBS)) {
+		/**if (parentRule.getHead()[1].equals(isIncompleteBS)) {
 			if (!containsCardinalityAtom(parentRule, parentRule.getHead()[2])) {
 				addCardinalityAtom(parentRule, minSupportThreshold, output, parentRule.getHead()[2]);
 				extendRule = false;
 				// Rules with incompleteness assertions are extended only when they have cardinality constraints
 			}
+		}**/
+		
+		if (!containsCardinalityAtom(parentRule, parentRule.getHead()[2])) {
+			addCardinalityAtom(parentRule, minSupportThreshold, output, parentRule.getHead()[2]);
 		}
 		
 		ByteString[] lastAtom = parentRule.getLastRealTriplePattern();
@@ -340,14 +344,14 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 
 	@Override
 	public void getDanglingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
-		ByteString targetRelation = rule.getHead()[2];
-		if (rule.getHead()[1].equals(isIncompleteBS)) {
-			if (containsCardinalityAtom(rule, targetRelation)) {
-				this.addDanglingAtoms(rule, minSupportThreshold, output);
-			}
-		} else {
+		//ByteString targetRelation = rule.getHead()[2];
+		//if (rule.getHead()[1].equals(isIncompleteBS)) {
+			//if (containsCardinalityAtom(rule, targetRelation)) {
+				//this.addDanglingAtoms(rule, minSupportThreshold, output);
+			//}
+//		} else {
 			this.addDanglingAtoms(rule, minSupportThreshold, output);
-		}
+//		}
 	}
 
 	private void addTypeAtom(Rule parentRule, double minSupportThreshold, Collection<Rule> output) {
