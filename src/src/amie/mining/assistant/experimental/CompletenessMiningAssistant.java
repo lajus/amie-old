@@ -180,8 +180,9 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}
 	}
 	
-	private void addCardinalityAtom(Rule rule, double minSupportThreshold, 
-			Collection<Rule> output, ByteString targetRelation) {
+	/**private void addCardinalityAtom(Rule rule, double minSupportThreshold, 
+			ByteString targetRelation,
+			Collection<Rule> output) {
 		// We'll force a cardinality atom at the end
 		ByteString[] head = rule.getHead();
 		int startCardinality = -1;
@@ -218,6 +219,49 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			output.add(candidate);
 			candidate.addParent(rule);
 		}
+	}**/
+	
+	private void addCardinalityAtom(Rule rule, double minSupportThreshold, 
+			ByteString targetRelation,
+			Collection<Rule> output) {
+		// We'll force a cardinality atom at the end
+		ByteString[] head = rule.getHead();
+		int startCardinality = -1;
+		String inequalityRelation = null;				
+		ByteString[] newAtom = head.clone();
+		if (this.isFunctional(targetRelation)) {
+			startCardinality  = 0;
+			inequalityRelation = KB.hasNumberOfValuesGreaterThan + startCardinality;
+			newAtom[1] = ByteString.of(inequalityRelation);
+			this.addAtom(rule, newAtom, minSupportThreshold, output);
+
+			startCardinality = kb.maximalCardinality(targetRelation) + 1;
+			inequalityRelation = KB.hasNumberOfValuesSmallerThan + startCardinality;
+			newAtom[1] = ByteString.of(inequalityRelation);
+			this.addAtom(rule, newAtom, minSupportThreshold, output);
+		} else {
+			startCardinality = 0;
+			inequalityRelation = KB.hasNumberOfValuesGreaterThanInv + startCardinality;
+			newAtom[1] = ByteString.of(inequalityRelation);
+			this.addAtom(rule, newAtom, minSupportThreshold, output);
+
+			startCardinality = kb.maximalCardinalityInv(targetRelation) + 1;
+			inequalityRelation = KB.hasNumberOfValuesSmallerThanInv + startCardinality;
+			newAtom[1] = ByteString.of(inequalityRelation);
+			this.addAtom(rule, newAtom, minSupportThreshold, output);
+		}
+		
+	}
+	
+	private void addAtom(Rule rule, ByteString[] newAtom, double minSupportThreshold, Collection<Rule> output) {
+		rule.getTriples().add(newAtom);
+		long cardinality = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
+		rule.getTriples().remove(rule.getTriples().size() - 1);			
+		if (cardinality >= minSupportThreshold) {
+			Rule candidate = rule.addAtom(newAtom, cardinality);
+			output.add(candidate);
+			candidate.addParent(rule);
+		}
 	}
 	
 	@Override
@@ -233,7 +277,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}**/
 		
 		if (!containsCardinalityAtom(parentRule, parentRule.getHead()[2])) {
-			addCardinalityAtom(parentRule, minSupportThreshold, output, parentRule.getHead()[2]);
+			addCardinalityAtom(parentRule, minSupportThreshold, parentRule.getHead()[2], output);
 		}
 		
 		ByteString[] lastAtom = parentRule.getLastRealTriplePattern();
@@ -264,7 +308,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}
 		
 		if (!containsCardinalityAtom(parentRule, parentRule.getHead()[2]) && extendRule) {
-			addCardinalityAtom(parentRule, minSupportThreshold, output, parentRule.getHead()[2]);
+			addCardinalityAtom(parentRule, minSupportThreshold, parentRule.getHead()[2], output);
 		}
 	}
 	

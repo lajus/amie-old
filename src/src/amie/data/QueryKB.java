@@ -20,19 +20,16 @@ public class QueryKB {
 		System.out.println(kb.selectDistinct(ByteString.of("?s"), ByteString.of("?o"), query)); **/
 		
 		KB kb = new KB();
-		kb.load(new File("/home/galarrag/workspace/Prediction/data/training-from-sampling/yago3/annotations/yago3.trainingset.final.tsv"),
+		kb.load(new File("/home/galarrag/Dropbox/workspace/Prediction/data/training-from-sampling/yago3/annotations/yago3.trainingset.part2.final.tsv"),
 				new File("/home/galarrag/workspace/AMIE/Data/yago3/yagoFacts.clean.tsv"));
-		List<ByteString[]> query = KB.triples(KB.triple("?a", "hasNumberOfValuesSmallerThan1", "<isMarriedTo>"),
-				KB.triple("?a", "isIncomplete", "<isMarriedTo>"));
-		List<ByteString[]> query1 = KB.triples(KB.triple("?a", "hasNumberOfValuesSmallerThan1", "<isMarriedTo>"),
-				KB.triple("?a", "isComplete", "<isMarriedTo>"));
-		List<ByteString[]> query2 = KB.triples(KB.triple("?a", "<isLocatedIn>", "?b"),
-				KB.triple("?b", "<isLocatedIn>", "?a"),
-				KB.triple("?a", "<hasCapital>", "?b"));
-		
+		List<ByteString[]> query = KB.triples(KB.triple("?a", "hasNumberOfValuesSmallerThan1", "<diedIn>"),
+				KB.triple("?a", "isIncomplete", "<diedIn>"));
+		List<ByteString[]> query1 = KB.triples(KB.triple("?a", "hasNumberOfValuesSmallerThan1", "<diedIn>"),
+				KB.triple("?a", "isComplete", "<diedIn>"));		
+
 		System.out.println(kb.countDistinct(ByteString.of("?a"), query));
 		System.out.println(kb.countDistinct(ByteString.of("?a"), query1));
-		System.out.println(kb.selectDistinct(ByteString.of("?a"), ByteString.of("?b"), query2));
+		System.out.println(kb.count(query.get(0)));
 
 	}
 }
