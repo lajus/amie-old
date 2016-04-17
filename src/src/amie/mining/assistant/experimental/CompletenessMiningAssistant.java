@@ -86,7 +86,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	 * @param relation
 	 * @return
 	 */
-	private boolean isFunctional(ByteString relation) {
+	public boolean isFunctional(ByteString relation) {
 		return this.kb.isFunctional(relation) || functionalExceptions.contains(relation);
 	}
 	
