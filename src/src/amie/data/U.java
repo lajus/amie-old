@@ -397,10 +397,12 @@ public class U {
 	}
 	
 	/**
-	 * 
+	 * It performs a KB coalesce between 2 KBs consisting of all the facts in both ontologies
+	 * for the intersection of all entities in the first KB with the subjects of the second KB.
 	 * @param source1
 	 * @param source2
-	 * @param withObjs
+	 * @param withObjs If true, the coalesce is done between all the entities in the first KB
+	 * and all the entities in the second KB.
 	 */
 	public static void coalesce(KB source1, 
 			KB source2, boolean withObjs) {
