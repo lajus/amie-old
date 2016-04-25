@@ -327,7 +327,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		for (ByteString subtype : subtypes) {
 			long typeCardinality = amie.data.U.getNumberOfEntitiesForType(this.kb, subtype);
 			double ratio = (double) typeCardinality / baseCardinality;
-			if (typeCardinality < minSupportThreshold || ratio < 0.1)
+			if (typeCardinality < minSupportThreshold || ratio < 0.05)
 				continue;
 			
 			atom2[2] = subtype;
