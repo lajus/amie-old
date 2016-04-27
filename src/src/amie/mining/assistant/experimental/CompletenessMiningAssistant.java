@@ -16,6 +16,9 @@ import javatools.datatypes.MultiMap;
 import javatools.datatypes.Pair;
 
 public class CompletenessMiningAssistant extends MiningAssistant {
+	public enum Mode {Standard, OnlyStar, OnlyType, OnlyCard};
+	
+	protected Mode mode;
 
 	public static final String isComplete = "isComplete";
 	
@@ -50,6 +53,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	
 	public CompletenessMiningAssistant(KB dataSource) {
 		super(dataSource);
+		mode = Mode.Standard;
 		this.allowConstants = false;
 		this.bodyExcludedRelations = Arrays.asList(amie.data.U.typeRelationBS, 
 				amie.data.U.subClassRelationBS, amie.data.U.domainRelationBS, 
@@ -179,47 +183,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			}
 		}
 	}
-	
-	/**private void addCardinalityAtom(Rule rule, double minSupportThreshold, 
-			ByteString targetRelation,
-			Collection<Rule> output) {
-		// We'll force a cardinality atom at the end
-		ByteString[] head = rule.getHead();
-		int startCardinality = -1;
-		String inequalityRelation = null;				
-		ByteString[] newAtom = head.clone();
-		long cardinality = 0;
-		if (this.isFunctional(targetRelation)) {
-			if (head[1].equals(isCompleteBS)) {
-				inequalityRelation = KB.hasNumberOfValuesGreaterThan;
-				startCardinality  = 0;
-			} else {
-				inequalityRelation = KB.hasNumberOfValuesSmallerThan;
-				startCardinality = kb.maximalCardinality(targetRelation) + 1;
-			}
-		} else {
-			if(head[1].equals(isCompleteBS)) {
-				inequalityRelation = KB.hasNumberOfValuesGreaterThanInv;
-				startCardinality = 0;
-			} else {				
-				startCardinality = kb.maximalCardinalityInv(targetRelation) + 1;
-				inequalityRelation = KB.hasNumberOfValuesSmallerThanInv;					
-			}
-		}
-		
-		inequalityRelation = inequalityRelation + startCardinality;
-		// First rule
-		newAtom[1] = ByteString.of(inequalityRelation);
-		
-		rule.getTriples().add(newAtom);
-		cardinality = kb.countDistinct(rule.getFunctionalVariable(), rule.getTriples());
-		rule.getTriples().remove(rule.getTriples().size() - 1);			
-		if (cardinality >= minSupportThreshold) {
-			Rule candidate = rule.addAtom(newAtom, cardinality);
-			output.add(candidate);
-			candidate.addParent(rule);
-		}
-	}**/
+
 	
 	private void addCardinalityAtom(Rule rule, double minSupportThreshold, 
 			ByteString targetRelation,
@@ -268,16 +232,11 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	public void getInstantiatedAtoms(Rule parentRule, double minSupportThreshold, 
 		Collection<Rule> danglingEdges, Collection<Rule> output) {
 		boolean extendRule = true;
-		/**if (parentRule.getHead()[1].equals(isIncompleteBS)) {
-			if (!containsCardinalityAtom(parentRule, parentRule.getHead()[2])) {
-				addCardinalityAtom(parentRule, minSupportThreshold, output, parentRule.getHead()[2]);
-				extendRule = false;
-				// Rules with incompleteness assertions are extended only when they have cardinality constraints
-			}
-		}**/
 		
-		if (!containsCardinalityAtom(parentRule, parentRule.getHead()[2])) {
-			addCardinalityAtom(parentRule, minSupportThreshold, parentRule.getHead()[2], output);
+		if (mode == Mode.Standard || mode == Mode.OnlyCard) {
+			if (!containsCardinalityAtom(parentRule, parentRule.getHead()[2])) {
+				addCardinalityAtom(parentRule, minSupportThreshold, parentRule.getHead()[2], output);
+			}
 		}
 		
 		ByteString[] lastAtom = parentRule.getLastRealTriplePattern();
@@ -287,8 +246,10 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 			addTypeNegationAtom(parentRule, minSupportThreshold, output);
 		}
 		
-		if (!parentRule.containsRelation(amie.data.U.typeRelationBS) && extendRule) {
-			addTypeAtom(parentRule, minSupportThreshold, output);
+		if (mode == Mode.Standard || mode == Mode.OnlyType) {
+			if (!parentRule.containsRelation(amie.data.U.typeRelationBS) && extendRule) {
+				addTypeAtom(parentRule, minSupportThreshold, output);
+			}
 		}
 		
 		if (!parentRule.containsRelation(isRelevanthasNumberOfFactsBS) && extendRule) {
@@ -305,10 +266,6 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		
 		if (!parentRule.containsRelation(hasNotChangedBS) && extendRule) {
 			addChangedAtom(parentRule, hasNotChangedBS, minSupportThreshold, output);
-		}
-		
-		if (!containsCardinalityAtom(parentRule, parentRule.getHead()[2]) && extendRule) {
-			addCardinalityAtom(parentRule, minSupportThreshold, parentRule.getHead()[2], output);
 		}
 	}
 	
@@ -349,6 +306,9 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	}
 	
 	public void addDanglingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
+		if (mode == Mode.OnlyCard || mode == Mode.OnlyType)
+			return;
+			
 		ByteString[] newEdge = rule.fullyUnboundTriplePattern();
 		ByteString[] head = rule.getHead();
 		//General case
@@ -644,6 +604,14 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 		}
 		rule.setPcaBodySize(support + counterEvidence);			
 		return rule.getPcaConfidence();
+	}
+	
+	public Mode getMode() {
+		return mode;
+	}
+
+	public void setMode(Mode mode) {
+		this.mode = mode;
 	}
 	
 	public static void main(String args[]) {
