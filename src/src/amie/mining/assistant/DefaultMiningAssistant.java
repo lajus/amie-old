@@ -168,6 +168,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 								if((t2 - t1) > 20000 && this.verbose)
 									System.err.println("countProjectionBindings var=" + newEdge[1] + " "  + rule + " has taken " + (t2 - t1) + " ms");
 							}else{
+								System.out.println(rewrittenQuery + " is a rewrite of " + rule);
 								long t1 = System.currentTimeMillis();
 								promisingRelations = kb.countProjectionBindings(rewrittenQuery.getHead(), rewrittenQuery.getAntecedent(), newEdge[1]);
 								long t2 = System.currentTimeMillis();

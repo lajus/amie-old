@@ -15,7 +15,7 @@ import amie.data.KB;
 import amie.rules.AMIEParser;
 import amie.rules.Rule;
 
-public class EquivalenceRulesFilter {
+public class EquivalenceRulesBuilder {
 
 	private static void calculateMetrics(KB source, Rule candidate) {
 		// TODO Auto-generated method stub
@@ -105,6 +105,48 @@ public class EquivalenceRulesFilter {
 			headBindings.addAll(source.selectDistinct(head[KB.firstVariablePos(head)], KB.triples(body)));			
 			return headBindings.size();
 		}
+	}
+	
+	public static List<ROSAEquivalence> findEquivalences(KB source, List<Rule> rules) {
+		List<ROSAEquivalence> results = new ArrayList<>();
+		boolean flags[] = new boolean[rules.size()];
+		for(int i = 0; i < rules.size(); ++i)
+			flags[i] = false;
+		
+		//Assume we get rules with 2 atoms
+		//Look for patterns r(x,y) => r'(x,y) and r'(x,y) => r(x,y)
+		for(int i = 0; i < rules.size(); ++i){
+			if(flags[i]) continue;
+			boolean twoVars = KB.numVariables(rules.get(i).getHead()) == 2;
+			ByteString r1, r2, r1p, r2p, t1, t2, t1p, t2p;
+			r1 = rules.get(i).getHead()[1];
+			r2 = rules.get(i).getBody().get(0)[1];
+			t1 = rules.get(i).getHead()[2];
+			t2 = rules.get(i).getBody().get(0)[2];
+			for(int j = i + 1; j < rules.size(); ++j){
+				boolean match = false;
+				r1p = rules.get(j).getHead()[1];
+				r2p = rules.get(j).getBody().get(0)[1];
+				t1p = rules.get(j).getHead()[2];
+				t2p = rules.get(j).getBody().get(0)[2];
+				if(twoVars){
+					match = r1.equals(r2p) && r2.equals(r1p);
+				}else{
+					match = r1.equals(r2p) && r2.equals(r1p) && t1.equals(t2p) && t2.equals(t1p);					
+				}
+				if(match){
+					flags[i] = true;
+					flags[j] = true;
+					long intersection, union;
+					intersection = calculateIntersection(source, rules.get(i));
+					union = calculateUnion(source, rules.get(i));
+					results.add(new ROSAEquivalence(rules.get(i), rules.get(j), intersection, union));
+					break;
+				}
+			}
+		}
+		
+		return results;
 	}
 	
 	/**

@@ -88,9 +88,10 @@ public class AMIE {
     private double minInitialSupport;
 
     /**
-     * Head coverage threshold for refinements
+     * Threshold for refinements. It can hold either an absolute support number
+     * or a head coverage threshold.
      */
-    private double minHeadCoverage;
+    private double minSignificanceThreshold;
 
     /**
      * Metric used to prune the mining tree
@@ -150,20 +151,19 @@ public class AMIE {
     		"PCA Confidence", "Positive Examples", "Body size", "PCA Body size",
             "Functional variable", "Std. Lower Bound", "PCA Lower Bound", "PCA Conf estimation");
 
-
     /**
      *
      * @param assistant An object that implements the logic of the mining operators.
      * @param minInitialSupport If head coverage is defined as pruning metric,
      * it is the minimum size for a relation to be considered in the mining.
      * @param threshold The minimum support threshold: it can be either a head
-     * coverage ratio threshold or an absolute number.
+     * coverage ratio threshold or an absolute number depending on the 'metric' argument.
      * @param metric Head coverage or support.
      */
     public AMIE(MiningAssistant assistant, int minInitialSupport, double threshold, Metric metric, int nThreads) {
         this.assistant = assistant;
         this.minInitialSupport = minInitialSupport;
-        this.minHeadCoverage = threshold;
+        this.minSignificanceThreshold = threshold;
         this.pruningMetric = metric;
         this.nThreads = nThreads;
         this.realTime = true;
@@ -200,7 +200,15 @@ public class AMIE {
     	this.seeds = seeds;
     }
 
-    public Metric getPruningMetric() {
+    public double getMinSignificanceThreshold() {
+		return minSignificanceThreshold;
+	}
+
+	public void setMinSignificanceThreshold(double minSignificanceThreshold) {
+		this.minSignificanceThreshold = minSignificanceThreshold;
+	}
+
+	public Metric getPruningMetric() {
         return pruningMetric;
     }
 
@@ -208,7 +216,23 @@ public class AMIE {
         this.pruningMetric = pruningMetric;
     }
 
-    private long _getSpecializationTime() {
+    public double getMinInitialSupport() {
+		return minInitialSupport;
+	}
+
+	public void setMinInitialSupport(double minInitialSupport) {
+		this.minInitialSupport = minInitialSupport;
+	}
+
+	public int getnThreads() {
+		return nThreads;
+	}
+
+	public void setnThreads(int nThreads) {
+		this.nThreads = nThreads;
+	}
+
+	private long _getSpecializationTime() {
         return _specializationTime;
     }
 
@@ -564,9 +588,9 @@ public class AMIE {
         private double getCountThreshold(Rule query) {
             switch (pruningMetric) {
                 case Support:
-                    return minHeadCoverage;
+                    return minSignificanceThreshold;
                 case HeadCoverage:
-                    return Math.ceil((minHeadCoverage * 
+                    return Math.ceil((minSignificanceThreshold * 
                     		(double) assistant.getHeadCardinality(query)));
                 default:
                     return 0;
@@ -617,8 +641,8 @@ public class AMIE {
         DefaultMiningAssistant miningAssistant = new DefaultMiningAssistant(db);
         miningAssistant.setPcaConfidenceThreshold(minPCAConfidence);
         return new AMIE(miningAssistant,
-                100, // Do not look at relations smaller than 100 facts 
-                0.01, // Head coverage 1%
+                DEFAULT_INITIAL_SUPPORT, // Do not look at relations smaller than 100 facts 
+                DEFAULT_HEAD_COVERAGE, // Head coverage 1%
                 Metric.HeadCoverage,
                 Runtime.getRuntime().availableProcessors());
     }
