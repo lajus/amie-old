@@ -1,6 +1,5 @@
 package amie.data;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -9,27 +8,22 @@ import javatools.datatypes.ByteString;
 public class QueryKB {
 
 	public static void main(String[] args) throws IOException {
-/**		KB kb = new KB();
-		kb.load(new File("/home/luis/Dropbox/postdoc/artist/DB_Artist_+Transitive.rdf"));
-		List<ByteString[]> query = KB.triples(KB.triple("?s", "http://dbpedia.org/ontology/birthYear", "?o"), 
-				KB.triple("?x", "http://dbpedia.org/ontology/birthYear", "?o"),
-				KB.triple("?s", "http://dbpedia.org/ontology/field", "http://dbpedia.org/resource/Painting"),
-				KB.triple("?x", "http://dbpedia.org/ontology/field", "http://dbpedia.org/resource/Painting"),
-				KB.triple("?s", KB.DIFFERENTFROMstr, "?x"));
-		System.out.println(kb.selectDistinct(ByteString.of("?s"), ByteString.of("?x"), query));
-		System.out.println(kb.selectDistinct(ByteString.of("?s"), ByteString.of("?o"), query)); **/
+		String query = args[0];
+		KB kb = amie.data.U.loadFiles(args, 1);
 		
-		KB kb = new KB();
-		kb.load(new File("/home/galarrag/Dropbox/workspace/Prediction/data/training-from-sampling/yago3/annotations/yago3.trainingset.part2.final.tsv"),
-				new File("/home/galarrag/workspace/AMIE/Data/yago3/yagoFacts.clean.tsv"));
-		List<ByteString[]> query = KB.triples(KB.triple("?a", "hasNumberOfValuesSmallerThan1", "<diedIn>"),
-				KB.triple("?a", "isIncomplete", "<diedIn>"));
-		List<ByteString[]> query1 = KB.triples(KB.triple("?a", "hasNumberOfValuesSmallerThan1", "<diedIn>"),
-				KB.triple("?a", "isComplete", "<diedIn>"));		
-
-		System.out.println(kb.countDistinct(ByteString.of("?a"), query));
-		System.out.println(kb.countDistinct(ByteString.of("?a"), query1));
-		System.out.println(kb.count(query.get(0)));
+		String[] queryParts = query.split("\\|");
+		String variables = queryParts[0];
+		String[] variableParts = variables.split(",");
+		String selection = queryParts[1].trim();
+		List<ByteString[]> selectionAtoms = KB.triples(selection);
+		System.out.println("Projection variables: " + KB.toString(variableParts));
+		System.out.println("Conditions: " + KB.toString(selectionAtoms));
+		if (variableParts.length == 1) {
+			System.out.println(kb.selectDistinct(ByteString.of(variables.trim()), selectionAtoms));
+		} else if (variableParts.length == 2) {
+			System.out.println(kb.selectDistinct(ByteString.of(variableParts[0].trim()), 
+					ByteString.of(variableParts[1].trim()), selectionAtoms));
+		}
 
 	}
 }

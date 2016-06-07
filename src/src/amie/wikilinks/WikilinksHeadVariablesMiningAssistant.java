@@ -6,11 +6,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javatools.datatypes.ByteString;
-import javatools.datatypes.IntHashMap;
 import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
 import amie.rules.Rule;
+import javatools.datatypes.ByteString;
+import javatools.datatypes.IntHashMap;
 
 public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistant {
 	
@@ -67,16 +67,14 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 			query.getTriples().remove(0);
 		} else {
 			super.getDanglingAtoms(query, minCardinality, output);
-			if (query.isClosed(true) && 
-					!query.containsRelation(ByteString.of(wikiLinkProperty)) 
-					&& !query.containsRelation(typeString)){
-				//Add the types when the query is long enough
-				getSpecializationCandidates(query, minCardinality, output);
-			}
 		}
 	}
 	
-	public void getSpecializationCandidates(Rule query, double minSupportThreshold, Collection<Rule> output){
+	@Override
+	public void getTypeSpecializedAtoms(Rule query, double minSupportThreshold, Collection<Rule> output) {
+		if (query.containsRelation(typeString))
+			return;
+		
 		List<Rule> tmpCandidates = new ArrayList<Rule>();
 		ByteString[] head = query.getHead();
 		
@@ -100,7 +98,7 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 			}
 			
 			query.getTriples().remove(query.getTriples().size() - 1);
-			tmpCandidates.add(query);
+			//tmpCandidates.add(query);
 		}
 		
 		if(KB.isVariable(head[2])){
@@ -124,10 +122,10 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 					}
 				}
 				
-				if (candidate != query) {
+				/**if (candidate != query) {
 					output.add(candidate);
 					candidate.addParent(query);
-				}
+				}**/
 				candidate.getTriples().remove(candidate.getTriples().size() - 1);
 			}
 		}
@@ -176,13 +174,19 @@ public class WikilinksHeadVariablesMiningAssistant extends DefaultMiningAssistan
 				candidate2.addParent(query);			
 				output.add(candidate2);	
 			}
+		} else {
+			super.getClosingAtoms(query, minSupportThreshold, output);
 		}
-			
-		super.getClosingAtoms(query, minSupportThreshold, output);
 	}
 
 	protected boolean isNotTooLong(Rule candidate){
-		boolean passed = candidate.getLengthWithoutTypesAndLinksTo(typeString, ByteString.of(wikiLinkProperty)) < maxDepth;
-		return passed;
+		return candidate.getLengthWithoutTypesAndLinksTo(typeString, ByteString.of(wikiLinkProperty)) < maxDepth;
 	}
+	
+	@Override
+	public boolean shouldBeOutput(Rule candidate) {
+		return candidate.isClosed(true) 
+				&& candidate.containsRelation(typeString)
+				&& candidate.containsRelation(ByteString.of(wikiLinkProperty));
+	}	
 }
