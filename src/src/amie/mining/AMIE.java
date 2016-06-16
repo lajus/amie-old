@@ -1350,7 +1350,7 @@ public class AMIE {
 			finalHeaders.removeAll(Arrays.asList("Std. Lower Bound", "PCA Lower Bound", "PCA Conf estimation"));
         }
 		
-    	System.out.println(telecom.util.collections.Collections.implode("\t", finalHeaders));
+    	System.out.println(telecom.util.collections.Collections.implode(finalHeaders, "\t"));
 	}
 
 
