@@ -241,16 +241,12 @@ public class U {
 			ByteString currentType = queue.poll();
 			resultSet.add(currentType);
 			superTypes = getSuperTypes(source, currentType);
-			boolean proceed = true;
 			for (ByteString st : superTypes) {
-				if (seenTypes.contains(st)) {
-					proceed = false;
-				} else {
-					seenTypes.add(st);
-				}
+		        if (!seenTypes.contains(st)) {
+	                seenTypes.add(st);
+	                queue.add(st);
+		        }
 			}
-			if (proceed)
-				queue.addAll(superTypes);
 		}
 		
 		return resultSet;
@@ -348,16 +344,12 @@ public class U {
 			ByteString currentType = queue.poll();
 			resultSet.add(currentType);
 			subTypes = getSubtypes(source, currentType);
-			boolean proceed = true;
 			for (ByteString st : subTypes) {
-				if (seenTypes.contains(st)) {
-					proceed = false;
-				} else {
-					seenTypes.add(st);
-				}
+		        if (!seenTypes.contains(st)) {
+	                seenTypes.add(st);
+	                queue.add(st);
+		        }
 			}
-			if (proceed)
-				queue.addAll(subTypes);
 		}
 		
 		return resultSet;
