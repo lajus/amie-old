@@ -858,7 +858,7 @@ public class KB {
 	 * Returns the results of the triple pattern query, if it contains exactly 1
 	 * variable
 	 */
-	protected IntHashMap<ByteString> resultsOneVariable(ByteString... triple) {
+	public IntHashMap<ByteString> resultsOneVariable(ByteString... triple) {
 		if (triple[1].equals(DIFFERENTFROMbs))
 			throw new IllegalArgumentException("Cannot query differentFrom: "
 					+ toString(triple));
