@@ -552,6 +552,32 @@ public class U {
 		kb.load(files);
 		return kb;
 	}
+	
+	/**
+	 * Returns a KB with the content of all the files referenced in the subarray starting
+	 * at the given index of the input array 'args'.
+	 * @param args
+	 * @return
+	 * @throws IOException
+	 * @throws SecurityException 
+	 * @throws NoSuchMethodException 
+	 * @throws InvocationTargetException 
+	 * @throws IllegalArgumentException 
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
+	 */
+	public static KB loadFiles(String args[], int fromIndex, Class kbSubclass) 
+			throws IOException, InstantiationException, IllegalAccessException, 
+			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		// Load the data
+		KB kb = (KB) kbSubclass.getConstructor().newInstance();
+		List<File> files = new ArrayList<File>();
+		for (int i = fromIndex; i < args.length; ++i) {
+			files.add(new File(args[i]));
+		}
+		kb.load(files);
+		return kb;
+	}
 
 	/**
 	 * 
