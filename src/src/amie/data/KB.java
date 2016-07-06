@@ -1529,7 +1529,7 @@ public class KB {
 		int bestPos = -1;
 		long count = Long.MAX_VALUE;
 		for (int i = 0; i < triples.size(); i++) {
-			long myCount = isSpecialAtom(triples.get(i)) ? Long.MAX_VALUE :
+			long myCount = isSpecialAtom(triples.get(i)) ? Long.MAX_VALUE - 1 :
 				count(triples.get(i));
 			if (myCount >= count)
 				continue;

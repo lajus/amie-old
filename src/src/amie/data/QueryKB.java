@@ -29,9 +29,7 @@ public class QueryKB {
 			Map<ByteString, IntHashMap<ByteString>> result = kb.selectDistinct(ByteString.of(variableParts[0].trim()), 
 					ByteString.of(variableParts[1].trim()), selectionAtoms);
 			System.out.println(result);
-			System.out.println(KB.aggregate(result) + " results");
-			
+			System.out.println(KB.aggregate(result) + " results");			
 		}
-
 	}
 }

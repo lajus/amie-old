@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import amie.data.KB;
 import amie.mining.AMIE;
@@ -19,6 +21,8 @@ public class AlignKBs {
 	public static String prefixkb1 = "<db:";
 	
 	public static String prefixkb2 = "";
+	
+	public static String wikidataMappings = "/infres/ic2/galarrag/AMIE/Data/wikidata/mapping_yago_wikidata.tsv";
 	
 	/**
 	 * Determines if a rule r => r' is a cross-ontology mapping, i.e., 
@@ -53,10 +57,51 @@ public class AlignKBs {
 		}
 		return kb;
 	}
+	
+	public static String map(Map<String, String> map, String val) {
+		if (map.containsKey(val)) 
+			return map.get(val);
+		else
+			return val;
+	}
+	
+	public static KB loadAndMapFiles(String args[]) throws IOException {
+		KB kb = new KB();
+		Map<String, String> yago2wiki = new HashMap<>();
+		// Load the mappings 
+		try(TSVFile mappings = new TSVFile(new File(wikidataMappings))) {
+			for (List<String> mapping : mappings) {
+				yago2wiki.put(mapping.get(0), mapping.get(2));
+			}
+		}
+		
+		for (int i = 1; i < args.length; ++i) {
+			String fileName = args[i];
+			TSVFile file = new TSVFile(new File(fileName));
+			for (List<String> line : file) {
+				String[] parts = line.get(0).split("> <");
+				if (parts.length == 3) {
+					kb.add(map(yago2wiki, parts[0] + ">"), "<" + parts[1] + ">", map(yago2wiki, "<" + parts[2]));
+				} else if (parts.length == 2) {
+					String[] tailParts = parts[1].split("> \"");
+					if (tailParts.length == 2) {
+						kb.add(map(yago2wiki, parts[0] + ">"), "<" + tailParts[0] + ">", map(yago2wiki, "\"" + tailParts[1]));
+					}
+				}
+			}
+			file.close();
+		}
+		return kb;
+	}
+
 
 	
 	public static void main(String[] args) throws Exception {	
-		KB kb = loadFiles(args);
+		KB kb = null;
+		if (args[0].equals("wikidata"))
+			kb = loadAndMapFiles(args);
+		else
+			kb = loadFiles(args);
 		AMIE amie = AMIE.getVanillaSettingInstance(kb);
 		amie.getAssistant().setMaxDepth(2);
 		amie.setPruningMetric(Metric.Support);
