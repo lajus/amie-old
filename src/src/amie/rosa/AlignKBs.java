@@ -68,8 +68,8 @@ public class AlignKBs {
 				}
 				file.close();
 			}
-			System.out.println(kb.size() + " facts loaded");
 		}
+		System.out.println(kb.size() + " facts loaded");
 		return kb;
 	}
 	
