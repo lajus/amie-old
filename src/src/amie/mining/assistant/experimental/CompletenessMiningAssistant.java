@@ -1,5 +1,6 @@
 package amie.mining.assistant.experimental;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -95,9 +96,11 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	}
 	
 	@Override
-	protected void buildInitialQueries(IntHashMap<ByteString> relations, 
-			double minSupportThreshold, Collection<Rule> output) {
+	protected Collection<Rule> buildInitialQueries(IntHashMap<ByteString> relations, 
+			double minSupportThreshold) {
+		Collection<Rule> output = new ArrayList<>();
 		Rule query = new Rule();
+		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		
 		for (ByteString relation: relations) {		
@@ -126,6 +129,8 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 				output.add(candidateIncomplete);
 			}
 		}
+		
+		return output;
 	}
 	
 

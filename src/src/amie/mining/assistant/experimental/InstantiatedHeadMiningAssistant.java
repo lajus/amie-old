@@ -23,7 +23,8 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 	}
 	
 	@Override
-	public void getInitialAtomsFromSeeds(Collection<ByteString> relations, double minCardinality, Collection<Rule> output) {
+	public Collection<Rule> getInitialAtomsFromSeeds(Collection<ByteString> relations, double minCardinality) {
+		Collection<Rule> output = new ArrayList<>();
 		Rule query = new Rule();
 		//The query must be empty
 		if(!query.isEmpty()) {
@@ -50,10 +51,12 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 		}
 		
 		query.getTriples().remove(0);		
+		return output;
 	}
 	
 	@Override
-	public void getInitialAtoms(double minSupportThreshold, Collection<Rule> output) {
+	public Collection<Rule> getInitialAtoms(double minSupportThreshold) {
+		Collection<Rule> output = new ArrayList<>();
 		Rule query = new Rule();
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		
@@ -80,7 +83,7 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 			}			
 			query.getTriples().remove(0);
 		}
-		
+		return output;
 	}
 	
 	@Override

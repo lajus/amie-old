@@ -161,7 +161,8 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 	}
 	
 	@Override
-	public void getInitialAtoms(double minSupportThreshold, Collection<Rule> output) {
+	public Collection<Rule> getInitialAtoms(double minSupportThreshold) {
+		Collection<Rule> output = new ArrayList<>();		
 		Rule query = new Rule();
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		query.getTriples().add(newEdge);
@@ -187,6 +188,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 				output.add(candidate);
 			}
 		}
+		return output;
 	}
 
 	@Override

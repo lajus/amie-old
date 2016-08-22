@@ -45,7 +45,8 @@ public class DefaultMiningAssistant extends MiningAssistant{
 	}
 	
 	@Override
-	public void getInitialAtomsFromSeeds(Collection<ByteString> relations, double minCardinality, Collection<Rule> output) {
+	public Collection<Rule> getInitialAtomsFromSeeds(Collection<ByteString> relations, double minCardinality) {
+		Collection<Rule> output = new ArrayList<>();
 		Rule query = new Rule();
 		//The query must be empty
 		if (!query.isEmpty()){
@@ -78,16 +79,17 @@ public class DefaultMiningAssistant extends MiningAssistant{
 		}
 		
 		query.getTriples().remove(0);
+		return output;
 	}
 	
 	@Override
-	public void getInitialAtoms(double minSupportThreshold, Collection<Rule> output) {
+	public Collection<Rule> getInitialAtoms(double minSupportThreshold) {
 		List<ByteString[]> newEdgeList = new ArrayList<ByteString[]>(1);
 		ByteString[] newEdge = new ByteString[]{ByteString.of("?x"), ByteString.of("?y"), ByteString.of("?z")};
 		newEdgeList.add(newEdge);
 		List<ByteString[]> emptyList = Collections.emptyList();
 		IntHashMap<ByteString> relations = this.kb.countProjectionBindings(newEdge, emptyList, newEdge[1]);
-		buildInitialQueries(relations, minSupportThreshold, output);		
+		return buildInitialQueries(relations, minSupportThreshold);		
 	}
 
 	

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import amie.data.KB;
+import amie.mining.AMIEQueue;
 import amie.rules.ConfidenceMetric;
 import amie.rules.Metric;
 import amie.rules.Rule;
@@ -370,10 +371,10 @@ public class MiningAssistant{
 	 * Returns a list of one-atom queries using the head relations provided in the collection relations.
 	 * @param relations
 	 * @param minSupportThreshold Only relations of size bigger or equal than this value will be considered.
-	 * @param output The results of the method are added directly to this collection.
 	 */
-	public void getInitialAtomsFromSeeds(Collection<ByteString> relations, 
-			double minSupportThreshold, Collection<Rule> output) {
+	public Collection<Rule> getInitialAtomsFromSeeds(Collection<ByteString> relations, 
+			double minSupportThreshold) {
+		Collection<Rule> output = new ArrayList<>();
 		Rule emptyQuery = new Rule();
 		
 		ByteString[] newEdge = emptyQuery.fullyUnboundTriplePattern();		
@@ -400,6 +401,7 @@ public class MiningAssistant{
 			}
 		}
 		emptyQuery.getTriples().remove(0);
+		return output;
 	}
 	
 	/**
@@ -408,24 +410,25 @@ public class MiningAssistant{
 	 * be considered.
 	 * @param output
 	 */
-	public void getInitialAtoms(double minSupportThreshold, Collection<Rule> output) {
+	public Collection<Rule> getInitialAtoms(double minSupportThreshold) {
 		List<ByteString[]> newEdgeList = new ArrayList<ByteString[]>(1);
 		ByteString[] newEdge = new ByteString[]{ByteString.of("?x"), ByteString.of("?y"), ByteString.of("?z")};
 		newEdgeList.add(newEdge);
 		IntHashMap<ByteString> relations = kb.frequentBindingsOf(newEdge[1], newEdge[0], newEdgeList);
-		buildInitialQueries(relations, minSupportThreshold, output);
+		return buildInitialQueries(relations, minSupportThreshold);
 	}
 	
 	/**
 	 * Given a list of relations with their corresponding support (one assistant could count based on the number of pairs,
-	 * another could use the number of subjects), it adds one rule per relation to the output. The relation
-	 * appears as the head and unique atom of the rule. 
+	 * another could use the number of subjects), it returns a queue with rules of the form => r(x, y) for each relation
+	 * r.
 	 * 
 	 * @param relations
 	 * @param minSupportThreshold Only relations with support equal or above this value are considered.
 	 * @param output
 	 */
-	protected void buildInitialQueries(IntHashMap<ByteString> relations, double minSupportThreshold, Collection<Rule> output) {
+	protected Collection<Rule> buildInitialQueries(IntHashMap<ByteString> relations, double minSupportThreshold) {
+		Collection<Rule> output = new ArrayList<>();
 		Rule query = new Rule();
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		for(ByteString relation: relations){
@@ -452,6 +455,7 @@ public class MiningAssistant{
 				}
 			}
 		}			
+		return output;
 	}
 
 	/**

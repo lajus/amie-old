@@ -11,11 +11,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -108,41 +105,10 @@ public class AMIE {
      */
     private boolean realTime;
     
-
-    /** Fields required to measure the system performance **/
-    
-    /**
-     * Time spent in applying the operators.
-     *
-     */
-    private long _specializationTime;
-
-    /**
-     * Time spent in calculating confidence scores.
-     *
-     */
-    private long _scoringTime;
-    
     /**
      * List of target head relations.
      */
     private Collection<ByteString> seeds;
-
-    /**
-     * Time spent in duplication elimination
-     *
-     */
-    private long _queueingAndDuplicateElimination;
-
-    /**
-     * Time spent in confidence approximations
-     */
-    private long _approximationTime;
-    
-    /**
-     * Time spent loading the KB into memory.
-     */
-    private long _sourcesLoadingTime;
     
     /**
      * Column headers
@@ -168,11 +134,6 @@ public class AMIE {
         this.nThreads = nThreads;
         this.realTime = true;
         this.seeds = null;
-        /** System performance **/
-        this._specializationTime = 0l;
-        this._scoringTime = 0l;
-        this._queueingAndDuplicateElimination = 0l;
-        this._approximationTime = 0l;
     }
 
     public MiningAssistant getAssistant() {
@@ -231,32 +192,6 @@ public class AMIE {
 	public void setnThreads(int nThreads) {
 		this.nThreads = nThreads;
 	}
-
-	private long _getSpecializationTime() {
-        return _specializationTime;
-    }
-
-    private long _getScoringTime() {
-        return _scoringTime;
-    }
-
-    private long _getQueueingAndDuplicateElimination() {
-        return _queueingAndDuplicateElimination;
-    }
-
-    private long _getApproximationTime() {
-        return _approximationTime;
-    }
-    
-    
-    private void _setSourcesLoadingTime(long sourcesLoadingTime) {
-    	this._sourcesLoadingTime = sourcesLoadingTime;
-	}
-    
-    
-    private long _getSourcesLoadingTime() {
-    	return this._sourcesLoadingTime;
-	}
     
 
     /**
@@ -273,15 +208,16 @@ public class AMIE {
         Thread consumerThread = null;
         Lock resultsLock = new ReentrantLock();
         Condition resultsCondVar = resultsLock.newCondition();
-        AtomicInteger sharedCounter = new AtomicInteger(nThreads);
-
-        Collection<Rule> seedsPool = new LinkedHashSet<>();
+        Collection<Rule> seedRules = new ArrayList<>();
+        
         // Queue initialization
         if (seeds == null || seeds.isEmpty()) {
-            assistant.getInitialAtoms(minInitialSupport, seedsPool);
+            seedRules = assistant.getInitialAtoms(minInitialSupport);
         } else {
-            assistant.getInitialAtomsFromSeeds(seeds, minInitialSupport, seedsPool);
+            seedRules = assistant.getInitialAtomsFromSeeds(seeds, minInitialSupport);
         }
+        
+        AMIEQueue<Rule> queue = new AMIEQueue<>(seedRules, nThreads);
 
         if (realTime) {
             consumerObj = new RuleConsumer(result, resultsLock, resultsCondVar);
@@ -294,7 +230,7 @@ public class AMIE {
         ArrayList<Thread> currentJobs = new ArrayList<>();
         ArrayList<RDFMinerJob> jobObjects = new ArrayList<>();
         for (int i = 0; i < nThreads; ++i) {
-            RDFMinerJob jobObject = new RDFMinerJob(seedsPool, result, resultsLock, resultsCondVar, sharedCounter, indexedResult);
+            RDFMinerJob jobObject = new RDFMinerJob(queue, result, resultsLock, resultsCondVar, indexedResult);
             Thread job = new Thread(jobObject);
             currentJobs.add(job);
             jobObjects.add(jobObject);
@@ -309,18 +245,9 @@ public class AMIE {
             job.join();
         }
 
-        // Required by the reviewers of the AMIE+ article. Timing collection   	
-        for (RDFMinerJob jobObject : jobObjects) {
-            this._specializationTime += jobObject._getSpecializationTime();
-            this._scoringTime += jobObject._getScoringTime();
-            this._queueingAndDuplicateElimination += jobObject._getQueueingAndDuplicateElimination();
-            this._approximationTime += jobObject._getApproximationTime();
-        }
-
-        if (realTime) {
-            consumerObj.finish();
+        if (realTime) {        
             consumerThread.interrupt();
-            consumerThread.join();
+            while (!consumerThread.isInterrupted());            	
         }
 
         return result;
@@ -337,8 +264,6 @@ public class AMIE {
 
         private List<Rule> consumeList;
 
-        private volatile boolean finished;
-
         private int lastConsumedIndex;
 
         private Lock consumeLock;
@@ -350,13 +275,12 @@ public class AMIE {
             this.lastConsumedIndex = -1;
             this.consumeLock = consumeLock;
             this.conditionVariable = conditionVariable;
-            finished = false;
         }
 
         @Override
         public void run() {
             AMIE.printRuleHeaders(assistant);
-            while (!finished) {
+            while (!Thread.currentThread().isInterrupted()) {
                 consumeLock.lock();
                 try {
                     while (lastConsumedIndex == consumeList.size() - 1) {
@@ -367,15 +291,10 @@ public class AMIE {
                         lastConsumedIndex = consumeList.size() - 1;
                     }
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                } finally {
-                    consumeLock.unlock();
-                }
+                	consumeLock.unlock();
+                	break;
+                } 
             }
-        }
-
-        public void finish() {
-            finished = true;
         }
     }
 
@@ -391,31 +310,11 @@ public class AMIE {
         // A version of the output set thought for search.
         private MultiMap<Integer, Rule> indexedOutputSet;
 
-        private Collection<Rule> queryPool;
+        private AMIEQueue<Rule> queryPool;
 
         private Lock resultsLock;
 
         private Condition resultsCondition;
-
-        private AtomicInteger sharedCounter;
-
-        private boolean idle;
-
-        private Boolean done;
-
-        /** System performance evaluation **/
-        
-        // Time spent in applying the operators.
-        private long _specializationTime;
-
-        // Time spent in calculating confidence scores.
-        private long _scoringTime;
-
-        // Time spent in duplication elimination
-        private long _queueingAndDuplicateElimination;
-
-        // Time to calculate confidence approximations
-        private long _approximationTime;
 
         /**
          * 
@@ -427,67 +326,37 @@ public class AMIE {
          * in the system.
          * @param indexedOutputSet
          */
-        public RDFMinerJob(Collection<Rule> seedsPool,
+        public RDFMinerJob(AMIEQueue<Rule> seedsPool,
                 List<Rule> outputSet, Lock resultsLock,
                 Condition resultsCondition,
-                AtomicInteger sharedCounter,
                 MultiMap<Integer, Rule> indexedOutputSet) {
             this.queryPool = seedsPool;
             this.outputSet = outputSet;
             this.resultsLock = resultsLock;
             this.resultsCondition = resultsCondition;
-            this.sharedCounter = sharedCounter;
             this.indexedOutputSet = indexedOutputSet;
-            this.idle = false;
-            this.done = false;
-            this._specializationTime = 0l;
-            this._scoringTime = 0l;
-            this._queueingAndDuplicateElimination = 0l;
-            this._approximationTime = 0l;
-        }
-
-        /**
-         * Removes the front of the queue of rules.
-         * @return
-         */
-        private Rule pollQuery() {
-            long timeStamp1 = System.currentTimeMillis();
-            Rule nextQuery = null;
-            if (!queryPool.isEmpty()) {
-                Iterator<Rule> iterator = queryPool.iterator();
-                nextQuery = iterator.next();
-                iterator.remove();
-            }
-            long timeStamp2 = System.currentTimeMillis();
-            this._queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
-            return nextQuery;
         }
 
         @Override
         public void run() {
-            synchronized (this.done) {
-                this.done = false;
-            }
             while (true) {
                 Rule currentRule = null;
+				try {
+					currentRule = queryPool.dequeue();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
-                synchronized (queryPool) {
-                    currentRule = pollQuery();
-                }
-
-                if (currentRule != null) {
-                    if (this.idle) {
-                        this.idle = false;
-                        this.sharedCounter.decrementAndGet();
-                    }
+                if (currentRule == null) {
+                	break;
+                } else {
                     // Check if the rule meets the language bias and confidence thresholds and
                     // decide whether to output it.
                     boolean outputRule = false;
                     if (assistant.shouldBeOutput(currentRule)) {
-                        long timeStamp1 = System.currentTimeMillis();
                         boolean ruleSatisfiesConfidenceBounds
                                 = assistant.calculateConfidenceBoundsAndApproximations(currentRule);
-                        this._approximationTime += (System.currentTimeMillis() - timeStamp1);
                         if (ruleSatisfiesConfidenceBounds) {
                             this.resultsLock.lock();
                             assistant.setAdditionalParents(currentRule, indexedOutputSet);
@@ -499,8 +368,6 @@ public class AMIE {
                         } else {
                             outputRule = false;
                         }
-                        long timeStamp2 = System.currentTimeMillis();
-                        this._scoringTime += (timeStamp2 - timeStamp1);
                     }
 
                     // Check if we should further refine the rule
@@ -511,7 +378,6 @@ public class AMIE {
 
                     // If so specialize it
                     if (furtherRefined) {
-                        long timeStamp1 = System.currentTimeMillis();
                         double threshold = getCountThreshold(currentRule);
                         List<Rule> temporalOutput = new ArrayList<Rule>();
                         List<Rule> temporalOutputDanglingEdges = new ArrayList<Rule>();
@@ -522,25 +388,17 @@ public class AMIE {
                         assistant.getInstantiatedAtoms(currentRule, threshold, temporalOutputDanglingEdges, temporalOutput);
                         assistant.getTypeSpecializedAtoms(currentRule, threshold, temporalOutput);
                         
-                        long timeStamp2 = System.currentTimeMillis();
-                        this._specializationTime += (timeStamp2 - timeStamp1);
                         // Addition of the specializations to the queue
-                        synchronized (queryPool) {
-                            timeStamp1 = System.currentTimeMillis();
-                            queryPool.addAll(temporalOutput);                            
-                            if (currentRule.getRealLength() < assistant.getMaxDepth() - 1) {
-                                queryPool.addAll(temporalOutputDanglingEdges);                           	
-                            }
-
-                            timeStamp2 = System.currentTimeMillis();
-                            this._queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
+                        queryPool.queueAll(temporalOutput);                            
+                        if (currentRule.getRealLength() 
+                        		< assistant.getMaxDepth() - 1) {
+                            queryPool.queueAll(temporalOutputDanglingEdges);                           	
                         }
                     }
 
                     // Output the rule
                     if (outputRule) {
                         this.resultsLock.lock();
-                        long timeStamp1 = System.currentTimeMillis();
                         Set<Rule> outputQueries = indexedOutputSet.get(currentRule.alternativeParentHashCode());
                         if (outputQueries != null) {
                             if (!outputQueries.contains(currentRule)) {
@@ -551,31 +409,10 @@ public class AMIE {
                             this.outputSet.add(currentRule);
                             this.indexedOutputSet.put(currentRule.alternativeParentHashCode(), currentRule);
                         }
-                        long timeStamp2 = System.currentTimeMillis();
-                        this._queueingAndDuplicateElimination += (timeStamp2 - timeStamp1);
                         this.resultsCondition.signal();
                         this.resultsLock.unlock();
                     }
-                } else {
-                    if (!this.idle) {
-                        this.idle = true;
-                        boolean leave;
-                        synchronized (this.sharedCounter) {
-                            leave = this.sharedCounter.decrementAndGet() <= 0;
-                        }
-                        if (leave) {
-                            break;
-                        }
-                    } else {
-                        if (this.sharedCounter.get() <= 0) {
-                            break;
-                        }
-                    }
                 }
-            }
-
-            synchronized (this.done) {
-                this.done = true;
             }
         }
 
@@ -596,23 +433,6 @@ public class AMIE {
                     return 0;
             }
         }
-
-        public long _getSpecializationTime() {
-            return _specializationTime;
-        }
-
-        public long _getScoringTime() {
-            return _scoringTime;
-        }
-
-        public long _getQueueingAndDuplicateElimination() {
-            return _queueingAndDuplicateElimination;
-        }
-
-        public long _getApproximationTime() {
-            return _approximationTime;
-        }
-
     }
 
     /**
@@ -1299,7 +1119,6 @@ public class AMIE {
         AMIE miner = new AMIE(mineAssistant, minInitialSup, minMetricValue, metric, nThreads);
         miner.setRealTime(realTime);
         miner.setSeeds(headTargetRelations);
-        miner._setSourcesLoadingTime(sourcesLoadingTime);
 
         if (minStdConf > 0.0) {
             System.out.println("Filtering on standard confidence with minimum threshold " + minStdConf);
@@ -1362,15 +1181,15 @@ public class AMIE {
     public static void main(String[] args) throws Exception {
     	amie.data.U.loadSchemaConf();
     	System.out.println("Assuming " + amie.data.U.typeRelationBS + " as type relation");
+    	long loadingStartTime = System.currentTimeMillis();
 		AMIE miner = AMIE.getInstance(args);
+		long loadingTime = System.currentTimeMillis() - loadingStartTime;
 		MiningAssistant assistant = miner.getAssistant();
 	
 	    Announce.doing("Starting the mining phase");
 	
 	    long time = System.currentTimeMillis();
-	    List<Rule> rules = null;
-	
-	    rules = miner.mine();
+	    List<Rule> rules = miner.mine();
 	
 	    if (!miner.isRealTime()) {
 	    	AMIE.printRuleHeaders(assistant);
@@ -1379,17 +1198,10 @@ public class AMIE {
 	        }
 	    }
 	
-	      if (miner.isVerbose()) {
-	          System.out.println("Specialization time: " + (miner._getSpecializationTime() / 1000.0) + "s");
-	          System.out.println("Scoring time: " + (miner._getScoringTime() / 1000.0) + "s");
-	          System.out.println("Queueing and duplicate elimination: " + (miner._getQueueingAndDuplicateElimination() / 1000.0) + "s");
-	          System.out.println("Approximation time: " + (miner._getApproximationTime() / 1000.0) + "s");
-	      }
-	
-	      long miningTime = System.currentTimeMillis() - time;
-	      System.out.println("Mining done in " + NumberFormatter.formatMS(miningTime));
-	      Announce.done("Total time " + NumberFormatter.formatMS(miningTime + miner._getSourcesLoadingTime()));
-	      System.out.println(rules.size() + " rules mined.");
+	    long miningTime = System.currentTimeMillis() - time;
+	    System.out.println("Mining done in " + NumberFormatter.formatMS(miningTime));
+	    Announce.done("Total time " + NumberFormatter.formatMS(miningTime + loadingTime));
+	    System.out.println(rules.size() + " rules mined.");
     }
 
 }

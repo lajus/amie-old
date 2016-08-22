@@ -1,5 +1,6 @@
 package amie.mining.assistant.experimental;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -44,10 +45,11 @@ public class ExistentialAndNegatedRulesMiningAssistant extends MiningAssistant {
 	public void setHeadExcludedRelations(java.util.Collection<ByteString> headExcludedRelations) {};
 	
 	@Override
-	protected void buildInitialQueries(IntHashMap<ByteString> relations, 
-			double minSupportThreshold, Collection<Rule> output) {
+	protected Collection<Rule> buildInitialQueries(IntHashMap<ByteString> relations, 
+			double minSupportThreshold) {
 		// Now we have to take care of the negative ones
 		// => ~r(x, y). We will use the keywords NOTEXISTSbs and NOTEXISTSINVbs
+		Collection<Rule> output = new ArrayList<>();
 		Rule query = new Rule();
 		ByteString[] newEdge1 = query.fullyUnboundTriplePattern();
 		ByteString[] newEdge2 = query.fullyUnboundTriplePattern();
@@ -92,6 +94,7 @@ public class ExistentialAndNegatedRulesMiningAssistant extends MiningAssistant {
 				output.add(rule);
 			}
 		}
+		return output;
 	}
 	
 	@Override

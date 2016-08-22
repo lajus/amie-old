@@ -29,9 +29,9 @@ public class StarShapedMiningAssistant extends MiningAssistant {
 	}
 	
 	@Override
-	protected void buildInitialQueries(IntHashMap<ByteString> relations, 
-			double minSupportThreshold, Collection<Rule> output) {
-		wrapped.buildInitialQueries(relations, minSupportThreshold, output);
+	protected Collection<Rule> buildInitialQueries(IntHashMap<ByteString> relations, 
+			double minSupportThreshold) {
+		return wrapped.buildInitialQueries(relations, minSupportThreshold);
 	}
 	
 	@Override
