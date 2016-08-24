@@ -99,6 +99,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 	 * @param minSupportThreshold
 	 * @param output
 	 */
+	@MiningOperator(name="closing")
 	public void getClosingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
 		if (this.enforceConstants) {
 			return;
@@ -228,6 +229,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 	 * @param minCardinality
 	 * @param output
 	 */
+	@MiningOperator(name="dangling")
 	public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output) {		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		
@@ -372,6 +374,7 @@ public class DefaultMiningAssistant extends MiningAssistant{
 	}
 	
 	@Override
+	@MiningOperator(name="specializing")
 	public void getTypeSpecializedAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {}
 
 	/**

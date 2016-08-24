@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -292,6 +293,7 @@ public class AMIE {
                     }
                 } catch (InterruptedException e) {
                 	consumeLock.unlock();
+                	System.out.flush();
                 	break;
                 } 
             }
@@ -379,20 +381,36 @@ public class AMIE {
                     // If so specialize it
                     if (furtherRefined) {
                         double threshold = getCountThreshold(currentRule);
-                        List<Rule> temporalOutput = new ArrayList<Rule>();
-                        List<Rule> temporalOutputDanglingEdges = new ArrayList<Rule>();
-
+                        
                         // Application of the mining operators
-                        assistant.getClosingAtoms(currentRule, threshold, temporalOutput);
-                        assistant.getDanglingAtoms(currentRule, threshold, temporalOutputDanglingEdges);
-                        assistant.getInstantiatedAtoms(currentRule, threshold, temporalOutputDanglingEdges, temporalOutput);
-                        assistant.getTypeSpecializedAtoms(currentRule, threshold, temporalOutput);
+                        Map<String, Collection<Rule>> temporalOutputMap = null;
+                        try {
+							temporalOutputMap = assistant.applyMiningOperators(currentRule, threshold);
+						} catch (IllegalAccessException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IllegalArgumentException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (InvocationTargetException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+                        
+                        for (Map.Entry<String, Collection<Rule>> entry : temporalOutputMap.entrySet()) {
+                        	String operator = entry.getKey();
+                        	Collection<Rule> items = entry.getValue();
+                        	if (!operator.equals("dangling")) {
+                        		queryPool.queueAll(items);
+                        	}
+                        }
                         
                         // Addition of the specializations to the queue
-                        queryPool.queueAll(temporalOutput);                            
+                        //queryPool.queueAll(temporalOutput);                            
                         if (currentRule.getRealLength() 
                         		< assistant.getMaxDepth() - 1) {
-                            queryPool.queueAll(temporalOutputDanglingEdges);                           	
+                        	if (temporalOutputMap.containsKey("dangling"))
+                        		queryPool.queueAll(temporalOutputMap.get("dangling"));
                         }
                     }
 

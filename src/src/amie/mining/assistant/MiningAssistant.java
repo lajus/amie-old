@@ -1,13 +1,18 @@
 package amie.mining.assistant;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import amie.data.KB;
-import amie.mining.AMIEQueue;
 import amie.rules.ConfidenceMetric;
 import amie.rules.Metric;
 import amie.rules.Rule;
@@ -179,6 +184,11 @@ public class MiningAssistant{
      * otherwise its default [subject, relation, object] notation
      */
     protected boolean datalogNotation;
+    
+    /**
+     * Sequence of mining operators to be applied to a rule.
+     */
+    private LinkedList<Method> miningOperators;
 	
 	
 	/**
@@ -210,8 +220,90 @@ public class MiningAssistant{
 		this.datalogNotation = false;
 		this.ommitStdConfidence = false;
 		buildRelationsDictionary();
-		
+		this.miningOperators = new LinkedList<>();
+		computeOperatorHierarchy();
 	}	
+	
+	/**
+	 * Hierarchy of operators. If an operator is the parent of another operator, then it 
+	 * will be called before this operator and its output will be sent as argument 
+	 * to the child operator. For example the standard operator "dangling" is the parent of 
+	 * the "instantiated" operator because the latter depends on the output of the first one.
+	 * @author galarrag
+	 *
+	 */
+	class OperatorDependencyTree {
+		HashMap<Method, OperatorDependencyTree> tree;
+		
+		public OperatorDependencyTree() {
+			tree = new HashMap<>();
+		}
+		
+		public void addMethod(Method m) {
+			tree.put(m, new OperatorDependencyTree());
+		}
+		
+		public void addMethod(Method m, String parentId) {
+			OperatorDependencyTree parent = find(parentId);
+			if (parent != null)
+				parent.addMethod(m);
+		}
+
+		private OperatorDependencyTree find(String parentId) {
+			for (Method m : tree.keySet()) {
+				MiningOperator annotInstance = m.getAnnotation(MiningOperator.class);
+                if (annotInstance.name().equals(parentId)) {         
+                    return tree.get(m);
+                } else {
+                	OperatorDependencyTree child = tree.get(m).find(parentId);
+                	if (child != null)
+                		return child;
+                }
+			}
+			
+			return null;
+		}
+
+		/**
+		 * It performs a depth-first search to determine the order in which the operators
+		 * will be invoked.
+		 * @param output
+		 */
+		public void traverse(LinkedList<Method> output) {
+			for (Method m : tree.keySet()) {
+				output.add(m);
+				tree.get(m).traverse(output);
+			}
+		}
+	}
+	
+	/**
+	 * This method precomputes the order in which the mining operators will be 
+	 * called by AMIE.
+	 * 
+	 */
+	private void computeOperatorHierarchy() {
+	    Class<?> klass = this.getClass();
+	    OperatorDependencyTree opTree = new OperatorDependencyTree();
+	    while (klass != Object.class) { // need to iterated thought hierarchy in order to retrieve methods from above the current instance
+	        // iterate though the list of methods declared in the class represented by klass variable, and add those annotated with the specified annotation
+	        final List<Method> allMethods = new ArrayList<Method>(Arrays.asList(klass.getDeclaredMethods()));
+	        for (final Method method : allMethods) {
+	            if (method.isAnnotationPresent(MiningOperator.class)) {         
+	            	MiningOperator annotInstance = method.getAnnotation(MiningOperator.class);
+	            	if (annotInstance.dependency().equals("")) {
+	            		opTree.addMethod(method);
+	            	} else {
+	            		opTree.addMethod(method, annotInstance.dependency());
+	            	}
+	            }
+	        }
+	        // move to the upper class in the hierarchy in search for more methods
+	        klass = klass.getSuperclass();
+	    }
+	    
+	    opTree.traverse(this.miningOperators);
+	}
 	
 	/**
 	 * Builds a dictionary with the relations and their sizes.
@@ -657,6 +749,7 @@ public class MiningAssistant{
 	 * @param danglingEdges 
 	 * @param output
 	 */
+	@MiningOperator(name="instantiated", dependency="dangling")
 	public void getInstantiatedAtoms(Rule rule, double minSupportThreshold, 
 			Collection<Rule> danglingEdges, Collection<Rule> output) {
 		if (!canAddInstantiatedAtoms()) {
@@ -1249,6 +1342,32 @@ public class MiningAssistant{
     	}
 		
 		return result.toString();
+	}
+	
+	/**
+	 * It call all the declared mining operators.
+	 * @param currentRule
+	 * @param threshold
+	 * @throws InvocationTargetException 
+	 * @throws IllegalArgumentException 
+	 * @throws IllegalAccessException 
+	 */
+	public Map<String, Collection<Rule>> applyMiningOperators(Rule currentRule, double threshold) 
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		Map<String, Collection<Rule>> temporalResultsMap = new LinkedHashMap<>();
+		for (Method m: this.miningOperators) {
+			MiningOperator mo = m.getAnnotation(MiningOperator.class);
+			Collection<Rule> tmpResult = new ArrayList<>();
+			if (mo.dependency().equals("")) {
+				m.invoke(this, currentRule, threshold, tmpResult);
+			} else {
+				m.invoke(this, currentRule, threshold, temporalResultsMap.get(mo.dependency()), tmpResult);
+			}
+			
+			temporalResultsMap.put(mo.name(), tmpResult);
+		}
+		
+		return temporalResultsMap;
 	}
     
 	public void setAllowConstants(boolean allowConstants) {

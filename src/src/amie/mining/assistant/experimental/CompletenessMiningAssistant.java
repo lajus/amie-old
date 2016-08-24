@@ -9,6 +9,7 @@ import java.util.Set;
 
 import amie.data.KB;
 import amie.mining.assistant.MiningAssistant;
+import amie.mining.assistant.MiningOperator;
 import amie.rules.QueryEquivalenceChecker;
 import amie.rules.Rule;
 import javatools.datatypes.ByteString;
@@ -135,6 +136,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	
 
 	@Override
+	@MiningOperator(name="specializing")
 	public void getTypeSpecializedAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
 		ByteString[] lastAtom = rule.getLastRealTriplePattern();
 		Pair<ByteString, Integer> compositeRelation = KB.parseCardinalityRelation(lastAtom[1]);
@@ -234,6 +236,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	}
 	
 	@Override
+	@MiningOperator(name="instantiated", dependency="dangling")
 	public void getInstantiatedAtoms(Rule parentRule, double minSupportThreshold, 
 		Collection<Rule> danglingEdges, Collection<Rule> output) {
 		boolean extendRule = true;
@@ -352,15 +355,9 @@ public class CompletenessMiningAssistant extends MiningAssistant {
 	}	
 
 	@Override
+	@MiningOperator(name="dangling")
 	public void getDanglingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
-		//ByteString targetRelation = rule.getHead()[2];
-		//if (rule.getHead()[1].equals(isIncompleteBS)) {
-			//if (containsCardinalityAtom(rule, targetRelation)) {
-				//this.addDanglingAtoms(rule, minSupportThreshold, output);
-			//}
-//		} else {
-			this.addDanglingAtoms(rule, minSupportThreshold, output);
-//		}
+		this.addDanglingAtoms(rule, minSupportThreshold, output);
 	}
 
 	private void addTypeAtom(Rule parentRule, double minSupportThreshold, Collection<Rule> output) {
