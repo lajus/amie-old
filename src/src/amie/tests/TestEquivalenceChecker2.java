@@ -211,6 +211,17 @@ public class TestEquivalenceChecker2 extends TestCase {
 				KB.triple("?a", "<livesIn>", "?e"));
 		Pair<List<ByteString[]>, List<ByteString[]>> p32 = new Pair<>(q321, q322);
 		cases.add(p32);
+		
+		List<ByteString[]> q331 = KB.triples(KB.triple("?a","<isLocatedIn>","?b"), 
+				KB.triple("?i", "<isLocatedIn>","?f"), 
+				KB.triple("?a", "<isLocatedIn>", "?f"),
+				KB.triple("?i", "<isCitizenOf>", "?b"));
+		List<ByteString[]> q332 = KB.triples(KB.triple("?a","<isLocatedIn>","?b"), 
+				KB.triple("?e", "<isLocatedIn>", "?j"), 
+				KB.triple("?a", "<isLocatedIn>", "?j"),
+				KB.triple("?e", "<isCitizenOf>", "?b"));
+		Pair<List<ByteString[]>, List<ByteString[]>> p33 = new Pair<>(q331, q332);
+		cases.add(p33);
 	}
 	
 	public void test0(){
@@ -345,7 +356,6 @@ public class TestEquivalenceChecker2 extends TestCase {
 		assertTrue(fq2.equals(fq1));
 		//assertTrue(pool.contains(fq2));
 		pool.add(fq2);
-		System.out.println(pool);
 	}
 	
 	public void test30(){
@@ -357,7 +367,11 @@ public class TestEquivalenceChecker2 extends TestCase {
 	}
 	
 	public void test32(){
-		assertFalse(QueryEquivalenceChecker.areEquivalent(cases.get(31).first, cases.get(31).second));
+		assertTrue(QueryEquivalenceChecker.areEquivalent(cases.get(31).first, cases.get(31).second));
+	}
+	
+	public void test33() {
+		assertTrue(QueryEquivalenceChecker.areEquivalent(cases.get(32).first, cases.get(32).second));
 	}
 
 	protected void tearDown() throws Exception {

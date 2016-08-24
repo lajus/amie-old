@@ -118,7 +118,12 @@ public class Rule {
      * Highest numerical suffix associated to variables
      */
     private int highestVariableSuffix;
-
+    
+    /**
+     * The number of operator calls required to produce this rule.
+     */
+    private int generation;
+    
     /**
      * ****** End of Standard Metrics ************
      */
@@ -129,17 +134,17 @@ public class Rule {
      * Standard confidence theorethical upper bound for standard confidence
      *
      */
-    private double _stdConfidenceUpperBound;
+    private double stdConfidenceUpperBound;
 
     /**
      * PCA confidence theorethical upper bound for PCA confidence
      */
-    private double _pcaConfidenceUpperBound;
+    private double pcaConfidenceUpperBound;
 
     /**
      * PCA confidence rough estimation for the hard cases
      */
-    private double _pcaConfidenceEstimation;
+    private double pcaConfidenceEstimation;
 
     /**
      * Time to run the denominator for the expression of the PCA confidence
@@ -150,25 +155,6 @@ public class Rule {
      * Time to run the denominator for the expression of the standard confidence
      */
     private double _confidenceRunningTime;
-
-    /**
-     * The rule is below an established support threshold
-     */
-    private boolean _belowMinimumSupport;
-
-    /**
-     * Information about the precision of the rule in some evaluation context
-     */
-    int[] _evaluationResult;
-
-    /**
-     * ****** End of AMIE+ and approximations ************
-     */
-    /**
-     * True is the last atom of the rule contains a variable that binds to a
-     * single instance (a case where the AMIE algorithm would prune the rule).
-     */
-    private boolean _containsQuasiBindings;
 
     /**
      * ******** Joint Prediction *********
@@ -252,12 +238,11 @@ public class Rule {
         this.highestVariable = 96; // The character before letter 'a'
         this.highestVariableSuffix = 0;
         this.pcaBodySize = 0.0;
-        this._stdConfidenceUpperBound = 0.0;
-        this._pcaConfidenceUpperBound = 0.0;
-        this._pcaConfidenceEstimation = 0.0;
-        this._belowMinimumSupport = false;
-        this._containsQuasiBindings = false;
+        this.stdConfidenceUpperBound = 0.0;
+        this.pcaConfidenceUpperBound = 0.0;
+        this.pcaConfidenceEstimation = 0.0;
         this.ancestors = new ArrayList<>();
+        this.generation = -1;
     }
 
     /**
@@ -279,12 +264,11 @@ public class Rule {
         this.highestVariableSuffix = 0;
         computeHeadKey();
         parseVariables();        
-        this._stdConfidenceUpperBound = 0.0;
-        this._pcaConfidenceUpperBound = 0.0;
-        this._pcaConfidenceEstimation = 0.0;
-        this._belowMinimumSupport = false;
-        this._containsQuasiBindings = false;
+        this.stdConfidenceUpperBound = 0.0;
+        this.pcaConfidenceUpperBound = 0.0;
+        this.pcaConfidenceEstimation = 0.0;
         this.ancestors = new ArrayList<>();
+        this.generation = -1;        
     }
     
     /**
@@ -306,11 +290,11 @@ public class Rule {
         this.bodySize = -1;
         this.highestVariable = otherQuery.highestVariable;
         this.highestVariableSuffix = otherQuery.highestVariableSuffix;
-        this._stdConfidenceUpperBound = 0.0;
-        this._pcaConfidenceUpperBound = 0.0;
-        this._pcaConfidenceEstimation = 0.0;
-        this._containsQuasiBindings = false;
+        this.stdConfidenceUpperBound = 0.0;
+        this.pcaConfidenceUpperBound = 0.0;
+        this.pcaConfidenceEstimation = 0.0;
         this.ancestors = new ArrayList<>();
+        this.generation = -1;        
     }
 
     public Rule(ByteString[] head, List<ByteString[]> body, double cardinality) {
@@ -326,11 +310,11 @@ public class Rule {
         this.functionalVariablePosition = 0;
         this.parent = null;
         this.bodySize = -1;
-        this._stdConfidenceUpperBound = 0.0;
-        this._pcaConfidenceUpperBound = 0.0;
-        this._pcaConfidenceEstimation = 0.0;
-        this._containsQuasiBindings = false;
+        this.stdConfidenceUpperBound = 0.0;
+        this.pcaConfidenceUpperBound = 0.0;
+        this.pcaConfidenceEstimation = 0.0;
         this.ancestors = new ArrayList<>();
+        this.generation = -1;
     }
     
     /**
@@ -604,20 +588,6 @@ public class Rule {
     }
 
     /**
-     * @return the evaluationResult
-     */
-    public int[] getEvaluationResult() {
-        return _evaluationResult;
-    }
-
-    /**
-     * @param evaluationResult the evaluationResult to set
-     */
-    public void setEvaluationResult(int[] evaluationResult) {
-        this._evaluationResult = evaluationResult;
-    }
-
-    /**
      * @return the pcaConfidence
      */
     public double getPcaConfidence() {
@@ -648,7 +618,15 @@ public class Rule {
         this.id = id;
     }
 
-    /**
+    public int getGeneration() {
+		return generation;
+	}
+
+	public void setGeneration(int generation) {
+		this.generation = generation;
+	}
+
+	/**
      * Returns the last triple pattern added to this rule.
      *
      * @return
@@ -1162,7 +1140,8 @@ public class Rule {
         int length = 0;
         for (ByteString[] triple : triples) {
             if (!triple[1].equals(KB.DIFFERENTFROMbs)
-                    && (!triple[1].equals(typeString) || KB.isVariable(triple[2]))) {
+                    && (!triple[1].equals(typeString) 
+                    		|| KB.isVariable(triple[2]))) {
                 ++length;
             }
         }
@@ -1198,7 +1177,8 @@ public class Rule {
     public int getLengthWithoutTypesAndLinksTo(ByteString typeString, ByteString linksString) {
         int size = 0;
         for (ByteString[] triple : triples) {
-            if ((!triple[1].equals(typeString) || KB.isVariable(triple[2]))
+            if ((!triple[1].equals(typeString) 
+            		|| KB.isVariable(triple[2]))
                     && !triple[1].equals(linksString)) {
                 ++size;
             }
@@ -1302,14 +1282,20 @@ public class Rule {
      */
     public int alternativeParentHashCode() {
     	String hk = getHeadKey();
-        return headAndLengthHashCode(hk, getRealLength());
+        return headAndGenerationHashCode(hk, generation);
     }
     
-    public static int headAndLengthHashCode(String headKey, int length) {
+    /**
+     * Returns a hash code that depends on the given arguments.
+     * @param headKey
+     * @param generation
+     * @return
+     */
+    public static int headAndGenerationHashCode(String headKey, int generation) {
         final int prime = 31;
         int result = 1;
         result = prime * result + (headKey == null ? 0 : headKey.hashCode());
-        result = prime * result + length;
+        result = prime * result + generation;
         return result;
     }
 
@@ -1317,12 +1303,18 @@ public class Rule {
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode() {
+    public int hashCode() {    	
         final int prime = 31;
         int result = 1;
-        result = prime * result + (int) initialSupport;
-        result = prime * result + (int) getRealLength();
-        result = prime * result + (headKey == null ? 0 : headKey.hashCode());
+        if (generation > 0) {
+	        result = prime * result + (int) initialSupport;
+	        result = prime * result + (int) generation;
+	        result = prime * result + (headKey == null ? 0 : headKey.hashCode());
+        } else { 
+	        result = prime * result + (int) initialSupport;
+	        result = prime * result + (int) getRealLength();
+	        result = prime * result + (headKey == null ? 0 : headKey.hashCode());	
+       }
         return result;
     }
 
@@ -1478,9 +1470,9 @@ public class Rule {
 	        strBuilder.append("\t" + df1.format(getBodySize()));
 	        strBuilder.append("\t" + df1.format(getPcaBodySize()));
 	        strBuilder.append("\t" + getFunctionalVariable());
-	        strBuilder.append("\t" + _stdConfidenceUpperBound);
-	        strBuilder.append("\t" + _pcaConfidenceUpperBound);
-	        strBuilder.append("\t" + _pcaConfidenceEstimation);
+	        strBuilder.append("\t" + stdConfidenceUpperBound);
+	        strBuilder.append("\t" + pcaConfidenceUpperBound);
+	        strBuilder.append("\t" + pcaConfidenceEstimation);
         } else {
         	List<Metric> metricsList = Arrays.asList(metrics2Ommit);
         	if (!metricsList.contains(Metric.HeadCoverage))
@@ -1496,9 +1488,9 @@ public class Rule {
 	        if (!metricsList.contains(Metric.PCABodySize))
 	        	strBuilder.append("\t" + df1.format(getPcaBodySize()));
 	        strBuilder.append("\t" + getFunctionalVariable());
-	        strBuilder.append("\t" + _stdConfidenceUpperBound);
-	        strBuilder.append("\t" + _pcaConfidenceUpperBound);
-	        strBuilder.append("\t" + _pcaConfidenceEstimation);
+	        strBuilder.append("\t" + stdConfidenceUpperBound);
+	        strBuilder.append("\t" + pcaConfidenceUpperBound);
+	        strBuilder.append("\t" + pcaConfidenceEstimation);
         }
     }
     
@@ -1511,7 +1503,7 @@ public class Rule {
 	        strBuilder.append("\t" + df.format(getSupport()));
 	        strBuilder.append("\t" + getBodySize());
 	        strBuilder.append("\t" + df.format(getPcaBodySize()));
-	        strBuilder.append("\t" + getFunctionalVariable());
+	        strBuilder.append("\t" + getFunctionalVariable());     
     	} else {
         	List<Metric> metricsList = Arrays.asList(metrics2Ommit);
         	if (!metricsList.contains(Metric.HeadCoverage))
@@ -1552,7 +1544,8 @@ public class Rule {
     }
 
     public static String toDatalog(ByteString[] atom) {
-        return atom[1].toString().replace("<", "").replace(">", "") + "(" + atom[0] + ", " + atom[2] + ")";
+        return atom[1].toString().replace("<", "").replace(">", "") 
+        		+ "(" + atom[0] + ", " + atom[2] + ")";
     }
 
     public String getDatalogString() {
@@ -1671,23 +1664,6 @@ public class Rule {
         return pcaBodySize;
     }
 
-    public boolean _isBelowMinimumSupport() {
-        return _belowMinimumSupport;
-    }
-
-    public void _setBelowMinimumSupport(boolean belowMinimumSupport) {
-        this._belowMinimumSupport = belowMinimumSupport;
-    }
-
-    public boolean _containsQuasiBindings() {
-        return this._containsQuasiBindings;
-    }
-
-    public void _setContainsQuasibinding(boolean containsQuasiBindings) {
-        this._containsQuasiBindings = containsQuasiBindings;
-
-    }
-
     public Rule rewriteQuery(ByteString[] remove, ByteString[] target, ByteString victimVar, ByteString targetVar) {
         List<ByteString[]> newTriples = new ArrayList<ByteString[]>();
         for (ByteString[] t : triples) {
@@ -1742,26 +1718,26 @@ public class Rule {
     }
 
     public void setConfidenceUpperBound(double stdConfUpperBound) {
-        this._stdConfidenceUpperBound = stdConfUpperBound;
+        this.stdConfidenceUpperBound = stdConfUpperBound;
     }
 
     public void setPcaConfidenceUpperBound(double pcaConfUpperBound) {
         // TODO Auto-generated method stub
-        this._pcaConfidenceUpperBound = pcaConfUpperBound;
+        this.pcaConfidenceUpperBound = pcaConfUpperBound;
     }
 
     /**
      * @return the pcaEstimation
      */
     public double getPcaEstimation() {
-        return _pcaConfidenceEstimation;
+        return pcaConfidenceEstimation;
     }
 
     /**
      * @param pcaEstimation the pcaEstimation to set
      */
     public void setPcaEstimation(double pcaEstimation) {
-        this._pcaConfidenceEstimation = pcaEstimation;
+        this.pcaConfidenceEstimation = pcaEstimation;
     }
 
     /**
@@ -1772,7 +1748,8 @@ public class Rule {
      * @return
      */
     public boolean containsLevel2RedundantSubgraphs() {
-        if (!isClosed(true) || triples.size() < 4 || triples.size() % 2 == 1) {
+        if (!isClosed(true) || triples.size() < 4 
+        		|| triples.size() % 2 == 1) {
             return false;
         }
 

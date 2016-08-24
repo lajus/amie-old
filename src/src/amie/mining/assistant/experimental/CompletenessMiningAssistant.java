@@ -476,7 +476,7 @@ public class CompletenessMiningAssistant extends MiningAssistant {
         // Go up until you find a parent that was output
         while (queryPattern.size() - offset > 1) {
         	int currentLength = queryPattern.size() - offset;
-            int parentHashCode = Rule.headAndLengthHashCode(currentRule.getHeadKey(), currentLength);
+            int parentHashCode = Rule.headAndGenerationHashCode(currentRule.getHeadKey(), currentLength);
             // Give all the rules of size 'currentLength' and the same head atom (potential parents)
             Set<Rule> candidateParentsOfCurrentLength = indexedOutputSet.get(parentHashCode);
             

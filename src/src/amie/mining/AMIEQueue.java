@@ -7,19 +7,25 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import amie.rules.Rule;
+
 /**
- * A thread-synchronized queue implementation tailored for the AMIE mining system.
+ * A queue implementation with barriers tailored for the AMIE mining system.
+ * This implementation guarantees that rules produced in the nth-round of a breath-first
+ * search strategy are always dequeued and refined before any rule corresponding
+ * to the (n+1)th-round.
+ * 
  * @author galarrag
  *
  */
-public final class AMIEQueue<T> {
+public final class AMIEQueue {
 	private final Lock lock = new ReentrantLock(); 
 	
 	private final Condition empty = lock.newCondition(); 
 	
-	private LinkedHashSet<T> current;
+	private LinkedHashSet<Rule> current;
 	
-	private LinkedHashSet<T> next;
+	private LinkedHashSet<Rule> next;
 	
 	private int generation;
 	
@@ -27,36 +33,59 @@ public final class AMIEQueue<T> {
 	
 	private int waitingThreads = 0;
 	
-	public AMIEQueue(Collection<T> seeds, int maxThreads) {
+	public AMIEQueue(Collection<Rule> seeds, int maxThreads) {
 		this.generation = 1;
 		this.maxThreads = maxThreads; 
 		this.waitingThreads = 0;
-		this.current = new LinkedHashSet<>(seeds);
+		this.current = new LinkedHashSet<>();
+		for (Rule seed : seeds) {
+			seed.setGeneration(generation);
+			this.current.add(seed);
+		}
+		this.generation++;
 		this.next = new LinkedHashSet<>();
 	}
 	
-	public void queue(T o) {
+	/**
+	 * Adds an item to the queue.
+	 * @param o
+	 */
+	public void queue(Rule o) {
 		lock.lock();
+		o.setGeneration(generation);
 		next.add(o);
 		lock.unlock();		
 	}
 	
-	public void queueAll(Collection<T> objects) {
+	/**
+	 * Adds a collection of items to the queue.
+	 * @param rules
+	 */
+	public void queueAll(Collection<Rule> rules) {
 		lock.lock();
-		next.addAll(objects);
+		for (Rule r : rules) {
+			r.setGeneration(generation);
+			next.add(r);			
+		}
 		lock.unlock();				
 	}
 	
-	public T dequeue() throws InterruptedException {
+	/**
+	 * Retrieves and removes the oldest item that was added to the queue.
+	 * @return An object or null if the queue is empty.
+	 * @throws InterruptedException
+	 */
+	public Rule dequeue() throws InterruptedException {
 		lock.lock();
-		T item = null;
+		Rule item = null;
 	    if (current.isEmpty()) {
-	    	++waitingThreads;
-	    	
+    		++waitingThreads;
 	    	if (waitingThreads < maxThreads) {
 	    		empty.await();
+	    		--waitingThreads;
 	    	} else {	    	
 	    		nextGeneration();
+	    		--waitingThreads;
 		    	empty.signalAll();	
 	    	}
 	    	
@@ -72,12 +101,17 @@ public final class AMIEQueue<T> {
 	    return item;
 	}
 	
-	private T poll() {
-    	Iterator<T> iterator = current.iterator();
-        T nextItem = iterator.next();
+	/**
+	 * Retrieves and removes an item from the current queue.
+	 * @return
+	 */
+	private Rule poll() {
+    	Iterator<Rule> iterator = current.iterator();
+        Rule nextItem = iterator.next();
         iterator.remove();
         return nextItem;		
 	}
+
 
 	private void nextGeneration() {
 		generation++;
@@ -87,5 +121,9 @@ public final class AMIEQueue<T> {
 	
 	public boolean isEmpty() {
 		return current.isEmpty() && next.isEmpty();
+	}
+	
+	public int getGeneration() {
+		return generation;
 	}
 }

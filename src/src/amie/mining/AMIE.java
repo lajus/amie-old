@@ -217,7 +217,7 @@ public class AMIE {
             seedRules = assistant.getInitialAtomsFromSeeds(seeds, minInitialSupport);
         }
         
-        AMIEQueue<Rule> queue = new AMIEQueue<>(seedRules, nThreads);
+        AMIEQueue queue = new AMIEQueue(seedRules, nThreads);
 
         if (realTime) {
             consumerObj = new RuleConsumer(result, resultsLock, resultsCondVar);
@@ -310,7 +310,7 @@ public class AMIE {
         // A version of the output set thought for search.
         private MultiMap<Integer, Rule> indexedOutputSet;
 
-        private AMIEQueue<Rule> queryPool;
+        private AMIEQueue queryPool;
 
         private Lock resultsLock;
 
@@ -326,7 +326,7 @@ public class AMIE {
          * in the system.
          * @param indexedOutputSet
          */
-        public RDFMinerJob(AMIEQueue<Rule> seedsPool,
+        public RDFMinerJob(AMIEQueue seedsPool,
                 List<Rule> outputSet, Lock resultsLock,
                 Condition resultsCondition,
                 MultiMap<Integer, Rule> indexedOutputSet) {

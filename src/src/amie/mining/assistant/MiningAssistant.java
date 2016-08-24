@@ -1203,21 +1203,16 @@ public class MiningAssistant{
      * @param currentRule
      */
     public void setAdditionalParents(Rule currentRule, MultiMap<Integer, Rule> indexedOutputSet) {
-        List<ByteString[]> queryPattern = currentRule.getTriples();
-        // No need to look for parents of rules of size 2
-        if (queryPattern.size() <= 2) {
-            return;
-        }
+        int currentGeneration = currentRule.getGeneration();
         int offset = 1;
         // Go up until you find a parent that was output
-        while (queryPattern.size() - offset > 1) {
-        	int currentLength = queryPattern.size() - offset;
-            int parentHashCode = Rule.headAndLengthHashCode(currentRule.getHeadKey(), currentLength);
-            // Give all the rules of size 'currentLength' and the same head atom (potential parents)
-            Set<Rule> candidateParentsOfCurrentLength = indexedOutputSet.get(parentHashCode);
+        while (currentGeneration - offset > 1) {
+        	int generation = currentGeneration - offset;
+            int parentHashCode = Rule.headAndGenerationHashCode(currentRule.getHeadKey(), generation);
+            Set<Rule> candidateParentsOfGeneration = indexedOutputSet.get(parentHashCode);
             
-            if (candidateParentsOfCurrentLength != null) {
-	            for (Rule parent : candidateParentsOfCurrentLength) {
+            if (candidateParentsOfGeneration != null) {
+	            for (Rule parent : candidateParentsOfGeneration) {
 	                if (parent.subsumes(currentRule)) {
 	                	currentRule.addParent(parent);
 	                }
@@ -1240,7 +1235,7 @@ public class MiningAssistant{
 		}
 		
 		if (this.datalogNotation) {
-    		if (this.verbose) {
+    		if (isVerbose()) {
     			result.append(rule.getDatalogFullRuleString(metrics2Ommit));
     		} else {
     			result.append(rule.getDatalogBasicRuleString(metrics2Ommit));
