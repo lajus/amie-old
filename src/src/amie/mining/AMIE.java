@@ -351,6 +351,7 @@ public class AMIE {
 				}
 
                 if (currentRule == null) {
+                	this.queryPool.decrementMaxThreads();
                 	break;
                 } else {
                     // Check if the rule meets the language bias and confidence thresholds and
@@ -413,6 +414,7 @@ public class AMIE {
                         		queryPool.queueAll(temporalOutputMap.get("dangling"));
                         }
                     }
+                    
 
                     // Output the rule
                     if (outputRule) {

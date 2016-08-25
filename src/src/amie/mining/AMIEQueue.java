@@ -67,7 +67,7 @@ public final class AMIEQueue {
 			r.setGeneration(generation);
 			next.add(r);			
 		}
-		lock.unlock();				
+		lock.unlock();					
 	}
 	
 	/**
@@ -81,7 +81,7 @@ public final class AMIEQueue {
 	    if (current.isEmpty()) {
     		++waitingThreads;
 	    	if (waitingThreads < maxThreads) {
-	    		empty.await();
+	    		empty.await();    		
 	    		--waitingThreads;
 	    	} else {	    	
 	    		nextGeneration();
@@ -125,5 +125,11 @@ public final class AMIEQueue {
 	
 	public int getGeneration() {
 		return generation;
+	}
+
+	public void decrementMaxThreads() {
+		lock.lock();
+		--maxThreads;
+		lock.unlock();
 	}
 }
