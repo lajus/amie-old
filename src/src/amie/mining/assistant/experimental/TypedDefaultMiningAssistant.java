@@ -12,6 +12,7 @@ import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
+import amie.mining.assistant.MiningOperator;
 import amie.rules.Rule;
 
 /**
@@ -42,6 +43,7 @@ public class TypedDefaultMiningAssistant extends DefaultMiningAssistant {
 	 * @param minCardinality
 	 * @return
 	 */
+	@MiningOperator(name="dangling")
 	public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output){		
 		if(query.getRealLength() == 1){
 			//Add the types at the beginning of the query.

@@ -9,6 +9,7 @@ import javatools.datatypes.ByteString;
 import javatools.datatypes.IntHashMap;
 import amie.data.KB;
 import amie.mining.assistant.DefaultMiningAssistant;
+import amie.mining.assistant.MiningOperator;
 import amie.rules.Rule;
 
 public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
@@ -87,6 +88,7 @@ public class InstantiatedHeadMiningAssistant extends DefaultMiningAssistant {
 	}
 	
 	@Override
+	@MiningOperator(name="dangling")
 	public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output) {
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		

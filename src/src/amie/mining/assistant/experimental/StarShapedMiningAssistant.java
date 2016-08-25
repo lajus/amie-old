@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import amie.data.KB;
 import amie.mining.assistant.MiningAssistant;
+import amie.mining.assistant.MiningOperator;
 import amie.rules.ConfidenceMetric;
 import amie.rules.Rule;
 import javatools.datatypes.ByteString;
@@ -53,6 +54,7 @@ public class StarShapedMiningAssistant extends MiningAssistant {
 	}
 	
 	@Override
+	@MiningOperator(name="dangling")
 	public void getDanglingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output) {
 		ByteString[] newEdge = rule.fullyUnboundTriplePattern();
 		ByteString[] head = rule.getHead();

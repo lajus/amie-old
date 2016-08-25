@@ -11,6 +11,7 @@ import javatools.datatypes.IntHashMap;
 import javatools.datatypes.Pair;
 import amie.data.KB;
 import amie.mining.assistant.MiningAssistant;
+import amie.mining.assistant.MiningOperator;
 import amie.rules.ConfidenceMetric;
 import amie.rules.Rule;
 
@@ -35,7 +36,8 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 		return subjectSchemaCount;
 	}
 
-	protected void getInstantiatedAtoms(Rule query, Rule originalQuery, ByteString[] danglingEdge, int danglingPosition, double minSupportThreshold, Collection<Rule> output) {
+	protected void getInstantiatedAtoms(Rule query, Rule originalQuery, ByteString[] danglingEdge, 
+			int danglingPosition, double minSupportThreshold, Collection<Rule> output) {
 		IntHashMap<ByteString> constants = kb.frequentBindingsOf(danglingEdge[danglingPosition], query.getFunctionalVariable(), query.getTriples());
 		for(ByteString constant: constants){
 			ByteString tmp = danglingEdge[danglingPosition];
@@ -67,6 +69,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 	 * @param omittedVariables
 	 * @return
 	 */
+	@MiningOperator(name="closing")
 	public void getClosingAtoms(Rule query, double minSupportThreshold, Collection<Rule> output){		
 		int nPatterns = query.getTriples().size();
 
@@ -192,6 +195,7 @@ public class SeedsCountMiningAssistant extends MiningAssistant {
 	}
 
 	@Override
+	@MiningOperator(name="dangling")
 	public void getDanglingAtoms(Rule query, double minCardinality, Collection<Rule> output){		
 		ByteString[] newEdge = query.fullyUnboundTriplePattern();
 		List<ByteString> openVariables = query.getOpenVariables();
