@@ -557,6 +557,7 @@ public class MiningAssistant{
 	 * @param minSupportThreshold
 	 * @param output
 	 */
+	@MiningOperator(name="dangling")
 	public void getDanglingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output){		
 		ByteString[] newEdge = rule.fullyUnboundTriplePattern();
 		if (rule.isEmpty()) {
@@ -666,6 +667,7 @@ public class MiningAssistant{
 	 * @param minSupportThreshold Only candidates with support above or equal this value are returned.
 	 * @param output 
 	 */
+	@MiningOperator(name="closing")
 	public void getClosingAtoms(Rule rule, double minSupportThreshold, Collection<Rule> output){
 		if (enforceConstants) {
 			return;
