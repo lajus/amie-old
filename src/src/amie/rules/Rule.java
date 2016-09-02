@@ -2301,6 +2301,17 @@ public class Rule {
         }
         return bodyRelations;
     }
+
+	public List<ByteString> getAllRelationsBS() {
+		List<ByteString> relations = new ArrayList<>();
+        for (ByteString[] atom : triples) {
+            if (!relations.contains(atom[1])) {
+                relations.add(atom[1]);
+            }
+        }
+        return relations;
+	}
+
         
     /**
      * It returns true if the atoms of the current are a superset for the
