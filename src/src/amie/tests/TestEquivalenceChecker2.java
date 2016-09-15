@@ -222,6 +222,23 @@ public class TestEquivalenceChecker2 extends TestCase {
 				KB.triple("?e", "<isCitizenOf>", "?b"));
 		Pair<List<ByteString[]>, List<ByteString[]>> p33 = new Pair<>(q331, q332);
 		cases.add(p33);
+		
+		//?a  db:birthyear  ?ob1  ?b  db:birthyear  ?ob1  ?a  db:description  british painter  ?b  db:description  british painter   => ?a  equals  ?b
+		// ?a  db:birthyear  ?ob1  ?b  db:birthyear  ?ob1  ?a  db:description  british painter  ?b  db:description  british painter   => ?a  equals  ?b
+
+		List<ByteString[]> q341 = KB.triples(KB.triple("?a", "equals", "?b"),
+				KB.triple("?b", "db:description", "british painter"),
+				KB.triple("?a", "db:description", "british painter"),
+				KB.triple("?b", "db:birthyear", "?ob1"),
+				KB.triple("?a", "db:birthyear", "?ob1"));
+		List<ByteString[]> q342 = KB.triples(KB.triple("?a", "equals", "?b"),
+				KB.triple("?b", "db:description", "british painter"),
+				KB.triple("?a", "db:description", "british painter"),
+				KB.triple("?b", "db:birthyear", "?ob1"),
+				KB.triple("?a", "db:birthyear", "?ob1"));
+		Pair<List<ByteString[]>, List<ByteString[]>> p34 = new Pair<>(q341, q342);
+		cases.add(p34);
+		
 	}
 	
 	public void test0(){
@@ -372,6 +389,10 @@ public class TestEquivalenceChecker2 extends TestCase {
 	
 	public void test33() {
 		assertTrue(QueryEquivalenceChecker.areEquivalent(cases.get(32).first, cases.get(32).second));
+	}
+	
+	public void test34() {
+		assertTrue(QueryEquivalenceChecker.areEquivalent(cases.get(33).first, cases.get(33).second));		
 	}
 
 	protected void tearDown() throws Exception {

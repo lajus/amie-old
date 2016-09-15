@@ -1322,7 +1322,7 @@ public class Rule {
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj) {        
         if (this == obj) {
             return true;
         }
@@ -1340,7 +1340,12 @@ public class Rule {
         } else if (!getHeadKey().equals(other.getHeadKey())) {
             return false;
         }
-        if (support != other.support) {
+        
+        if (initialSupport != other.initialSupport) {
+        	return false;
+        }
+        	        
+        if (((long)support) != ((long)other.support)) {
             return false;
         }
 
